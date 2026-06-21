@@ -1,42 +1,42 @@
 :root {
-    --fsflow-bg: #f7f4ee;
-    --fsflow-surface: rgba(255, 255, 255, 0.82);
-    --fsflow-surface-strong: #ffffff;
-    --fsflow-surface-soft: #f1ece3;
-    --fsflow-border: rgba(42, 41, 37, 0.12);
-    --fsflow-border-strong: rgba(42, 41, 37, 0.18);
-    --fsflow-text: #1e1b18;
-    --fsflow-muted: #61594f;
-    --fsflow-faint: #8a8176;
-    --fsflow-accent: #3767b1;
-    --fsflow-accent-soft: rgba(55, 103, 177, 0.1);
-    --fsflow-shadow: 0 18px 50px rgba(41, 32, 23, 0.08);
-    --fsflow-radius: 18px;
-    --fsflow-radius-sm: 12px;
-    --fsflow-max-width: 1160px;
-    --fsflow-sidebar-width: 250px;
-    --fsflow-page-width: 230px;
-    --fsflow-display-font: "IBM Plex Serif", Georgia, "Times New Roman", serif;
-    --fsflow-heading-font: "Source Sans 3", "Segoe UI", Arial, sans-serif;
-    --fsflow-body-font: "Source Sans 3", "Segoe UI", Arial, sans-serif;
-    --fsflow-sans-font: "Source Sans 3", "Segoe UI", Arial, sans-serif;
-    --fsflow-mono-font: "Fira Code", "IBM Plex Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+    --axial-bg: #f7f4ee;
+    --axial-surface: rgba(255, 255, 255, 0.82);
+    --axial-surface-strong: #ffffff;
+    --axial-surface-soft: #f1ece3;
+    --axial-border: rgba(42, 41, 37, 0.12);
+    --axial-border-strong: rgba(42, 41, 37, 0.18);
+    --axial-text: #1e1b18;
+    --axial-muted: #61594f;
+    --axial-faint: #8a8176;
+    --axial-accent: #3767b1;
+    --axial-accent-soft: rgba(55, 103, 177, 0.1);
+    --axial-shadow: 0 18px 50px rgba(41, 32, 23, 0.08);
+    --axial-radius: 18px;
+    --axial-radius-sm: 12px;
+    --axial-max-width: 1160px;
+    --axial-sidebar-width: 250px;
+    --axial-page-width: 230px;
+    --axial-display-font: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+    --axial-heading-font: "Source Sans 3", "Segoe UI", Arial, sans-serif;
+    --axial-body-font: "Source Sans 3", "Segoe UI", Arial, sans-serif;
+    --axial-sans-font: "Source Sans 3", "Segoe UI", Arial, sans-serif;
+    --axial-mono-font: "Fira Code", "IBM Plex Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
 }
 
 html {
     background:
         radial-gradient(circle at top left, rgba(55, 103, 177, 0.07), transparent 28%),
         radial-gradient(circle at top right, rgba(104, 92, 255, 0.05), transparent 24%),
-        linear-gradient(180deg, #fbf9f5 0%, var(--fsflow-bg) 100%);
+        linear-gradient(180deg, #fbf9f5 0%, var(--axial-bg) 100%);
 }
 
 body {
-    color: var(--fsflow-text);
-    font-family: var(--fsflow-sans-font);
+    color: var(--axial-text);
+    font-family: var(--axial-sans-font);
     background: transparent;
     min-height: 100vh;
     display: grid;
-    grid-template-columns: minmax(0, var(--fsflow-sidebar-width)) minmax(0, 1fr) minmax(0, var(--fsflow-page-width));
+    grid-template-columns: minmax(0, var(--axial-sidebar-width)) minmax(0, 1fr) minmax(0, var(--axial-page-width));
     grid-template-areas:
         "header header header"
         "nav content toc";
@@ -55,7 +55,7 @@ body > header {
     gap: 1.25rem;
     padding: 1rem 1.5rem;
     margin-bottom: 0;
-    border-bottom: 1px solid var(--fsflow-border);
+    border-bottom: 1px solid var(--axial-border);
     backdrop-filter: blur(20px);
     background: rgba(251, 249, 245, 0.88);
 }
@@ -72,7 +72,7 @@ body > header .start {
 }
 
 body > header .end {
-    color: var(--fsflow-muted);
+    color: var(--axial-muted);
 }
 
 .navbar-brand {
@@ -82,11 +82,11 @@ body > header .end {
     gap: 0.1rem;
     flex-shrink: 0;
     text-decoration: none;
-    color: var(--fsflow-text);
+    color: var(--axial-text);
 }
 
 .docs-wordmark-name {
-    font-family: var(--fsflow-display-font);
+    font-family: var(--axial-display-font);
     font-size: clamp(1.55rem, 1.9vw, 2rem);
     line-height: 0.9;
     letter-spacing: -0.08em;
@@ -94,8 +94,8 @@ body > header .end {
 }
 
 .docs-wordmark-sigil {
-    color: var(--fsflow-accent);
-    font: 700 0.66rem/1 var(--fsflow-mono-font);
+    color: var(--axial-accent);
+    font: 700 0.66rem/1 var(--axial-mono-font);
     letter-spacing: 0.16em;
     text-transform: uppercase;
 }
@@ -111,16 +111,16 @@ body > header .end {
     width: fit-content;
     padding: 0.18rem 0.6rem;
     border-radius: 999px;
-    border: 1px solid var(--fsflow-border-strong);
-    color: var(--fsflow-accent);
+    border: 1px solid var(--axial-border-strong);
+    color: var(--axial-accent);
     background: rgba(255, 255, 255, 0.72);
-    font: 600 0.7rem/1 var(--fsflow-mono-font);
+    font: 600 0.7rem/1 var(--axial-mono-font);
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
 
 .docs-tagline {
-    color: var(--fsflow-muted);
+    color: var(--axial-muted);
     font-size: 0.95rem;
     line-height: 1.2;
     white-space: nowrap;
@@ -134,7 +134,7 @@ body > aside#fsdocs-main-menu {
     max-height: calc(100vh - 5.75rem);
     overflow: auto;
     padding: 1.5rem 1rem 1.5rem 1.5rem;
-    border-right: 1px solid var(--fsflow-border);
+    border-right: 1px solid var(--axial-border);
     background: rgba(249, 247, 242, 0.7);
 }
 
@@ -146,12 +146,12 @@ body > aside#fsdocs-page-menu {
     max-height: calc(100vh - 5.75rem);
     overflow: auto;
     padding: 1.5rem 1.5rem 1.5rem 1rem;
-    border-left: 1px solid var(--fsflow-border);
+    border-left: 1px solid var(--axial-border);
     background: rgba(249, 247, 242, 0.28);
     opacity: 0.42;
     transition: opacity 160ms ease, background-color 160ms ease;
     font-size: 0.93rem;
-    color: var(--fsflow-faint);
+    color: var(--axial-faint);
 }
 
 body > aside#fsdocs-page-menu:hover,
@@ -168,7 +168,7 @@ body > aside#fsdocs-page-menu #on-this-page {
     font-size: 0.74rem;
     letter-spacing: 0.09em;
     text-transform: uppercase;
-    color: var(--fsflow-accent);
+    color: var(--axial-accent);
 }
 
 body > aside#fsdocs-page-menu li,
@@ -183,14 +183,14 @@ body > main {
 }
 
 #content {
-    max-width: var(--fsflow-max-width);
+    max-width: var(--axial-max-width);
     margin: 0 auto;
 }
 
 #content > h1:first-child {
     margin-top: 0;
     margin-bottom: 1rem;
-    font-family: var(--fsflow-heading-font);
+    font-family: var(--axial-heading-font);
     font-size: clamp(2.4rem, 4.7vw, 4.25rem);
     line-height: 0.96;
     letter-spacing: -0.06em;
@@ -200,7 +200,7 @@ body > main {
 
 #content > p:first-of-type {
     max-width: 78ch;
-    color: var(--fsflow-muted);
+    color: var(--axial-muted);
     font-size: 1.12rem;
     line-height: 1.7;
     text-wrap: balance;
@@ -209,7 +209,7 @@ body > main {
 #content h2,
 #content h3,
 #content h4 {
-    font-family: var(--fsflow-heading-font);
+    font-family: var(--axial-heading-font);
     letter-spacing: -0.04em;
     line-height: 1.15;
     font-weight: 700;
@@ -238,7 +238,7 @@ body > main {
 }
 
 #content a {
-    color: var(--fsflow-accent);
+    color: var(--axial-accent);
     text-decoration-thickness: 0.08em;
     text-underline-offset: 0.16em;
 }
@@ -252,21 +252,21 @@ body > main {
 .highlight,
 .code,
 code {
-    font-family: var(--fsflow-mono-font);
+    font-family: var(--axial-mono-font);
     font-size: 0.95em;
 }
 
 #content pre {
     overflow: auto;
     padding: 1.15rem 1.25rem;
-    border: 1px solid var(--fsflow-border);
-    border-radius: var(--fsflow-radius-sm);
+    border: 1px solid var(--axial-border);
+    border-radius: var(--axial-radius-sm);
     background: linear-gradient(180deg, #fcfbf8 0%, #f6f2ea 100%);
-    box-shadow: var(--fsflow-shadow);
+    box-shadow: var(--axial-shadow);
 }
 
 #content pre code {
-    color: var(--fsflow-text);
+    color: var(--axial-text);
     background: transparent;
 }
 
@@ -274,7 +274,7 @@ code {
     padding: 0.12rem 0.35rem;
     border-radius: 999px;
     background: rgba(55, 103, 177, 0.08);
-    color: var(--fsflow-text);
+    color: var(--axial-text);
 }
 
 #content pre code {
@@ -286,33 +286,33 @@ code {
 #content blockquote {
     margin: 1.25rem 0;
     padding: 1rem 1.15rem;
-    border-left: 3px solid var(--fsflow-accent);
-    border-radius: 0 var(--fsflow-radius-sm) var(--fsflow-radius-sm) 0;
+    border-left: 3px solid var(--axial-accent);
+    border-radius: 0 var(--axial-radius-sm) var(--axial-radius-sm) 0;
     background: rgba(55, 103, 177, 0.05);
-    color: var(--fsflow-muted);
+    color: var(--axial-muted);
 }
 
 #content table {
     display: block;
     overflow: auto;
     border-collapse: collapse;
-    border: 1px solid var(--fsflow-border);
-    border-radius: var(--fsflow-radius-sm);
-    background: var(--fsflow-surface-strong);
+    border: 1px solid var(--axial-border);
+    border-radius: var(--axial-radius-sm);
+    background: var(--axial-surface-strong);
     box-shadow: 0 8px 26px rgba(41, 32, 23, 0.05);
 }
 
 #content th,
 #content td {
     padding: 0.8rem 0.95rem;
-    border-bottom: 1px solid var(--fsflow-border);
+    border-bottom: 1px solid var(--axial-border);
     vertical-align: top;
 }
 
 #content th {
     text-align: left;
     font-weight: 600;
-    color: var(--fsflow-muted);
+    color: var(--axial-muted);
     background: rgba(247, 244, 238, 0.95);
 }
 
@@ -321,8 +321,8 @@ code {
 }
 
 #content details {
-    border: 1px solid var(--fsflow-border);
-    border-radius: var(--fsflow-radius-sm);
+    border: 1px solid var(--axial-border);
+    border-radius: var(--axial-radius-sm);
     background: rgba(255, 255, 255, 0.7);
     padding: 0.75rem 0.9rem;
 }
@@ -339,7 +339,7 @@ code {
 #content hr {
     margin: 2rem 0;
     border: 0;
-    border-top: 1px solid var(--fsflow-border);
+    border-top: 1px solid var(--axial-border);
 }
 
 .docs-home-hero {
@@ -355,26 +355,26 @@ code {
     gap: 0.45rem;
     margin-bottom: 1rem;
     padding: 0.3rem 0.7rem;
-    border: 1px solid var(--fsflow-border);
+    border: 1px solid var(--axial-border);
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.65);
-    color: var(--fsflow-accent);
-    font: 600 0.72rem/1 var(--fsflow-mono-font);
+    color: var(--axial-accent);
+    font: 600 0.72rem/1 var(--axial-mono-font);
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
 
 .docs-home-hero .page-summary {
     margin: 0 0 0.8rem;
-    color: var(--fsflow-faint);
-    font: 600 0.9rem/1.45 var(--fsflow-sans-font);
+    color: var(--axial-faint);
+    font: 600 0.9rem/1.45 var(--axial-sans-font);
     letter-spacing: 0.01em;
 }
 
 .docs-home-hero h1 {
     max-width: 12ch;
     margin: 0 0 1rem;
-    font-family: var(--fsflow-heading-font);
+    font-family: var(--axial-heading-font);
     font-weight: 700;
     font-size: clamp(2.4rem, 4.9vw, 4.8rem);
     line-height: 0.96;
@@ -384,7 +384,7 @@ code {
 
 .docs-home-hero .lede {
     max-width: 62ch;
-    color: var(--fsflow-muted);
+    color: var(--axial-muted);
     font-size: 1.08rem;
     line-height: 1.75;
 }
@@ -417,33 +417,33 @@ code {
 .docs-home-sample .sample-note {
     margin: 0.85rem 0 0;
     max-width: 62ch;
-    color: var(--fsflow-muted);
+    color: var(--axial-muted);
     font-size: 1rem;
     line-height: 1.65;
 }
 
 .docs-home-panel-card {
     padding: 1rem 1.05rem 1.05rem;
-    border: 1px solid var(--fsflow-border);
-    border-radius: var(--fsflow-radius);
+    border: 1px solid var(--axial-border);
+    border-radius: var(--axial-radius);
     background: rgba(255, 255, 255, 0.82);
-    box-shadow: var(--fsflow-shadow);
+    box-shadow: var(--axial-shadow);
     backdrop-filter: blur(12px);
 }
 
 .docs-home-panel-card .label {
     display: inline-block;
     margin-bottom: 0.55rem;
-    color: var(--fsflow-accent);
-    font: 600 0.72rem/1 var(--fsflow-mono-font);
+    color: var(--axial-accent);
+    font: 600 0.72rem/1 var(--axial-mono-font);
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
 
 .docs-home-panel-card strong {
     display: block;
-    color: var(--fsflow-text);
-    font-family: var(--fsflow-heading-font);
+    color: var(--axial-text);
+    font-family: var(--axial-heading-font);
     font-size: 1.08rem;
     line-height: 1.3;
     font-weight: 600;
@@ -455,11 +455,11 @@ code {
     align-items: center;
     gap: 0.4rem;
     padding: 0.42rem 0.75rem;
-    border: 1px solid var(--fsflow-border);
+    border: 1px solid var(--axial-border);
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.72);
-    color: var(--fsflow-text);
-    font: 500 0.9rem/1 var(--fsflow-sans-font);
+    color: var(--axial-text);
+    font: 500 0.9rem/1 var(--axial-sans-font);
 }
 
 .docs-grid {
@@ -472,10 +472,10 @@ code {
 .docs-card {
     grid-column: span 4;
     padding: 1.15rem 1.15rem 1.2rem;
-    border: 1px solid var(--fsflow-border);
-    border-radius: var(--fsflow-radius);
-    background: var(--fsflow-surface);
-    box-shadow: var(--fsflow-shadow);
+    border: 1px solid var(--axial-border);
+    border-radius: var(--axial-radius);
+    background: var(--axial-surface);
+    box-shadow: var(--axial-shadow);
     backdrop-filter: blur(12px);
 }
 
@@ -487,14 +487,14 @@ code {
 
 .docs-card p {
     margin: 0;
-    color: var(--fsflow-muted);
+    color: var(--axial-muted);
 }
 
 .docs-card .label {
     display: inline-block;
     margin-bottom: 0.75rem;
-    color: var(--fsflow-accent);
-    font: 600 0.72rem/1 var(--fsflow-mono-font);
+    color: var(--axial-accent);
+    font: 600 0.72rem/1 var(--axial-mono-font);
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
@@ -515,27 +515,27 @@ code {
     grid-column: span 12;
 }
 
-.fsflow-sidebar-collapse-toggle {
+.axial-sidebar-collapse-toggle {
     width: 100%;
     margin: 0.35rem 0 0.75rem;
     padding: 0.4rem 0.6rem;
-    border: 1px solid var(--fsflow-border);
+    border: 1px solid var(--axial-border);
     border-radius: 8px;
-    color: var(--fsflow-muted);
+    color: var(--axial-muted);
     background: rgba(255, 255, 255, 0.68);
-    font: 600 0.78rem/1.2 var(--fsflow-sans-font);
+    font: 600 0.78rem/1.2 var(--axial-sans-font);
     text-align: left;
     text-decoration: none;
 }
 
-.fsflow-sidebar-collapse-toggle::before {
+.axial-sidebar-collapse-toggle::before {
     content: "v";
     display: inline-block;
     width: 1rem;
-    color: var(--fsflow-accent);
+    color: var(--axial-accent);
 }
 
-.fsflow-sidebar-collapse-toggle[aria-expanded="false"]::before {
+.axial-sidebar-collapse-toggle[aria-expanded="false"]::before {
     content: ">";
 }
 
