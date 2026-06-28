@@ -4,21 +4,21 @@
     <TargetFrameworks>netstandard2.1;net8.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsAotCompatible Condition="'$(TargetFramework)' == 'net8.0'">true</IsAotCompatible>
-    <PackageId>Axial.Result</PackageId>
-    <AssemblyName>Axial.Result</AssemblyName>
-    <RootNamespace>Axial.Result</RootNamespace>
+    <PackageId>Axial.ErrorHandling</PackageId>
+    <AssemblyName>Axial.ErrorHandling</AssemblyName>
+    <RootNamespace>Axial.ErrorHandling</RootNamespace>
     <Authors>Adam Davies</Authors>
-    <Description>Fail-fast Result helpers, checks, and result computation expressions.</Description>
+    <Description>Focused fail-fast error handling helpers, predicates, result guards, and result computation expressions for F#.</Description>
     <PackageProjectUrl>https://github.com/adz/Axial</PackageProjectUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/adz/Axial</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <PackageTags>fsharp;result;check;validation;application</PackageTags>
+    <PackageTags>fsharp;error-handling;result;check;railway-oriented-programming;application</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <FsDocsCollectionName>Axial</FsDocsCollectionName>
     <FsDocsLogoSource>content/img/axial-inline-light.svg</FsDocsLogoSource>
-    <FsDocsLogoAlt>Axial.Result</FsDocsLogoAlt>
+    <FsDocsLogoAlt>Axial.ErrorHandling</FsDocsLogoAlt>
     <FsDocsLogoLink>https://github.com/adz/Axial</FsDocsLogoLink>
     <FsDocsLicenseLink>https://github.com/adz/Axial/blob/main/LICENSE</FsDocsLicenseLink>
     <FsDocsReleaseNotesLink>https://github.com/adz/Axial/blob/main/RELEASE_NOTES.md</FsDocsReleaseNotesLink>
@@ -34,6 +34,8 @@
 
   <ItemGroup>
     <Compile Include="Check.fs" />
+    <Compile Include="Result.fs" />
+    <Compile Include="Collection.fs" />
     <Compile Include="ResultBuilder.fs" />
     <Compile Include="Builders.fs" />
   </ItemGroup>

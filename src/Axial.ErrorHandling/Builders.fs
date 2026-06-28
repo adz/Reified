@@ -1,4 +1,4 @@
-namespace Axial.Result
+namespace Axial.ErrorHandling
 
 [<AutoOpen>]
 module Builders =
