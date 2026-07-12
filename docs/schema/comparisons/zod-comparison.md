@@ -1,5 +1,5 @@
 ---
-weight: 92
+weight: 30
 title: vs zod
 description: The same parse-don't-validate philosophy, in F#, with no reflection and Fable support.
 ---
