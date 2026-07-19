@@ -53,7 +53,6 @@
     <Compile Include="Contract.fs" />
     <Compile Include="RefinedSchemas.fs" />
     <Compile Include="Inspection.fs" />
-    <Compile Include="JsonSchema.fs" />
   </ItemGroup>
 
 </Project>
