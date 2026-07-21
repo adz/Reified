@@ -32,7 +32,7 @@ let validateBadgeName (name: string) : Result<string, BadgeError> =
 
 What improves over hand-rolled `if name.Length < 3 then Error ...`: the constraint is a reusable named value that
 already keeps the input on success, and `Result.orError` swaps in *your* error union — the signature stays plain
-`Result<string, BadgeError>`. See [Checks]({{< relref "/error-handling/checks/" >}}).
+`Result<string, BadgeError>`. See [Checks]({{< relref "/schema/error-handling/checks/" >}}).
 
 ## Stage 2 — `result {}`: dependent steps fail fast
 
@@ -49,7 +49,7 @@ result {
 
 The first failure stops the pipeline — the demo shows an unknown tier reported without the quantity ever being
 inspected. No nested `match` staircases, and still ordinary `Result`. See
-[Result Builder]({{< relref "/error-handling/result-builder/" >}}).
+[Result Builder]({{< relref "/schema/error-handling/result-builder/" >}}).
 
 ## Stage 3 — `refine {}`: values that carry their proof
 
@@ -69,7 +69,7 @@ let createContact (rawId: string) (rawEmail: string) : Result<Contact, Refinemen
 A `Contact` cannot exist unless every parse and refinement succeeded; downstream code takes `Contact` and checks
 nothing. The catalog types (`PositiveInt`, `NonBlankString`) preserve their invariant for the value's lifetime; the
 demo shows the structured `RefinementError` a zero id produces. See
-[Refined]({{< relref "/error-handling/refined/" >}}).
+[Refined]({{< relref "/schema/error-handling/refined/" >}}).
 
 ## Stage 4 — `validate {}`: every field failure at once, with paths
 
@@ -99,7 +99,7 @@ ticket:
 
 Note what composed: stages 1–3 were written as fail-fast building blocks with their own error types, and stage 4
 lifted them unchanged into an accumulating form report. See
-[Validation]({{< relref "/error-handling/validation/" >}}).
+[Validation]({{< relref "/schema/error-handling/validation/" >}}).
 
 ## Where this tier stops
 
