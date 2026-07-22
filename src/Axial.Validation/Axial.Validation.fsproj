@@ -4,21 +4,21 @@
     <TargetFrameworks>netstandard2.1;net8.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsAotCompatible Condition="'$(TargetFramework)' == 'net8.0'">true</IsAotCompatible>
-    <PackageId>Axial.ErrorHandling</PackageId>
-    <AssemblyName>Axial.ErrorHandling</AssemblyName>
-    <RootNamespace>Axial.ErrorHandling</RootNamespace>
+    <PackageId>Axial.Validation</PackageId>
+    <AssemblyName>Axial.Validation</AssemblyName>
+    <RootNamespace>Axial.Validation</RootNamespace>
     <Authors>Adam Davies</Authors>
-    <Description>Focused fail-fast error handling helpers, predicates, result guards, and result computation expressions for F#.</Description>
+    <Description>Value checks, fail-fast results, accumulated diagnostics, and refined values for F#.</Description>
     <PackageProjectUrl>https://github.com/adz/Axial</PackageProjectUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/adz/Axial</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <PackageTags>fsharp;error-handling;result;check;railway-oriented-programming;application</PackageTags>
+    <PackageTags>fsharp;validation;error-handling;result;check;diagnostics;refined-types</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <FsDocsCollectionName>Axial</FsDocsCollectionName>
     <FsDocsLogoSource>content/img/axial-inline-light.svg</FsDocsLogoSource>
-    <FsDocsLogoAlt>Axial.ErrorHandling</FsDocsLogoAlt>
+    <FsDocsLogoAlt>Axial.Validation</FsDocsLogoAlt>
     <FsDocsLogoLink>https://github.com/adz/Axial</FsDocsLogoLink>
     <FsDocsLicenseLink>https://github.com/adz/Axial/blob/main/LICENSE</FsDocsLicenseLink>
     <FsDocsReleaseNotesLink>https://github.com/adz/Axial/blob/main/RELEASE_NOTES.md</FsDocsReleaseNotesLink>
