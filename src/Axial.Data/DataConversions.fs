@@ -2,251 +2,22 @@ namespace Axial
 
 open System
 open System.Collections.Specialized
-open System.Text
+#if FABLE_COMPILER
+open Fable.Core.JsInterop
+#endif
 
-/// <summary>A segment in a structured data path.</summary>
-/// <remarks>
-/// <para>
-/// Structured data paths address boundary data by source field names and zero-based collection indexes. They are intentionally
-/// separate from diagnostics graphs, but can be lowered to diagnostics paths when schema input errors are interpreted.
-/// </para>
-/// </remarks>
-[<RequireQualifiedAccess>]
-type DataPathSegment =
-    /// <summary>A named source field or object member.</summary>
-    | Name of string
-    /// <summary>A zero-based collection index.</summary>
-    | Index of int
-
-/// <summary>A path that addresses a location in structured data.</summary>
-type DataPath = DataPathSegment list
-
-/// <summary>Helpers for constructing, parsing, and rendering structured data paths.</summary>
+/// <summary>Internal conversions from supported source representations into owned structured data.</summary>
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
-module DataPath =
-    let private validateName (name: string) =
-        if isNull name then
-            nullArg (nameof name)
-
-        if name = "" then
-            invalidArg (nameof name) "Input path names cannot be empty."
-
-    let private validateIndex index =
-        if index < 0 then
-            invalidArg (nameof index) "Input path indexes must be zero or greater."
-
-    let private isBareName (name: string) =
-        not (String.IsNullOrEmpty name)
-        && name.IndexOfAny([| '.'; '['; ']'; '"'; '\\' |]) < 0
-
-    let private quoteName (name: string) =
-        let builder = StringBuilder()
-        builder.Append("[\"") |> ignore
-
-        name
-        |> Seq.iter (function
-            | '\\' -> builder.Append("\\\\") |> ignore
-            | '"' -> builder.Append("\\\"") |> ignore
-            | value -> builder.Append(value) |> ignore)
-
-        builder.Append("\"]").ToString()
-
-    let private renderName name =
-        validateName name
-
-        if isBareName name then name else quoteName name
-
-    let private parseError () = None
-
-    let private parseBareName (text: string) start =
-        let mutable index = start
-
-        while index < text.Length && text[index] <> '.' && text[index] <> '[' do
-            if text[index] = ']' then
-                index <- text.Length + 1
-            else
-                index <- index + 1
-
-        if index > text.Length || index = start then
-            None
-        else
-            Some(text.Substring(start, index - start), index)
-
-    let private parseBracket (text: string) start =
-        let contentStart = start + 1
-
-        if contentStart >= text.Length then
-            parseError ()
-        elif text[contentStart] = '"' then
-            let builder = StringBuilder()
-            let mutable index = contentStart + 1
-            let mutable closed = false
-
-            while index < text.Length && not closed do
-                match text[index] with
-                | '\\' when index + 1 < text.Length ->
-                    builder.Append(text[index + 1]) |> ignore
-                    index <- index + 2
-                | '"' ->
-                    closed <- true
-                    index <- index + 1
-                | value ->
-                    builder.Append(value) |> ignore
-                    index <- index + 1
-
-            if not closed || index >= text.Length || text[index] <> ']' then
-                parseError ()
-            else
-                let name = builder.ToString()
-
-                if name = "" then
-                    parseError ()
-                else
-                    Some(DataPathSegment.Name name, index + 1)
-        else
-            let mutable index = contentStart
-
-            while index < text.Length && Char.IsDigit text[index] do
-                index <- index + 1
-
-            if index = contentStart || index >= text.Length || text[index] <> ']' then
-                parseError ()
-            else
-                match Int32.TryParse(text.Substring(contentStart, index - contentStart)) with
-                | true, value -> Some(DataPathSegment.Index value, index + 1)
-                | false, _ -> parseError ()
-
-    /// <summary>The root structured data path.</summary>
-    let empty : DataPath = []
-
-    /// <summary>Creates a one-segment path for a named source field.</summary>
-    let name (name: string) : DataPath =
-        validateName name
-        [ DataPathSegment.Name name ]
-
-    /// <summary>Creates a one-segment path for a zero-based collection index.</summary>
-    let index (index: int) : DataPath =
-        validateIndex index
-        [ DataPathSegment.Index index ]
-
-    /// <summary>Appends a named source field segment to an input path.</summary>
-    let appendName (name: string) (path: DataPath) : DataPath =
-        validateName name
-        path @ [ DataPathSegment.Name name ]
-
-    /// <summary>Appends a zero-based collection index segment to an input path.</summary>
-    let appendIndex (index: int) (path: DataPath) : DataPath =
-        validateIndex index
-        path @ [ DataPathSegment.Index index ]
-
-    /// <summary>Creates a path from validated segments.</summary>
-    let ofSegments (segments: DataPathSegment seq) : DataPath =
-        if isNull (box segments) then
-            nullArg (nameof segments)
-
-        segments
-        |> Seq.map (function
-            | DataPathSegment.Name name ->
-                validateName name
-                DataPathSegment.Name name
-            | DataPathSegment.Index index ->
-                validateIndex index
-                DataPathSegment.Index index)
-        |> Seq.toList
-
-    /// <summary>Returns the segments in an input path.</summary>
-    let segments (path: DataPath) : DataPathSegment list = path
-
-    /// <summary>Renders a structured data path using names, dot separators, and bracketed indexes.</summary>
-    let toString (path: DataPath) : string =
-        let builder = StringBuilder()
-
-        path
-        |> List.iteri (fun position segment ->
-            match segment with
-            | DataPathSegment.Name name ->
-                let rendered = renderName name
-
-                if position = 0 || rendered.StartsWith("[", StringComparison.Ordinal) then
-                    builder.Append(rendered) |> ignore
-                else
-                    builder.Append('.').Append(rendered) |> ignore
-            | DataPathSegment.Index index ->
-                validateIndex index
-                builder.Append('[').Append(index).Append(']') |> ignore)
-
-        builder.ToString()
-
-    /// <summary>Attempts to parse a structured data path such as <c>contacts[1].value</c>.</summary>
-    let tryParse (text: string) : DataPath option =
-        if isNull text then
-            nullArg (nameof text)
-
-        if text = "" then
-            Some empty
-        else
-            let rec loop index expectSegment segments =
-                if index = text.Length then
-                    if expectSegment then None else Some(List.rev segments)
-                else
-                    match text[index] with
-                    | '.' when not expectSegment -> loop (index + 1) true segments
-                    | '[' ->
-                        match parseBracket text index with
-                        | Some(segment, nextIndex) -> loop nextIndex false (segment :: segments)
-                        | None -> None
-                    | _ when expectSegment ->
-                        match parseBareName text index with
-                        | Some(name, nextIndex) -> loop nextIndex false (DataPathSegment.Name name :: segments)
-                        | None -> None
-                    | _ -> None
-
-            loop 0 true []
-
-    /// <summary>Parses a structured data path or raises <see cref="T:System.FormatException" /> when the text is invalid.</summary>
-    let parse (text: string) : DataPath =
-        match tryParse text with
-        | Some path -> path
-        | None -> raise (FormatException($"Invalid input path: {text}"))
-
-/// <summary>Helpers for inspecting source-agnostic structured data.</summary>
-[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
-[<RequireQualifiedAccess>]
-module Data =
+module internal DataConversions =
     /// <summary>Builds an object from an F# map, ordered by key.</summary>
     let objectOfMap (fields: Map<string, Data>) : Data =
         if isNull (box fields) then nullArg (nameof fields)
         fields |> Map.toList |> Data.Object
 
-    /// <summary>Concise, opt-in syntax for constructing structured objects.</summary>
-    module Syntax =
-        /// <summary>Associates a field name with a supported primitive, structured value, or recursive list.</summary>
-        let inline (=>) (name: string) (value: ^value) : string * Data =
-            if isNull name then nullArg (nameof name)
-
-            let inline convert (witness: ^w) (value: ^v) =
-                ((^w or ^v): (static member From: ^v -> Data) value)
-
-            name, convert Unchecked.defaultof<Data> value
-
-        /// <summary>Builds an object from ordered name/value pairs produced with <c>=&gt;</c>.</summary>
-        let data (fields: (string * Data) list) : Data =
-            if isNull (box fields) then nullArg (nameof fields)
-            Data.Object fields
-
     type private ConfigurationNode =
         | Value of Data
         | Branch of Map<string, ConfigurationNode>
-
-    let private tryRedisplayValue (input: Data) =
-        match input with
-        | Data.Null -> Some ""
-        | Data.Text value -> Some value
-        | Data.Number token -> Some token
-        | Data.Bool value -> Some(if value then "true" else "false")
-        | Data.List _
-        | Data.Object _ -> None
 
     let private ensureName (name: string) =
         if isNull name then
@@ -409,6 +180,45 @@ module Data =
         |> objectFromGroupedValues
 #endif
 
+#if FABLE_COMPILER
+    [<Fable.Core.Emit("typeof $0")>]
+    let private jsTypeOf (value: obj) : string = Unchecked.defaultof<string>
+
+    [<Fable.Core.Emit("Array.isArray($0)")>]
+    let private jsIsArray (value: obj) : bool = false
+
+    [<Fable.Core.Emit("Object.keys($0)")>]
+    let private jsObjectKeys (value: obj) : string[] = Unchecked.defaultof<string[]>
+
+    [<Fable.Core.Emit("$0[$1]")>]
+    let private jsProperty (value: obj) (name: string) : obj = null
+
+    [<Fable.Core.Emit("String($0)")>]
+    let private jsString (value: obj) : string = Unchecked.defaultof<string>
+
+    /// <summary>Copies a value returned by JavaScript <c>JSON.parse</c> into structured data.</summary>
+    /// <remarks>
+    /// JavaScript parsing has already discarded duplicate object fields and the original spelling of number tokens.
+    /// Use <c>Axial.Schema.Json.Json.parseData</c> when those distinctions must be retained.
+    /// </remarks>
+    let rec ofJsonValue (value: obj) : Data =
+        if isNull value then
+            Data.Null
+        elif jsIsArray value then
+            value |> unbox<obj[]> |> Array.map ofJsonValue |> Array.toList |> Data.List
+        else
+            match jsTypeOf value with
+            | "string" -> Data.Text(unbox<string> value)
+            | "boolean" -> Data.Bool(unbox<bool> value)
+            | "number" -> Data.Number(jsString value)
+            | "object" ->
+                jsObjectKeys value
+                |> Array.map (fun name -> name, ofJsonValue (jsProperty value name))
+                |> Array.toList
+                |> Data.Object
+            | actual -> invalidArg (nameof value) $"Expected a value returned by JSON.parse but found JavaScript {actual}."
+#endif
+
     /// <summary>
     /// Builds structured data from command-line arguments.
     /// </summary>
@@ -471,10 +281,9 @@ module Data =
     /// <summary>Builds structured data from a <see cref="T:System.Text.Json.JsonElement" />.</summary>
     /// <remarks>
     /// <para>
-    /// This is the boundary adapter for JSON bodies parsed with <c>System.Text.Json</c>, such as ASP.NET Core request
-    /// payloads: convert the element once, then parse it with <c>Schema.parse</c> to get path-aware diagnostics or a
-    /// trusted model. JSON value kinds remain distinct, and number tokens are carried without narrowing them to one
-    /// CLR numeric type. Other JSON syntax, such as whitespace and source locations, is not represented.
+    /// This converts JSON parsed with <c>System.Text.Json</c> into a reusable structured value. JSON value kinds remain
+    /// distinct, and number tokens are carried without narrowing them to one CLR numeric type. Other JSON syntax,
+    /// such as whitespace and source locations, is not represented.
     /// </para>
     /// <para>
     /// The adapter is available on .NET 8+ targets where <c>System.Text.Json</c> ships in-box, keeping the package
@@ -557,93 +366,3 @@ module Data =
 
         values |> Seq.map (fun pair -> pair.Key, pair.Value) |> ofConfiguration
 
-    /// <summary>Attempts to find a structured data value at a parsed input path.</summary>
-    let tryFind (path: DataPath) (input: Data) : Data option =
-        let path = DataPath.ofSegments path
-
-        let rec loop current remaining =
-            match remaining, current with
-            | [], _ -> Some current
-            | DataPathSegment.Name name :: rest, Data.Object fields ->
-                fields
-                |> List.tryFindBack (fun (fieldName, _) -> fieldName = name)
-                |> Option.map snd
-                |> Option.bind (fun field -> loop field rest)
-            | DataPathSegment.Index index :: rest, Data.List items ->
-                items |> List.tryItem index |> Option.bind (fun item -> loop item rest)
-            | _ -> None
-
-        loop input path
-
-    /// <summary>Looks up a structured data value at a parsed input path, returning <c>Null</c> when the path is absent.</summary>
-    let lookup (path: DataPath) (input: Data) : Data =
-        tryFind path input |> Option.defaultValue Data.Null
-
-    /// <summary>Attempts to parse an input path and find the addressed structured data value.</summary>
-    let tryFindPath (path: string) (input: Data) : Data option =
-        DataPath.tryParse path |> Option.bind (fun parsedPath -> tryFind parsedPath input)
-
-    /// <summary>Parses an input path and looks up the addressed structured data value.</summary>
-    let lookupPath (path: string) (input: Data) : Data =
-        DataPath.parse path |> fun parsedPath -> lookup parsedPath input
-
-    /// <summary>
-    /// Attempts to redisplay a scalar structured data value, returning blank text for explicitly missing input.
-    /// </summary>
-    let tryRedisplay (input: Data) : string option =
-        tryRedisplayValue input
-
-    /// <summary>
-    /// Redisplays a scalar structured data value, returning blank text for missing, object-shaped, or collection-shaped input.
-    /// </summary>
-    /// <example>
-    /// <code>
-    /// Data.Text "42" |> Data.redisplay
-    /// // "42"
-    ///
-    /// Data.Null |> Data.redisplay
-    /// // ""
-    ///
-    /// Data.objectOfList [ "name", Data.Text "Ada" ] |> Data.redisplay
-    /// // "" (object-shaped input has no scalar to redisplay)
-    /// </code>
-    /// </example>
-    let redisplay (input: Data) : string =
-        tryRedisplay input |> Option.defaultValue ""
-
-    /// <summary>Attempts to redisplay the scalar structured data value at a parsed input path.</summary>
-    let tryRedisplayAt (path: DataPath) (input: Data) : string option =
-        lookup path input |> tryRedisplayValue
-
-    /// <summary>
-    /// Redisplays the scalar structured data value at a parsed input path, returning blank text when the value cannot be
-    /// redisplayed as a scalar.
-    /// </summary>
-    let redisplayAt (path: DataPath) (input: Data) : string =
-        tryRedisplayAt path input |> Option.defaultValue ""
-
-    /// <summary>Attempts to parse an input path and redisplay the addressed scalar structured data value.</summary>
-    let tryRedisplayPath (path: string) (input: Data) : string option =
-        DataPath.tryParse path |> Option.bind (fun parsedPath -> tryRedisplayAt parsedPath input)
-
-    /// <summary>Parses an input path and redisplays the addressed scalar structured data value.</summary>
-    /// <example>
-    /// <code>
-    /// let input =
-    ///     Data.objectOfList [
-    ///         "address", Data.objectOfList [ "city", Data.Text "Boston" ]
-    ///         "tags", Data.List [ Data.Text "admin"; Data.Text "billing" ]
-    ///     ]
-    ///
-    /// Data.redisplayPath "address.city" input
-    /// // "Boston"
-    ///
-    /// Data.redisplayPath "tags[1]" input
-    /// // "billing"
-    ///
-    /// Data.redisplayPath "address.zip" input
-    /// // "" (path not present)
-    /// </code>
-    /// </example>
-    let redisplayPath (path: string) (input: Data) : string =
-        DataPath.parse path |> fun parsedPath -> redisplayAt parsedPath input
