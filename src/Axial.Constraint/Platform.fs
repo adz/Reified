@@ -1,7 +1,7 @@
 /// The package's platform-variant surface. Fable's project cracker does not expose FABLE_COMPILER as an
 /// MSBuild property, so the variants live in one conditionally-halved file rather than two
 /// conditionally-included ones; split them if Fable restores the property.
-module internal Axial.Check.Platform
+module internal Axial.Constraint.Platform
 
 open System
 
