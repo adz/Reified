@@ -1,8 +1,13 @@
 ---
-weight: 8
+weight: 3
 title: Result
+linkTitle: Result
 type: docs
+notoc: true
 description: Compose operations that can fail, using the standard F# Result type.
+menu:
+  main:
+    weight: 1
 ---
 
 # Result
@@ -69,4 +74,18 @@ Every page below builds on this same `parseName`/`parseAge` pair, so the example
 - [The result computation expression](./result-ce/) — write dependent steps as straight-line code with `result { }`.
 - [Collecting every error](./collecting-errors/) — report all independent failures at once with `result.list { }`
   and `and!`.
-- [API reference](../reference/result/) — every function, generated from the source.
+- [Comparison with FsToolkit.ErrorHandling](./fstoolkit-comparison/) — what each library is for, and how they
+  interoperate.
+- [API reference]({{< relref "/result/reference/" >}}) — every function, generated from the source.
+
+## Related
+
+`Axial.Result` composes failures. Admitting values in the first place is the
+[Values]({{< relref "/values/" >}}) packages' job: `Axial.Constraint` tests a typed value,
+`Axial.Refined` constructs values whose types record a successful check, and `Axial.Parse` decodes serialized
+primitives. All of them return the standard F# `Result`, so these helpers work on their output — but none of them
+requires this package, and this package does not require them.
+
+Accumulation here is **flat**: `result.list { }` collects a list of your error values with no field identity.
+When a whole form, request, or document must become a model with path-aware accumulated diagnostics, that is
+[Axial.Schema]({{< relref "/schema/" >}}).

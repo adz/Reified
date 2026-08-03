@@ -11,7 +11,7 @@ This page is the reference for that machinery.
 
 Before reaching for it, decide whether the concept deserves a type at all. Checked construction is how a value is
 admitted, not a reason on its own: if nothing downstream becomes total or loses a branch, the rule belongs in a
-[constraint]({{< relref "/error-handling/constraint/" >}}) on the primitive instead. Numeric ranges are the clearest
+[constraint]({{< relref "/values/constraint/" >}}) on the primitive instead. Numeric ranges are the clearest
 example — F# cannot carry "greater than zero" through arithmetic, so a refined number costs more at every use site
 than it saves. [When not to make a type](../catalog/#when-not-to-make-a-type) draws the line, and
 [Customer Id](../tutorials/customer-id/) works a full example through.

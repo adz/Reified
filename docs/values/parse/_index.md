@@ -93,7 +93,7 @@ forms preserve errors from malformed present text.
 ## Parse, then refine
 
 Parsing changes representation; refinement checks an already-typed value and constructs a domain type. See
-[Refined values]({{< relref "/error-handling/refined/" >}}) for the refinement model and its built-in types.
+[Refined values]({{< relref "/values/refined/" >}}) for the refinement model and its built-in types.
 
 ```fsharp
 open Axial.Constraint
@@ -112,4 +112,4 @@ let quantity raw =
     }
 ```
 
-The [Parse API reference]({{< relref "/error-handling/reference/parse/" >}}) lists every parser.
+The [Parse API reference]({{< relref "/values/reference/parse/" >}}) lists every parser.

@@ -32,7 +32,7 @@ carry nothing forward — concatenating two trimmed strings is not trimmed — s
 [When not to make a type](./catalog/#when-not-to-make-a-type).
 
 `Axial.Refined` depends only on `Axial.Constraint`. It does not
-[parse text]({{< relref "/error-handling/parse/" >}}) and does not normalize input.
+[parse text]({{< relref "/values/parse/" >}}) and does not normalize input.
 
 ```sh
 dotnet add package Axial.Refined

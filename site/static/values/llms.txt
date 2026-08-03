@@ -1,10 +1,11 @@
-# Axial Error Handling
+# Axial Values
 
-- `Axial.Result` is a top-level product about composing failures, a peer of Data, Schema, and Flow.
-- Values is a navigation grouping over `Axial.Constraint`, `Axial.Refined`, and `Axial.Parse` — packages about
-  admitting values. There is no `Axial.Values` package or namespace.
-- All four packages install independently; there is no meta-package.
-- `Axial.Result` owns generic Result combinators, extraction helpers, and `result { }`.
+- Values is a navigation grouping over `Axial.Constraint`, `Axial.Refined`, and `Axial.Parse` — three packages about
+  admitting values. There is no `Axial.Values` package or namespace, and no meta-package.
+- `Axial.Refined` depends only on `Axial.Constraint`. `Axial.Parse` depends on neither. None depends on
+  `Axial.Result`: they all return the standard F# `Result`, so any Result vocabulary composes them.
+- Composing the failures they return is `Axial.Result`'s job (a separate product); path-aware accumulation over a
+  whole structured input is `Axial.Schema`'s.
 - `Axial.Constraint` owns `Constraint<'value>`, `Violation`, and the `ConstraintDescription` read model.
 - A constraint is a reusable description of valid values; `check` runs it. There is no separate `Check` type.
 - `Constraint.test` answers `bool`; `Constraint.check` returns `Result<unit, Violation>`; `Constraint.guard` keeps the input.
