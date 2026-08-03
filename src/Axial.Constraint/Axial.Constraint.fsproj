@@ -4,21 +4,21 @@
     <TargetFrameworks>netstandard2.1;net8.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsAotCompatible Condition="'$(TargetFramework)' == 'net8.0'">true</IsAotCompatible>
-    <PackageId>Axial.Check</PackageId>
-    <AssemblyName>Axial.Check</AssemblyName>
-    <RootNamespace>Axial.Check</RootNamespace>
+    <PackageId>Axial.Constraint</PackageId>
+    <AssemblyName>Axial.Constraint</AssemblyName>
+    <RootNamespace>Axial.Constraint</RootNamespace>
     <Authors>Adam Davies</Authors>
-    <Description>Reusable, path-free value checks and predicates for F#, returning standard Result values.</Description>
+    <Description>Reusable, inspectable value constraints for F#: one declaration for runtime checking, refined values, schema, and export.</Description>
     <PackageProjectUrl>https://github.com/adz/Axial</PackageProjectUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/adz/Axial</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <PackageTags>fsharp;validation;checks;predicates;result;error-handling</PackageTags>
+    <PackageTags>fsharp;validation;constraints;schema;result;error-handling</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <FsDocsCollectionName>Axial</FsDocsCollectionName>
     <FsDocsLogoSource>content/img/axial-inline-light.svg</FsDocsLogoSource>
-    <FsDocsLogoAlt>Axial.Check</FsDocsLogoAlt>
+    <FsDocsLogoAlt>Axial.Constraint</FsDocsLogoAlt>
     <FsDocsLogoLink>https://github.com/adz/Axial</FsDocsLogoLink>
     <FsDocsLicenseLink>https://github.com/adz/Axial/blob/main/LICENSE</FsDocsLicenseLink>
     <FsDocsReleaseNotesLink>https://github.com/adz/Axial/blob/main/RELEASE_NOTES.md</FsDocsReleaseNotesLink>
@@ -34,10 +34,13 @@
 
   <ItemGroup>
     <Compile Include="Platform.fs" />
-    <Compile Include="Predicate.fs" />
-    <Compile Include="Check.fs" />
+    <Compile Include="ConstraintValue.fs" />
+    <Compile Include="ConstraintAtom.fs" />
+    <Compile Include="Violation.fs" />
+    <Compile Include="ConstraintDescription.fs" />
+    <Compile Include="Predicates.fs" />
     <Compile Include="Constraint.fs" />
-    <Compile Include="CheckDSL.fs" />
+    <Compile Include="ConstraintDSL.fs" />
   </ItemGroup>
 
 </Project>

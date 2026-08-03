@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="CheckTests.fs" />
+    <Compile Include="ConstraintTests.fs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Axial.Check\Axial.Check.fsproj" />
+    <ProjectReference Include="..\..\src\Axial.Constraint\Axial.Constraint.fsproj" />
   </ItemGroup>
 
 </Project>
