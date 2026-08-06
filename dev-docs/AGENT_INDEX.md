@@ -55,6 +55,11 @@ Working on `src/Reified.Schema`? Read `dev-docs/schema/internals.md` first (impl
   `tests/Reified.Constraint.Tests/**`, `tests/Reified.Result.Tests/ResultTests.fs`, and `dev-docs/PLAN.md`.
 - Package graph, umbrella contents, and pack/consumer wiring: `src/Reified/Reified.fsproj`,
   `tests/Reified.Package.Tests/PackageGraphTests.fs`, `scripts/pack.sh`, and `tests/package-consumers/**`.
+- Public API surface: `tests/Reified.ApiShape.Tests/ApiShapeTests.fs` and `dev-docs/API_BASELINE.md`. Adding or
+  renaming a public module means editing that suite in the same change.
+- Fable JavaScript support: `examples/Reified.FableProbe/**` and `scripts/check-fable-js-surface.sh`. The probe
+  runs the same assertions on both targets, so put a new cross-runtime claim in `Checks.fs` rather than in a
+  .NET-only test.
 - Parsing and refined values: `src/Reified.Parse/{Errors,Parse}.fs`, and in `src/Reified.Refinements/` (compile order)
   `Refinement.fs` -> `NonEmpty.fs` -> `Interval.fs` -> `Bounded.fs` -> `Finite.fs` -> `UnitInterval.fs` ->
   `Refine.fs`. Tests are one file per area under `tests/Reified.Refinements.Tests/`. Adding or removing a refined type
@@ -91,7 +96,8 @@ artifacts, or build artifacts.
 ## Validation Commands
 
 - Source/package moves: `bash scripts/check-source-inventory.sh`.
-- Schema CE type-state changes: `bash scripts/check-schema-ce-errors.sh`.
+- Schema CE type-state changes: `bash scripts/check-schema-ce-errors.sh` (fixtures in `tests/compile-fail/schema-ce`).
+- Fable-visible changes: `bash scripts/check-fable-js-surface.sh` (needs `dotnet tool restore` and Node).
 - Focused .NET tests: `dotnet test <project> --nologo -v minimal`.
 - Public API/doc generator impact: update source comments or generator inputs first, regenerate affected docs, and defer
   `bash scripts/validate-docs.sh` until a phase or release checkpoint unless the task asks for full validation.

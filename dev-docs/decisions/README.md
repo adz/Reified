@@ -35,8 +35,18 @@ something that was never decided.
   only; netstandard2.1 consumers (Fable, older hosts) get the rest of the umbrella rather than no umbrella at all.
 - **Docs, generators, and CI describe four products, not five.** The docgen Flow page specs, the Flow DLL inputs,
   the `flow` product, the flow sidebar, and the CI jobs for examples that were never extracted are deleted rather
-  than left pointing at absent code. Gaps this opened — the Fable surface check and the Schema CE compile-fail
-  fixtures — are recorded in `dev-docs/TASKS.md` rather than quietly dropped.
+  than left pointing at absent code.
+- **The three checks the extraction dropped are rebuilt, not waived.** The Schema CE compile-fail fixtures, the
+  API-shape suite, and the Fable surface check were recovered from Axial's history and rewritten Reified-only:
+  the Flow halves of the shape suite and the Fable project were dropped rather than ported, and the Fable
+  benchmarks stayed with Flow because a benchmark comparing `Flow` to manual composition is not this
+  repository's claim. `examples/Reified.FableProbe` multi-targets so the *same* assertions run on .NET and on
+  Node, which is the only way a divergence is visible.
+- **Folding JsonSchema into Reified.Schema had put a Fable-hostile call on the Fable path, and nobody could see
+  it.** `JsonSchema.generate` used `Type.GetTypeCode`, which Fable does not support. It was invisible while
+  `Axial.Schema.JsonSchema` was a separate package the Fable project did not reference. Restoring the surface
+  check surfaced it immediately; it is now a type test, and the rule stands: a package on the Fable list must be
+  compiled by the probe, or the list is a claim nothing checks.
 
 ## 2026-08-03: Result and Values are separate top-level documentation areas
 

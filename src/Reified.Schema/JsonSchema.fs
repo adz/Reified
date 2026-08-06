@@ -55,22 +55,29 @@ module JsonSchema =
         | :? float32 as number when Single.IsNaN number || Single.IsInfinity number ->
             sprintf "\"%s\"" (Convert.ToString(number, CultureInfo.InvariantCulture))
         | other ->
-            match Type.GetTypeCode(other.GetType()) with
-            | TypeCode.SByte
-            | TypeCode.Byte
-            | TypeCode.Int16
-            | TypeCode.UInt16
-            | TypeCode.Int32
-            | TypeCode.UInt32
-            | TypeCode.Int64
-            | TypeCode.UInt64
-            | TypeCode.Decimal
-            | TypeCode.Single
-            | TypeCode.Double -> Convert.ToString(other, CultureInfo.InvariantCulture)
-            | _ ->
-                Convert.ToString(other, CultureInfo.InvariantCulture)
-                |> escape
-                |> sprintf "\"%s\""
+            // Numbers are emitted bare and everything else is quoted. Type tests rather than
+            // Type.GetTypeCode, which Fable does not support. Fable erases the numeric types to one
+            // JavaScript number, so a test can match a sibling type there; that is harmless, because every
+            // numeric type takes the same bare form. A value Fable erases to a string (Guid) is caught by the
+            // string case above and quoted, exactly as .NET quotes it here.
+            let isNumber =
+                match other with
+                | :? sbyte
+                | :? byte
+                | :? int16
+                | :? uint16
+                | :? int
+                | :? uint32
+                | :? int64
+                | :? uint64
+                | :? decimal
+                | :? float32
+                | :? float -> true
+                | _ -> false
+
+            let text = Convert.ToString(other, CultureInfo.InvariantCulture)
+
+            if isNumber then text else text |> escape |> sprintf "\"%s\""
 
     /// Collects the constraint descriptions visible at a boundary: the layer's own constraints plus every
     /// refinement layer down to the primitive foundation. A refinement's constraint is written against the raw

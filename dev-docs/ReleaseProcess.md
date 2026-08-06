@@ -46,6 +46,7 @@ dotnet build Reified.slnx --configuration Release --nologo -v minimal
 dotnet test Reified.slnx --configuration Release --no-build --nologo -v minimal
 bash scripts/check-source-inventory.sh
 bash scripts/check-schema-ce-errors.sh
+bash scripts/check-fable-js-surface.sh
 bash scripts/run-aot-probe.sh
 bash scripts/run-package-consumers.sh
 bash scripts/validate-docs.sh

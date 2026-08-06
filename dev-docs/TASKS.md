@@ -46,22 +46,6 @@ From the same ZIO comparison; these belong *with* the remote-config milestone, n
   validation, multi-format codecs before a consumer asks, `DynamicValue` as a public surface (at most internal
   plumbing for the two items above).
 
-## Gaps left by the repository split and the Reified rename (2026-08-07)
-
-- **Schema CE compile-fail fixtures.** `scripts/check-schema-ce-errors.sh` and the CI step that runs it expect
-  `tests/compile-fail/schema-ce/{raw-field-without-refine,missing-refinement,constraint-after-refine}.fsx`. Those
-  fixtures were never extracted into this repository, so the check fails on a missing directory. Rewrite the three
-  `.fsx` fixtures against the current CE type-state, or delete the script and its CI step.
-- **Fable JavaScript surface check.** `scripts/check-fable-js-surface.sh` and `scripts/run-fable-benchmarks.sh`
-  were deleted with the rename: both drove `benchmarks/Reified.Benchmarks.Fable`, which stayed cross-product and
-  did not come across. `Reified.Schema.Json` is still a supported Fable target
-  (`dev-docs/decisions/README.md`, 2026-07-24), so rebuild a Reified-only Fable compile-and-run check and restore
-  the CI job that ran it.
-- **API-shape tests.** `Axial.ApiShape.Tests` covered the combined product and stayed with Axial, so no test here
-  pins the public module and member surface. `Reified.Package.Tests` and the package-consumer fixtures cover the
-  package graph and the installed surface, not member signatures. Rebuild a Reified-scoped shape suite; the
-  intended coverage is listed in `dev-docs/API_BASELINE.md`.
-
 ## Acceptance Checks
 
 The two-group direction is coherent when the following are true:

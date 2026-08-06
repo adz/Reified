@@ -5,7 +5,12 @@ set -euo pipefail
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 fixture_dir="$root_dir/tests/compile-fail/schema-ce"
 
-dotnet build "$root_dir/src/Reified.Schema/Reified.Schema.fsproj" --nologo -v quiet
+# references.fsx loads these assemblies by path, so every one of them must exist before fsi runs.
+# A missing dll fails the fixture for the wrong reason: the script would see a non-zero exit and only
+# the diagnostic grep would catch that it was a load error rather than the type error under test.
+for project in Reified.Result Reified.Schema; do
+  dotnet build "$root_dir/src/$project/$project.fsproj" --nologo -v quiet
+done
 
 check_failure() {
   local fixture="$1"
