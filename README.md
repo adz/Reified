@@ -62,8 +62,9 @@ The same `signupSchema` can drive a compiled JSON codec, JSON Schema, form metad
 
 ## Packages
 
-Install only the capability you need. There is no umbrella or meta-package.
+Install `Reified` to get the complete library, or install an individual package when you need only one capability.
 
+- `Reified` — umbrella package that references all runtime packages
 - `Reified.Constraint` — reusable, inspectable value rules and structured violations
 - `Reified.Refinements` — types that carry an invariant after construction
 - `Reified.Parse` — serialized primitive decoding
@@ -78,7 +79,7 @@ The contract compiler and schema-derived testing adapter are repository tooling,
 
 ## Install
 
-Reified packages have not been published. The first prerelease will use the `Reified.*` IDs above; current local projects retain their transitional `Axial.*` IDs until the rename commit.
+Reified packages have not been published yet.
 
 ## Documentation and examples
 
