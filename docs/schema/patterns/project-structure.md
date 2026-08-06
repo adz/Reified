@@ -31,7 +31,7 @@ MyApp.Host
 ```text
 Contracts  -> Reified.Schema
 Domain     -> Reified.Result, Reified.Constraint, Reified.Refinements, Reified.Parse, optionally Reified.Schema
-Application -> Domain, optionally Axial.Flow
+Application -> Domain
 Infrastructure -> Application
 Host -> Contracts, Domain, Application, Infrastructure
 ```

@@ -6,7 +6,7 @@ Declare value and model invariants once. Derive validation, parsing, diagnostics
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 > [!WARNING]
-> Reified is pre-1.0. Package and namespace renaming from `Axial.*` to `Reified.*` is in progress before the first release.
+> Reified is pre-1.0 and has not been published to NuGet yet. APIs change without deprecation cycles.
 
 ## Declare the rule once
 
@@ -76,7 +76,9 @@ Install `Reified` to get the complete library, or install an individual package 
 - `Reified.Schema.Http` — host-neutral endpoint contracts, problem details, and OpenAPI
 - `Reified.Schema.Contracts.Build` — MSBuild integration for derived record and wire contracts
 
-The contract compiler and schema-derived testing adapter are repository tooling, not runtime packages. The source tree retains the `Axial.*` names until the post-extraction rename commit.
+The contract compiler and schema-derived testing adapter are repository tooling, not runtime packages.
+
+`Reified.Schema.Contracts.Build` is not in the umbrella. MSBuild targets do not travel through a transitive package reference, so a project that derives schemas at build time references it directly.
 
 ## Install
 

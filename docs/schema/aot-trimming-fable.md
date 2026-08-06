@@ -41,11 +41,10 @@ introduced reflection the trimmer could not prove safe, CI fails.
 
 ## Fable
 
-The same explicitness is what makes Fable compilation work: `Axial.Flow`, `Reified.Result`, `Reified.Constraint`, `Reified.Refinements`, and
+The same explicitness is what makes Fable compilation work: `Reified.Result`, `Reified.Constraint`, `Reified.Refinements`, and
 `Reified.Schema` all compile to JavaScript, so a browser front end can parse
-and redisplay through the same schema declaration the server uses. CI compiles the Fable JavaScript surface
-(`bash scripts/check-fable-js-surface.sh`), and the [benchmarks]({{< relref "/schema/benchmarks.md" >}}) include
-Node and Erlang runs of the same workloads. .NET-only conveniences — such as `Data.ofJsonDocument` and the
+and redisplay through the same schema declaration the server uses. `Reified.Schema.Json` compiles too, so a
+codec is available on both sides of the wire. .NET-only conveniences — such as `Data.ofJsonDocument` and the
 `DateOnly` field type — are compile-time gated so the Fable surface never references them.
 
 The quotation-based bare field form is also .NET-only:

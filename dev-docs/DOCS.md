@@ -18,7 +18,8 @@ Write for pragmatic F# devs solving dependency, async, and typed-failure problem
 - The short Reified index lives at `/docs/index.md`.
 - Data guides and generated reference live under `/docs/data`.
 - Schema guides and generated reference live under `/docs/schema`.
-- Flow guides and generated reference live under `/docs/flow`.
+- Result guides and generated reference live under `/docs/result`.
+- Values guides (Constraint, Refinements, Parse) and generated reference live under `/docs/values`.
 - The Hugo site source lives in `/site`.
 - Content is synced from `/docs` to `/site/content` via `scripts/populate-hugo-content.sh`.
 - The site uses Hugo with the Docsy theme.
@@ -27,13 +28,12 @@ Write for pragmatic F# devs solving dependency, async, and typed-failure problem
 
 The docs system has two different kinds of pages:
 
-There are five product documentation areas, one per top-nav entry:
+There are four product documentation areas, one per top-nav entry:
 
 - hand-written Result guides and its API member pages live in `docs/result/`
-- hand-written Values guides (Constraint, Refined, Parse) and their API member pages live in `docs/values/`
+- hand-written Values guides (Constraint, Refinements, Parse) and their API member pages live in `docs/values/`
 - hand-written Data guides and its API member pages live in `docs/data/`
 - hand-written Schema guides and its API member pages live in `docs/schema/`
-- hand-written Flow guides and its API member pages live in `docs/flow/`
 
 Values is a navigation grouping over three independently installable packages. There is no `Reified.Values` package,
 so no page may tell a reader to install one.
@@ -44,8 +44,7 @@ The pipeline is:
 
 1. Edit the public XML doc comments in `src/`.
 2. Run `bash scripts/validate-result-docs.sh`, `bash scripts/validate-values-docs.sh`,
-   `bash scripts/validate-data-docs.sh`, `bash scripts/validate-schema-docs.sh`, or
-   `bash scripts/validate-flow-docs.sh` for the affected product.
+   `bash scripts/validate-data-docs.sh`, or `bash scripts/validate-schema-docs.sh` for the affected product.
 3. Review regenerated reference pages with `bash scripts/preview-docs.sh` when browser inspection or screenshots are needed.
 4. Update the hand-written guides in `docs/` as needed.
 
@@ -56,7 +55,7 @@ Do not hand-edit the generated API member pages unless you are fixing a generate
 - The "Runnable Examples" page is generated from real code in `/examples/`.
 - Use `scripts/generate-example-docs.sh` to refresh it.
 - Do not edit `site/content/docs/examples/_index.md` directly; it is managed by the population script.
-- The API reference member pages under `docs/result/reference/`, `docs/values/reference/`, `docs/data/reference/`, `docs/schema/reference/`, and `docs/flow/reference/` are generated from the XML docs in `src/`.
+- The API reference member pages under `docs/result/reference/`, `docs/values/reference/`, `docs/data/reference/`, and `docs/schema/reference/` are generated from the XML docs in `src/`.
 - Update the generator in `scripts/docgen/Program.fs` when the reference structure changes, then rerun
   `bash scripts/generate-api-docs.sh`. Page groups are routed to a product area there: `result` to `docs/result/`,
   `constraint`/`refined`/`parse` to `docs/values/`, and so on.
@@ -65,8 +64,8 @@ Do not hand-edit the generated API member pages unless you are fixing a generate
 ### Validate, preview, and deploy
 
 Run `bash scripts/validate-result-docs.sh`, `bash scripts/validate-values-docs.sh`,
-`bash scripts/validate-data-docs.sh`, `bash scripts/validate-schema-docs.sh`, or
-`bash scripts/validate-flow-docs.sh` for routine product documentation validation. Each command builds only that
+`bash scripts/validate-data-docs.sh`, or `bash scripts/validate-schema-docs.sh` for routine product documentation
+validation. Each command builds only that
 product's reference inputs and any examples, regenerates its API pages, syncs Hugo content, and performs a static
 render. Run `bash scripts/validate-docs.sh` at a cross-product phase or release boundary.
 
@@ -95,7 +94,7 @@ Use `bash scripts/build-docs-site.sh` only when preparing or checking deployment
 We maintain specific files to optimize the experience for AI agents (Claude, Gemini, Codex) used by our library users.
 
 - `llms.txt`: A short product index served at the site root.
-- `docs/data/llms.txt`, `docs/schema/llms.txt`, and `docs/flow/llms.txt`: product-local machine-readable context.
-- `docs/data/agent.md`, `docs/schema/agent.md`, and `docs/flow/agent.md`: product-local user-facing guidance for AI agents.
+- `docs/result/llms.txt`, `docs/values/llms.txt`, `docs/data/llms.txt`, and `docs/schema/llms.txt`: product-local machine-readable context.
+- `docs/result/agent.md`, `docs/values/agent.md`, `docs/data/agent.md`, and `docs/schema/agent.md`: product-local user-facing guidance for AI agents.
 
 When the public API changes, ensure both of these files are updated to reflect the current idiomatic "Golden Path."

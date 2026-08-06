@@ -5,122 +5,25 @@ title: Benchmarks
 
 # Benchmarks
 
-This page shows the performance tradeoffs of using Reified compared to manual composition across the runtime shapes it supports.
+This page shows what the compiled JSON codec costs compared with `System.Text.Json`, and what full boundary
+parsing costs compared with the trusted codec. Those two comparisons are the ones that decide which path an
+endpoint should take.
 
-The Flow benchmark harness lives in [benchmarks/Axial.Flow.Benchmarks/Suites.fs](https://github.com/adz/Reified/blob/main/benchmarks/Axial.Flow.Benchmarks/Suites.fs). Schema codec benchmarks live in their own project.
-The Fable runner lives in [benchmarks/Reified.Benchmarks.Fable/Program.fs](https://github.com/adz/Reified/blob/main/benchmarks/Reified.Benchmarks.Fable/Program.fs) and shares its workload definitions from [benchmarks/Reified.Benchmarks.Fable/Shared.fs](https://github.com/adz/Reified/blob/main/benchmarks/Reified.Benchmarks.Fable/Shared.fs).
-The Fable benchmark project is self-contained by source inclusion, so it can be compiled directly with Fable against the library projects under [src](https://github.com/adz/Reified/tree/main/src). Its local tool manifest lives in [benchmarks/Reified.Benchmarks.Fable/mise.toml](https://github.com/adz/Reified/blob/main/benchmarks/Reified.Benchmarks.Fable/mise.toml), with [benchmarks/Reified.Benchmarks.Fable/package.json](https://github.com/adz/Reified/blob/main/benchmarks/Reified.Benchmarks.Fable/package.json) for Node ESM execution and [scripts/run-fable-benchmarks.sh](https://github.com/adz/Reified/blob/main/scripts/run-fable-benchmarks.sh) for the target-specific runner.
-
-The implementation split matters:
-
-- [src/Axial.Flow/Core.fs](https://github.com/adz/Reified/blob/main/src/Axial.Flow/Core.fs) defines `Execution<'value, 'error>` and flips its concrete shape by compiler target.
-- [src/Axial.Flow/Flow.fs](https://github.com/adz/Reified/blob/main/src/Axial.Flow/Flow.fs) exposes execution members such as `ToTask`, `ToValueTask`, `ToAsync`, and `RunSynchronously`.
-- [benchmarks/Axial.Flow.Benchmarks/Suites.fs](https://github.com/adz/Reified/blob/main/benchmarks/Axial.Flow.Benchmarks/Suites.fs) shows the manual baselines beside the `Flow` versions.
-- [scripts/run-benchmarks.sh](https://github.com/adz/Reified/blob/main/scripts/run-benchmarks.sh) prompts before starting the .NET benchmark run so you can stop other processes first.
-
-## Summary
-
-- `Flow` stays competitive with manual `Result`, `Async<Result<_,_>>`, and `Task<Result<_,_>>` composition
-- the .NET effect shape is `ValueTask<Exit<'value, 'error>>`
-- the Fable effect shape is `Async<Exit<'value, 'error>>`
-- the same benchmark source can be reused across .NET, Node, Erlang, and any other supported Fable backend
+The suites live in
+[benchmarks/Reified.Schema.Benchmarks/CodecSuites.fs](https://github.com/adz/Reified/blob/main/benchmarks/Reified.Schema.Benchmarks/CodecSuites.fs).
+[scripts/run-benchmarks.sh](https://github.com/adz/Reified/blob/main/scripts/run-benchmarks.sh) prompts before
+starting the run so you can stop other processes first.
 
 ## Setup
 
-Recorded .NET measurements in this repository were taken with:
-
-- .NET SDK 10.0.201
-- .NET runtime 10.0.5
-- F# 10.0
-- BenchmarkDotNet 0.15.8
-
-The current repo toolchain also builds with .NET SDK 10.0.203, .NET runtime 10.0.7, and F# 10.0. The benchmark source does not change between those toolchains.
-
-## Runtime Coverage
-
-Each runtime should show the same comparison:
-
-| Runtime | Without Flow | With Flow | Notes |
-| --- | --- | --- | --- |
-| .NET | `Result`, `Async<Result<_,_>>`, `Task<Result<_,_>>`, and raw `Task` baselines | `ToTask` / `ToValueTask` returning `Exit<'value, 'error>` asynchronously | Measured with BenchmarkDotNet |
-| Fable on Node | manual `Result` and reader composition | `ToAsync` returning `Async<Exit<'value, 'error>>` | Run through `scripts/run-fable-benchmarks.sh` |
-| Fable on Erlang | manual `Result` and reader composition | `ToAsync` returning `Async<Exit<'value, 'error>>` | Run through `scripts/run-fable-benchmarks.sh` |
-| Other supported Fable backend | manual `Result` and reader composition | `ToAsync` returning `Async<Exit<'value, 'error>>` | Use the same benchmark source whenever a backend is available |
-
-The Fable runner uses the same benchmark source on each backend, with the sync-result and reader-propagation comparisons shown below for Node and Erlang. The other-backend row is the same runner shape, ready for any additional Fable target that becomes available.
-
-## .NET Results
-
-The measured .NET run in this repository used:
+The measured run used:
 
 - .NET SDK 10.0.203
 - .NET runtime 10.0.7
 - F# 10.0
 - BenchmarkDotNet 0.15.8
 
-The tables below are taken from the joined BenchmarkDotNet report for the current tree.
-
-### Reader Overhead
-
-| Method | Mean | Allocated |
-| --- | --- | --- |
-| `Manual env passing x10` | 74.02 ns | 80 B |
-| `Flow task adapter localEnv x10` | 256.06 ns | 560 B |
-| `AsyncLocal updates x10` | 819.32 ns | 2,000 B |
-
-### Task Railway
-
-| Method | FailAt | Mean | Allocated |
-| --- | --- | --- | --- |
-| `Direct Task<Result>` | 1 | 179.20 ns | 256 B |
-| `Flow task adapter` | 1 | 2.718 us | 5,944 B |
-| `FsToolkit taskResult` | 1 | 167.47 ns | 336 B |
-| `Direct Task<Result>` | 20 | 1.749 us | 3,392 B |
-| `Flow task adapter` | 20 | 3.865 us | 7,320 B |
-| `FsToolkit taskResult` | 20 | 2.742 us | 6,512 B |
-
-### Async Railway
-
-| Method | FailAt | Mean | Allocated |
-| --- | --- | --- | --- |
-| `Direct Async<Result>` | 1 | 7.048 us | 1,000 B |
-| `Flow async adapter` | 1 | 8.907 us | 7,977 B |
-| `Direct Async<Result>` | 20 | 8.653 us | 7,393 B |
-| `Flow async adapter` | 20 | 11.378 us | 9,353 B |
-| `FsToolkit asyncResult` | 20 | 9.226 us | 12,561 B |
-
-### Cancellation
-
-| Method | Mean | Allocated |
-| --- | --- | --- |
-| `Manual token Task` | 229.87 ns | 624 B |
-| `CancellableTask` | 290.42 ns | 504 B |
-| `Explicit token Task<Result>` | 367.77 ns | 672 B |
-| `Flow task adapter` | 1.079 us | 3,136 B |
-
-### Composition Chain
-
-| Method | Mean | Allocated |
-| --- | --- | --- |
-| `Flow map x100` | 8.342 us | 12.024 KB |
-| `Flow bind x100` | 11.090 us | 18.424 KB |
-| `Flow task adapter bind x100` | 11.450 us | 28.096 KB |
-| `Direct Task<Result> bind x100` | 11.762 us | 21.504 KB |
-| `Direct Async<Result> bind x100` | 18.083 us | 34.443 KB |
-| `Flow async adapter bind x100` | 26.710 us | 44.739 KB |
-| `Raw Task bind x100` | 7.804 us | 17.488 KB |
-
-### Synchronous Completion
-
-| Method | Mean | Allocated |
-| --- | --- | --- |
-| `Candidate ValueTaskFlow` | 68.36 ns | 96 B |
-| `Flow task adapter` | 258.24 ns | 752 B |
-| `Ply vtask` | 209.37 ns | 128 B |
-
-The practical read is unchanged: `Flow` stays competitive with the direct baselines, and the extra cost is a fixed orchestration cost rather than a function of the actual business logic.
-
-### Schema JSON Codec
+## JSON codec
 
 The codec suites measure `Reified.Schema.Json` — the JSON codec compiled from a `Schema<'model>` declaration — on a realistic aggregate (seven primitive fields, one nested record, and two collections) against `System.Text.Json` on the same model. Both suites live in [benchmarks/Reified.Schema.Benchmarks/CodecSuites.fs](https://github.com/adz/Reified/blob/main/benchmarks/Reified.Schema.Benchmarks/CodecSuites.fs).
 
@@ -151,80 +54,10 @@ The boundary suite compares the trusted codec against full boundary parsing — 
 
 That gap is the price of diagnostics, redisplayable structured data, and constraint checking, and it is why the two paths exist: parse untrusted input where the diagnostics pay for themselves, and use the compiled codec for trusted payloads such as internal services, storage, and queues.
 
-## Fable Results
-
-The Fable runner is built from the source-included benchmark project in [benchmarks/Reified.Benchmarks.Fable/Reified.Benchmarks.Fable.fsproj](https://github.com/adz/Reified/blob/main/benchmarks/Reified.Benchmarks.Fable/Reified.Benchmarks.Fable.fsproj) and uses the toolchain pins in [benchmarks/mise.toml](https://github.com/adz/Reified/blob/main/benchmarks/mise.toml) plus [benchmarks/Reified.Benchmarks.Fable/mise.toml](https://github.com/adz/Reified/blob/main/benchmarks/Reified.Benchmarks.Fable/mise.toml).
-
-### Fable on Node
-
-Measured with Fable 5.0.0 and Node 26.1.0.
-
-#### Sync Result
-
-| Method | Mean |
-| --- | --- |
-| `manual result` | 1,600.00 ns |
-| `flow` | 6,400.00 ns |
-
-#### Async Result
-
-| Method | Mean |
-| --- | --- |
-| `manual async result` | 100.00 ns |
-| `flow` | 17,300.00 ns |
-
-#### Reader Propagation
-
-| Method | Mean |
-| --- | --- |
-| `manual env passing` | 100.00 ns |
-| `flow` | 3,000.00 ns |
-
-### Fable on Erlang
-
-Measured with Fable 5.0.0, Erlang 27.2.2, and rebar 3.24.0.
-
-#### Sync Result
-
-| Method | Mean |
-| --- | --- |
-| `manual result` | 1,276.00 ns |
-| `flow` | 8,766.20 ns |
-
-#### Async Result
-
-| Method | Mean |
-| --- | --- |
-| `manual async result` | 78.90 ns |
-| `flow` | 100,609.00 ns |
-
-#### Reader Propagation
-
-| Method | Mean |
-| --- | --- |
-| `manual env passing` | 1,116.60 ns |
-| `flow` | 9,330.70 ns |
-
 ## Conclusion
 
-- use Reified for architectural clarity and safety
-- expect some orchestration overhead even for local reader and synchronous composition
-- treat Fable BEAM async as the highest-cost case in these microbenchmarks
-- keep the runtime comparison tied to the actual target backend, because the platform execution handle shape changes between .NET and Fable
-- use the benchmark source links above when you want to inspect how the manual and `Flow` implementations differ
-
-## Benchmark Map
-
-The actual benchmark suites and the method pairs they compare are:
-
-- `ReaderOverheadBenchmarks`: `ManualEnvPassingX10` vs `TaskFlowLocalEnvX10`
-- `AsyncRailwayBenchmarks`: `DirectAsyncResult` vs `Flow async adapter`
-- `TaskRailwayBenchmarks`: `DirectTaskResult` vs `Flow task adapter`
-- `CompositionChainBenchmarks`: `FlowMapX100`, `FlowBindX100`, `AsyncFlowBindX100`, `TaskFlowBindX100`, `DirectAsyncResultBindX100`, `DirectTaskResultBindX100`, `RawTaskBindX100`
-- `CancellationFlowBenchmarks`: `ExplicitTokenTaskResult` vs `Flow task adapter`
-- `CancellableTaskBenchmarks`: `ManualTokenTask` vs `CancellableTask`
-- `SynchronousCompletionBenchmarks`: `CandidateValueTaskFlow` vs `Flow task adapter`
-- `JsonCodecBenchmarks`: `Reified Json.serialize`/`Json.deserialize` vs `System.Text.Json`
-- `BoundaryParseBenchmarks`: trusted codec vs `Data` + `Schema.parse` boundary parsing
-
-The .NET reports are generated from the product-scoped `Axial.Flow.Benchmarks` and `Reified.Schema.Benchmarks` projects. The cross-product Fable runner is separate and uses the same comparison vocabulary without pretending the runtime shape is the same.
+- for trusted payloads — internal services, storage, queues — the compiled codec is the right path, and costs
+  about what a reflection-based serializer costs while staying AOT- and trimming-safe.
+- for untrusted input, pay for boundary parsing: the diagnostics, redisplayable structured data, and constraint
+  checking are the reason the schema exists.
+- the codec compiles once per schema declaration, so the compilation cost is not on the per-payload path.

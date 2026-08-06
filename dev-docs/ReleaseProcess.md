@@ -4,37 +4,36 @@ This project uses a coordinated pre-1.0 release train.
 
 ## Versioning policy
 
-- `Axial.Flow`, `Reified.Result`, `Reified.Constraint`, `Reified.Refinements`, `Reified.Parse`, `Reified.Data`, `Reified.Schema`, and
-  the add-on packages share one package version before 1.0.
+- Every package in this repository shares one version before 1.0.
 - The shared version is declared once in `Directory.Build.props`.
 - Packable project files must not declare their own `<Version>`.
 - A tag such as `v0.7.0` produces every public Reified package at version `0.7.0`.
 - Empty version bumps are acceptable before 1.0 because the package boundaries are still settling and a single documented version is simpler for users.
 - Independent package versioning can be reconsidered once the split is stable, likely at or after 1.0.
+- The Axial repository has its own train. A tag here says nothing about a version there.
 
 ## Public package set
 
-The coordinated release currently packs:
+`scripts/pack.sh` is the authority; `tests/Reified.Package.Tests` fails if a packable runtime package is missing
+from it. The set is:
 
-- `Axial.Flow`
-- `Reified.Result`
 - `Reified.Constraint`
 - `Reified.Refinements`
+- `Reified.Parse`
+- `Reified.Result`
+- `Reified.Data`
 - `Reified.Schema`
-- `Axial.Flow.Console`
-- `Axial.Flow.FileSystem`
-- `Axial.Flow.HttpClient`
-- `Axial.Flow.Process`
-- `Axial.Flow.PlatformService`
-- `Axial.Flow.Hosting`
-- `Axial.Flow.Hosting.Node`
-- `Axial.Flow.Hosting.Browser`
-- `Axial.Flow.Telemetry`
+- `Reified.Schema.Json`
+- `Reified.Schema.Http`
+- `Reified.Schema.Contracts.Build`
+- `Reified` — the umbrella, which carries no assembly and only depends on the runtime packages above
 
-There is no meta-package and no umbrella: `Reified.ErrorHandling` and `Reified` were both retired pre-1.0. Every
-package in the list above is installed on its own.
+`Reified.Schema.Contracts.Build` is not in the umbrella. MSBuild `build/` assets are not transitive, so an
+umbrella dependency would install its targets without ever running them; consumers that derive schemas at build
+time reference it directly.
 
-The `Axial.Flow.*` add-on packages depend on `Axial.Flow`.
+The contract compiler (`Reified.Schema.Contracts`) and the FsCheck adapter (`Reified.Schema.Testing`) are
+repository tooling and are never packed.
 
 ## Preparing a release
 
@@ -47,9 +46,8 @@ dotnet build Reified.slnx --configuration Release --nologo -v minimal
 dotnet test Reified.slnx --configuration Release --no-build --nologo -v minimal
 bash scripts/check-source-inventory.sh
 bash scripts/check-schema-ce-errors.sh
-bash scripts/check-fable-js-surface.sh
 bash scripts/run-aot-probe.sh
-bash scripts/pack.sh
+bash scripts/run-package-consumers.sh
 bash scripts/validate-docs.sh
 ```
 

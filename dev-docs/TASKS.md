@@ -10,15 +10,10 @@ Work this queue from top to bottom, with one caveat: the schema surface has just
 2026-07-11..13 entries) and the shape is settling, not settled. Phase 30 below is current thinking with enough
 detail to pick up cold; re-read the decisions file and sanity-check the ordering before starting any of them.
 
-Reified has two main groups, and everything in this queue serves that split:
-
-- **Parse-don't-validate results**: `Schema` is the front door for domain models — parsing, validation, redisplay,
-  and metadata fall out of one declaration. Plain `Result` with the user's own error DU is the
-  blessed lane for simple code. `Constraint`, `Validation`, `Refined`, and the interpreter error types are machinery
-  behind those two doors, not peer entry points.
-- **Effects in Flow**: the ZIO-style Reader-Async-Result workflow model. Useful with or without schemas, and never
-  part of the entry price for the results group. Flow-group gaps are tracked in `LATER_TODO.md` (demand-driven, not
-  worked top to bottom).
+Reified has one job: parse-don't-validate. `Schema` is the front door for domain models — parsing, validation,
+redisplay, and metadata fall out of one declaration. Plain `Result` with the user's own error DU is the blessed
+lane for simple code. `Constraint`, `Refinements`, and the interpreter error types are machinery behind those two
+doors, not peer entry points. Effects are not in scope here; they live in Axial.
 
 Phases 19–28-prelude are complete and recorded in `dev-docs/decisions/README.md` and git history; the most recent
 completions (2026-07-09..13): the Schema value/model catalog consolidation, `Reified.Refinements` moved into
@@ -51,10 +46,19 @@ From the same ZIO comparison; these belong *with* the remote-config milestone, n
   validation, multi-format codecs before a consumer asks, `DynamicValue` as a public surface (at most internal
   plumbing for the two items above).
 
-## Smaller queue items
+## Gaps left by the repository split and the Reified rename (2026-08-07)
 
-- `dev-docs/API_BASELINE.md` needs a fresh validated-command pass: its project lists were corrected on 2026-07-12,
-  but the recorded run, test counts, and baseline commit predate the 2026-07-09..13 renames.
+- **Schema CE compile-fail fixtures.** `scripts/check-schema-ce-errors.sh` and the CI step that runs it expect
+  `tests/compile-fail/schema-ce/{raw-field-without-refine,missing-refinement,constraint-after-refine}.fsx`. Those
+  fixtures were never extracted into this repository, so the check fails on a missing directory. Rewrite the three
+  `.fsx` fixtures against the current CE type-state, or delete the script and its CI step.
+- **Fable JavaScript surface check.** `scripts/check-fable-js-surface.sh` and `scripts/run-fable-benchmarks.sh`
+  were deleted with the rename: both drove `benchmarks/Reified.Benchmarks.Fable`, which stayed cross-product and
+  did not come across. `Reified.Schema.Json` is still a supported Fable target
+  (`dev-docs/decisions/README.md`, 2026-07-24), so rebuild a Reified-only Fable compile-and-run check and restore
+  the CI job that ran it.
+- **`dev-docs/API_BASELINE.md`** needs a fresh validated-command pass: its project lists, recorded run, test
+  counts, and baseline commit all predate the split and the rename.
 
 ## Acceptance Checks
 
@@ -64,10 +68,7 @@ The two-group direction is coherent when the following are true:
 - a newcomer handles one error shape at the boundary, with one default renderer to display strings
 - domain value types exist in one catalog usable standalone and as schema fields
 - discriminated unions are expressible as schemas with path-aware diagnostics
-- ~~a runnable ASP.NET Core sample serves parsing, error responses, and OpenAPI from one schema declaration~~ —
-  done 2026-07-14: `examples/Reified.Api` on `Reified.Schema.Http`/`.AspNetCore` (problem-details 400s, codec 201s,
-  assembled OpenAPI 3.1), with a GenHTTP twin proving the boundary contract is host-neutral
 - one schema declaration also compiles to a trusted-lane JSON codec with benchmarked performance
-- Flow is never required by the results-group quick starts
+- the host-neutral HTTP contract is proven by an adapter in the Axial repository, and nothing here depends on one
 - comparison pages answer FsToolkit.ErrorHandling, FluentValidation, and zod by name
 - generated reference docs match source comments

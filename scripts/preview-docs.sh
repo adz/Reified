@@ -23,10 +23,7 @@ generation_fingerprint() {
   {
     find \
       "$root_dir/src" \
-      "$root_dir/examples/Reified.Examples" \
-      "$root_dir/examples/Reified.Api" \
-      "$root_dir/examples/Reified.Playground" \
-      "$root_dir/examples/Reified.MaintenanceExamples" \
+      "$root_dir/examples" \
       "$root_dir/scripts/docgen" \
       -type f \
       \( -name "*.fs" -o -name "*.fsproj" -o -name "*.props" -o -name "*.targets" -o -name "*.json" \) \
@@ -60,12 +57,10 @@ if $generate; then
   if ! $force_generate &&
      [ "$fingerprint" = "$cached_fingerprint" ] &&
      [ -f "$root_dir/docs/schema/examples.md" ] &&
-     [ -f "$root_dir/docs/flow/examples.md" ] &&
      [ -d "$root_dir/docs/data/reference" ] &&
      [ -d "$root_dir/docs/result/reference" ] &&
      [ -d "$root_dir/docs/values/reference" ] &&
-     [ -d "$root_dir/docs/schema/reference" ] &&
-     [ -d "$root_dir/docs/flow/reference" ]; then
+     [ -d "$root_dir/docs/schema/reference" ]; then
     echo "Docs generator inputs unchanged; reusing cached generated docs."
   else
     dotnet msbuild "$root_dir/scripts/docs-build.proj" \

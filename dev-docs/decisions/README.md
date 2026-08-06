@@ -3,6 +3,41 @@
 This folder keeps only high-level durable decisions. Detailed historical specs are deleted once their useful rules have
 been folded into `AGENTS.md`, `dev-docs/PLAN.md`, or this summary.
 
+Entries dated before 2026-08-07 were written while Flow and the description side shared one repository. Where they
+decide something about `Axial.Flow*` or the host HTTP adapters, that decision now belongs to the
+[Axial repository](https://github.com/adz/Axial); the names are left as written rather than rewritten into
+something that was never decided.
+
+## 2026-08-07: Reified is the description side, with one umbrella package
+
+- **The repository split on description versus execution, and this side is `Reified`.** Constraint, Refinements,
+  Parse, Result, Data, Schema, the JSON codec, the host-neutral HTTP contracts, contract generation, and
+  schema-derived testing are here. Flow, its service and hosting satellites, the two host HTTP adapters, and the
+  integration reference application are in Axial. The dependency runs one way — Axial's adapters execute Reified
+  contracts — and it runs through published packages, never a project reference.
+- **No execution concept enters this repository to close that gap.** No workflow type, no service contract, no
+  ambient runtime. A caller that needs one either uses Axial or uses an ordinary function. `Reified.Schema.Http`
+  assembles boundary input, problem details, and OpenAPI documents as *values*; it never opens a socket.
+- **`Axial.Refined` became `Reified.Refinements`, and only at the package and namespace level.** The internal
+  `Refined` type and module vocabulary reads correctly in the singular and was left alone. Mechanically
+  pluralizing it would have renamed a domain concept to match a package id.
+- **`Reified` is an umbrella package, and `Reified.ErrorHandling` is not coming back.** The distinction that
+  killed the old meta-packages still holds: a grouping that is not a capability does not earn a package id.
+  `Reified` earns one because "install the whole library" is a real thing a reader wants and cannot otherwise
+  express. It carries no sources and no assembly — only dependencies — so a type never gains a second place it
+  could come from, and `tests/Reified.Package.Tests` fails if a packable runtime package is missing from it.
+- **`Reified.Schema.Contracts.Build` stays outside the umbrella.** This is a NuGet fact, not a preference: MSBuild
+  `build/` assets do not flow through a transitive package reference, so an umbrella dependency would install the
+  targets without ever running them — worse than not shipping it, because the failure is silent. Packing them to
+  `buildTransitive/` would work and was rejected: it would run schemagen on every build of every consumer that
+  wanted only a JSON codec.
+- **`Reified.Schema.Http` is .NET-only, so the umbrella multi-targets.** It joins the `net8.0` dependency group
+  only; netstandard2.1 consumers (Fable, older hosts) get the rest of the umbrella rather than no umbrella at all.
+- **Docs, generators, and CI describe four products, not five.** The docgen Flow page specs, the Flow DLL inputs,
+  the `flow` product, the flow sidebar, and the CI jobs for examples that were never extracted are deleted rather
+  than left pointing at absent code. Gaps this opened — the Fable surface check and the Schema CE compile-fail
+  fixtures — are recorded in `dev-docs/TASKS.md` rather than quietly dropped.
+
 ## 2026-08-03: Result and Values are separate top-level documentation areas
 
 - The top navigation is **Result | Values | Data | Schema | Flow**. Each is its own documentation area with its own

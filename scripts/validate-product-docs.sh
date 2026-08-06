@@ -6,14 +6,14 @@ root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 product="${1:-}"
 
 case "$product" in
-  data|result|values|schema|flow) ;;
-  *) echo "Usage: $0 <data|result|values|schema|flow>" >&2; exit 2 ;;
+  data|result|values|schema) ;;
+  *) echo "Usage: $0 <data|result|values|schema>" >&2; exit 2 ;;
 esac
 
 HUGO_BASEURL="${HUGO_BASEURL:-http://localhost:3000/}"
 validate_dir="${REIFIED_DOCS_VALIDATE_DIR:-$root_dir/.fsdocs/validate-$product}"
 
-if [[ "$product" == "schema" || "$product" == "flow" ]]; then
+if [[ "$product" == "schema" ]]; then
   "$root_dir/scripts/generate-example-docs.sh" "$product"
 fi
 bash "$root_dir/scripts/generate-api-docs.sh" "$product"
@@ -42,7 +42,7 @@ case "$product" in
     test -f "$validate_dir/values/refined/domain-values/index.html"
     test -f "$validate_dir/values/parse/index.html"
     test -f "$validate_dir/values/reference/constraint/t-constraint-renderer/index.html"
-    # Values is navigation only: no page may advertise an Reified.Values package.
+    # Values is navigation only: no page may advertise a Reified.Values package.
     ! grep -rqF 'dotnet add package Reified.Values' "$validate_dir/values"
     ;;
   schema)
@@ -51,12 +51,6 @@ case "$product" in
     grep -q 'id="package-schemaoverview-reference-check" checked' "$validate_dir/schema/reference/schema/index.html"
     grep -q 'id="package-schemajson-codec-reference-check" checked' "$validate_dir/schema/reference/codec/index.html"
     grep -q 'id="package-schemahttp-servers-reference-check" checked' "$validate_dir/schema/reference/schema/http/index.html"
-    ;;
-  flow)
-    test -f "$validate_dir/flow/getting-started/index.html"
-    test -f "$validate_dir/flow/reference/flow/t-flow-flow/index.html"
-    test -f "$validate_dir/flow/reference/hosting-node/index.html"
-    test -f "$validate_dir/flow/reference/hosting-browser/index.html"
     ;;
 esac
 

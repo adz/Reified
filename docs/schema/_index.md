@@ -92,8 +92,6 @@ The Schema documentation covers the core package and its focused codec, contract
 | `Reified.Schema.JsonSchema` | JSON Schema generation | [JSON Schema reference]({{< relref "/schema/reference/schema/m-schema-jsonschema-generate" >}}) |
 | `Reified.Schema.Contracts.Build` | Build-time schema derivation from F# records | [Derived Schemas](./derivation/) |
 | `Reified.Schema.Http` | HTTP-neutral request and response contracts | [HTTP Servers](./http-servers/) |
-| `Axial.Schema.Http.AspNetCore` | ASP.NET Core integration | [ASP.NET Core reference]({{< relref "/schema/reference/schema/http/aspnetcore" >}}) |
-| `Axial.Schema.Http.GenHttp` | GenHTTP integration | [GenHTTP reference]({{< relref "/schema/reference/schema/http/genhttp" >}}) |
 | `Reified.Schema.Testing` | Test helpers for schema guarantees | [Testing patterns](./patterns/testing-schema-guarantees/) |
 
 Schema controls values produced through Schema. A public F# record can still be constructed directly. Use refined fields,

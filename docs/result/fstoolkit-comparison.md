@@ -16,7 +16,6 @@ Reified separates five roles, each installable on its own:
 - `Reified.Constraint` describes which values are acceptable, and derives the failure from that description.
 - `Reified.Refinements` constructs values whose types record successful checks.
 - `Reified.Schema` declares structured boundaries and accumulates path-aware failures.
-- `Axial.Flow` runs effectful workflows with explicit dependencies.
 
 None of these depends on `Reified.Result`; every one of them returns the standard F# `Result`, so they compose
 with `Reified.Result`, with FsToolkit.ErrorHandling, or with your own helpers.

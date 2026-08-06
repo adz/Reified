@@ -21,8 +21,6 @@ that provide the JavaScript primitives they use.
 | `Reified.Schema` | Yes | Yes | Node and browser | Schema declaration, parsing, checking, accumulated errors, and inspection. |
 | `Reified.Schema.Json` | Yes | Yes | Node and browser | Portable JSON-to-`Data` parsing and compiled typed JSON codecs. |
 | `Reified.Schema.Http` | Yes, .NET 8+ | No | — | Host-neutral .NET HTTP boundary contracts and OpenAPI assembly. |
-| `Axial.Schema.Http.AspNetCore` | Yes, .NET 8+ | No | — | ASP.NET Core boundary adapter. |
-| `Axial.Schema.Http.GenHttp` | Yes, .NET 8+ | No | — | GenHTTP boundary adapter. |
 | `Reified.Schema.Contracts` | Yes, .NET 8+ | No | — | Repository tool-tier contract and record source generation; not packable. |
 | `Reified.Schema.Contracts.Build` | Yes, .NET 8+ | No | — | MSBuild package that runs contract generation before compilation. |
 | `Reified.Schema.Testing` | Yes, .NET 8+ | No | — | Repository-only FsCheck adapter; not packable. |

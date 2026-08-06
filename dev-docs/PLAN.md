@@ -8,8 +8,7 @@ Speculative sketches live in `dev-docs/current-ideas/`, but this file is the liv
 
 Per `prd.md`: the boundary stack — `Reified.Result`, `Reified.Constraint`, `Reified.Refinements`, and `Reified.Parse` as focused
 packages, plus `Reified.Schema` and `Reified.Schema.Json` — is the 1.0 gate, driven by
-a real adoption target (a ~100-variant versioned config system). The Flow group's remaining pre-1.0 scope in
-`LATER_TODO.md` is demand-driven — pulled forward when a concrete application needs it. The contract-declaration
+a real adoption target (a ~100-variant versioned config system). The contract-declaration
 thread originally sequenced versioning/migration machinery before the grammar; in practice the grammar and generator
 shipped first (2026-07-12, single-version wire-tier scope), and the versioning/migration engine shipped on 2026-07-13.
 Record-first `[<DeriveSchema>]` generation is now the primary generated path; `.contract` remains a secondary wire-tier
@@ -18,49 +17,19 @@ and contracts) and should be treated as settling rather than settled.
 
 ## Current Direction
 
-Reified began as a Reader-Async-Result workflow monad in the ZIO tradition; the result side has since expanded into a
-full input and value toolkit. The public surface has three identities:
+Reified describes; it does not run. Effects left with Flow when the repository split, so everything here is a
+value: a rule, a shape, a diagnostic, a contract. The public surface has two identities:
 
-- **Error Handling**: four focused packages — ordinary `Result` and `result { }` in `Reified.Result`; reusable,
-  reusable, inspectable value constraints in `Reified.Constraint` (returns the standard F# `Result` type, no dependency
-  on `Reified.Result`); primitive parsing in the independent `Reified.Parse`; and refined domain values in `Reified.Refinements`
-  (depends only on `Reified.Constraint`). All four install independently; there is no meta-package.
+- **Values**: four focused packages — ordinary `Result` and `result { }` in `Reified.Result`; reusable, inspectable
+  value constraints in `Reified.Constraint` (returns the standard F# `Result` type, no dependency on
+  `Reified.Result`); primitive parsing in the independent `Reified.Parse`; and refined domain values in
+  `Reified.Refinements` (depends only on `Reified.Constraint`).
 - **Schema**: structured input, accumulated path-aware errors, model construction, codecs, contracts, and boundary
   interpreters.
-- **Flow**: effectful workflows. Useful with or without Schema, and always installed separately.
 
-There is no umbrella package. `Reified.ErrorHandling` and `Reified` were both removed pre-1.0; consumers install the
-focused packages they use.
-
-Within the effects group, Reified has one fully expanded workflow shape:
-
-```fsharp
-Flow<'env, 'error, 'value>
-```
-
-Shorter type aliases cover common channel combinations:
-
-```fsharp
-Flow<'value> = Flow<unit, Never, 'value>
-Flow<'error, 'value> = Flow<unit, 'error, 'value>
-EnvFlow<'env, 'value> = Flow<'env, Never, 'value>
-ExnFlow<'value> = Flow<unit, exn, 'value>
-ExnEnvFlow<'env, 'value> = Flow<'env, exn, 'value>
-```
-
-Teach from the smallest useful shape first, then expand to `Flow<'env, 'error, 'value>` when environment and typed
-failure channels matter. Use `Never` for an error channel that cannot fail, and use the `Exn*` aliases only for
-recoverable exception-channel interop.
-
-The active direction splits concerns like this:
-
-- explicit services and app/domain dependencies live in `'env`
-- executor mechanics live in a closed ambient runtime
-- data boundaries are described with portable schemas, reusable value checks, and path-aware input/validation interpreters;
-  operation-specific admission uses ordinary functions or environment-aware policies
-
-First-party service packages and standard operational services should be expressed as explicit services, not runtime
-slots.
+Each package installs on its own. The `Reified` umbrella package installs all of them at once and adds no API: it
+has no sources and no assembly, only dependencies, so a type never has a second place it could come from.
+`Reified.ErrorHandling` is not coming back — a grouping that is not a capability does not earn a package.
 
 Reified's data-boundary direction splits concerns like this:
 
@@ -74,10 +43,9 @@ Reified's data-boundary direction splits concerns like this:
   constructor. Successful operations return the ordinary value rather than a universal trust wrapper.
 - schema interpreters parse structured data, check existing values, produce diagnostics, and drive non-validation metadata
   consumers
-- policies adapt checks, parsers, validations, and application admission functions into `Flow`
 
 Core schema declarations and their interpreters share the single `Reified.Schema` namespace and package (module names,
-not namespaces, separate declaration from interpretation); the package stays independent of flow execution.
+not namespaces, separate declaration from interpretation); the package stays independent of any execution model.
 
 Constructor-level intrinsic errors are a second stage after field parsing and field constraints, not an error source that
 runs alongside invalid fields. If any field or nested item has intrinsic diagnostics, interpreters must not apply the
@@ -137,156 +105,9 @@ execution. Reflection can be an optional import/tooling path on .NET, but the co
 and trimming-safe and must have a Fable-compatible fallback. If ergonomic boilerplate becomes painful, prefer build-time
 generation layered over explicit schemas rather than reflection-heavy runtime discovery.
 
-## Active Architecture
+## Boundary With Axial
 
-### Explicit Environment
-
-`'env` is for:
-
-- repositories
-- gateways
-- domain services
-- feature dependencies
-- request or user context when it is part of business logic
-- operational services modeled explicitly as services
-
-The default access pattern is:
-
-```fsharp
-Flow.read (fun env -> env.Orders)
-```
-
-Plain records are still the default recommendation for local app code. They are simple, legible, easy to test, and
-avoid unnecessary service boilerplate.
-
-### Nominal Service Contracts
-
-`IHas<'service>` and `Service<'service>.get()` are the nominal compile-time checked service story.
-
-Use this when the static contract is worth the ceremony:
-
-```fsharp
-type IHasOrders = inherit IHas<IOrderRepository>
-
-let saveOrder order : Flow<#IHasOrders, OrderError, unit> =
-    flow {
-        let! orders = Service<IOrderRepository>.get()
-        return! orders.Save order
-    }
-```
-
-Do not make `IHasX` the default story for all dependencies. For most feature-local code, records plus `Flow.read` are
-better.
-
-### Provider Edge
-
-`Service<'service>.resolve()` exists for pragmatic .NET host integration when `'env :> IServiceProvider`.
-
-Use it at host edges, glue code, prototypes, and boundary adapters. Prefer mapping provider registrations into an
-explicit record or nominal contract before entering core domain workflows.
-
-Missing provider registrations are configuration defects, not domain errors.
-
-### Closed Ambient Runtime
-
-Ambient runtime state is reserved for executor mechanics only. It is not the dependency model for first-party service
-packages.
-
-Ambient mechanics include:
-
-- cancellation token access
-- scope ownership
-- scheduling and interruption helpers
-- runtime annotations and trace metadata
-
-Operational services such as clock, log, random, GUID, and environment variables should be modeled as explicit services
-and provisioned through environments and layers.
-
-### Root Applications And Hosts
-
-`App` owns the portable lifetime of one root Flow application. `App.run` is the finite entry point; `App.start` returns
-an owned handle whose `Stop()` is idempotent and whose `Completion` becomes available after root scope cleanup. App
-definitions stay ordinary provided Flow values rather than inheriting a host-specific base type.
-
-Platform hosting packages translate native events into `App.Stop()` and translate the final `Exit` at the outer edge:
-
-- `Axial.Flow.Hosting`: standalone .NET console and Microsoft Generic Host, plus MEL adaptation
-- `Axial.Flow.Hosting.Node`: Node signals, process exit, arguments, and `process.env`
-- `Axial.Flow.Hosting.Browser`: UI ownership and `AbortSignal`
-
-The browser adapter never equates tab visibility or unload with dependable application shutdown. Node and browser
-packages are JavaScript-only Fable bindings and fail immediately outside their named runtime.
-
-## Scope And Layers
-
-`Scope` and `Layer` are part of the target public architecture rather than deferred internals.
-
-- `Scope` owns deterministic teardown
-- `Layer` provisions explicit environments and service bundles
-- `Flow.provide` is the main way to run flows with a built environment
-- `layer { }` is the primary app-environment construction style: `let!` is dependent/sequential, while sibling `and!`
-  uses `Layer.merge` / `Layer.zipPar` for independent provisioning
-- `Layer.merge` combines layer outputs as tuples; it does not synthesize records, interfaces, or automatic
-  `IHas<'service>` environments
-- `Flow.acquireReleaseWith` is the local acquire/use/release combinator
-- `Flow.acquireRelease` attaches acquired resources to the current runtime scope
-- `Layer.acquireRelease` attaches provisioned service resources to the layer scope
-
-The internal registry has been removed rather than promoted.
-
-Reified v1 intentionally does not add tagged services or automatic service-environment merging. Multiple services of the
-same type should be modeled with explicit named record fields or distinct nominal contracts. If boilerplate becomes a
-real problem, prefer a future source generator that emits named environment records and `IHas<'service>` implementations
-over reflection, proxy types, or hidden service maps.
-
-## Service Packages
-
-Service packages should focus on explicit, typed, testable system effects:
-
-- Core (`Axial.Flow.PlatformService`): clock, log, random, GUID, environment variables
-- Console (`Axial.Flow.Console`)
-- FileSystem (`Axial.Flow.FileSystem`)
-- Http (`Axial.Flow.HttpClient`)
-- Process (`Axial.Flow.Process`)
-- Telemetry (`Axial.Flow.Telemetry`) and hosting adapters (`Axial.Flow.Hosting`)
-- future Network package
-
-`Axial.Flow` owns no operational service contracts. The contracts for clock, log, random, GUID, and environment
-variables live in `Axial.Flow.PlatformService`; all target-specific implementations in that package are isolated in
-its internal `Platform` module. Fable-facing public operations and test implementations remain target-neutral.
-
-Service-package operations should use explicit services. They should normally be thin wrappers over
-`Service<'service>.get()` plus live implementations and layers.
-
-## Documentation Direction
-
-Public docs should teach this order:
-
-1. Use plain records plus `Flow.read` for most app dependencies.
-2. Use `IHas<'T>` plus `Service<'service>.get()` for reusable named service contracts.
-3. Use `Service<'service>.resolve()` at .NET host edges.
-4. Use `Layer` to provision environments and base runtime bundles.
-5. Treat the ambient runtime as executor mechanics only.
-
-Docs must avoid:
-
-- presenting first-party services as magical ambient runtime slots
-- presenting registry-backed runtime as the architecture
-- teaching `IHasX` as the default for every dependency
-- centering `IServiceProvider` as the main app model
-
-## Implementation Snapshot
-
-As of 2026-07-12, core code, service packages, tests, examples, and generated reference docs use the explicit
-service/layer model. Integration tests cover `Microsoft.Extensions.DependencyInjection` provider-backed base runtime
-construction, typed missing-registration failures, direct `Service<'T>.resolve()` defects, and composition of the
-current Console, FileSystem, Http, and Process service layers. Effect dependencies are explicit through the stack:
-`Process.live`/`Process.layer` take `IClock`, `IFileSystem`, and `IConsole` rather than touching files or the host
-console ambiently, and `Script.run` takes an explicit `IConsole` and returns the exit code. Remaining work should
-improve public guide coverage and future service packages, not ambient-core or `Flow.service` / `Flow.inject`
-direction.
-
-`Axial.Flow.Process` uses one immutable `ProcessSpec` construction model. `IProcess.Run` returns a lazy
-`Flow<unit, ProcessError, ProcessResult>` and `IProcess.Stream` returns a lazy event stream. `Process.run` and
-`Process.stream` compose those programs into the caller's environment. Flow owns timeout racing, cancellation, and
-scope cleanup; the native interpreter owns process-tree termination and partial-start cleanup.
+`Axial` runs what Reified describes: its optional server adapters execute `Reified.Schema.Http` contracts, and its
+workflow model is never required to use one. The dependency points one way, from Axial to Reified, and only through
+published packages. Do not add an execution concept — a workflow type, a service contract, an ambient runtime — to
+this repository to close that gap; add it to Axial, or leave the caller an ordinary function.
