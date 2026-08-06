@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "2Hy7ZuKVOWc=",
+  "success": true,
+  "projectFilePath": "/home/adam/projects/Reified/tests/package-consumers/Consumer.Parse/Consumer.Parse.fsproj",
+  "expectedPackageFiles": [
+    "/home/adam/.nuget/packages/fable.core/4.3.0/fable.core.4.3.0.nupkg.sha512",
+    "/home/adam/.nuget/packages/fsharp.core/10.1.300/fsharp.core.10.1.300.nupkg.sha512",
+    "/home/adam/.nuget/packages/reified.parse/0.7.0/reified.parse.0.7.0.nupkg.sha512"
+  ],
+  "logs": []
+}

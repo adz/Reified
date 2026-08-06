@@ -1,0 +1,278 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "Consumer.Umbrella/1.0.0": {
+        "dependencies": {
+          "FSharp.Core": "10.1.300",
+          "Reified": "0.7.0"
+        },
+        "runtime": {
+          "Consumer.Umbrella.dll": {}
+        }
+      },
+      "Fable.Core/4.3.0": {
+        "runtime": {
+          "lib/netstandard2.0/Fable.Core.dll": {
+            "assemblyVersion": "4.3.0.0",
+            "fileVersion": "4.3.0.0"
+          }
+        }
+      },
+      "FSharp.Core/10.1.300": {
+        "runtime": {
+          "lib/netstandard2.1/FSharp.Core.dll": {
+            "assemblyVersion": "10.1.0.0",
+            "fileVersion": "10.103.26.23102"
+          }
+        },
+        "resources": {
+          "lib/netstandard2.1/cs/FSharp.Core.resources.dll": {
+            "locale": "cs"
+          },
+          "lib/netstandard2.1/de/FSharp.Core.resources.dll": {
+            "locale": "de"
+          },
+          "lib/netstandard2.1/es/FSharp.Core.resources.dll": {
+            "locale": "es"
+          },
+          "lib/netstandard2.1/fr/FSharp.Core.resources.dll": {
+            "locale": "fr"
+          },
+          "lib/netstandard2.1/it/FSharp.Core.resources.dll": {
+            "locale": "it"
+          },
+          "lib/netstandard2.1/ja/FSharp.Core.resources.dll": {
+            "locale": "ja"
+          },
+          "lib/netstandard2.1/ko/FSharp.Core.resources.dll": {
+            "locale": "ko"
+          },
+          "lib/netstandard2.1/pl/FSharp.Core.resources.dll": {
+            "locale": "pl"
+          },
+          "lib/netstandard2.1/pt-BR/FSharp.Core.resources.dll": {
+            "locale": "pt-BR"
+          },
+          "lib/netstandard2.1/ru/FSharp.Core.resources.dll": {
+            "locale": "ru"
+          },
+          "lib/netstandard2.1/tr/FSharp.Core.resources.dll": {
+            "locale": "tr"
+          },
+          "lib/netstandard2.1/zh-Hans/FSharp.Core.resources.dll": {
+            "locale": "zh-Hans"
+          },
+          "lib/netstandard2.1/zh-Hant/FSharp.Core.resources.dll": {
+            "locale": "zh-Hant"
+          }
+        }
+      },
+      "Reified/0.7.0": {
+        "dependencies": {
+          "FSharp.Core": "10.1.300",
+          "Reified.Constraint": "0.7.0",
+          "Reified.Data": "0.7.0",
+          "Reified.Parse": "0.7.0",
+          "Reified.Refinements": "0.7.0",
+          "Reified.Result": "0.7.0",
+          "Reified.Schema": "0.7.0",
+          "Reified.Schema.Http": "0.7.0",
+          "Reified.Schema.Json": "0.7.0"
+        }
+      },
+      "Reified.Constraint/0.7.0": {
+        "dependencies": {
+          "FSharp.Core": "10.1.300",
+          "Fable.Core": "4.3.0"
+        },
+        "runtime": {
+          "lib/net8.0/Reified.Constraint.dll": {
+            "assemblyVersion": "0.7.0.0",
+            "fileVersion": "0.7.0.0"
+          }
+        }
+      },
+      "Reified.Data/0.7.0": {
+        "dependencies": {
+          "FSharp.Core": "10.1.300",
+          "Fable.Core": "4.3.0"
+        },
+        "runtime": {
+          "lib/net8.0/Reified.Data.dll": {
+            "assemblyVersion": "0.7.0.0",
+            "fileVersion": "0.7.0.0"
+          }
+        }
+      },
+      "Reified.Parse/0.7.0": {
+        "dependencies": {
+          "FSharp.Core": "10.1.300",
+          "Fable.Core": "4.3.0"
+        },
+        "runtime": {
+          "lib/net8.0/Reified.Parse.dll": {
+            "assemblyVersion": "0.7.0.0",
+            "fileVersion": "0.7.0.0"
+          }
+        }
+      },
+      "Reified.Refinements/0.7.0": {
+        "dependencies": {
+          "FSharp.Core": "10.1.300",
+          "Fable.Core": "4.3.0",
+          "Reified.Constraint": "0.7.0"
+        },
+        "runtime": {
+          "lib/net8.0/Reified.Refinements.dll": {
+            "assemblyVersion": "0.7.0.0",
+            "fileVersion": "0.7.0.0"
+          }
+        }
+      },
+      "Reified.Result/0.7.0": {
+        "dependencies": {
+          "FSharp.Core": "10.1.300",
+          "Fable.Core": "4.3.0"
+        },
+        "runtime": {
+          "lib/net8.0/Reified.Result.dll": {
+            "assemblyVersion": "0.7.0.0",
+            "fileVersion": "0.7.0.0"
+          }
+        }
+      },
+      "Reified.Schema/0.7.0": {
+        "dependencies": {
+          "FSharp.Core": "10.1.300",
+          "Fable.Core": "4.3.0",
+          "Reified.Constraint": "0.7.0",
+          "Reified.Data": "0.7.0",
+          "Reified.Parse": "0.7.0",
+          "Reified.Refinements": "0.7.0"
+        },
+        "runtime": {
+          "lib/net8.0/Reified.Schema.dll": {
+            "assemblyVersion": "0.7.0.0",
+            "fileVersion": "0.7.0.0"
+          }
+        }
+      },
+      "Reified.Schema.Http/0.7.0": {
+        "dependencies": {
+          "FSharp.Core": "10.1.300",
+          "Reified.Data": "0.7.0",
+          "Reified.Schema": "0.7.0"
+        },
+        "runtime": {
+          "lib/net8.0/Reified.Schema.Http.dll": {
+            "assemblyVersion": "0.7.0.0",
+            "fileVersion": "0.7.0.0"
+          }
+        }
+      },
+      "Reified.Schema.Json/0.7.0": {
+        "dependencies": {
+          "FSharp.Core": "10.1.300",
+          "Fable.Core": "4.3.0",
+          "Reified.Data": "0.7.0",
+          "Reified.Schema": "0.7.0"
+        },
+        "runtime": {
+          "lib/net8.0/Reified.Schema.Json.dll": {
+            "assemblyVersion": "0.7.0.0",
+            "fileVersion": "0.7.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Consumer.Umbrella/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Fable.Core/4.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-sbK+hYs7H7I3b3sbgttI4GlvQfNPcIqSz1qPSagF3QbVA46KJ/pWSXC/Dwv0s9M6AeRGmoqcIeD7GUaLn41zkA==",
+      "path": "fable.core/4.3.0",
+      "hashPath": "fable.core.4.3.0.nupkg.sha512"
+    },
+    "FSharp.Core/10.1.300": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-BACHDBo/KL615GifW2wGB8vw3HLraCJb77VN/XVmQZPceNw+Oc+J+McehOo2yHtcr7hABmW4EqZZzVYiR1Z1EQ==",
+      "path": "fsharp.core/10.1.300",
+      "hashPath": "fsharp.core.10.1.300.nupkg.sha512"
+    },
+    "Reified/0.7.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-FJ2GQ+U3o7MbE7u09J/LGt7GcKXinQnp4x22BXx1yv4/IQ1M5C8wm2HpGc0TE/CN0x8GWerfP0mzbseKvX5m3Q==",
+      "path": "reified/0.7.0",
+      "hashPath": "reified.0.7.0.nupkg.sha512"
+    },
+    "Reified.Constraint/0.7.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-pUtHtOHXQPn65tGOFAdZ3kEgLZc8yGu30MJMPnmx93xiGlCdQSZpuUEN4V5PpxLNW1GRK554AjfUVsvTYhVr+w==",
+      "path": "reified.constraint/0.7.0",
+      "hashPath": "reified.constraint.0.7.0.nupkg.sha512"
+    },
+    "Reified.Data/0.7.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-O08yBa2TM5LpRDWtjKPC5rsilm12maoIsFWqkASQdjfWLFaTYDG6fgNk3OeDdwfWyK1xhNwUpeQENOSfVZISJA==",
+      "path": "reified.data/0.7.0",
+      "hashPath": "reified.data.0.7.0.nupkg.sha512"
+    },
+    "Reified.Parse/0.7.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-VObCCB9xefZxODX2FUm614vxrtgkSk6TYILSJI0fdgOWBOQuY2gXlhjI15N80biMSu7QoZJ9r/4V01CcbVyn/Q==",
+      "path": "reified.parse/0.7.0",
+      "hashPath": "reified.parse.0.7.0.nupkg.sha512"
+    },
+    "Reified.Refinements/0.7.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-/Q3AJCwI7s+Ia93/r5bpKHbC4Jz4LgalYLrT5ok92udL3dpN2J/3bc3fF9/dzYsyXEyzbFTkPQdPWBxcawAvaQ==",
+      "path": "reified.refinements/0.7.0",
+      "hashPath": "reified.refinements.0.7.0.nupkg.sha512"
+    },
+    "Reified.Result/0.7.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-VpERngR8Qe0NX08i2iP9yqrGSmyXx6SvTYlIeXKS6JFDFMqvXET9HenKX3uhWP8gALSSF6xdyKhN41dCeMNSCg==",
+      "path": "reified.result/0.7.0",
+      "hashPath": "reified.result.0.7.0.nupkg.sha512"
+    },
+    "Reified.Schema/0.7.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-morCc8cdrhCGsAy7v6uBgeh2Sm3GEAKElGoUloEUgqBJKa4a1EEN1K3bs3R+lDkkbCElHsGL6I97leaFhxyYag==",
+      "path": "reified.schema/0.7.0",
+      "hashPath": "reified.schema.0.7.0.nupkg.sha512"
+    },
+    "Reified.Schema.Http/0.7.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-xgfrNlQEzUtm4yDwJ25mbDoSLJcK/pIjkMriWz1a1UUaAZphenfRwN3oQ0U7fVY8600ocr2/tE12645LCu4mvQ==",
+      "path": "reified.schema.http/0.7.0",
+      "hashPath": "reified.schema.http.0.7.0.nupkg.sha512"
+    },
+    "Reified.Schema.Json/0.7.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-GptYq8cYwn3R1wXEBZYoZa0tNpbwZJgpgftFjNXNpRJGs+rVLBWJHS+/esltkIGKY0QZAKyn63w2pPdAollOjQ==",
+      "path": "reified.schema.json/0.7.0",
+      "hashPath": "reified.schema.json.0.7.0.nupkg.sha512"
+    }
+  }
+}

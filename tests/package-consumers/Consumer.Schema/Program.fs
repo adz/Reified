@@ -1,4 +1,4 @@
-// Reified.Schema installed alone. Schema declares dependencies on Constraint, Data, Parse, and Refined
+// Reified.Schema installed alone. Schema declares dependencies on Constraint, Data, Parse, and Refinements
 // directly, so a single PackageReference must be enough to declare a model AND to build the Data
 // input it parses. Referencing only Reified.Schema here is the point of the fixture.
 

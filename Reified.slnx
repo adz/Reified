@@ -20,6 +20,7 @@
     <Project Path="scripts/schemagen/schemagen.fsproj" />
   </Folder>
   <Folder Name="/src/">
+    <Project Path="src/Reified/Reified.fsproj" />
     <Project Path="src/Reified.Data/Reified.Data.fsproj" />
     <Project Path="src/Reified.Result/Reified.Result.fsproj" />
     <Project Path="src/Reified.Constraint/Reified.Constraint.fsproj" />
@@ -33,6 +34,7 @@
     <Project Path="src/Reified.Schema.Testing/Reified.Schema.Testing.fsproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Reified.Package.Tests/Reified.Package.Tests.fsproj" />
     <Project Path="tests/Reified.Data.Tests/Reified.Data.Tests.fsproj" />
     <Project Path="tests/Reified.Result.Tests/Reified.Result.Tests.fsproj" />
     <Project Path="tests/Reified.Constraint.Tests/Reified.Constraint.Tests.fsproj" />

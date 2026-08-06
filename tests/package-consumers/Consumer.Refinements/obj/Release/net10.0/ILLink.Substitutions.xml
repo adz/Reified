@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<linker>
+  <assembly fullname="Consumer.Refinements">
+    <resource name="FSharpSignatureData.Consumer.Refinements" action="remove"></resource>
+    <resource name="FSharpSignatureCompressedData.Consumer.Refinements" action="remove"></resource>
+    <resource name="FSharpSignatureDataB.Consumer.Refinements" action="remove"></resource>
+    <resource name="FSharpSignatureCompressedDataB.Consumer.Refinements" action="remove"></resource>
+    <resource name="FSharpOptimizationData.Consumer.Refinements" action="remove"></resource>
+    <resource name="FSharpOptimizationCompressedData.Consumer.Refinements" action="remove"></resource>
+    <resource name="FSharpOptimizationDataB.Consumer.Refinements" action="remove"></resource>
+    <resource name="FSharpOptimizationCompressedDataB.Consumer.Refinements" action="remove"></resource>
+    <resource name="FSharpOptimizationInfo.Consumer.Refinements" action="remove"></resource>
+    <resource name="FSharpSignatureInfo.Consumer.Refinements" action="remove"></resource>
+  </assembly>
+</linker>

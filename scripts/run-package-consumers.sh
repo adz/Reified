@@ -36,7 +36,7 @@ fi
 
 # A stale package of the same version in the global cache would shadow what we just packed, so the
 # fixtures must never restore from it.
-for package in Reified.Result Reified.Parse Reified.Constraint Reified.Refinements Reified.Data Reified.Schema; do
+for package in Reified Reified.Result Reified.Parse Reified.Constraint Reified.Refinements Reified.Data Reified.Schema Reified.Schema.Json Reified.Schema.Http; do
   cached="$HOME/.nuget/packages/$(echo "$package" | tr '[:upper:]' '[:lower:]')/$version"
   if [[ -d "$cached" ]]; then
     echo "Evicting cached $package $version"

@@ -1,4 +1,4 @@
-// Reified.Refinements installed alone. Refined depends on Reified.Constraint and nothing else, so this also
+// Reified.Refinements installed alone. It depends on Reified.Constraint and nothing else, so this also
 // checks that Constraint arrives transitively and that Violation is reachable without naming it.
 
 open Reified.Refinements
@@ -10,8 +10,8 @@ let main _ =
 
     match populated, empty with
     | Ok list, Error _ when list.ToList() = [ 1; 2; 3 ] ->
-        printfn "Consumer.Refined OK"
+        printfn "Consumer.Refinements OK"
         0
     | other ->
-        eprintfn "Consumer.Refined FAILED: %A" other
+        eprintfn "Consumer.Refinements FAILED: %A" other
         1
