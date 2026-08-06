@@ -16,13 +16,13 @@ Keep those jobs in separate types.
 
 ## Define a permissive wire record
 
-`[<DeriveSchema>]` marks a public, namespace-level record whose Axial schema is generated from its source declaration. The
+`[<DeriveSchema>]` marks a public, namespace-level record whose Reified schema is generated from its source declaration. The
 schema describes how input fields parse and which portable constraints apply.
 
 ```fsharp
 namespace MyApp.Contracts
 
-open Axial.Schema.Derive
+open Reified.Schema.Derive
 
 [<DeriveSchema>]
 type BookingWire =
@@ -43,14 +43,14 @@ generated code is placed under `obj` and inserted in the correct compile order a
 ```xml
 <ItemGroup>
   <PackageReference
-      Include="Axial.Schema.Contracts.Build"
+      Include="Reified.Schema.Contracts.Build"
       Version="..."
       PrivateAssets="all" />
 </ItemGroup>
 
 ```
 
-Set `AxialSchemaGeneratedFiles` to `CheckedIn` when the repository deliberately commits generated siblings. Do not add
+Set `ReifiedSchemaGeneratedFiles` to `CheckedIn` when the repository deliberately commits generated siblings. Do not add
 those `.g.fs` files to `<Compile>`; the target inserts them after their declaration files.
 
 The generated module contains `schema`, `parse`, and `validate`. Stale generated code is replaced during the normal

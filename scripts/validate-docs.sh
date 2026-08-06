@@ -15,7 +15,7 @@ hugo --source "$root_dir/site" --destination "$validate_dir" --baseURL "$HUGO_BA
 assert_edit_link() {
   local rendered_page="$1"
   local source_path="$2"
-  local expected="https://github.com/adz/Axial/edit/main/$source_path"
+  local expected="https://github.com/adz/Reified/edit/main/$source_path"
 
   if ! grep -Fq "$expected" "$validate_dir/$rendered_page"; then
     echo "Missing expected Edit link in $rendered_page: $expected" >&2

@@ -4,21 +4,21 @@
   </PropertyGroup>
 
   <ItemGroup Condition="'$(DocsBuildScope)' == 'All' Or '$(DocsBuildScope)' == 'Api'">
-    <DocsProject Include="../src/Axial.Result/Axial.Result.fsproj" />
-    <DocsProject Include="../src/Axial.Data/Axial.Data.fsproj" />
-    <DocsProject Include="../src/Axial.Constraint/Axial.Constraint.fsproj" />
-    <DocsProject Include="../src/Axial.Refined/Axial.Refined.fsproj" />
-    <DocsProject Include="../src/Axial.Parse/Axial.Parse.fsproj" />
-    <DocsProject Include="../src/Axial.Schema/Axial.Schema.fsproj" />
-    <DocsProject Include="../src/Axial.Schema.Json/Axial.Schema.Json.fsproj" />
-    <DocsProject Include="../src/Axial.Schema.Http/Axial.Schema.Http.fsproj" />
-    <DocsProject Include="../src/Axial.Schema.Contracts/Axial.Schema.Contracts.fsproj" />
-    <DocsProject Include="../src/Axial.Schema.Testing/Axial.Schema.Testing.fsproj" />
+    <DocsProject Include="../src/Reified.Result/Reified.Result.fsproj" />
+    <DocsProject Include="../src/Reified.Data/Reified.Data.fsproj" />
+    <DocsProject Include="../src/Reified.Constraint/Reified.Constraint.fsproj" />
+    <DocsProject Include="../src/Reified.Refinements/Reified.Refinements.fsproj" />
+    <DocsProject Include="../src/Reified.Parse/Reified.Parse.fsproj" />
+    <DocsProject Include="../src/Reified.Schema/Reified.Schema.fsproj" />
+    <DocsProject Include="../src/Reified.Schema.Json/Reified.Schema.Json.fsproj" />
+    <DocsProject Include="../src/Reified.Schema.Http/Reified.Schema.Http.fsproj" />
+    <DocsProject Include="../src/Reified.Schema.Contracts/Reified.Schema.Contracts.fsproj" />
+    <DocsProject Include="../src/Reified.Schema.Testing/Reified.Schema.Testing.fsproj" />
     <DocsProject Include="docgen/docgen.fsproj" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(DocsBuildScope)' == 'All' Or '$(DocsBuildScope)' == 'Examples'">
-    <DocsProject Include="../examples/Axial.Schema.Examples/Axial.Schema.Examples.fsproj" />
+    <DocsProject Include="../examples/Reified.Schema.Examples/Reified.Schema.Examples.fsproj" />
   </ItemGroup>
 
   <Target Name="Build">

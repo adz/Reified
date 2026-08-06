@@ -9,7 +9,7 @@ description: Change the error type, replace one error with another, and recover 
 The error channel gets the same treatment as the success channel: map it, replace it, or use it to produce a fallback.
 
 ```fsharp
-open Axial.Result
+open Reified.Result
 
 type SignupError =
     | NameMissing

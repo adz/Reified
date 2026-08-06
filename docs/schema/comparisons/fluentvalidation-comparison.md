@@ -1,15 +1,15 @@
 ---
 weight: 20
 title: vs FluentValidation
-description: Validators check existing objects; Axial schemas never construct the invalid object.
+description: Validators check existing objects; Reified schemas never construct the invalid object.
 ---
 
-# Axial vs FluentValidation
+# Reified vs FluentValidation
 
-This page compares Axial's schema-first parsing with FluentValidation's validator classes for readers deciding between
+This page compares Reified's schema-first parsing with FluentValidation's validator classes for readers deciding between
 the two models.
 
-The short version: FluentValidation validates objects that already exist. Axial parses input into objects that cannot
+The short version: FluentValidation validates objects that already exist. Reified parses input into objects that cannot
 exist in an invalid state. That difference decides everything else.
 
 ## The Model Difference
@@ -31,12 +31,12 @@ The `Customer` had to be constructed first — usually by a model binder filling
 Between construction and validation (and anywhere a code path forgets to call the validator) an invalid `Customer`
 exists and can leak.
 
-An Axial schema owns construction. Parsing either produces a trusted model or path-aware issues; there is no
+An Reified schema owns construction. Parsing either produces a trusted model or path-aware issues; there is no
 intermediate invalid object:
 
 ```fsharp
-open Axial.Schema.Syntax
-open type Axial.Schema.Syntax
+open Reified.Schema.Syntax
+open type Reified.Schema.Syntax
 let customerSchema =
     schema<Customer> {
         field "name" _.Name {
@@ -58,7 +58,7 @@ a question the rest of the codebase can ask.
 
 ## Rules Are Data, Not Just Code
 
-FluentValidation rules are lambdas inside a class: they can run, but nothing else can read them. Axial constraints are
+FluentValidation rules are lambdas inside a class: they can run, but nothing else can read them. Reified constraints are
 inspectable metadata, so the same declaration also produces the JSON Schema/OpenAPI contract
 (`JsonSchema.generate`), UI metadata (`Inspect.model`), a compiled JSON codec (`Json.compile`), and redisplayable form
 errors. With FluentValidation, each of those is a separate artifact to keep in sync by hand.
@@ -74,7 +74,7 @@ errors. With FluentValidation, each of those is a separate artifact to keep in s
 
 ## Side By Side
 
-| Concern | FluentValidation | Axial |
+| Concern | FluentValidation | Reified |
 | --- | --- | --- |
 | Invalid object exists? | Yes, until validated | No — parsing constructs or fails |
 | Rules readable as data | No (lambdas in classes) | Yes (`Constraint` metadata) |

@@ -10,7 +10,7 @@ description: Compare every field and item, then inspect all structural differenc
 Use exact comparison when every field and item belongs to the expected result.
 
 ```fsharp
-open Axial.Data
+open Reified.Data
 open Data.Syntax
 
 let expected = data [ "name" => "Ada"; "plan" => "pro" ]

@@ -33,22 +33,22 @@ jobs:
         run: bash scripts/check-source-inventory.sh
 
       - name: Build
-        run: dotnet build Axial.slnx --configuration Release --no-restore --nologo -v minimal
+        run: dotnet build Reified.slnx --configuration Release --no-restore --nologo -v minimal
 
       - name: Test
-        run: dotnet test Axial.slnx --configuration Release --no-build --nologo -v minimal
+        run: dotnet test Reified.slnx --configuration Release --no-build --nologo -v minimal
 
       - name: Check Schema CE compiler errors
         run: bash scripts/check-schema-ce-errors.sh
 
       - name: Run main example
-        run: dotnet run --project examples/Axial.Examples/Axial.Examples.fsproj --configuration Release --no-build --nologo
+        run: dotnet run --project examples/Reified.Examples/Reified.Examples.fsproj --configuration Release --no-build --nologo
 
       - name: Run API sample smoke pass
-        run: AXIAL_EXAMPLE=smoke dotnet run --project examples/Axial.Api/Axial.Api.fsproj --configuration Release --no-build --nologo
+        run: AXIAL_EXAMPLE=smoke dotnet run --project examples/Reified.Api/Reified.Api.fsproj --configuration Release --no-build --nologo
 
       - name: Run maintenance example
-        run: dotnet run --project examples/Axial.MaintenanceExamples/Axial.MaintenanceExamples.fsproj --configuration Release --no-build --nologo
+        run: dotnet run --project examples/Reified.MaintenanceExamples/Reified.MaintenanceExamples.fsproj --configuration Release --no-build --nologo
 
   fable:
     runs-on: ubuntu-latest

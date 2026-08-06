@@ -12,10 +12,10 @@ matter to the test.
 
 ## Create the baseline
 
-Open `Axial` for the `Data` type and module. Open `Data.Syntax` for the concise literal, edit, and matching syntax:
+Open `Reified` for the `Data` type and module. Open `Data.Syntax` for the concise literal, edit, and matching syntax:
 
 ```fsharp
-open Axial.Data
+open Reified.Data
 open Data.Syntax
 
 let customer =
@@ -131,7 +131,7 @@ nameCases |> List.map (fun case -> case.Name, Data.tryFindPath "name" case.Value
 
 ```fsharp
 let response =
-    Axial.Schema.Json.Json.parseData
+    Reified.Schema.Json.Json.parseData
         """{
           "customer": {
             "id": "c-123",

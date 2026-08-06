@@ -1,6 +1,6 @@
-# Axial documentation
+# Reified documentation
 
-Axial contains five independent documentation entry points. Load only the context for the product being used:
+Reified contains five independent documentation entry points. Load only the context for the product being used:
 
 - Result composition, `result { }`, and accumulating builders: `/result/llms.txt`
 - Values — Constraint, Refined, and Parse: `/values/llms.txt`
@@ -9,4 +9,4 @@ Axial contains five independent documentation entry points. Load only the contex
 - Flow, effects, services, resources, concurrency, and hosting: `/flow/llms.txt`
 
 Product documentation starts at `/result/`, `/values/`, `/data/`, `/schema/`, and `/flow/`.
-Values is a navigation grouping over three independently installable packages; there is no `Axial.Values` package.
+Values is a navigation grouping over three independently installable packages; there is no `Reified.Values` package.

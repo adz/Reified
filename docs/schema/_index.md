@@ -10,19 +10,19 @@ menu:
     weight: 5
 ---
 
-<div class="docs-home-container axial-landing">
+<div class="docs-home-container reified-landing">
 
 <div class="docs-home-hero">
 
 <div class="docs-home-copy">
-<span class="eyebrow" style="color:#0b55d9">Axial &middot; Parse-don't-validate</span>
+<span class="eyebrow" style="color:#0b55d9">Reified &middot; Parse-don't-validate</span>
 
 <h1>Parse, don't validate.</h1>
 
 <div class="lede">
 Validators start with an object that already exists. That leaves application code to track whether validation ran,
 keep field paths aligned with checks, and repeat the same rules for parsing, forms, codecs, and contract documents.
-Axial starts one step earlier: a <code>Schema</code> describes how untrusted boundary values become a model. If a field
+Reified starts one step earlier: a <code>Schema</code> describes how untrusted boundary values become a model. If a field
 or constructor invariant fails, parsing returns `SchemaErrors` and does not return the model.
 </div>
 
@@ -41,7 +41,7 @@ and test-data generation interpret the same field names, value shapes, and const
 
 <div class="docs-home-hero-visual">
 <svg viewBox="0 0 680 300" role="img" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto">
-  <title>Axial.Schema: one declaration drives everything below</title>
+  <title>Reified.Schema: one declaration drives everything below</title>
   <desc>A single field declaration fans downward into JSON codecs, parsers, contracts, docs and forms, and tests.</desc>
   <g font-size="13">
     <text x="20" y="24" fill="currentColor" opacity="0.55">One declaration drives all of it</text>
@@ -87,14 +87,14 @@ The Schema documentation covers the core package and its focused codec, contract
 
 | Package | Use it for | Documentation |
 | --- | --- | --- |
-| `Axial.Schema` | Model schemas, parsing, checking, accumulated errors, and inspection | [Axial.Schema](./overview/) |
-| `Axial.Schema.Json` | Compiled JSON codecs | [JSON Codec](./json-codec/) |
-| `Axial.Schema.JsonSchema` | JSON Schema generation | [JSON Schema reference]({{< relref "/schema/reference/schema/m-schema-jsonschema-generate" >}}) |
-| `Axial.Schema.Contracts.Build` | Build-time schema derivation from F# records | [Derived Schemas](./derivation/) |
-| `Axial.Schema.Http` | HTTP-neutral request and response contracts | [HTTP Servers](./http-servers/) |
+| `Reified.Schema` | Model schemas, parsing, checking, accumulated errors, and inspection | [Reified.Schema](./overview/) |
+| `Reified.Schema.Json` | Compiled JSON codecs | [JSON Codec](./json-codec/) |
+| `Reified.Schema.JsonSchema` | JSON Schema generation | [JSON Schema reference]({{< relref "/schema/reference/schema/m-schema-jsonschema-generate" >}}) |
+| `Reified.Schema.Contracts.Build` | Build-time schema derivation from F# records | [Derived Schemas](./derivation/) |
+| `Reified.Schema.Http` | HTTP-neutral request and response contracts | [HTTP Servers](./http-servers/) |
 | `Axial.Schema.Http.AspNetCore` | ASP.NET Core integration | [ASP.NET Core reference]({{< relref "/schema/reference/schema/http/aspnetcore" >}}) |
 | `Axial.Schema.Http.GenHttp` | GenHTTP integration | [GenHTTP reference]({{< relref "/schema/reference/schema/http/genhttp" >}}) |
-| `Axial.Schema.Testing` | Test helpers for schema guarantees | [Testing patterns](./patterns/testing-schema-guarantees/) |
+| `Reified.Schema.Testing` | Test helpers for schema guarantees | [Testing patterns](./patterns/testing-schema-guarantees/) |
 
 Schema controls values produced through Schema. A public F# record can still be constructed directly. Use refined fields,
 a private aggregate, or an opaque `.fsi` interface when the rest of the application must rely on an invariant
@@ -106,7 +106,7 @@ without checking it again — see [Trusted Construction](./trusted-construction/
 uses. It can also be installed and used on its own. [Flow]({{< relref "/flow/" >}}) models effects and dependencies;
 Schema does not require it.
 
-See [Axial.Schema](./overview/) for the core package's mental model, installation, and full guide list.
+See [Reified.Schema](./overview/) for the core package's mental model, installation, and full guide list.
 
 </div>
 

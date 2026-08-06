@@ -5,7 +5,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Axial.Result" Version="$(AxialPackageVersion)" />
+    <PackageReference Include="Reified.Result" Version="$(ReifiedPackageVersion)" />
   </ItemGroup>
 
 </Project>

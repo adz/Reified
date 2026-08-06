@@ -29,8 +29,8 @@ MyApp.Host
 ## Keep the dependency direction small
 
 ```text
-Contracts  -> Axial.Schema
-Domain     -> Axial.Result, Axial.Constraint, Axial.Refined, Axial.Parse, optionally Axial.Schema
+Contracts  -> Reified.Schema
+Domain     -> Reified.Result, Reified.Constraint, Reified.Refinements, Reified.Parse, optionally Reified.Schema
 Application -> Domain, optionally Axial.Flow
 Infrastructure -> Application
 Host -> Contracts, Domain, Application, Infrastructure

@@ -10,7 +10,7 @@ Two functions cover almost all of it. `map` changes the success value. `bind` ru
 
 ```fsharp
 open System
-open Axial.Result
+open Reified.Result
 
 type SignupError =
     | AgeMissing

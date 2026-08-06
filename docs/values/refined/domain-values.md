@@ -19,8 +19,8 @@ than it saves. [When not to make a type](../catalog/#when-not-to-make-a-type) dr
 ## Define the wrapper and Value projection
 
 ```fsharp
-open Axial.Constraint
-open Axial.Refined
+open Reified.Constraint
+open Reified.Refinements
 
 type ContactEmail =
     private

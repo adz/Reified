@@ -60,7 +60,7 @@ dependency weight makes the boundary valuable.
 `Axial.Flow` must not depend on any satellite. Process may later depend on the shared framing package, but framing must
 not depend on Process, Network, Serial, or HttpClient.
 
-No public package should depend on `Axial.Result`, `Axial.Constraint`, `Axial.Refined`, or `Axial.Parse`. Each
+No public package should depend on `Reified.Result`, `Reified.Constraint`, `Reified.Refinements`, or `Reified.Parse`. Each
 package owns its operational error types or accepts
 caller-provided codec errors.
 
@@ -734,7 +734,7 @@ Do not provide `acceptAnyCertificate` in the common module. If an unsafe test-on
 obviously unsafe qualified module.
 
 TLS errors distinguish handshake, trust, hostname, protocol, alert, EOF, and underlying transport failures without
-exposing secrets. Certificate validity checks require an explicit clock if Axial performs them; otherwise the TLS
+exposing secrets. Certificate validity checks require an explicit clock if Reified performs them; otherwise the TLS
 service contract must make platform trust behavior explicit rather than pretending it is deterministic.
 
 TLS record framing remains internal. The result is another `ByteDuplex<TlsError<NetworkError>>` plus negotiated
@@ -809,7 +809,7 @@ Network.Native.socket connection
 Network.Native.listenerSocket listener
 ```
 
-Its presence makes complete platform access possible while typed Axial operations should cover common and uncommon
+Its presence makes complete platform access possible while typed Reified operations should cover common and uncommon
 portable cases. Using it explicitly accepts platform coupling; it does not transfer resource ownership.
 
 ## Serial package
@@ -1020,7 +1020,7 @@ Serial.Native.serialPort connection
 ```
 
 This supports uncommon platform functionality without making `SerialPort` the normal API. Ownership remains with the
-Axial scope.
+Reified scope.
 
 Browser Fable has no general serial support except Web Serial, which has user-gesture, permissions, stream, and browser
 availability semantics unlike desktop serial. Treat Web Serial as a future target-specific implementation or package,
@@ -1592,7 +1592,7 @@ Additional effects remain visible:
 
 - explicit clock for package-owned timestamp/certificate-time behavior;
 - explicit filesystem for archive extraction or Unix path management delegated outside Network;
-- explicit randomness for protocol features Axial generates itself;
+- explicit randomness for protocol features Reified generates itself;
 - explicit log/telemetry callback if a helper reports failures;
 - no ambient environment variables, console, filesystem, clock, random, GUID, or service provider lookup.
 

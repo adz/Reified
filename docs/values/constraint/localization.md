@@ -7,14 +7,14 @@ description: Translating constraint failures, with the complete key catalogue.
 
 # Localization
 
-A `Violation` carries no language. Built-in failures carry Axial-owned identities and operands; opaque failures
+A `Violation` carries no language. Built-in failures carry Reified-owned identities and operands; opaque failures
 carry the prose their author wrote. Turning either into a sentence happens at the rendering edge, through a
 `Renderer`.
 
 Build one renderer at the composition root and reuse it:
 
 ```fsharp
-open Axial.Constraint
+open Reified.Constraint
 
 let renderer = Renderer.ofResourceManager resources culture
 let signup = renderer |> Renderer.context "signup"
@@ -26,7 +26,7 @@ violation
 errors |> SchemaErrors.fullMessages signup
 ```
 
-Nothing in an ordinary application walks a violation tree, reproduces Axial's key catalogue, or implements
+Nothing in an ordinary application walks a violation tree, reproduces Reified's key catalogue, or implements
 contextual fallback.
 
 The renderer holds the language and the context; the violation holds the facts. That split is why a `Violation`
@@ -75,14 +75,14 @@ Renderer.ofResourceManagerWithCultures resources uiCulture valueCulture
 Renderer.ofCurrentCulture resources
 ```
 
-`Renderer.english` needs no resources at all: every entry falls back to Axial's neutral English. It is the default
+`Renderer.english` needs no resources at all: every entry falls back to Reified's neutral English. It is the default
 for tests, tools, and applications that never translate.
 
-`ofCurrentCulture` is the one place ambient culture enters Axial. It reads the thread's cultures per render, so one
+`ofCurrentCulture` is the one place ambient culture enters Reified. It reads the thread's cultures per render, so one
 renderer registered as a singleton follows a per-request culture. Constraint execution itself stays free of ambient
 effects.
 
-Register a renderer as an ordinary immutable value. Axial introduces no renderer interface, no ambient registry,
+Register a renderer as an ordinary immutable value. Reified introduces no renderer interface, no ambient registry,
 and no global configuration:
 
 ```fsharp
@@ -139,7 +139,7 @@ attribute.address.postcode
 attribute.postcode
 ```
 
-If no resource resolves, Axial humanizes the final raw attribute segment. Humanization splits camelCase,
+If no resource resolves, Reified humanizes the final raw attribute segment. Humanization splits camelCase,
 `snake_case`, and `kebab-case`, preserves acronym runs, keeps `_id`, and applies invariant sentence casing:
 
 ```text
@@ -149,12 +149,12 @@ postcodeID       -> Postcode ID
 billing_address  -> Billing address
 ```
 
-Humanization applies only to a raw segment Axial invented a noun for. A value that came out of a resource file is
+Humanization applies only to a raw segment Reified invented a noun for. A value that came out of a resource file is
 returned exactly as authored — no recasing, trimming, or Unicode normalization, ever.
 
 ### Segments are opaque
 
-Context names, attribute names, and Schema path keys are arbitrary text. Axial rejects an explicitly empty segment
+Context names, attribute names, and Schema path keys are arbitrary text. Reified rejects an explicitly empty segment
 and encodes the reserved characters before joining:
 
 ```text
@@ -275,7 +275,7 @@ cleverer pattern.
 
 ## Your own messages
 
-`Constraint.custom` hands Axial prose and nothing else, so prose is all Axial can give back: it renders verbatim in
+`Constraint.custom` hands Reified prose and nothing else, so prose is all Reified can give back: it renders verbatim in
 every language. Name a key and the rule becomes translatable:
 
 ```fsharp
@@ -306,11 +306,11 @@ A key is `segment ("." segment)*`. An empty key or empty segment is rejected at 
 written in source is a defect, and failing at the call site beats failing at a rendering edge in whichever language
 nobody tested. `%`, brackets, whitespace, and non-ASCII characters are exact input; you never pre-encode a key.
 
-Custom constraints declare no plural operand, and Axial does not infer one from an argument's name or value.
+Custom constraints declare no plural operand, and Reified does not infer one from an argument's name or value.
 Guessing would silently change which key a translator has to supply. If you need `.one`/`.other` for a custom rule,
 select it in an [advanced resolver](#advanced-resolvers).
 
-Axial never invents a key for `Constraint.custom` prose. A key it made up would name a catalogue entry that does
+Reified never invents a key for `Constraint.custom` prose. A key it made up would name a catalogue entry that does
 not exist, and the lookup would fail in production, in the language you did not test.
 
 ## Plurals
@@ -384,11 +384,11 @@ let renderer =
 The answer means:
 
 - `None` — continue to the next, less specific level;
-- `MessageResolution.Template template` — Axial interpolates and formats it;
-- `MessageResolution.Rendered text` — you rendered it; Axial never interpolates that text again, so literal braces
+- `MessageResolution.Template template` — Reified interpolates and formats it;
+- `MessageResolution.Rendered text` — you rendered it; Reified never interpolates that text again, so literal braces
   in it stay literal.
 
-`Rendered` is final for the entry that was requested. Axial may still use its text as the `{message}` of
+`Rendered` is final for the entry that was requested. Reified may still use its text as the `{message}` of
 `constraint.actual`, as a child of a group pattern, or as the `{message}` of `constraint.fullMessage`, because
 those are separate entries with their own resolution.
 
@@ -406,7 +406,7 @@ Renderer.Advanced.format spec renderer             // render any catalogue's ent
 
 These take a `MessageFormatSpec`: a message identity and arguments (`MessageDescriptor`) plus the owning
 catalogue's neutral fallback and plural operand. That pairing is what lets Schema — or your own catalogue — reuse
-every renderer mechanic without `Axial.Constraint` knowing a single one of its keys.
+every renderer mechanic without `Reified.Constraint` knowing a single one of its keys.
 
 ```fsharp
 let spec =
@@ -435,7 +435,7 @@ compatibility is promised for `render` only.
 
 ## The key catalogue
 
-Every key Axial can produce. `actual` is not listed as an argument on any predicate: it arrives through the
+Every key Reified can produce. `actual` is not listed as an argument on any predicate: it arrives through the
 separate `constraint.actual` entry.
 
 | Key | Arguments | Plural on | Default English |
@@ -515,7 +515,7 @@ undocumented or unimplemented.
 
 ### The Schema catalogue
 
-`Axial.Schema` owns its own keys for parse, boundary-supply, and structural failures. They stay in that package —
+`Reified.Schema` owns its own keys for parse, boundary-supply, and structural failures. They stay in that package —
 Schema depends on Constraint and never the reverse.
 
 | Key | Arguments | Default English |

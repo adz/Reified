@@ -1,4 +1,4 @@
-# Axial v1 Baseline and API Surface Policy
+# Reified v1 Baseline and API Surface Policy
 
 This file records the current v1 stabilization baseline. It is for maintainers and coding agents, not user-facing
 documentation.
@@ -11,8 +11,8 @@ documentation.
 - Node.js used locally: `v26.1.0`
 
 Note (2026-07-12): the validated-command record below is historical — it predates the 2026-07-09..13 renames and
-references test projects that have since been restructured (`Axial.Refined.Tests` and `Axial.ErrorHandling.Tests`
-folded into `Axial.ErrorHandling.Tests`). The project lists in this file were corrected on 2026-07-12; a fresh
+references test projects that have since been restructured (`Reified.Refinements.Tests` and `Reified.ErrorHandling.Tests`
+folded into `Reified.ErrorHandling.Tests`). The project lists in this file were corrected on 2026-07-12; a fresh
 validated-command pass is queued in `dev-docs/TASKS.md`.
 
 Validated commands for this refresh:
@@ -21,20 +21,20 @@ Validated commands for this refresh:
 bash scripts/check-source-inventory.sh
 => Source inventory covers src/tests .fs and .fsproj files.
 
-dotnet build tests/Axial.ApiShape.Tests/Axial.ApiShape.Tests.fsproj --no-restore --nologo -v minimal
-dotnet build tests/Axial.Result.Tests/Axial.Result.Tests.fsproj --no-restore --nologo -v minimal
-dotnet build tests/Axial.Constraint.Tests/Axial.Constraint.Tests.fsproj --no-restore --nologo -v minimal
+dotnet build tests/Reified.ApiShape.Tests/Reified.ApiShape.Tests.fsproj --no-restore --nologo -v minimal
+dotnet build tests/Reified.Result.Tests/Reified.Result.Tests.fsproj --no-restore --nologo -v minimal
+dotnet build tests/Reified.Constraint.Tests/Reified.Constraint.Tests.fsproj --no-restore --nologo -v minimal
 dotnet build tests/Axial.Flow.FileSystem.Tests/Axial.Flow.FileSystem.Tests.fsproj --no-restore --nologo -v minimal
 dotnet build tests/Axial.Flow.Hosting.Tests/Axial.Flow.Hosting.Tests.fsproj --no-restore --nologo -v minimal
 dotnet build tests/Axial.Flow.Integration.Tests/Axial.Flow.Integration.Tests.fsproj --no-restore --nologo -v minimal
 dotnet build tests/Axial.Flow.PlatformService.Tests/Axial.Flow.PlatformService.Tests.fsproj --no-restore --nologo -v minimal
 dotnet build tests/Axial.Flow.Telemetry.Tests/Axial.Flow.Telemetry.Tests.fsproj --no-restore --nologo -v minimal
 dotnet build tests/Axial.Flow.Tests/Axial.Flow.Tests.fsproj --no-restore --nologo -v minimal
-dotnet build tests/Axial.Refined.Tests/Axial.Refined.Tests.fsproj --no-restore --nologo -v minimal
-dotnet build tests/Axial.Schema.Tests/Axial.Schema.Tests.fsproj --no-restore --nologo -v minimal
-dotnet build tests/Axial.Schema.Tests/Axial.Schema.Tests.fsproj --no-restore --nologo -v minimal
-dotnet build tests/Axial.Result.Tests/Axial.Result.Tests.fsproj --no-restore --nologo -v minimal
-dotnet build tests/Axial.Constraint.Tests/Axial.Constraint.Tests.fsproj --no-restore --nologo -v minimal
+dotnet build tests/Reified.Refinements.Tests/Reified.Refinements.Tests.fsproj --no-restore --nologo -v minimal
+dotnet build tests/Reified.Schema.Tests/Reified.Schema.Tests.fsproj --no-restore --nologo -v minimal
+dotnet build tests/Reified.Schema.Tests/Reified.Schema.Tests.fsproj --no-restore --nologo -v minimal
+dotnet build tests/Reified.Result.Tests/Reified.Result.Tests.fsproj --no-restore --nologo -v minimal
+dotnet build tests/Reified.Constraint.Tests/Reified.Constraint.Tests.fsproj --no-restore --nologo -v minimal
 => Build succeeded for each package-boundary test project.
 
 bash scripts/run-aot-probe.sh
@@ -44,19 +44,19 @@ bash scripts/run-aot-probe.sh
 Additional validated commands for this refresh:
 
 ```text
-dotnet test tests/Axial.ApiShape.Tests --nologo (36 passed)
-dotnet test tests/Axial.Schema.Tests --nologo (56 passed)
-dotnet test tests/Axial.Schema.Json.Tests --nologo (13 passed)
-dotnet test tests/Axial.Schema.Tests --nologo (stale count; re-baseline after the 2026-07 renames)
+dotnet test tests/Reified.ApiShape.Tests --nologo (36 passed)
+dotnet test tests/Reified.Schema.Tests --nologo (56 passed)
+dotnet test tests/Reified.Schema.Json.Tests --nologo (13 passed)
+dotnet test tests/Reified.Schema.Tests --nologo (stale count; re-baseline after the 2026-07 renames)
 dotnet test tests/Axial.Flow.Tests --nologo (89 passed)
 bash scripts/validate-docs.sh
 => Docs validation build succeeded, including regenerated reference docs.
 ```
 
 Known validation gaps observed during this refresh: none. The previous Fable gaps are fixed:
-`benchmarks/Axial.Benchmarks.Fable` now compiles `Predicates.fs` before `Constraint.fs`, and
+`benchmarks/Reified.Benchmarks.Fable` now compiles `Predicates.fs` before `Constraint.fs`, and
 `ValueSchema.inspectUnderlying` guards its .NET-only generic projection-type validation with `#if !FABLE_COMPILER`, so
-`dotnet build Axial.slnx` and `bash scripts/check-fable-js-surface.sh` both pass.
+`dotnet build Reified.slnx` and `bash scripts/check-fable-js-surface.sh` both pass.
 
 The full solution build, generated API docs, docs preview, production site build, and an unrestricted `dotnet test` run
 are required before committing any release/API-surface update. Record their result in the commit summary when they are
@@ -64,13 +64,13 @@ run.
 
 ## Package-Boundary Test Projects
 
-The old monolithic `tests/Axial.Tests/Axial.Tests.fsproj` harness has been replaced by package-boundary test projects:
+The old monolithic `tests/Reified.Tests/Reified.Tests.fsproj` harness has been replaced by package-boundary test projects:
 
-- `tests/Axial.ApiShape.Tests/Axial.ApiShape.Tests.fsproj`
-- `tests/Axial.Schema.Json.Tests/Axial.Schema.Json.Tests.fsproj`
-- `tests/Axial.Result.Tests/Axial.Result.Tests.fsproj`
-- `tests/Axial.Constraint.Tests/Axial.Constraint.Tests.fsproj`
-- `tests/Axial.Refined.Tests/Axial.Refined.Tests.fsproj`
+- `tests/Reified.ApiShape.Tests/Reified.ApiShape.Tests.fsproj`
+- `tests/Reified.Schema.Json.Tests/Reified.Schema.Json.Tests.fsproj`
+- `tests/Reified.Result.Tests/Reified.Result.Tests.fsproj`
+- `tests/Reified.Constraint.Tests/Reified.Constraint.Tests.fsproj`
+- `tests/Reified.Refinements.Tests/Reified.Refinements.Tests.fsproj`
 - `tests/Axial.Flow.FileSystem.Tests/Axial.Flow.FileSystem.Tests.fsproj`
 - `tests/Axial.Flow.Hosting.Tests/Axial.Flow.Hosting.Tests.fsproj`
 - `tests/Axial.Flow.HttpClient.Tests/Axial.Flow.HttpClient.Tests.fsproj`
@@ -78,19 +78,19 @@ The old monolithic `tests/Axial.Tests/Axial.Tests.fsproj` harness has been repla
 - `tests/Axial.Flow.PlatformService.Tests/Axial.Flow.PlatformService.Tests.fsproj`
 - `tests/Axial.Flow.Telemetry.Tests/Axial.Flow.Telemetry.Tests.fsproj`
 - `tests/Axial.Flow.Tests/Axial.Flow.Tests.fsproj`
-- `tests/Axial.ReferenceApp.Tests/Axial.ReferenceApp.Tests.fsproj`
-- `tests/Axial.Schema.Contracts.Tests/Axial.Schema.Contracts.Tests.fsproj`
-- `tests/Axial.Schema.Testing.Tests/Axial.Schema.Testing.Tests.fsproj`
-- `tests/Axial.Schema.Tests/Axial.Schema.Tests.fsproj`
+- `tests/Reified.ReferenceApp.Tests/Reified.ReferenceApp.Tests.fsproj`
+- `tests/Reified.Schema.Contracts.Tests/Reified.Schema.Contracts.Tests.fsproj`
+- `tests/Reified.Schema.Testing.Tests/Reified.Schema.Testing.Tests.fsproj`
+- `tests/Reified.Schema.Tests/Reified.Schema.Tests.fsproj`
 
 ## CI Baseline Gates
 
 CI currently proves:
 
-- every `src/**/*.fsproj` and `tests/**/*.fsproj` project is listed by `Axial.slnx`
+- every `src/**/*.fsproj` and `tests/**/*.fsproj` project is listed by `Reified.slnx`
 - every `src/**/*.fs` and `tests/**/*.fs` file is explicitly compiled by a `src` or `tests` project
 - the package-boundary test projects run
-- `tests/Axial.ApiShape.Tests` compiles the public API surface expected by users and examples
+- `tests/Reified.ApiShape.Tests` compiles the public API surface expected by users and examples
 - the intended Fable JavaScript surface compiles and excludes .NET-only `ColdTask`
 - examples run
 - the NativeAOT probe publishes and runs
@@ -99,12 +99,12 @@ CI currently proves:
 
 ## API Surface Policy Before 1.0
 
-Axial is still pre-1.0, so breaking changes are allowed when they improve coherence. However, every public API change
+Reified is still pre-1.0, so breaking changes are allowed when they improve coherence. However, every public API change
 must be deliberate.
 
 Required checks for public API changes:
 
-1. Update or extend `tests/Axial.ApiShape.Tests/ApiShapeTests.fs` in the same change.
+1. Update or extend `tests/Reified.ApiShape.Tests/ApiShapeTests.fs` in the same change.
 2. Update XML docs on the changed public members.
 3. Regenerate API docs with `bash scripts/generate-api-docs.sh`.
 4. Build the docs site with `npm run build` in `site`.
@@ -129,7 +129,7 @@ the named modules, types, and members users and examples are expected to depend 
 - computation builders
 - `Constraint`, `Violation`, `Renderer`, `Catalogue`, `Bind`, `BindError`
 - `Schema`, `Value`, `Field`, `Inspect` and its description types, `JsonSchema`
-- `Axial.Schema.Json` `Json` module and `JsonCodec`
+- `Reified.Schema.Json` `Json` module and `JsonCodec`
 - `Data`, `Schema.parse`/`Schema.check`, `RetainedParseResult`, `SchemaError`, `Contract`
 - `Policy` and `Flow.verify`
 - the leaf-package dependency graph (`leaf packages stay independent of each other`)

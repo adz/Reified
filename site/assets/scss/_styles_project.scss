@@ -1,4 +1,4 @@
-// Custom styles for Axial docs
+// Custom styles for Reified docs
 @font-face {
   font-family: "Rajdhani";
   src: url("/content/fonts/Rajdhani-Medium.ttf") format("truetype");
@@ -15,47 +15,47 @@
   font-display: swap;
 }
 
-$axial-text: "Inter", "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
-$axial-code: "JetBrains Mono", "Cascadia Code", "Fira Code", "SFMono-Regular", Consolas, monospace;
-$axial-display: "Rajdhani", "Arial Narrow", $axial-text;
+$reified-text: "Inter", "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+$reified-code: "JetBrains Mono", "Cascadia Code", "Fira Code", "SFMono-Regular", Consolas, monospace;
+$reified-display: "Rajdhani", "Arial Narrow", $reified-text;
 
 :root,
 [data-bs-theme="light"] {
   --bs-body-bg: #f1eee8;
-  --axial-masthead-bg: var(--bs-body-bg, #fff);
-  --axial-masthead-border: #dfe3e5;
-  --axial-brand: #303b40;
-  --axial-nav: #667177;
-  --axial-nav-hover: #34464d;
-  --axial-nav-active: #172e37;
-  --axial-mark: #46565d;
-  --axial-mark-highlight: #829097;
-  --axial-mark-shadow: rgba(255, 255, 255, 0.8);
-  --axial-core: #39474d;
-  --axial-bore: #d0d6d8;
-  --axial-control-bg: #fff;
-  --axial-control-border: #d5dbde;
+  --reified-masthead-bg: var(--bs-body-bg, #fff);
+  --reified-masthead-border: #dfe3e5;
+  --reified-brand: #303b40;
+  --reified-nav: #667177;
+  --reified-nav-hover: #34464d;
+  --reified-nav-active: #172e37;
+  --reified-mark: #46565d;
+  --reified-mark-highlight: #829097;
+  --reified-mark-shadow: rgba(255, 255, 255, 0.8);
+  --reified-core: #39474d;
+  --reified-bore: #d0d6d8;
+  --reified-control-bg: #fff;
+  --reified-control-border: #d5dbde;
 }
 
 [data-bs-theme="dark"] {
   --bs-body-bg: #1b1b1f;
-  --axial-masthead-bg: var(--bs-body-bg, #15191b);
-  --axial-masthead-border: #30383c;
-  --axial-brand: #d3d8d6;
-  --axial-nav: #9ca8a6;
-  --axial-nav-hover: #c3cfcc;
-  --axial-nav-active: #e0e5e2;
-  --axial-mark: #aeb9b8;
-  --axial-mark-highlight: #e0e5e2;
-  --axial-mark-shadow: rgba(0, 0, 0, 0.85);
-  --axial-core: #b7c1bf;
-  --axial-bore: #202629;
-  --axial-control-bg: #202629;
-  --axial-control-border: #3c464a;
+  --reified-masthead-bg: var(--bs-body-bg, #15191b);
+  --reified-masthead-border: #30383c;
+  --reified-brand: #d3d8d6;
+  --reified-nav: #9ca8a6;
+  --reified-nav-hover: #c3cfcc;
+  --reified-nav-active: #e0e5e2;
+  --reified-mark: #aeb9b8;
+  --reified-mark-highlight: #e0e5e2;
+  --reified-mark-shadow: rgba(0, 0, 0, 0.85);
+  --reified-core: #b7c1bf;
+  --reified-bore: #202629;
+  --reified-control-bg: #202629;
+  --reified-control-border: #3c464a;
 }
 
 body {
-  font-family: $axial-text;
+  font-family: $reified-text;
   color: #243041;
   background: #f1eee8;
 }
@@ -66,7 +66,7 @@ body {
 }
 
 .td-content {
-  font-family: $axial-text;
+  font-family: $reified-text;
 
   p,
   li,
@@ -102,7 +102,7 @@ kbd,
 pre,
 samp,
 .highlight {
-  font-family: $axial-code;
+  font-family: $reified-code;
 }
 
 .td-content :not(pre) > code {
@@ -112,8 +112,8 @@ samp,
 .td-navbar {
   min-height: 4.7rem;
   padding: 0.32rem 0.9rem;
-  border-bottom: 1px solid var(--axial-masthead-border);
-  background: var(--axial-masthead-bg);
+  border-bottom: 1px solid var(--reified-masthead-border);
+  background: var(--reified-masthead-bg);
   box-shadow: none;
   overflow: visible;
 
@@ -128,12 +128,12 @@ samp,
     gap: 0.06rem;
     margin: 0;
     padding: 0 0.5rem;
-    color: var(--axial-brand);
+    color: var(--reified-brand);
     text-decoration: none;
     overflow: visible;
 
     &:hover {
-      color: var(--axial-nav-active);
+      color: var(--reified-nav-active);
     }
   }
 
@@ -157,8 +157,8 @@ samp,
   .nav-link {
     padding: 0.58rem 0.85rem 0.48rem;
     border-bottom: 2px solid transparent;
-    color: var(--axial-nav);
-    font-family: $axial-display;
+    color: var(--reified-nav);
+    font-family: $reified-display;
     font-size: 0.98rem;
     font-weight: 600;
     letter-spacing: 0.075em;
@@ -166,25 +166,25 @@ samp,
     transition: color 130ms ease, border-color 130ms ease, text-shadow 130ms ease;
 
     &:hover {
-      color: var(--axial-nav-hover);
-      border-bottom-color: color-mix(in srgb, var(--axial-nav-hover) 38%, transparent);
+      color: var(--reified-nav-hover);
+      border-bottom-color: color-mix(in srgb, var(--reified-nav-hover) 38%, transparent);
       text-shadow: none;
     }
 
     &.active,
     &[aria-current="page"] {
-      color: var(--axial-nav-active);
-      border-bottom-color: var(--axial-nav-active);
+      color: var(--reified-nav-active);
+      border-bottom-color: var(--reified-nav-active);
       text-shadow: none;
     }
   }
 
   .td-version-menu .dropdown-toggle {
-    border: 1px solid var(--axial-control-border);
+    border: 1px solid var(--reified-control-border);
     border-radius: 3px;
-    background: var(--axial-control-bg);
-    color: var(--axial-brand);
-    font-family: $axial-display;
+    background: var(--reified-control-bg);
+    color: var(--reified-brand);
+    font-family: $reified-display;
     font-size: 0.94rem;
     font-weight: 600;
     letter-spacing: 0.045em;
@@ -192,10 +192,10 @@ samp,
   }
 
   .td-search__input {
-    border-color: var(--axial-control-border);
+    border-color: var(--reified-control-border);
     border-radius: 3px;
-    background: var(--axial-control-bg);
-    color: var(--axial-brand);
+    background: var(--reified-control-bg);
+    color: var(--reified-brand);
 
     &::placeholder {
       color: #747d84;
@@ -227,12 +227,12 @@ samp,
   }
 }
 
-.axial-sidebar-collapse-toggle {
+.reified-sidebar-collapse-toggle {
   display: none;
 }
 
 @media (max-width: 767.98px) {
-  .axial-sidebar-collapse-toggle {
+  .reified-sidebar-collapse-toggle {
     display: block;
     width: 100%;
     margin: 0.35rem 0 0.75rem;
@@ -248,7 +248,7 @@ samp,
   }
 }
 
-.axial-pre1-banner {
+.reified-pre1-banner {
   width: 100%;
   min-height: 2.75rem;
   margin: 4rem 0 1.25rem;
@@ -263,22 +263,22 @@ samp,
 }
 
 @media (min-width: 768px) {
-  body .axial-pre1-banner {
+  body .reified-pre1-banner {
     margin-top: 4.7rem;
   }
 }
 
-.axial-pre1-banner p {
+.reified-pre1-banner p {
   margin: 0;
 }
 
-.axial-pre1-banner code {
+.reified-pre1-banner code {
   color: inherit;
   background: rgba(124, 45, 18, 0.08);
 }
 
 @media (min-width: 768px) {
-  .axial-pre1-banner + .row > main {
+  .reified-pre1-banner + .row > main {
     padding-top: var(--td-main-padding-top);
   }
 }
@@ -292,18 +292,18 @@ samp,
 
 [data-bs-theme="dark"] {
   .docs-home-copy h1,
-  .axial-door h2 {
+  .reified-door h2 {
     color: #d7dfe1;
   }
 
   .lede,
   .docs-card p,
-  .axial-door p,
-  .axial-diag,
-  .axial-checks li,
-  .axial-lane > p,
-  .axial-machinery p,
-  .axial-strip p,
+  .reified-door p,
+  .reified-diag,
+  .reified-checks li,
+  .reified-lane > p,
+  .reified-machinery p,
+  .reified-strip p,
   .coord-pill {
     color: #aebbc0;
   }
@@ -311,9 +311,9 @@ samp,
   .docs-chip,
   .docs-card,
   .docs-home-cta,
-  .axial-door,
-  .axial-panel,
-  .axial-lane,
+  .reified-door,
+  .reified-panel,
+  .reified-lane,
   .coord-pill,
   .coord-hub {
     border-color: #35353b;
@@ -341,7 +341,7 @@ samp,
   display: block;
   max-width: 60ch;
   margin: 0 0 2.5rem;
-  font-family: $axial-text;
+  font-family: $reified-text;
   font-size: 1.4rem;
   line-height: 1.6;
   color: #334155;
@@ -694,22 +694,22 @@ samp,
 // Product landing pages (/, /result/, /values/, /data/, /schema/, /flow/)
 // ---------------------------------------------------------------------------
 
-$axial-parse: #0b55d9;
+$reified-parse: #0b55d9;
 $axial-flow: #6d4fc4;
-$axial-result: #0a7d62;
-$axial-values: #1f7a8c;
-$axial-data: #a34f00;
+$reified-result: #0a7d62;
+$reified-values: #1f7a8c;
+$reified-data: #a34f00;
 
 // Homepage: no navbar, hero fills the viewport.
-body.axial-home header {
+body.reified-home header {
   display: none;
 }
 
-body.axial-home .td-main {
+body.reified-home .td-main {
   padding-top: 0;
 }
 
-body.axial-home .docs-home-hero {
+body.reified-home .docs-home-hero {
   grid-template-columns: 1fr;
   justify-items: center;
   text-align: center;
@@ -718,17 +718,17 @@ body.axial-home .docs-home-hero {
   padding-bottom: 0;
 }
 
-body.axial-home .docs-home-hero-visual {
+body.reified-home .docs-home-hero-visual {
   max-width: 420px;
   margin: 0 auto;
 }
 
-body.axial-home .lede {
+body.reified-home .lede {
   margin-left: auto;
   margin-right: auto;
 }
 
-body.axial-home .axial-doors {
+body.reified-home .reified-doors {
   margin-top: 2rem;
 }
 
@@ -779,14 +779,14 @@ body.axial-home .axial-doors {
   }
 }
 
-.axial-doors {
+.reified-doors {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 2rem;
   margin: 3rem 0;
 }
 
-.axial-door {
+.reified-door {
   display: block;
   padding: 2.25rem 2rem 2rem;
   border: 1px solid rgba(0,0,0,0.08);
@@ -805,7 +805,7 @@ body.axial-home .axial-doors {
     color: inherit;
   }
 
-  .axial-door-kicker {
+  .reified-door-kicker {
     display: block;
     margin-bottom: 0.6rem;
     font-size: 0.8rem;
@@ -829,43 +829,43 @@ body.axial-home .axial-doors {
     line-height: 1.65;
   }
 
-  .axial-door-cta {
+  .reified-door-cta {
     font-weight: 700;
   }
 }
 
-.axial-door--parse {
-  border-top-color: $axial-parse;
-  .axial-door-kicker, .axial-door-cta { color: $axial-parse; }
+.reified-door--parse {
+  border-top-color: $reified-parse;
+  .reified-door-kicker, .reified-door-cta { color: $reified-parse; }
 }
 
-.axial-door--data {
-  border-top-color: $axial-data;
-  .axial-door-kicker, .axial-door-cta { color: $axial-data; }
+.reified-door--data {
+  border-top-color: $reified-data;
+  .reified-door-kicker, .reified-door-cta { color: $reified-data; }
 }
 
-.axial-door--flow {
+.reified-door--flow {
   border-top-color: $axial-flow;
-  .axial-door-kicker, .axial-door-cta { color: $axial-flow; }
+  .reified-door-kicker, .reified-door-cta { color: $axial-flow; }
 }
 
-.axial-door--result {
-  border-top-color: $axial-result;
-  .axial-door-kicker, .axial-door-cta { color: $axial-result; }
+.reified-door--result {
+  border-top-color: $reified-result;
+  .reified-door-kicker, .reified-door-cta { color: $reified-result; }
 }
 
-.axial-door--values {
-  border-top-color: $axial-values;
-  .axial-door-kicker, .axial-door-cta { color: $axial-values; }
+.reified-door--values {
+  border-top-color: $reified-values;
+  .reified-door-kicker, .reified-door-cta { color: $reified-values; }
 }
 
-.axial-hero-panels {
+.reified-hero-panels {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
 }
 
-.axial-panel {
+.reified-panel {
   padding: 1.1rem 1.25rem;
   border: 1px solid rgba(0,0,0,0.08);
   border-radius: 10px;
@@ -887,7 +887,7 @@ body.axial-home .axial-doors {
   }
 }
 
-.axial-diag {
+.reified-diag {
   font-family: $font-family-monospace, monospace;
   font-size: 0.88rem;
   line-height: 1.6;
@@ -905,7 +905,7 @@ body.axial-home .axial-doors {
   }
 }
 
-.axial-checks {
+.reified-checks {
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem 2rem;
@@ -926,23 +926,23 @@ body.axial-home .axial-doors {
     &::before {
       content: "\2713";
       font-weight: 800;
-      color: $axial-parse;
+      color: $reified-parse;
     }
   }
 }
 
-.axial-checks--flow li::before {
+.reified-checks--flow li::before {
   color: $axial-flow;
 }
 
-.axial-lanes {
+.reified-lanes {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 1.5rem;
   margin: 1.5rem 0 2.5rem;
 }
 
-.axial-lane {
+.reified-lane {
   padding: 1.6rem 1.6rem 1.2rem;
   border: 1px solid rgba(0,0,0,0.07);
   border-radius: 10px;
@@ -966,7 +966,7 @@ body.axial-home .axial-doors {
   }
 }
 
-.axial-machinery {
+.reified-machinery {
   margin: 0 0 2.5rem;
 
   .label {
@@ -980,7 +980,7 @@ body.axial-home .axial-doors {
   }
 }
 
-.axial-strip {
+.reified-strip {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1003,19 +1003,19 @@ body.axial-home .axial-doors {
   }
 }
 
-.axial-strip--flow {
+.reified-strip--flow {
   background: rgba(109, 79, 196, 0.07);
   border: 1px solid rgba(109, 79, 196, 0.18);
   a { color: $axial-flow; }
 }
 
-.axial-strip--parse {
+.reified-strip--parse {
   background: rgba(11, 85, 217, 0.06);
   border: 1px solid rgba(11, 85, 217, 0.16);
-  a { color: $axial-parse; }
+  a { color: $reified-parse; }
 }
 
-.axial-variants {
+.reified-variants {
   margin: 1rem 0 2.5rem;
 
   table {
@@ -1028,7 +1028,7 @@ body.axial-home .axial-doors {
   }
 }
 
-.axial-landing h1 {
+.reified-landing h1 {
   font-size: 3.1rem;
   font-weight: 850;
   line-height: 1.05;
@@ -1037,33 +1037,33 @@ body.axial-home .axial-doors {
   margin-bottom: 1.6rem;
 }
 
-.axial-landing .docs-home-hero {
+.reified-landing .docs-home-hero {
   align-items: start;
   padding-top: 3.5rem;
 }
 
 @media (max-width: 900px) {
-  .axial-landing h1 {
+  .reified-landing h1 {
     font-size: 2.3rem;
   }
 }
 
 // Coordination diagram on the Flow landing page
-.axial-coord {
+.reified-coord {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: stretch;
   margin: 3rem 0 1rem;
 }
 
-.axial-coord-col {
+.reified-coord-col {
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 0.7rem;
 }
 
-.axial-coord-label {
+.reified-coord-label {
   display: block;
   margin-bottom: 0.4rem;
   font-size: 0.72rem;
@@ -1073,8 +1073,8 @@ body.axial-home .axial-doors {
   color: #94a3b8;
 }
 
-.axial-coord-col--left .axial-coord-label { text-align: left; }
-.axial-coord-col--right .axial-coord-label { text-align: right; }
+.reified-coord-col--left .reified-coord-label { text-align: left; }
+.reified-coord-col--right .reified-coord-label { text-align: right; }
 
 .coord-row {
   display: flex;
@@ -1100,11 +1100,11 @@ body.axial-home .axial-doors {
   border-top: 1px dashed rgba(100, 116, 139, 0.5);
 }
 
-.axial-coord-col--right .coord-row {
+.reified-coord-col--right .coord-row {
   justify-content: flex-end;
 }
 
-.axial-coord-mid {
+.reified-coord-mid {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1139,7 +1139,7 @@ body.axial-home .axial-doors {
   }
 }
 
-.axial-coord-caption {
+.reified-coord-caption {
   margin: 1rem 0 2.5rem;
   text-align: center;
   font-size: 0.92rem;
@@ -1147,12 +1147,12 @@ body.axial-home .axial-doors {
 }
 
 @media (max-width: 820px) {
-  .axial-coord {
+  .reified-coord {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
 
-  .axial-coord-mid {
+  .reified-coord-mid {
     border-left: 0;
     border-right: 0;
     border-top: 1px dashed rgba(100, 116, 139, 0.35);
@@ -1161,18 +1161,18 @@ body.axial-home .axial-doors {
     order: 2;
   }
 
-  .axial-coord-col--left { order: 1; }
-  .axial-coord-col--right { order: 3; }
+  .reified-coord-col--left { order: 1; }
+  .reified-coord-col--right { order: 3; }
 
   .coord-line { display: none; }
 
   .coord-row,
-  .axial-coord-col--right .coord-row {
+  .reified-coord-col--right .coord-row {
     justify-content: center;
   }
 
-  .axial-coord-col--left .axial-coord-label,
-  .axial-coord-col--right .axial-coord-label {
+  .reified-coord-col--left .reified-coord-label,
+  .reified-coord-col--right .reified-coord-label {
     text-align: center;
   }
 }
@@ -1183,7 +1183,7 @@ body.axial-home .axial-doors {
   margin-left: 0;
 }
 
-.axial-package-nav {
+.reified-package-nav {
   margin: 0 0 0.45rem;
   padding: 0;
 
@@ -1192,7 +1192,7 @@ body.axial-home .axial-doors {
   }
 }
 
-.axial-package-nav__title {
+.reified-package-nav__title {
   margin: 0 0 0.35rem;
   padding: 0;
   border-bottom: 1px solid rgba(100, 116, 139, 0.22);
@@ -1212,7 +1212,7 @@ body.axial-home .axial-doors {
   }
 }
 
-.axial-package-nav.active-path {
+.reified-package-nav.active-path {
   padding-bottom: 0.55rem;
 }
 
@@ -1223,12 +1223,12 @@ body.axial-home .axial-doors {
 // color, matching the home page door and the section index page's heading.
 // Unlike other package titles, the primary title stays in its accent color
 // whether or not it's the active group.
-.axial-package-nav--primary {
+.reified-package-nav--primary {
   margin-bottom: 1.05rem;
   border-radius: 0.4rem;
   background: var(--pkg-accent-bg, rgba(11, 85, 217, 0.06));
 
-  .axial-package-nav__title {
+  .reified-package-nav__title {
     border-bottom-color: var(--pkg-accent-border, rgba(11, 85, 217, 0.25));
 
     a,
@@ -1243,19 +1243,19 @@ body.axial-home .axial-doors {
 }
 
 .td-section-nav--result {
-  --pkg-accent: #{$axial-result};
+  --pkg-accent: #{$reified-result};
   --pkg-accent-bg: rgba(10, 125, 98, 0.06);
   --pkg-accent-border: rgba(10, 125, 98, 0.25);
 }
 
 .td-section-nav--values {
-  --pkg-accent: #{$axial-values};
+  --pkg-accent: #{$reified-values};
   --pkg-accent-bg: rgba(31, 122, 140, 0.06);
   --pkg-accent-border: rgba(31, 122, 140, 0.25);
 }
 
 .td-section-nav--schema {
-  --pkg-accent: #{$axial-parse};
+  --pkg-accent: #{$reified-parse};
   --pkg-accent-bg: rgba(11, 85, 217, 0.06);
   --pkg-accent-border: rgba(11, 85, 217, 0.25);
 }
@@ -1266,7 +1266,7 @@ body.axial-home .axial-doors {
   --pkg-accent-border: rgba(109, 79, 196, 0.25);
 }
 
-.axial-package-nav__caption {
+.reified-package-nav__caption {
   margin: -0.2rem 0 0.4rem;
   padding: 0 0.75rem 0.5rem;
   color: #64748b;
@@ -1280,18 +1280,18 @@ body.axial-home .axial-doors {
   display: none;
 }
 
-.axial-package-nav.active-path > .axial-package-nav__caption,
-.axial-package-nav--primary > .axial-package-nav__caption {
+.reified-package-nav.active-path > .reified-package-nav__caption,
+.reified-package-nav--primary > .reified-package-nav__caption {
   display: block;
 }
 
-.axial-package-nav:not(.active-path):not(.axial-package-nav--primary) {
+.reified-package-nav:not(.active-path):not(.reified-package-nav--primary) {
   position: relative;
 
   // Only the header link triggers the tooltip, not the whole (mostly empty)
   // section box, and the tooltip itself never captures the pointer — so it
   // can float over the next item without blocking hover/clicks on it.
-  .axial-package-nav__title:hover + .axial-package-nav__caption {
+  .reified-package-nav__title:hover + .reified-package-nav__caption {
     display: block;
     position: absolute;
     left: 0.5rem;
@@ -1309,27 +1309,27 @@ body.axial-home .axial-doors {
 }
 
 [data-bs-theme="dark"] {
-  .axial-package-nav--primary {
+  .reified-package-nav--primary {
     background: rgba(143, 184, 255, 0.09);
   }
 
-  .axial-package-nav__caption {
+  .reified-package-nav__caption {
     color: #aebbc0;
   }
 }
 
 
-.axial-package-nav__items {
+.reified-package-nav__items {
   margin: 0;
   padding: 0;
 }
 
-.axial-package-nav .axial-package-nav__items {
+.reified-package-nav .reified-package-nav__items {
   margin-left: 0 !important;
   padding-inline: 0.75rem;
 }
 
-.axial-package-nav__item {
+.reified-package-nav__item {
   position: relative;
   min-width: 0;
   list-style: none;
@@ -1364,7 +1364,7 @@ body.axial-home .axial-doors {
   }
 }
 
-.axial-package-nav .td-sidebar-link {
+.reified-package-nav .td-sidebar-link {
   display: block;
   min-width: 0;
   padding: 0.2rem 0.15rem;
@@ -1400,8 +1400,8 @@ body.axial-home .axial-doors {
   .td-content h2,
   .td-content h3,
   .td-content h4,
-  .axial-landing h1,
-  .axial-package-nav:not(.axial-package-nav--primary) .axial-package-nav__title a {
+  .reified-landing h1,
+  .reified-package-nav:not(.reified-package-nav--primary) .reified-package-nav__title a {
     color: #e4ebed;
   }
 

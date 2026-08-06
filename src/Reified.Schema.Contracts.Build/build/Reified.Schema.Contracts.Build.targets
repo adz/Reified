@@ -1,0 +1,50 @@
+<Project>
+
+  <!--
+    [<DeriveSchema>] records are discovered automatically in ordinary F# Compile items.
+    Only .contract declarations need a separate MSBuild item:
+
+      <ItemGroup>
+        <ReifiedContract Include="contracts/*.contract" />
+      </ItemGroup>
+
+    Generated files go under obj by default and are inserted into F# compilation immediately after
+    their declaration file. CheckedIn mode writes sibling .g.fs files but still manages Compile ordering.
+
+    Properties:
+      ReifiedSchemaGenEnabled      - set false to skip generation (default true)
+      ReifiedSchemaNaming          - camel | snake | verbatim (default camel)
+      ReifiedSchemaGeneratedFiles  - Intermediate | CheckedIn (default Intermediate)
+      ReifiedContractNamespace     - namespace for .contract code (required with ReifiedContract items)
+      ReifiedSchemaGenToolPath     - override the task assembly path
+  -->
+
+  <PropertyGroup>
+    <ReifiedSchemaGenEnabled Condition="'$(ReifiedSchemaGenEnabled)' == ''">true</ReifiedSchemaGenEnabled>
+    <ReifiedSchemaNaming Condition="'$(ReifiedSchemaNaming)' == ''">camel</ReifiedSchemaNaming>
+    <ReifiedSchemaGeneratedFiles Condition="'$(ReifiedSchemaGeneratedFiles)' == ''">Intermediate</ReifiedSchemaGeneratedFiles>
+    <ReifiedSchemaGenToolPath Condition="'$(ReifiedSchemaGenToolPath)' == ''">$(MSBuildThisFileDirectory)../tools/schemagen.dll</ReifiedSchemaGenToolPath>
+  </PropertyGroup>
+
+  <UsingTask TaskName="Reified.Schema.Contracts.Build.GenerateSchemas" AssemblyFile="$(ReifiedSchemaGenToolPath)" />
+
+  <Target Name="ReifiedSchemaGen" BeforeTargets="CoreCompile" Condition="'$(ReifiedSchemaGenEnabled)' == 'true'">
+    <GenerateSchemas
+      Sources="@(Compile)"
+      Contracts="@(ReifiedContract)"
+      CompileItems="@(Compile)"
+      Naming="$(ReifiedSchemaNaming)"
+      ContractNamespace="$(ReifiedContractNamespace)"
+      ProjectDirectory="$(MSBuildProjectDirectory)"
+      IntermediateOutputPath="$(IntermediateOutputPath)"
+      OutputMode="$(ReifiedSchemaGeneratedFiles)">
+      <Output TaskParameter="GeneratedCompileItems" ItemName="_ReifiedCompile" />
+    </GenerateSchemas>
+
+    <ItemGroup>
+      <Compile Remove="@(Compile)" />
+      <Compile Include="@(_ReifiedCompile)" />
+    </ItemGroup>
+  </Target>
+
+</Project>

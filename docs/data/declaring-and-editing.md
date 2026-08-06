@@ -2,15 +2,15 @@
 weight: 20
 title: Declare, render, and edit data
 type: docs
-description: Every literal, rendering, and immutable edit operation in Axial.Data.
+description: Every literal, rendering, and immutable edit operation in Reified.Data.
 ---
 
 # Declare, render, and edit data
 
-Open `Axial` for `Data`. Open `Data.Syntax` for the concise operators and functions used on this page.
+Open `Reified` for `Data`. Open `Data.Syntax` for the concise operators and functions used on this page.
 
 ```fsharp
-open Axial.Data
+open Reified.Data
 open Data.Syntax
 ```
 

@@ -14,7 +14,7 @@ it for a person, or keep it structured when application code needs to classify o
 Use `Violation.render` at the edge where the failure becomes text:
 
 ```fsharp
-open Axial.Constraint
+open Reified.Constraint
 
 let retryCount : Constraint<int> =
     Constraint.between 0 10
@@ -113,7 +113,7 @@ The projections return `None` for a grouped violation because a group has more t
 Opaque rules created with `Constraint.custom` carry author-supplied prose instead; read a single opaque leaf with
 `Violation.tryDescription`.
 
-Axial-produced groups are never empty or wrapped around one child. If only one child fails, that violation is returned
+Reified-produced groups are never empty or wrapped around one child. If only one child fails, that violation is returned
 directly.
 
 ## Translate messages

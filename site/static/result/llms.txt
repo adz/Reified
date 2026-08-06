@@ -1,9 +1,9 @@
-# Axial Result
+# Reified Result
 
-- `Axial.Result` is a top-level product about composing failures, a peer of Values, Data, Schema, and Flow.
-- It is a standalone leaf: no dependency on any other Axial package, and no other Axial package depends on it.
+- `Reified.Result` is a top-level product about composing failures, a peer of Values, Data, Schema, and Flow.
+- It is a standalone leaf: no dependency on any other Reified package, and no other Reified package depends on it.
 - It works with the standard F# `Result<'value,'error>`; it never wraps or replaces that type.
-- Namespace is `Axial.Result`; `Builders` is `[<AutoOpen>]`, so `open Axial.Result` brings `result` into scope.
+- Namespace is `Reified.Result`; `Builders` is `[<AutoOpen>]`, so `open Reified.Result` brings `result` into scope.
 - Create: `Result.orError`, `Result.okOr`, `Result.errorOr`, `Result.fromTry`, `Result.fromChoice`,
   `Result.requireTrue`, `Result.okIf`, `Result.failIf`, `Result.guard`, and option/voption/nullable/null conversions.
 - Transform: `Result.map`, `Result.mapError`, `Result.bind`.
@@ -23,14 +23,14 @@
 - `result.set` and `result.seq` are deliberately not shipped. Use `Result.mapError Set.ofList` or
   `Result.mapError Seq.ofList` off `result.list`.
 - Accumulation here is flat: no path, no field identity, no reconstruction. Path-aware accumulation is
-  `Axial.Schema`'s and is not interchangeable.
-- `Axial.Constraint`, `Axial.Refined`, and `Axial.Parse` return the standard F# `Result`, so these helpers work on
+  `Reified.Schema`'s and is not interchangeable.
+- `Reified.Constraint`, `Reified.Refinements`, and `Reified.Parse` return the standard F# `Result`, so these helpers work on
   their output — but none of them depends on this package.
 
 Golden path:
 
 ```fsharp
-open Axial.Result
+open Reified.Result
 
 type SignupError =
     | NameMissing

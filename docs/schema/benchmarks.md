@@ -5,18 +5,18 @@ title: Benchmarks
 
 # Benchmarks
 
-This page shows the performance tradeoffs of using Axial compared to manual composition across the runtime shapes it supports.
+This page shows the performance tradeoffs of using Reified compared to manual composition across the runtime shapes it supports.
 
-The Flow benchmark harness lives in [benchmarks/Axial.Flow.Benchmarks/Suites.fs](https://github.com/adz/Axial/blob/main/benchmarks/Axial.Flow.Benchmarks/Suites.fs). Schema codec benchmarks live in their own project.
-The Fable runner lives in [benchmarks/Axial.Benchmarks.Fable/Program.fs](https://github.com/adz/Axial/blob/main/benchmarks/Axial.Benchmarks.Fable/Program.fs) and shares its workload definitions from [benchmarks/Axial.Benchmarks.Fable/Shared.fs](https://github.com/adz/Axial/blob/main/benchmarks/Axial.Benchmarks.Fable/Shared.fs).
-The Fable benchmark project is self-contained by source inclusion, so it can be compiled directly with Fable against the library projects under [src](https://github.com/adz/Axial/tree/main/src). Its local tool manifest lives in [benchmarks/Axial.Benchmarks.Fable/mise.toml](https://github.com/adz/Axial/blob/main/benchmarks/Axial.Benchmarks.Fable/mise.toml), with [benchmarks/Axial.Benchmarks.Fable/package.json](https://github.com/adz/Axial/blob/main/benchmarks/Axial.Benchmarks.Fable/package.json) for Node ESM execution and [scripts/run-fable-benchmarks.sh](https://github.com/adz/Axial/blob/main/scripts/run-fable-benchmarks.sh) for the target-specific runner.
+The Flow benchmark harness lives in [benchmarks/Axial.Flow.Benchmarks/Suites.fs](https://github.com/adz/Reified/blob/main/benchmarks/Axial.Flow.Benchmarks/Suites.fs). Schema codec benchmarks live in their own project.
+The Fable runner lives in [benchmarks/Reified.Benchmarks.Fable/Program.fs](https://github.com/adz/Reified/blob/main/benchmarks/Reified.Benchmarks.Fable/Program.fs) and shares its workload definitions from [benchmarks/Reified.Benchmarks.Fable/Shared.fs](https://github.com/adz/Reified/blob/main/benchmarks/Reified.Benchmarks.Fable/Shared.fs).
+The Fable benchmark project is self-contained by source inclusion, so it can be compiled directly with Fable against the library projects under [src](https://github.com/adz/Reified/tree/main/src). Its local tool manifest lives in [benchmarks/Reified.Benchmarks.Fable/mise.toml](https://github.com/adz/Reified/blob/main/benchmarks/Reified.Benchmarks.Fable/mise.toml), with [benchmarks/Reified.Benchmarks.Fable/package.json](https://github.com/adz/Reified/blob/main/benchmarks/Reified.Benchmarks.Fable/package.json) for Node ESM execution and [scripts/run-fable-benchmarks.sh](https://github.com/adz/Reified/blob/main/scripts/run-fable-benchmarks.sh) for the target-specific runner.
 
 The implementation split matters:
 
-- [src/Axial.Flow/Core.fs](https://github.com/adz/Axial/blob/main/src/Axial.Flow/Core.fs) defines `Execution<'value, 'error>` and flips its concrete shape by compiler target.
-- [src/Axial.Flow/Flow.fs](https://github.com/adz/Axial/blob/main/src/Axial.Flow/Flow.fs) exposes execution members such as `ToTask`, `ToValueTask`, `ToAsync`, and `RunSynchronously`.
-- [benchmarks/Axial.Flow.Benchmarks/Suites.fs](https://github.com/adz/Axial/blob/main/benchmarks/Axial.Flow.Benchmarks/Suites.fs) shows the manual baselines beside the `Flow` versions.
-- [scripts/run-benchmarks.sh](https://github.com/adz/Axial/blob/main/scripts/run-benchmarks.sh) prompts before starting the .NET benchmark run so you can stop other processes first.
+- [src/Axial.Flow/Core.fs](https://github.com/adz/Reified/blob/main/src/Axial.Flow/Core.fs) defines `Execution<'value, 'error>` and flips its concrete shape by compiler target.
+- [src/Axial.Flow/Flow.fs](https://github.com/adz/Reified/blob/main/src/Axial.Flow/Flow.fs) exposes execution members such as `ToTask`, `ToValueTask`, `ToAsync`, and `RunSynchronously`.
+- [benchmarks/Axial.Flow.Benchmarks/Suites.fs](https://github.com/adz/Reified/blob/main/benchmarks/Axial.Flow.Benchmarks/Suites.fs) shows the manual baselines beside the `Flow` versions.
+- [scripts/run-benchmarks.sh](https://github.com/adz/Reified/blob/main/scripts/run-benchmarks.sh) prompts before starting the .NET benchmark run so you can stop other processes first.
 
 ## Summary
 
@@ -122,12 +122,12 @@ The practical read is unchanged: `Flow` stays competitive with the direct baseli
 
 ### Schema JSON Codec
 
-The codec suites measure `Axial.Schema.Json` — the JSON codec compiled from a `Schema<'model>` declaration — on a realistic aggregate (seven primitive fields, one nested record, and two collections) against `System.Text.Json` on the same model. Both suites live in [benchmarks/Axial.Schema.Benchmarks/CodecSuites.fs](https://github.com/adz/Axial/blob/main/benchmarks/Axial.Schema.Benchmarks/CodecSuites.fs).
+The codec suites measure `Reified.Schema.Json` — the JSON codec compiled from a `Schema<'model>` declaration — on a realistic aggregate (seven primitive fields, one nested record, and two collections) against `System.Text.Json` on the same model. Both suites live in [benchmarks/Reified.Schema.Benchmarks/CodecSuites.fs](https://github.com/adz/Reified/blob/main/benchmarks/Reified.Schema.Benchmarks/CodecSuites.fs).
 
 Run them:
 
 ```bash
-dotnet run -c Release --project benchmarks/Axial.Schema.Benchmarks -- --filter "*JsonCodecBenchmarks*" "*BoundaryParseBenchmarks*"
+dotnet run -c Release --project benchmarks/Reified.Schema.Benchmarks -- --filter "*JsonCodecBenchmarks*" "*BoundaryParseBenchmarks*"
 ```
 
 Measured with a BenchmarkDotNet short job on the recorded toolchain:
@@ -135,9 +135,9 @@ Measured with a BenchmarkDotNet short job on the recorded toolchain:
 | Method | Mean | Allocated |
 | --- | --- | --- |
 | `System.Text.Json Serialize` | 1.44 us | 1.11 KB |
-| `Axial Json.serialize` | 1.55 us | 1.44 KB |
-| `Axial Json.deserializeBytes` | 2.85 us | 2.46 KB |
-| `Axial Json.deserialize` | 3.10 us | 2.84 KB |
+| `Reified Json.serialize` | 1.55 us | 1.44 KB |
+| `Reified Json.deserializeBytes` | 2.85 us | 2.46 KB |
+| `Reified Json.deserialize` | 3.10 us | 2.84 KB |
 | `System.Text.Json Deserialize` | 3.11 us | 2.01 KB |
 
 The codec compiles once per schema and runs with no runtime reflection, so it stays on par with `System.Text.Json`'s reflection-based serializer while remaining AOT- and trimming-safe by construction. `deserializeBytes` skips the string-to-UTF-8 conversion and is the faster decode entry point when the payload already arrives as bytes.
@@ -146,14 +146,14 @@ The boundary suite compares the trusted codec against full boundary parsing — 
 
 | Method | Mean | Allocated |
 | --- | --- | --- |
-| `Axial Json.deserialize (trusted path)` | 3.15 us | 2.84 KB |
+| `Reified Json.deserialize (trusted path)` | 3.15 us | 2.84 KB |
 | `JsonDocument + Data + Schema.parse (boundary parsing)` | 19.78 us | 27.71 KB |
 
 That gap is the price of diagnostics, redisplayable structured data, and constraint checking, and it is why the two paths exist: parse untrusted input where the diagnostics pay for themselves, and use the compiled codec for trusted payloads such as internal services, storage, and queues.
 
 ## Fable Results
 
-The Fable runner is built from the source-included benchmark project in [benchmarks/Axial.Benchmarks.Fable/Axial.Benchmarks.Fable.fsproj](https://github.com/adz/Axial/blob/main/benchmarks/Axial.Benchmarks.Fable/Axial.Benchmarks.Fable.fsproj) and uses the toolchain pins in [benchmarks/mise.toml](https://github.com/adz/Axial/blob/main/benchmarks/mise.toml) plus [benchmarks/Axial.Benchmarks.Fable/mise.toml](https://github.com/adz/Axial/blob/main/benchmarks/Axial.Benchmarks.Fable/mise.toml).
+The Fable runner is built from the source-included benchmark project in [benchmarks/Reified.Benchmarks.Fable/Reified.Benchmarks.Fable.fsproj](https://github.com/adz/Reified/blob/main/benchmarks/Reified.Benchmarks.Fable/Reified.Benchmarks.Fable.fsproj) and uses the toolchain pins in [benchmarks/mise.toml](https://github.com/adz/Reified/blob/main/benchmarks/mise.toml) plus [benchmarks/Reified.Benchmarks.Fable/mise.toml](https://github.com/adz/Reified/blob/main/benchmarks/Reified.Benchmarks.Fable/mise.toml).
 
 ### Fable on Node
 
@@ -207,7 +207,7 @@ Measured with Fable 5.0.0, Erlang 27.2.2, and rebar 3.24.0.
 
 ## Conclusion
 
-- use Axial for architectural clarity and safety
+- use Reified for architectural clarity and safety
 - expect some orchestration overhead even for local reader and synchronous composition
 - treat Fable BEAM async as the highest-cost case in these microbenchmarks
 - keep the runtime comparison tied to the actual target backend, because the platform execution handle shape changes between .NET and Fable
@@ -224,7 +224,7 @@ The actual benchmark suites and the method pairs they compare are:
 - `CancellationFlowBenchmarks`: `ExplicitTokenTaskResult` vs `Flow task adapter`
 - `CancellableTaskBenchmarks`: `ManualTokenTask` vs `CancellableTask`
 - `SynchronousCompletionBenchmarks`: `CandidateValueTaskFlow` vs `Flow task adapter`
-- `JsonCodecBenchmarks`: `Axial Json.serialize`/`Json.deserialize` vs `System.Text.Json`
+- `JsonCodecBenchmarks`: `Reified Json.serialize`/`Json.deserialize` vs `System.Text.Json`
 - `BoundaryParseBenchmarks`: trusted codec vs `Data` + `Schema.parse` boundary parsing
 
-The .NET reports are generated from the product-scoped `Axial.Flow.Benchmarks` and `Axial.Schema.Benchmarks` projects. The cross-product Fable runner is separate and uses the same comparison vocabulary without pretending the runtime shape is the same.
+The .NET reports are generated from the product-scoped `Axial.Flow.Benchmarks` and `Reified.Schema.Benchmarks` projects. The cross-product Fable runner is separate and uses the same comparison vocabulary without pretending the runtime shape is the same.

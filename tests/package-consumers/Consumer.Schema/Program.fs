@@ -1,10 +1,10 @@
-// Axial.Schema installed alone. Schema declares dependencies on Constraint, Data, Parse, and Refined
+// Reified.Schema installed alone. Schema declares dependencies on Constraint, Data, Parse, and Refined
 // directly, so a single PackageReference must be enough to declare a model AND to build the Data
-// input it parses. Referencing only Axial.Schema here is the point of the fixture.
+// input it parses. Referencing only Reified.Schema here is the point of the fixture.
 
-open Axial.Constraint
-open Axial.Data
-open Axial.Schema
+open Reified.Constraint
+open Reified.Data
+open Reified.Schema
 
 type Signup = { Email: string; Age: int }
 

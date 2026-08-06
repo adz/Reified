@@ -1,4 +1,4 @@
-# Axial Documentation Guide
+# Reified Documentation Guide
 
 Source of truth for Hugo + Docsy maintenance and documentation style.
 
@@ -15,7 +15,7 @@ Write for pragmatic F# devs solving dependency, async, and typed-failure problem
 
 ## Hugo workflow
 
-- The short Axial index lives at `/docs/index.md`.
+- The short Reified index lives at `/docs/index.md`.
 - Data guides and generated reference live under `/docs/data`.
 - Schema guides and generated reference live under `/docs/schema`.
 - Flow guides and generated reference live under `/docs/flow`.
@@ -35,7 +35,7 @@ There are five product documentation areas, one per top-nav entry:
 - hand-written Schema guides and its API member pages live in `docs/schema/`
 - hand-written Flow guides and its API member pages live in `docs/flow/`
 
-Values is a navigation grouping over three independently installable packages. There is no `Axial.Values` package,
+Values is a navigation grouping over three independently installable packages. There is no `Reified.Values` package,
 so no page may tell a reader to install one.
 
 The API member pages are generated from the XML doc comments in `src/`. When you change public API wording, update the code comments first and then regenerate the reference pages.
@@ -70,7 +70,7 @@ Run `bash scripts/validate-result-docs.sh`, `bash scripts/validate-values-docs.s
 product's reference inputs and any examples, regenerates its API pages, syncs Hugo content, and performs a static
 render. Run `bash scripts/validate-docs.sh` at a cross-product phase or release boundary.
 
-Run `bash scripts/preview-docs.sh` for a local live-reload server at `http://localhost:3000` when you need browser review or screenshots. The preview hashes the source, project, and generator inputs and reuses generated docs when those inputs are unchanged. On a cache miss, it builds the shared docs project graph once, then generates runnable examples and API reference pages concurrently. Use `--force-generate` to ignore the cache or `--no-generate` to start from the existing generated docs without checking generator inputs. Stop the preview with `SIGHUP`, `TERM`, `INT`, or by creating `$AXIAL_DOCS_PREVIEW_STOP_FILE` (default `/tmp/axial-docs-preview.stop`).
+Run `bash scripts/preview-docs.sh` for a local live-reload server at `http://localhost:3000` when you need browser review or screenshots. The preview hashes the source, project, and generator inputs and reuses generated docs when those inputs are unchanged. On a cache miss, it builds the shared docs project graph once, then generates runnable examples and API reference pages concurrently. Use `--force-generate` to ignore the cache or `--no-generate` to start from the existing generated docs without checking generator inputs. Stop the preview with `SIGHUP`, `TERM`, `INT`, or by creating `$AXIAL_DOCS_PREVIEW_STOP_FILE` (default `/tmp/reified-docs-preview.stop`).
 
 Use `bash scripts/build-docs-site.sh` only when preparing or checking deployment output. It builds all projects and writes the deployable site to `/output`, so it is heavier than the normal validation path.
 

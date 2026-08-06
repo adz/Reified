@@ -9,7 +9,7 @@ description: Failed parses that keep the user's input.
 
 This page shows how failed schema parses retain structured data, path-aware field errors, and default display strings.
 
-When boundary input fails to parse, a form should show the user's original text next to each field's errors. Axial's
+When boundary input fails to parse, a form should show the user's original text next to each field's errors. Reified's
 `RetainedParseResult` keeps both: the structured data exactly as submitted, and diagnostics addressed by path.
 
 ## The Handoff Value
@@ -78,7 +78,7 @@ let messages = RetainedParseResult.renderErrors parsed
 Schema fold its typed path in as the attribute:
 
 ```fsharp
-open Axial.Constraint
+open Reified.Constraint
 
 let signup = renderer |> Renderer.context "signup"
 
@@ -114,7 +114,7 @@ for field in formFields do
 ```
 
 Schema's own parse and structural failures have a `schema.*` catalogue (`SchemaMessages.keys`); constraint failures
-use Axial's `constraint.*` catalogue. Both render through the same mechanics. See
+use Reified's `constraint.*` catalogue. Both render through the same mechanics. See
 [Localization]({{< relref "/values/constraint/localization/" >}}) for the key catalogue and
 [Adding a language]({{< relref "/values/constraint/adding-a-language/" >}}) for generating a translation.
 
@@ -127,5 +127,5 @@ preserving the structured data and paths:
 let domainParsed = parsed |> RetainedParseResult.mapErrors SignupError.ofSchemaError
 ```
 
-That mapping is the boundary between Axial's interpreter errors and your application errors. Keep your user-owned error
+That mapping is the boundary between Reified's interpreter errors and your application errors. Keep your user-owned error
 union in the application, and translate `SchemaError` with one function when the parsed result crosses that boundary.

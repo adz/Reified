@@ -22,9 +22,9 @@ shape. The structured data convention is an object with a discriminator field an
 Each case supplies a tag, a constructor, a payload extractor, and a payload schema:
 
 ```fsharp
-open Axial.Refined
-open Axial.Schema
-open type Axial.Schema.Syntax
+open Reified.Refinements
+open Reified.Schema
+open type Reified.Schema.Syntax
 
 type CardDetails =
     {
@@ -56,7 +56,7 @@ The extractor is what lets validation and metadata/codecs inspect an existing tr
 Union value schemas are ordinary `Schema<'value>` values, so select one inside the field block:
 
 ```fsharp
-open type Axial.Schema.Syntax
+open type Reified.Schema.Syntax
 type Checkout =
     {
         Payment: Payment

@@ -18,7 +18,7 @@ let contactSchema =
 ```
 
 This is the form to prefer at use sites. Every built-in refined type from
-[Axial.Refined]({{< relref "/values/refined/" >}}) works this way — `NonBlankString`,
+[Reified.Refinements]({{< relref "/values/refined/" >}}) works this way — `NonBlankString`,
 `FiniteFloat`, `UnitInterval`, `NonEmptyList<_>`, and the rest resolve without a `withSchema`, as
 [Getting Started](../getting-started/) shows.
 
@@ -46,8 +46,8 @@ The rest of this page expands what a domain type like `Email` contributes and sh
 ## Define the domain type
 
 ```fsharp
-open Axial.Constraint
-open Axial.Refined
+open Reified.Constraint
+open Reified.Refinements
 
 type Email = private Email of string
 
@@ -70,8 +70,8 @@ The `email` format is intrinsic to `Email`, so its refinement owns that constrai
 Expand the field to expose its wire schema:
 
 ```fsharp
-open Axial.Schema
-open Axial.Schema.Syntax
+open Reified.Schema
+open Reified.Schema.Syntax
 
 field "email" _.Email {
     withSchema Schema.text
@@ -159,9 +159,9 @@ module ContactEmail =
 
     let refinement =
         Refinement.defineAll
-            [ Axial.Constraint.Constraint.present
-              Axial.Constraint.Constraint.email
-              Axial.Constraint.Constraint.maxLength 254 ]
+            [ Reified.Constraint.Constraint.present
+              Reified.Constraint.Constraint.email
+              Reified.Constraint.Constraint.maxLength 254 ]
             ContactEmail
             value
 

@@ -13,19 +13,19 @@ that provide the JavaScript primitives they use.
 
 | Package | .NET | Fable JavaScript | JavaScript host | Purpose |
 | --- | --- | --- | --- | --- |
-| `Axial.Data` | Yes | Yes | Node and browser | Source-neutral data, human rendering, JSON rendering, and native-platform JSON conversions. |
-| `Axial.Result` | Yes | Yes | Node and browser | `Result` composition and `result { }`. |
-| `Axial.Constraint` | Yes | Yes | Node and browser | Reusable value checks and predicates. |
-| `Axial.Refined` | Yes | Yes | Node and browser | Invariant-carrying refined values. |
-| `Axial.Parse` | Yes | Yes | Node and browser | Serialized primitive parsing. |
-| `Axial.Schema` | Yes | Yes | Node and browser | Schema declaration, parsing, checking, accumulated errors, and inspection. |
-| `Axial.Schema.Json` | Yes | Yes | Node and browser | Portable JSON-to-`Data` parsing and compiled typed JSON codecs. |
-| `Axial.Schema.Http` | Yes, .NET 8+ | No | — | Host-neutral .NET HTTP boundary contracts and OpenAPI assembly. |
+| `Reified.Data` | Yes | Yes | Node and browser | Source-neutral data, human rendering, JSON rendering, and native-platform JSON conversions. |
+| `Reified.Result` | Yes | Yes | Node and browser | `Result` composition and `result { }`. |
+| `Reified.Constraint` | Yes | Yes | Node and browser | Reusable value checks and predicates. |
+| `Reified.Refinements` | Yes | Yes | Node and browser | Invariant-carrying refined values. |
+| `Reified.Parse` | Yes | Yes | Node and browser | Serialized primitive parsing. |
+| `Reified.Schema` | Yes | Yes | Node and browser | Schema declaration, parsing, checking, accumulated errors, and inspection. |
+| `Reified.Schema.Json` | Yes | Yes | Node and browser | Portable JSON-to-`Data` parsing and compiled typed JSON codecs. |
+| `Reified.Schema.Http` | Yes, .NET 8+ | No | — | Host-neutral .NET HTTP boundary contracts and OpenAPI assembly. |
 | `Axial.Schema.Http.AspNetCore` | Yes, .NET 8+ | No | — | ASP.NET Core boundary adapter. |
 | `Axial.Schema.Http.GenHttp` | Yes, .NET 8+ | No | — | GenHTTP boundary adapter. |
-| `Axial.Schema.Contracts` | Yes, .NET 8+ | No | — | Repository tool-tier contract and record source generation; not packable. |
-| `Axial.Schema.Contracts.Build` | Yes, .NET 8+ | No | — | MSBuild package that runs contract generation before compilation. |
-| `Axial.Schema.Testing` | Yes, .NET 8+ | No | — | Repository-only FsCheck adapter; not packable. |
+| `Reified.Schema.Contracts` | Yes, .NET 8+ | No | — | Repository tool-tier contract and record source generation; not packable. |
+| `Reified.Schema.Contracts.Build` | Yes, .NET 8+ | No | — | MSBuild package that runs contract generation before compilation. |
+| `Reified.Schema.Testing` | Yes, .NET 8+ | No | — | Repository-only FsCheck adapter; not packable. |
 
 The Fable JavaScript build is a separate compilation of the same F# sources. A `netstandard2.1` target by itself does
 not imply JavaScript support; the table records packages with an intentional Fable surface and repository coverage.

@@ -12,24 +12,24 @@ menu:
 
 # Result
 
-`Axial.Result` works with the standard F# `Result<'value, 'error>`. It does not wrap or replace that type: a value
+`Reified.Result` works with the standard F# `Result<'value, 'error>`. It does not wrap or replace that type: a value
 produced by these helpers is an ordinary `Ok` or `Error` that any other F# code can pattern match.
 
 What the package supplies is the vocabulary around it — turning ordinary values into a `Result` carrying your own
 error type, chaining steps that each may fail, replacing one error with another, getting values back out, and two
 computation expressions for writing sequences of fallible steps as straight-line code.
 
-The package is a standalone leaf with no dependency on any other Axial package, and nothing in this section uses one.
+The package is a standalone leaf with no dependency on any other Reified package, and nothing in this section uses one.
 
 ```sh
-dotnet add package Axial.Result
+dotnet add package Reified.Result
 ```
 
 ## A first example
 
 ```fsharp
 open System
-open Axial.Result
+open Reified.Result
 
 type SignupError =
     | NameMissing
@@ -80,12 +80,12 @@ Every page below builds on this same `parseName`/`parseAge` pair, so the example
 
 ## Related
 
-`Axial.Result` composes failures. Admitting values in the first place is the
-[Values]({{< relref "/values/" >}}) packages' job: `Axial.Constraint` tests a typed value,
-`Axial.Refined` constructs values whose types record a successful check, and `Axial.Parse` decodes serialized
+`Reified.Result` composes failures. Admitting values in the first place is the
+[Values]({{< relref "/values/" >}}) packages' job: `Reified.Constraint` tests a typed value,
+`Reified.Refinements` constructs values whose types record a successful check, and `Reified.Parse` decodes serialized
 primitives. All of them return the standard F# `Result`, so these helpers work on their output — but none of them
 requires this package, and this package does not require them.
 
 Accumulation here is **flat**: `result.list { }` collects a list of your error values with no field identity.
 When a whole form, request, or document must become a model with path-aware accumulated diagnostics, that is
-[Axial.Schema]({{< relref "/schema/" >}}).
+[Reified.Schema]({{< relref "/schema/" >}}).

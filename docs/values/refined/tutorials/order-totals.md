@@ -12,8 +12,8 @@ branch, an option, or a guard from the code downstream.
 
 ```fsharp
 open System
-open Axial.Constraint
-open Axial.Refined
+open Reified.Constraint
+open Reified.Refinements
 ```
 
 ## Model the domain

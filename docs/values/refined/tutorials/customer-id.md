@@ -11,8 +11,8 @@ to yours, and — just as importantly — shows how to decide whether it should 
 all.
 
 ```fsharp
-open Axial.Constraint
-open Axial.Refined
+open Reified.Constraint
+open Reified.Refinements
 ```
 
 ## Decide whether it earns a type
@@ -116,7 +116,7 @@ Keep the raw type at input and storage boundaries, and the refined type in betwe
 boundary describes the type without restating it:
 
 ```fsharp
-open Axial.Schema
+open Reified.Schema
 
 let customerIdSchema : Schema<CustomerId> =
     Schema.int |> Schema.refine CustomerId.refinement

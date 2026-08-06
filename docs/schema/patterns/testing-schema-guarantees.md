@@ -19,13 +19,13 @@ Use generated examples to check those claims near the owning module.
 
 ## Generate accepted models
 
-The repository contains a non-packable `Axial.Schema.Testing` project as a test-only FsCheck adapter. It is not
-published on NuGet. The example below documents the adapter used by Axial's own tests and a pattern an application can
+The repository contains a non-packable `Reified.Schema.Testing` project as a test-only FsCheck adapter. It is not
+published on NuGet. The example below documents the adapter used by Reified's own tests and a pattern an application can
 adapt locally. `SchemaGen.model` derives values by generating structured data, parsing it, and immediately checking the
 result.
 
 ```fsharp
-open Axial.Schema.Testing
+open Reified.Schema.Testing
 open FsCheck.FSharp
 
 let bookingGenerator =

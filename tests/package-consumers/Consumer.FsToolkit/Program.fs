@@ -1,13 +1,13 @@
-// FsToolkit.ErrorHandling alongside Axial.Refined and Axial.Schema.
+// FsToolkit.ErrorHandling alongside Reified.Refinements and Reified.Schema.
 //
-// The thing being tested is builder ambiguity. Axial.Result also defines a result { } builder, so a
-// consumer who wants FsToolkit's must be able to take Refined and Schema WITHOUT Axial.Result being
-// dragged in behind them. This fixture deliberately does not reference Axial.Result: if either
+// The thing being tested is builder ambiguity. Reified.Result also defines a result { } builder, so a
+// consumer who wants FsToolkit's must be able to take Refined and Schema WITHOUT Reified.Result being
+// dragged in behind them. This fixture deliberately does not reference Reified.Result: if either
 // package ever grows that dependency, the result { } below becomes ambiguous and this stops
 // compiling, which is the signal we want.
 
-open Axial.Refined
-open Axial.Schema
+open Reified.Refinements
+open Reified.Schema
 open FsToolkit.ErrorHandling
 
 type Order = { Sku: string; Quantity: int }

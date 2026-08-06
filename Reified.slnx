@@ -1,0 +1,46 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/examples/">
+    <Project Path="examples/Reified.Result.AotProbe/Reified.Result.AotProbe.fsproj" />
+    <Project Path="examples/Reified.Constraint.AotProbe/Reified.Constraint.AotProbe.fsproj" />
+    <Project Path="examples/Reified.Refinements.AotProbe/Reified.Refinements.AotProbe.fsproj" />
+    <Project Path="examples/Reified.Schema.AotProbe/Reified.Schema.AotProbe.fsproj" />
+    <Project Path="examples/Reified.Schema.Examples/Reified.Schema.Examples.fsproj" />
+    <Project Path="examples/Reified.ReferenceApp.Intro/Reified.ReferenceApp.Intro.fsproj" />
+    <Project Path="examples/Reified.ReferenceApp.Wire/Reified.ReferenceApp.Wire.fsproj" />
+  </Folder>
+  <Folder Name="/benchmarks/">
+    <Project Path="benchmarks/Reified.Schema.Benchmarks/Reified.Schema.Benchmarks.fsproj" />
+  </Folder>
+  <Folder Name="/scripts/">
+    <Project Path="scripts/schemagen/schemagen.fsproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Reified.Data/Reified.Data.fsproj" />
+    <Project Path="src/Reified.Result/Reified.Result.fsproj" />
+    <Project Path="src/Reified.Constraint/Reified.Constraint.fsproj" />
+    <Project Path="src/Reified.Parse/Reified.Parse.fsproj" />
+    <Project Path="src/Reified.Refinements/Reified.Refinements.fsproj" />
+    <Project Path="src/Reified.Schema.Json/Reified.Schema.Json.fsproj" />
+    <Project Path="src/Reified.Schema/Reified.Schema.fsproj" />
+    <Project Path="src/Reified.Schema.Http/Reified.Schema.Http.fsproj" />
+    <Project Path="src/Reified.Schema.Contracts/Reified.Schema.Contracts.fsproj" />
+    <Project Path="src/Reified.Schema.Contracts.Build/Reified.Schema.Contracts.Build.fsproj" />
+    <Project Path="src/Reified.Schema.Testing/Reified.Schema.Testing.fsproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Reified.Data.Tests/Reified.Data.Tests.fsproj" />
+    <Project Path="tests/Reified.Result.Tests/Reified.Result.Tests.fsproj" />
+    <Project Path="tests/Reified.Constraint.Tests/Reified.Constraint.Tests.fsproj" />
+    <Project Path="tests/Reified.Refinements.Tests/Reified.Refinements.Tests.fsproj" />
+    <Project Path="tests/Reified.Schema.Json.Tests/Reified.Schema.Json.Tests.fsproj" />
+    <Project Path="tests/Reified.Schema.Tests/Reified.Schema.Tests.fsproj" />
+    <Project Path="tests/Reified.Schema.Http.Tests/Reified.Schema.Http.Tests.fsproj" />
+    <Project Path="tests/Reified.Schema.Contracts.Tests/Reified.Schema.Contracts.Tests.fsproj" />
+    <Project Path="tests/Reified.Schema.Testing.Tests/Reified.Schema.Testing.Tests.fsproj" />
+  </Folder>
+</Solution>

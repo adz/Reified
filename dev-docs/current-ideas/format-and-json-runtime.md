@@ -11,12 +11,12 @@ This covers two related questions: how representation formats are packaged, and 
 Future representation formats should use separate packages:
 
 ```text
-Axial.Schema.Json
-Axial.Schema.Xml
-Axial.Schema.Yaml
-Axial.Schema.Toml
-Axial.Schema.MessagePack
-Axial.Schema.Protobuf
+Reified.Schema.Json
+Reified.Schema.Xml
+Reified.Schema.Yaml
+Reified.Schema.Toml
+Reified.Schema.MessagePack
+Reified.Schema.Protobuf
 ```
 
 This keeps transitive dependencies small and allows each format to have its own wire rules, limitations, runtime
@@ -52,7 +52,7 @@ compilation with a typed error, not later while encoding a value.
 
 ## Shared Compiler, Platform-Specific JSON Runtime
 
-`Axial.Schema.Json` should keep one public API and one schema-to-codec compiler.
+`Reified.Schema.Json` should keep one public API and one schema-to-codec compiler.
 
 The compiler walks Schema's retained typed shape and builds a reusable encoding and decoding plan. This logic should be
 shared across .NET and Fable.
@@ -94,7 +94,7 @@ module internal JsonPlatform =
 
 Other files call `JsonPlatform` without their own compiler directives.
 
-This follows the existing `Axial.Schema.Platform` pattern. The pattern is a response to the build constraint, not a
+This follows the existing `Reified.Schema.Platform` pattern. The pattern is a response to the build constraint, not a
 claim that .NET and JavaScript should use the same low-level representation.
 
 ## What Belongs In `Platform.fs`
@@ -187,7 +187,7 @@ Identical implementation is not required. Equivalent documented behavior is requ
 
 ## Current Fable Status And Remaining Work
 
-`Axial.Schema.Json` is a supported Fable surface. The benchmark uses the current Schema API,
+`Reified.Schema.Json` is a supported Fable surface. The benchmark uses the current Schema API,
 `scripts/check-fable-js-surface.sh` passes, CI runs it, and generated JavaScript executes a Node encode/decode round
 trip. Stream APIs remain .NET-only.
 

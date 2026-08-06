@@ -85,7 +85,7 @@ field "email" _.Email {
 }
 ```
 
-The typed vocabulary in `Axial.Schema.Syntax` covers every portable schema constraint. The field type checks every
+The typed vocabulary in `Reified.Schema.Syntax` covers every portable schema constraint. The field type checks every
 entry, so `email` cannot be applied to an `int` field. Lifted constraints such as `minLength` apply to strings,
 lists, arrays, and maps with shape-appropriate interpretation.
 

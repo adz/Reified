@@ -11,8 +11,8 @@ Add the runtime Schema package and the private build-time generator package:
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="Axial.Schema" Version="..." />
-  <PackageReference Include="Axial.Schema.Contracts.Build" Version="..." PrivateAssets="all" />
+  <PackageReference Include="Reified.Schema" Version="..." />
+  <PackageReference Include="Reified.Schema.Contracts.Build" Version="..." PrivateAssets="all" />
 </ItemGroup>
 ```
 
@@ -40,8 +40,8 @@ By default output is written below `obj/`, so it should not be committed.
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Axial.Schema" Version="..." />
-    <PackageReference Include="Axial.Schema.Contracts.Build" Version="..." PrivateAssets="all" />
+    <PackageReference Include="Reified.Schema" Version="..." />
+    <PackageReference Include="Reified.Schema.Contracts.Build" Version="..." PrivateAssets="all" />
   </ItemGroup>
 </Project>
 ```
@@ -51,7 +51,7 @@ By default output is written below `obj/`, so it should not be committed.
 ```fsharp
 namespace MyApp.Wire
 
-open Axial.Schema.Derive
+open Reified.Schema.Derive
 
 [<DeriveSchema>]
 type Order = { Sku: string; Quantity: int }
@@ -63,10 +63,10 @@ An ordinary `dotnet build` now generates and compiles the companion schema.
 
 | Property | Default | Purpose |
 | --- | --- | --- |
-| `AxialSchemaGenEnabled` | `true` | Set to `false` to skip generation. |
-| `AxialSchemaNaming` | `camel` | Default wire naming: `camel`, `snake`, or `verbatim`. |
-| `AxialSchemaGeneratedFiles` | `Intermediate` | `Intermediate` writes under `obj`; `CheckedIn` writes sibling `.g.fs` files. |
-| `AxialSchemaGenToolPath` | packaged tool | Override the generator task assembly path, mainly for repository development. |
+| `ReifiedSchemaGenEnabled` | `true` | Set to `false` to skip generation. |
+| `ReifiedSchemaNaming` | `camel` | Default wire naming: `camel`, `snake`, or `verbatim`. |
+| `ReifiedSchemaGeneratedFiles` | `Intermediate` | `Intermediate` writes under `obj`; `CheckedIn` writes sibling `.g.fs` files. |
+| `ReifiedSchemaGenToolPath` | packaged tool | Override the generator task assembly path, mainly for repository development. |
 
 ### Checked-in output
 
@@ -74,7 +74,7 @@ Use checked-in output when generated source must be reviewed or consumed outside
 
 ```xml
 <PropertyGroup>
-  <AxialSchemaGeneratedFiles>CheckedIn</AxialSchemaGeneratedFiles>
+  <ReifiedSchemaGeneratedFiles>CheckedIn</ReifiedSchemaGeneratedFiles>
 </PropertyGroup>
 ```
 

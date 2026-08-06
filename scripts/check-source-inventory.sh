@@ -8,18 +8,20 @@ cd "$root_dir"
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
 
-find src tests -name '*.fsproj' -print | sort > "$tmp_dir/projects.actual"
-grep -o 'Path="[^"]*\.fsproj"' Axial.slnx \
+# tests/package-consumers is deliberately outside the solution: those fixtures restore the packed
+# .nupkg files instead of referencing src/, so they must not appear in Reified.slnx.
+find src tests -path 'tests/package-consumers' -prune -o -name '*.fsproj' -print | sort > "$tmp_dir/projects.actual"
+grep -o 'Path="[^"]*\.fsproj"' Reified.slnx \
   | sed 's/^Path="//; s/"$//' \
   | grep -E '^(src|tests)/' \
   | sort > "$tmp_dir/projects.expected"
 
-find src tests -name '*.fs' -print | sort > "$tmp_dir/sources.actual"
+find src tests -path 'tests/package-consumers' -prune -o -name '*.fs' -print | sort > "$tmp_dir/sources.actual"
 
 > "$tmp_dir/sources.expected"
 while IFS= read -r project; do
   project_dir="$(dirname "$project")"
-  # A project may compile no sources at all (targets-only packages like Axial.Schema.Contracts.Build).
+  # A project may compile no sources at all (targets-only packages like Reified.Schema.Contracts.Build).
   { grep -o '<Compile Include="[^"]*\.fs"' "$project" || true; } \
     | sed 's/^<Compile Include="//; s/"$//' \
     | while IFS= read -r include_path; do
@@ -32,7 +34,7 @@ while IFS= read -r project; do
 done < "$tmp_dir/projects.actual" | sort -u > "$tmp_dir/sources.expected"
 
 if ! diff -u "$tmp_dir/projects.expected" "$tmp_dir/projects.actual"; then
-  echo "Source project inventory mismatch: update Axial.slnx or remove stale src/tests project files." >&2
+  echo "Source project inventory mismatch: update Reified.slnx or remove stale src/tests project files." >&2
   exit 1
 fi
 

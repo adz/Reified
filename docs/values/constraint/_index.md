@@ -13,12 +13,12 @@ explains it to a person. The two live in different places — an attribute and a
 and a message override, a predicate and a string literal — and they drift. Someone widens a length limit
 and the error still quotes the old one.
 
-`Axial.Constraint` has no second place to write it. A `Constraint<'value>` is a reusable description of
+`Reified.Constraint` has no second place to write it. A `Constraint<'value>` is a reusable description of
 valid values, and the failure it produces is derived from that same description. **check** is the operation
 that runs it.
 
 ```fsharp
-open Axial.Constraint
+open Reified.Constraint
 
 let retryCount : Constraint<int> =
     Constraint.between 0 10
@@ -70,7 +70,7 @@ violation |> Violation.fullMessage field  // "Name must be present"
 ```
 
 Give the renderer a different culture and the identical violation reads `"Le nom doit être renseigné"`,
-with contextual fallback, and without any application code walking a violation tree or reproducing Axial's
+with contextual fallback, and without any application code walking a violation tree or reproducing Reified's
 key catalogue.
 
 Translation is cheap here because it is not a feature bolted on afterwards — it is the same split that

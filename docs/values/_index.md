@@ -12,33 +12,33 @@ menu:
 
 # Values
 
-**Values is a grouping, not a package.** There is no `Axial.Values` on NuGet and no `Axial.Values` namespace. It is
+**Values is a grouping, not a package.** There is no `Reified.Values` on NuGet and no `Reified.Values` namespace. It is
 the name for three packages that answer the same question — *may this value into my program?* — each installed on
 its own:
 
 | Package | Answers | Returns |
 | --- | --- | --- |
-| [`Axial.Constraint`](./constraint/) | Is this typed value acceptable? | `Result<unit, Violation>` |
-| [`Axial.Refined`](./refined/) | Can I build a type that records the answer? | `Result<'refined, Violation>` |
-| [`Axial.Parse`](./parse/) | What does this serialized text decode to? | `Result<'value, ParseError>` |
+| [`Reified.Constraint`](./constraint/) | Is this typed value acceptable? | `Result<unit, Violation>` |
+| [`Reified.Refinements`](./refined/) | Can I build a type that records the answer? | `Result<'refined, Violation>` |
+| [`Reified.Parse`](./parse/) | What does this serialized text decode to? | `Result<'value, ParseError>` |
 
 ```sh
-dotnet add package Axial.Constraint   # reusable checks and portable constraints
-dotnet add package Axial.Refined      # invariant-carrying domain values
-dotnet add package Axial.Parse        # serialized primitive decoding
+dotnet add package Reified.Constraint   # reusable checks and portable constraints
+dotnet add package Reified.Refinements      # invariant-carrying domain values
+dotnet add package Reified.Parse        # serialized primitive decoding
 ```
 
-`Axial.Refined` depends on `Axial.Constraint`. `Axial.Parse` depends on neither. None of them depends on
-`Axial.Result`: every one returns the standard F# `Result`, so they compose with
-[`Axial.Result`]({{< relref "/result/" >}}), FsToolkit.ErrorHandling, or your own helpers — your choice, not the
+`Reified.Refinements` depends on `Reified.Constraint`. `Reified.Parse` depends on neither. None of them depends on
+`Reified.Result`: every one returns the standard F# `Result`, so they compose with
+[`Reified.Result`]({{< relref "/result/" >}}), FsToolkit.ErrorHandling, or your own helpers — your choice, not the
 library's.
 
 ## The three in one function
 
 ```fsharp
-open Axial.Parse
-open Axial.Constraint
-open Axial.Refined
+open Reified.Parse
+open Reified.Constraint
+open Reified.Refinements
 
 type Quantity =
     private Quantity of int
@@ -88,6 +88,6 @@ part of the type, so nothing downstream re-checks it.
 
 ## Related
 
-[`Axial.Result`]({{< relref "/result/" >}}) composes the failures these packages return into one application error
-type. [`Axial.Schema`]({{< relref "/schema/" >}}) applies the same constraints and refinements at declared fields
+[`Reified.Result`]({{< relref "/result/" >}}) composes the failures these packages return into one application error
+type. [`Reified.Schema`]({{< relref "/schema/" >}}) applies the same constraints and refinements at declared fields
 of a structured input, and returns accumulated diagnostics carrying the path of each failure.

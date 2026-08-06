@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="RefinedCatalogExample.fs" />
+    <Compile Include="RefinedValueSchemaExample.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Reified.Result\Reified.Result.fsproj" />
+    <ProjectReference Include="..\..\src\Reified.Constraint\Reified.Constraint.fsproj" />
+    <ProjectReference Include="..\..\src\Reified.Refinements\Reified.Refinements.fsproj" />
+    <ProjectReference Include="..\..\src\Reified.Parse\Reified.Parse.fsproj" />
+    <ProjectReference Include="..\..\src\Reified.Schema\Reified.Schema.fsproj" />
+  </ItemGroup>
+
+</Project>

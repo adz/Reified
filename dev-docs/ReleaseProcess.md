@@ -4,11 +4,11 @@ This project uses a coordinated pre-1.0 release train.
 
 ## Versioning policy
 
-- `Axial.Flow`, `Axial.Result`, `Axial.Constraint`, `Axial.Refined`, `Axial.Parse`, `Axial.Data`, `Axial.Schema`, and
+- `Axial.Flow`, `Reified.Result`, `Reified.Constraint`, `Reified.Refinements`, `Reified.Parse`, `Reified.Data`, `Reified.Schema`, and
   the add-on packages share one package version before 1.0.
 - The shared version is declared once in `Directory.Build.props`.
 - Packable project files must not declare their own `<Version>`.
-- A tag such as `v0.7.0` produces every public Axial package at version `0.7.0`.
+- A tag such as `v0.7.0` produces every public Reified package at version `0.7.0`.
 - Empty version bumps are acceptable before 1.0 because the package boundaries are still settling and a single documented version is simpler for users.
 - Independent package versioning can be reconsidered once the split is stable, likely at or after 1.0.
 
@@ -17,10 +17,10 @@ This project uses a coordinated pre-1.0 release train.
 The coordinated release currently packs:
 
 - `Axial.Flow`
-- `Axial.Result`
-- `Axial.Constraint`
-- `Axial.Refined`
-- `Axial.Schema`
+- `Reified.Result`
+- `Reified.Constraint`
+- `Reified.Refinements`
+- `Reified.Schema`
 - `Axial.Flow.Console`
 - `Axial.Flow.FileSystem`
 - `Axial.Flow.HttpClient`
@@ -31,7 +31,7 @@ The coordinated release currently packs:
 - `Axial.Flow.Hosting.Browser`
 - `Axial.Flow.Telemetry`
 
-There is no meta-package and no umbrella: `Axial.ErrorHandling` and `Axial` were both retired pre-1.0. Every
+There is no meta-package and no umbrella: `Reified.ErrorHandling` and `Reified` were both retired pre-1.0. Every
 package in the list above is installed on its own.
 
 The `Axial.Flow.*` add-on packages depend on `Axial.Flow`.
@@ -43,8 +43,8 @@ The `Axial.Flow.*` add-on packages depend on `Axial.Flow`.
 3. Run the local verification commands:
 
 ```bash
-dotnet build Axial.slnx --configuration Release --nologo -v minimal
-dotnet test Axial.slnx --configuration Release --no-build --nologo -v minimal
+dotnet build Reified.slnx --configuration Release --nologo -v minimal
+dotnet test Reified.slnx --configuration Release --no-build --nologo -v minimal
 bash scripts/check-source-inventory.sh
 bash scripts/check-schema-ce-errors.sh
 bash scripts/check-fable-js-surface.sh
@@ -74,8 +74,8 @@ git push origin v0.7.0
 
 For a tag build:
 
-- it builds `Axial.slnx`
-- it tests `Axial.slnx` (every package-scoped test project)
+- it builds `Reified.slnx`
+- it tests `Reified.slnx` (every package-scoped test project)
 - it derives the package version from the tag by stripping the leading `v`
 - it runs `bash scripts/pack.sh -v <version>`
 - it builds the docs site

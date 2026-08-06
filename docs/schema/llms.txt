@@ -1,13 +1,13 @@
-# Axial Schema
-- `Axial.Schema` depends on `Axial.Data`, `Axial.Constraint`, and `Axial.Refined`. It does not depend on `Axial.Result` or
+# Reified Schema
+- `Reified.Schema` depends on `Reified.Data`, `Reified.Constraint`, and `Reified.Refinements`. It does not depend on `Reified.Result` or
   Flow.
-- Schema owns path-aware accumulated boundary errors through `Path`, `SchemaIssue`, and `SchemaErrors`. `Axial.Constraint`
-  and `Axial.Refined` never claim path-aware accumulation; that is Schema's role.
+- Schema owns path-aware accumulated boundary errors through `Path`, `SchemaIssue`, and `SchemaErrors`. `Reified.Constraint`
+  and `Reified.Refinements` never claim path-aware accumulation; that is Schema's role.
 - Declare records with `schema<Model> { field ...; construct ... }`.
 - `field "wire-name" _.Member` resolves the member type's canonical schema.
 - `field _.Member` derives the wire name from a quotation and is .NET-only. Use explicit names for Fable.
-- Constraints are `Axial.Constraint.Constraint<'value>`; `Schema.constrain` takes the same value you check directly.
-- Open `Axial.Constraint.ConstraintDSL` for the unqualified constraint vocabulary; `Axial.Schema.Syntax` holds only collection adapters.
+- Constraints are `Reified.Constraint.Constraint<'value>`; `Schema.constrain` takes the same value you check directly.
+- Open `Reified.Constraint.ConstraintDSL` for the unqualified constraint vocabulary; `Reified.Schema.Syntax` holds only collection adapters.
 - A field block may contain `withSchema`, `constrain`, `constraints`, `refine`, and `validate`.
 - `withSchema` sets the current field schema.
 - `constrain` adds one portable constraint. `constraints [ ... ]` adds several in declaration order.

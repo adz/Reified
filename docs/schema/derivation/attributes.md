@@ -7,10 +7,10 @@ weight: 20
 
 # Derivation Attributes
 
-Open `Axial.Schema.Derive` to use the attributes without suffixes:
+Open `Reified.Schema.Derive` to use the attributes without suffixes:
 
 ```fsharp
-open Axial.Schema.Derive
+open Reified.Schema.Derive
 ```
 
 Attributes are read from F# source at generation time. They do not use runtime reflection. Each generated operation in

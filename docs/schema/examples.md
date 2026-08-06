@@ -20,25 +20,25 @@ This example shows a request boundary that parses strings, builds refined numeri
 Run it:
 
 ```bash
-AXIAL_EXAMPLE=refined-catalog dotnet run --project examples/Axial.Schema.Examples/Axial.Schema.Examples.fsproj --nologo
+AXIAL_EXAMPLE=refined-catalog dotnet run --project examples/Reified.Schema.Examples/Reified.Schema.Examples.fsproj --nologo
 ```
 
 Source:
 
-- [RefinedCatalogExample.fs](https://github.com/adz/Axial/blob/main/examples/Axial.Schema.Examples/RefinedCatalogExample.fs)
+- [RefinedCatalogExample.fs](https://github.com/adz/Reified/blob/main/examples/Reified.Schema.Examples/RefinedCatalogExample.fs)
 
 Source code:
 
 ```fsharp
 module RefinedCatalogExample
 
-open Axial.Parse
+open Reified.Parse
 
 open System
-open Axial.Result
-open Axial.Constraint
-open Axial.Constraint.ConstraintDSL
-open Axial.Refined
+open Reified.Result
+open Reified.Constraint
+open Reified.Constraint.ConstraintDSL
+open Reified.Refinements
 
 // Slug is no longer a catalogue entry: it carries no invariant past the boundary, so it
 // is defined here from the same constraints the built-in type used, exactly like Sku below.
@@ -190,23 +190,23 @@ This example shows total domain conversions built with Schema.convert, composed 
 Run it:
 
 ```bash
-AXIAL_EXAMPLE=refined-value-schema dotnet run --project examples/Axial.Schema.Examples/Axial.Schema.Examples.fsproj --nologo
+AXIAL_EXAMPLE=refined-value-schema dotnet run --project examples/Reified.Schema.Examples/Reified.Schema.Examples.fsproj --nologo
 ```
 
 Source:
 
-- [RefinedValueSchemaExample.fs](https://github.com/adz/Axial/blob/main/examples/Axial.Schema.Examples/RefinedValueSchemaExample.fs)
+- [RefinedValueSchemaExample.fs](https://github.com/adz/Reified/blob/main/examples/Reified.Schema.Examples/RefinedValueSchemaExample.fs)
 
 Source code:
 
 ```fsharp
 module RefinedValueSchemaExample
 
-open Axial.Constraint
-open Axial.Schema
-open Axial.Schema.Syntax
+open Reified.Constraint
+open Reified.Schema
+open Reified.Schema.Syntax
 
-/// <summary>An email address refined over Axial's text primitive, carrying the well-known email format.</summary>
+/// <summary>An email address refined over Reified's text primitive, carrying the well-known email format.</summary>
 type Email =
     private
     | Email of string

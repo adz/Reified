@@ -4,8 +4,8 @@
 
 ### Meta-packages retired (breaking)
 
-`Axial.ErrorHandling` and the `Axial` umbrella are removed. Neither carried API: `Axial.ErrorHandling` was
-dependency-only, and `Axial` added a single re-export of the `result { }` builder on top of its three references.
+`Reified.ErrorHandling` and the `Reified` umbrella are removed. Neither carried API: `Reified.ErrorHandling` was
+dependency-only, and `Reified` added a single re-export of the `result { }` builder on top of its three references.
 Both package ids are retired with no replacement and no deprecation shim — this lands pre-1.0 and nothing released
 depends on them.
 
@@ -13,31 +13,31 @@ depends on them.
 
 | Before | Now |
 | --- | --- |
-| `dotnet add package Axial.ErrorHandling` | `Axial.Result`, `Axial.Constraint`, `Axial.Refined`, `Axial.Parse` — whichever you use |
-| `dotnet add package Axial` | the focused packages above, plus `Axial.Schema` and/or `Axial.Flow` |
-| `open Axial` for `result { }` | `open Axial.Result` |
+| `dotnet add package Reified.ErrorHandling` | `Reified.Result`, `Reified.Constraint`, `Reified.Refinements`, `Reified.Parse` — whichever you use |
+| `dotnet add package Reified` | the focused packages above, plus `Reified.Schema` and/or `Axial.Flow` |
+| `open Reified` for `result { }` | `open Reified.Result` |
 
-`open Axial` remains valid where it means `Axial.Data`'s namespace; only the umbrella package's re-export is gone.
+`open Reified` remains valid where it means `Reified.Data`'s namespace; only the umbrella package's re-export is gone.
 
 The former error-handling family survives as search vocabulary, not as a package: Result is presented as its own
 product, and Constraint, Refined, and Parse under a **Values** navigation grouping with no package behind it.
 
 ### Constraint unification (breaking)
 
-Value rules now have one vocabulary. `Axial.Check` is renamed **`Axial.Constraint`**, and `Constraint<'value>` — a
+Value rules now have one vocabulary. `Reified.Check` is renamed **`Reified.Constraint`**, and `Constraint<'value>` — a
 reusable description of valid values that `check` executes — replaces every parallel surface. Pre-1.0, so superseded
 APIs are removed outright rather than deprecated.
 
 **Removed, with no aliases:** the `Check<'value>` type, `CheckFailure` and its expectation types, `CheckDSL`, the
-public `Predicate` catalogue, `Axial.Check.Constraint`'s code/metadata surface, `Axial.Schema.SchemaConstraint`,
-`ConstraintDescriptor`, the `Axial.Schema.Constraint` facade and its duplicate catalogue in `Schema.Syntax`,
+public `Predicate` catalogue, `Reified.Check.Constraint`'s code/metadata surface, `Reified.Schema.SchemaConstraint`,
+`ConstraintDescriptor`, the `Reified.Schema.Constraint` facade and its duplicate catalogue in `Schema.Syntax`,
 `Refinement.defineAll`/`defineWithCheck`, and per-constraint message overrides (`Constraint.withMessage`).
 
 **Migration at a glance:**
 
 | Before | Now |
 | --- | --- |
-| `open Axial.Check` | `open Axial.Constraint` |
+| `open Reified.Check` | `open Reified.Constraint` |
 | `Check.all [ ... ]` returning a function | `Constraint.all [ ... ]`, run with `Constraint.check` |
 | `Check.String.present`, `Check.present` | `Constraint.present` (annotate the binding) |
 | `Check.empty` / `Check.notEmpty` | `Constraint.blank` / `Constraint.minLength 1` |
@@ -56,7 +56,7 @@ public `Predicate` catalogue, `Axial.Check.Constraint`'s code/metadata surface, 
 - **`Constraint.numeric` is ASCII** (`^[0-9]+$`). The old `\d` rule matched any Unicode decimal digit, which no
   ECMA-262 lowering could reproduce.
 - **JSON Schema lowering is honest about what it enforces.** Text `present` now emits only `minLength: 1` and keeps
-  the non-blank rule in `x-axial-runtime-constraints`, because .NET whitespace and ECMA-262 `\s` disagree in both
+  the non-blank rule in `x-reified-runtime-constraints`, because .NET whitespace and ECMA-262 `\s` disagree in both
   directions. The email constraint lowers to its exact runtime `pattern`; the separate `SchemaFormat.email`
   annotation still lowers to `format: "email"`, and declaring both now emits both instead of one suppressing the
   other. Authored `Constraint.pattern`, IEEE-float relations, and GUID/instant equality are retained as runtime-only
@@ -75,9 +75,9 @@ public `Predicate` catalogue, `Axial.Check.Constraint`'s code/metadata surface, 
 
 ## 0.7.0 - 2026-07-28
 
-First public release under the `Axial` name and repository identity (previously published as `FsFlow`). This
+First public release under the `Reified` name and repository identity (previously published as `FsFlow`). This
 release settles the package family shape; treat it as the project's actual debut rather than an increment on
-prior `FsFlow`/`Axial` previews. See the docs site for guides and API reference — these notes stay at the
+prior `FsFlow`/`Reified` previews. See the docs site for guides and API reference — these notes stay at the
 package level.
 
 - **`Axial.Flow`** — the effect and runtime package: explicit environments, typed failures, async/task/`ColdTask`
@@ -86,24 +86,24 @@ package level.
   `.PlatformService`), hosting adapters (`Axial.Flow.Hosting`, `.Hosting.Node`, `.Hosting.Browser`), and
   telemetry (`Axial.Flow.Telemetry` for .NET, `Axial.Flow.Telemetry.JavaScript` for Fable) round out the runtime
   story with fiber diagnostics, a `FiberRegistry`, and OpenTelemetry integration on both platforms.
-- **`Axial.ErrorHandling`** (the error-handling family) — fail-fast `Result` composition and `result {}`
-  (`Axial.Result`), reusable value checks and predicates (`Axial.Constraint`), constraint-backed refined/domain types
-  and `refine {}` (`Axial.Refined`), and primitive parsers for untrusted input (`Axial.Parse`), with
-  `Axial.ErrorHandling` itself a dependency-only meta-package installing the core pieces together.
-- **`Axial.Schema`** — portable `Schema<'model>` metadata for validation, codecs, documentation, and UI
-  interpreters, plus the packages built on it: reflection-free compiled JSON codecs (`Axial.Schema.Json`), JSON
-  Schema document generation (`Axial.Schema.JsonSchema`), host-neutral HTTP boundary support with OpenAPI and
-  RFC 9457 problem details (`Axial.Schema.Http`, with ASP.NET Core and GenHTTP hosting adapters), and compile-time
+- **`Reified.ErrorHandling`** (the error-handling family) — fail-fast `Result` composition and `result {}`
+  (`Reified.Result`), reusable value checks and predicates (`Reified.Constraint`), constraint-backed refined/domain types
+  and `refine {}` (`Reified.Refinements`), and primitive parsers for untrusted input (`Reified.Parse`), with
+  `Reified.ErrorHandling` itself a dependency-only meta-package installing the core pieces together.
+- **`Reified.Schema`** — portable `Schema<'model>` metadata for validation, codecs, documentation, and UI
+  interpreters, plus the packages built on it: reflection-free compiled JSON codecs (`Reified.Schema.Json`), JSON
+  Schema document generation (`Reified.Schema.JsonSchema`), host-neutral HTTP boundary support with OpenAPI and
+  RFC 9457 problem details (`Reified.Schema.Http`, with ASP.NET Core and GenHTTP hosting adapters), and compile-time
   wire schema generation from `[<DeriveSchema>]` records or `.contract` files via `schemagen` and the
-  `Axial.Schema.Contracts.Build` MSBuild package, including versioned contract chains.
-- **`Axial`** — the top-level umbrella package installing `Axial.ErrorHandling`, `Axial.Schema`, and `Axial.Flow`
+  `Reified.Schema.Contracts.Build` MSBuild package, including versioned contract chains.
+- **`Reified`** — the top-level umbrella package installing `Reified.ErrorHandling`, `Reified.Schema`, and `Axial.Flow`
   together. App templates built on this umbrella are planned as follow-up work, not part of this release.
-- Standardized pre-1.0 release versioning so every public Axial package in the release train ships at the same
+- Standardized pre-1.0 release versioning so every public Reified package in the release train ships at the same
   version from `Directory.Build.props`.
 - Refreshed package metadata, README content, examples, generated reference pages, and documentation site content
   across the full package family.
 
-Looking ahead: the repository itself is expected to split into `Axial`, `Axial.Schema`, and `Axial.Flow` repos
+Looking ahead: the repository itself is expected to split into `Reified`, `Reified.Schema`, and `Axial.Flow` repos
 post-release, with the current repo becoming home to the root docs site and reference apps. Not yet decided
 whether reference docs stay centralized or move per sub-repo.
 

@@ -6,10 +6,10 @@ description: Compile a schema into a runtime-reflection-free JSON codec for trus
 
 # JSON Codec
 
-This page shows how `Axial.Schema.Json` turns the schema you already declared into a compiled JSON codec, so trusted
+This page shows how `Reified.Schema.Json` turns the schema you already declared into a compiled JSON codec, so trusted
 serialization and boundary parsing come from one declaration.
 
-Axial has two paths for JSON, and they exist because they optimize for different things:
+Reified has two paths for JSON, and they exist because they optimize for different things:
 
 - **Boundary parsing** — `Data` + `Schema.parse`: for untrusted input. It runs constraint metadata, accumulates
   path-aware diagnostics, and keeps the structured data for redisplay.
@@ -21,9 +21,9 @@ Axial has two paths for JSON, and they exist because they optimize for different
 ## Compile Once, Reuse Everywhere
 
 ```fsharp
-open Axial.Schema
-open Axial.Schema.Json
-open type Axial.Schema.Syntax
+open Reified.Schema
+open Reified.Schema.Json
+open type Reified.Schema.Syntax
 
 type Address =
     { Street: string; City: string }
@@ -112,8 +112,8 @@ Consume-don't-author: F# declares the schema, C# compiles the codec, parses, and
 function takes plain positional arguments, so it calls as an ordinary static method with no `FSharpFunc` conversion:
 
 ```csharp
-using Axial.Schema;
-using Axial.Schema.Json;
+using Reified.Schema;
+using Reified.Schema.Json;
 
 JsonCodec<Customer> codec = Json.compile(customerSchema);
 

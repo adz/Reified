@@ -15,14 +15,14 @@ inspection stay in step with no second source of truth.
 This page builds one model up in four stages. Each stage adds one idea and shows what the interpreters do with it.
 
 ```bash
-dotnet add package Axial.Schema
+dotnet add package Reified.Schema
 ```
 
 ```fsharp
-open Axial.Data
-open Axial.Schema
-open Axial.Schema.Syntax
-open type Axial.Schema.Syntax
+open Reified.Data
+open Reified.Schema
+open Reified.Schema.Syntax
+open type Reified.Schema.Syntax
 ```
 
 ## 1. Plain fields
@@ -103,15 +103,15 @@ indexes, or map keys alongside separate validation expressions. For nesting and 
 
 ### Serialize
 
-`Axial.Schema.Json` compiles the same declaration into a JSON codec. It uses no runtime reflection, so it works under
+`Reified.Schema.Json` compiles the same declaration into a JSON codec. It uses no runtime reflection, so it works under
 NativeAOT, trimming, and Fable.
 
 ```bash
-dotnet add package Axial.Schema.Json
+dotnet add package Reified.Schema.Json
 ```
 
 ```fsharp
-open Axial.Schema.Json
+open Reified.Schema.Json
 
 let codec = Json.compile signupSchema
 
@@ -165,10 +165,10 @@ Everything after this point is added to the declaration once and shows up in all
 `Signup.Email` is a `string`, so nothing stops `{ Email = ""; Age = 36; Newsletter = true }`. A refined type moves that
 guarantee into the model, where it holds no matter how the value was built.
 
-[Axial.Refined]({{< relref "/values/refined/" >}}) ships the common ones. Use them as field types directly:
+[Reified.Refinements]({{< relref "/values/refined/" >}}) ships the common ones. Use them as field types directly:
 
 ```fsharp
-open Axial.Refined
+open Reified.Refinements
 
 type Registration =
     { Owner: NonBlankString

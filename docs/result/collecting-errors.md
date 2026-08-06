@@ -13,7 +13,7 @@ columns of a row — the caller usually wants every problem at once, not the fir
 
 ```fsharp
 open System
-open Axial.Result
+open Reified.Result
 
 type SignupError =
     | NameMissing

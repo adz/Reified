@@ -9,15 +9,15 @@ description: Check typed values, decode serialized primitives, and construct inv
 Install only the packages an application needs — Values is a grouping, not a package:
 
 ```bash
-dotnet add package Axial.Constraint   # reusable checks and portable constraints
-dotnet add package Axial.Refined      # invariant-carrying domain values
-dotnet add package Axial.Parse        # serialized primitive decoding
+dotnet add package Reified.Constraint   # reusable checks and portable constraints
+dotnet add package Reified.Refinements      # invariant-carrying domain values
+dotnet add package Reified.Parse        # serialized primitive decoding
 ```
 
 ```fsharp
-open Axial.Constraint
-open Axial.Parse
-open Axial.Refined
+open Reified.Constraint
+open Reified.Parse
+open Reified.Refinements
 ```
 
 Each package stays focused:
@@ -69,10 +69,10 @@ The successful check is now part of the type, so nothing downstream re-checks it
 ## A complete boundary function
 
 These packages return the standard F# `Result`, so any Result vocabulary composes them. This example uses
-[`Axial.Result`]({{< relref "/result/" >}}), but FsToolkit.ErrorHandling or your own helpers work identically:
+[`Reified.Result`]({{< relref "/result/" >}}), but FsToolkit.ErrorHandling or your own helpers work identically:
 
 ```fsharp
-open Axial.Result
+open Reified.Result
 
 type QuantityError =
     | InvalidInteger of ParseError
@@ -97,7 +97,7 @@ it. See [Working with violations](./constraint/violations/) for grouped failures
 These packages perform explicit operations over individual values. The caller decides which input each failure belongs
 to and how to represent the application's error type.
 
-[Axial.Schema]({{< relref "/schema/" >}}) is the structured-boundary layer. A `Schema<'model>` declares fields and
+[Reified.Schema]({{< relref "/schema/" >}}) is the structured-boundary layer. A `Schema<'model>` declares fields and
 constructors, applies constraints and refinements at those fields, and returns accumulated `SchemaError` values with
 input paths. The same declaration can also drive JSON codecs, JSON Schema, forms, contracts, and inspection.
 

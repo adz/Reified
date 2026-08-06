@@ -6,16 +6,16 @@ root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 HUGO_BASEURL="${HUGO_BASEURL:-"/"}"
 
 for project in \
-  "src/Axial.Result/Axial.Result.fsproj" \
-  "src/Axial.Constraint/Axial.Constraint.fsproj" \
-  "src/Axial.Refined/Axial.Refined.fsproj" \
-  "src/Axial.Parse/Axial.Parse.fsproj" \
+  "src/Reified.Result/Reified.Result.fsproj" \
+  "src/Reified.Constraint/Reified.Constraint.fsproj" \
+  "src/Reified.Refinements/Reified.Refinements.fsproj" \
+  "src/Reified.Parse/Reified.Parse.fsproj" \
   "src/Axial.Flow.PlatformService/Axial.Flow.PlatformService.fsproj" \
   "src/Axial.Flow.Console/Axial.Flow.Console.fsproj" \
   "src/Axial.Flow.FileSystem/Axial.Flow.FileSystem.fsproj" \
   "src/Axial.Flow.HttpClient/Axial.Flow.HttpClient.fsproj" \
   "src/Axial.Flow.Process/Axial.Flow.Process.fsproj" \
-  "src/Axial.Schema/Axial.Schema.fsproj"
+  "src/Reified.Schema/Reified.Schema.fsproj"
 do
   dotnet build "$root_dir/$project" --nologo -v minimal
 done

@@ -9,7 +9,7 @@ open System.Net
 open System.Text.RegularExpressions
 
 let repoRoot = Path.GetFullPath(Path.Combine(__SOURCE_DIRECTORY__, "../.."))
-let githubRepoUrl = "https://github.com/adz/Axial"
+let githubRepoUrl = "https://github.com/adz/Reified"
 let githubBranch = "main"
 
 type PageSpec = {
@@ -24,7 +24,7 @@ type PageSpec = {
 let normalize (name: string) =
     if String.IsNullOrEmpty name then ""
     else
-        name.Replace("Axial.", "").Replace("Axial.", "").Replace("Services.", "").Replace("Module", "").Replace("Extensions", "").Replace("Builders", "")
+        name.Replace("Reified.", "").Replace("Reified.", "").Replace("Services.", "").Replace("Module", "").Replace("Extensions", "").Replace("Builders", "")
         |> (fun s ->
             s
                 .Split('(').[0]
@@ -36,7 +36,7 @@ let normalize (name: string) =
 let cleanName (name: string) =
     if String.IsNullOrEmpty name then ""
     else
-        name.Replace("Axial.", "").Replace("Axial.", "").Replace("Services.", "").Replace("Module", "").Replace("Extensions", "").Replace("Builders", "")
+        name.Replace("Reified.", "").Replace("Reified.", "").Replace("Services.", "").Replace("Module", "").Replace("Extensions", "").Replace("Builders", "")
         |> (fun s -> s.Trim('.'))
         |> (fun s -> 
             s
@@ -70,7 +70,7 @@ let getPageName (id: string) =
     let kind = id.[0].ToString().ToLower()
     let namePart = id.Substring(2).Split('(').[0]
     let clean = 
-        namePart.Replace("Axial.", "").Replace("Axial.", "").Replace("Services.", "").Replace("Module", "").Replace("Extensions", "").Replace("Builders", "")
+        namePart.Replace("Reified.", "").Replace("Reified.", "").Replace("Services.", "").Replace("Module", "").Replace("Extensions", "").Replace("Builders", "")
         |> (fun s -> System.Text.RegularExpressions.Regex.Replace(s, @"`[0-9]+", ""))
         |> (fun s -> s.Replace("'", "").Trim('.'))
         
@@ -325,15 +325,15 @@ let pageSpecs = [
     {
         OutPath = ["schema"; "_index.md"]
         Title = "Schema"
-        Description = "Source-documented universal schema definitions for Axial."
+        Description = "Source-documented universal schema definitions for Reified."
         Intro = "This page shows `Schema<'value>`, the universal catalog for primitive, collection, optional, union, refined, and record declarations. The same declaration can be parsed, checked, inspected, encoded, documented, and used for generation."
         SymbolIds = [
-            "Core types", ["T:Axial.Schema.Schema`1"; "T:Axial.Schema.Field`2"; "T:Axial.Schema.UnionCase`1"]
-            "Catalog", ["P:Axial.Schema.Schema.text"; "P:Axial.Schema.Schema.int"; "P:Axial.Schema.Schema.decimal"; "P:Axial.Schema.Schema.bool"; "P:Axial.Schema.Schema.dateTime"; "P:Axial.Schema.Schema.guid"; "M:Axial.Schema.Schema.list"; "M:Axial.Schema.Schema.option"; "M:Axial.Schema.Schema.constrain"; "M:Axial.Schema.Schema.constrainAll"; "M:Axial.Schema.Schema.mustSupply"; "M:Axial.Schema.Schema.mayOmit"; "M:Axial.Schema.Schema.refine"; "M:Axial.Schema.Schema.validate"; "M:Axial.Schema.Schema.union"; "M:Axial.Schema.UnionCase.create"; "T:Axial.Schema.Supply"]
-            "Record builder", ["P:Axial.Schema.SchemaCE.schema"; "M:Axial.Schema.SchemaCE.field"; "M:Axial.Schema.SchemaCE.construct"; "M:Axial.Schema.SchemaCE.constructResult"]
-            "Inspection", ["T:Axial.Schema.SchemaShape"; "T:Axial.Schema.SchemaDescription"; "T:Axial.Schema.FieldDescription"; "T:Axial.Schema.ModelDescription"; "T:Axial.Schema.UnionDescription"; "T:Axial.Schema.UnionCaseDescription"; "M:Axial.Schema.Inspect.model"; "M:Axial.Schema.Inspect.schema"; "M:Axial.Schema.Inspect.field"]
-            "JSON Schema generation", ["M:Axial.Schema.JsonSchema.generate"; "M:Axial.Schema.JsonSchema.generateValue"]
-            "Schema derivation attributes (read by schemagen at generation time)", ["T:Axial.Schema.Derive.DeriveSchemaAttribute"; "T:Axial.Schema.Derive.SchemaNameAttribute"; "T:Axial.Schema.Derive.DeriveUnionAttribute"; "T:Axial.Schema.Derive.SchemaConstructorAttribute"; "T:Axial.Schema.Derive.PatternAttribute"; "T:Axial.Schema.Derive.MinAttribute"; "T:Axial.Schema.Derive.MaxAttribute"; "T:Axial.Schema.Derive.LengthAttribute"; "T:Axial.Schema.Derive.LengthBetweenAttribute"; "T:Axial.Schema.Derive.PresentAttribute"; "T:Axial.Schema.Derive.SuppliedAttribute"; "T:Axial.Schema.Derive.FormatAttribute"; "T:Axial.Schema.Derive.AtLeastAttribute"; "T:Axial.Schema.Derive.GreaterThanAttribute"; "T:Axial.Schema.Derive.AtMostAttribute"; "T:Axial.Schema.Derive.LessThanAttribute"; "T:Axial.Schema.Derive.MultipleOfAttribute"; "T:Axial.Schema.Derive.DistinctAttribute"; "T:Axial.Schema.Derive.EmailAttribute"; "T:Axial.Schema.Derive.DefaultAttribute"]
+            "Core types", ["T:Reified.Schema.Schema`1"; "T:Reified.Schema.Field`2"; "T:Reified.Schema.UnionCase`1"]
+            "Catalog", ["P:Reified.Schema.Schema.text"; "P:Reified.Schema.Schema.int"; "P:Reified.Schema.Schema.decimal"; "P:Reified.Schema.Schema.bool"; "P:Reified.Schema.Schema.dateTime"; "P:Reified.Schema.Schema.guid"; "M:Reified.Schema.Schema.list"; "M:Reified.Schema.Schema.option"; "M:Reified.Schema.Schema.constrain"; "M:Reified.Schema.Schema.constrainAll"; "M:Reified.Schema.Schema.mustSupply"; "M:Reified.Schema.Schema.mayOmit"; "M:Reified.Schema.Schema.refine"; "M:Reified.Schema.Schema.validate"; "M:Reified.Schema.Schema.union"; "M:Reified.Schema.UnionCase.create"; "T:Reified.Schema.Supply"]
+            "Record builder", ["P:Reified.Schema.SchemaCE.schema"; "M:Reified.Schema.SchemaCE.field"; "M:Reified.Schema.SchemaCE.construct"; "M:Reified.Schema.SchemaCE.constructResult"]
+            "Inspection", ["T:Reified.Schema.SchemaShape"; "T:Reified.Schema.SchemaDescription"; "T:Reified.Schema.FieldDescription"; "T:Reified.Schema.ModelDescription"; "T:Reified.Schema.UnionDescription"; "T:Reified.Schema.UnionCaseDescription"; "M:Reified.Schema.Inspect.model"; "M:Reified.Schema.Inspect.schema"; "M:Reified.Schema.Inspect.field"]
+            "JSON Schema generation", ["M:Reified.Schema.JsonSchema.generate"; "M:Reified.Schema.JsonSchema.generateValue"]
+            "Schema derivation attributes (read by schemagen at generation time)", ["T:Reified.Schema.Derive.DeriveSchemaAttribute"; "T:Reified.Schema.Derive.SchemaNameAttribute"; "T:Reified.Schema.Derive.DeriveUnionAttribute"; "T:Reified.Schema.Derive.SchemaConstructorAttribute"; "T:Reified.Schema.Derive.PatternAttribute"; "T:Reified.Schema.Derive.MinAttribute"; "T:Reified.Schema.Derive.MaxAttribute"; "T:Reified.Schema.Derive.LengthAttribute"; "T:Reified.Schema.Derive.LengthBetweenAttribute"; "T:Reified.Schema.Derive.PresentAttribute"; "T:Reified.Schema.Derive.SuppliedAttribute"; "T:Reified.Schema.Derive.FormatAttribute"; "T:Reified.Schema.Derive.AtLeastAttribute"; "T:Reified.Schema.Derive.GreaterThanAttribute"; "T:Reified.Schema.Derive.AtMostAttribute"; "T:Reified.Schema.Derive.LessThanAttribute"; "T:Reified.Schema.Derive.MultipleOfAttribute"; "T:Reified.Schema.Derive.DistinctAttribute"; "T:Reified.Schema.Derive.EmailAttribute"; "T:Reified.Schema.Derive.DefaultAttribute"]
         ]
         Alias = None
     }
@@ -343,11 +343,11 @@ let pageSpecs = [
         Description = "Source-documented schema input parsing, checking, and refined-value interpreters."
         Intro = "This page shows structured boundary data, universal schema parsing into `Result`, opt-in input retention with `RetainedParseResult`, checking of existing values, and refined schemas. Core schema metadata stays in [Schema](../); interpreters attach path-aware `SchemaErrors` and optional redisplay behavior to it."
         SymbolIds = [
-            "Structured data", ["T:Axial.Data"; "T:Axial.DataPathSegment"; "T:Axial.DataPath"; "M:Axial.DataModule.ofMap"; "M:Axial.DataModule.ofNameValues"; "M:Axial.DataModule.ofCliArgs"; "M:Axial.DataModule.ofJsonElement"; "M:Axial.DataModule.ofJsonDocument"; "M:Axial.DataModule.ofConfiguration"; "M:Axial.DataModule.redisplay"; "M:Axial.DataModule.redisplayPath"]
-            "Input parsing", ["M:Axial.Schema.Schema.parse"; "M:Axial.Schema.Schema.parseRetainingInput"; "M:Axial.Schema.Schema.parseWith"; "T:Axial.Schema.SchemaParseOptions"; "T:Axial.Schema.RetainedParseResult`1"; "M:Axial.Schema.RetainedParseResultModule.create"; "M:Axial.Schema.RetainedParseResultModule.renderErrors"]
-            "Errors", ["T:Axial.Schema.SchemaError"; "T:Axial.Schema.Path"; "M:Axial.Schema.Path.root"; "M:Axial.Schema.Path.key"; "M:Axial.Schema.Path.index"; "M:Axial.Schema.Path.append"; "M:Axial.Schema.Path.format"; "M:Axial.Schema.Path.fold"; "T:Axial.Schema.SchemaIssue"; "T:Axial.Schema.SchemaErrors"; "M:Axial.Schema.SchemaErrors.toList"; "M:Axial.Schema.SchemaErrors.count"; "M:Axial.Schema.SchemaErrors.isEmpty"; "M:Axial.Schema.SchemaErrors.toString"; "M:Axial.Schema.SchemaErrors.messages"; "M:Axial.Schema.SchemaErrors.fullMessages"; "M:Axial.Schema.SchemaErrors.toStringWith"; "T:Axial.Schema.SchemaMessages"; "P:Axial.Schema.SchemaMessages.keys"; "P:Axial.Schema.SchemaMessages.arguments"; "P:Axial.Schema.SchemaMessages.english"]
-            "Refined catalog schemas", ["P:Axial.Schema.RefinedSchemas.nonBlankString"; "P:Axial.Schema.RefinedSchemas.finiteFloat"; "P:Axial.Schema.RefinedSchemas.unitInterval"; "M:Axial.Schema.RefinedSchemas.nonEmptyList"; "M:Axial.Schema.RefinedSchemas.nonEmptyArray"; "M:Axial.Schema.RefinedSchemas.distinctList"; "M:Axial.Schema.RefinedSchemas.interval"; "P:Axial.Schema.RefinedSchemas.dateRange"; "M:Axial.Schema.RefinedSchemas.bounded"]
-            "Existing values", ["M:Axial.Schema.Schema.check"]
+            "Structured data", ["T:Reified.Data"; "T:Reified.DataPathSegment"; "T:Reified.DataPath"; "M:Reified.DataModule.ofMap"; "M:Reified.DataModule.ofNameValues"; "M:Reified.DataModule.ofCliArgs"; "M:Reified.DataModule.ofJsonElement"; "M:Reified.DataModule.ofJsonDocument"; "M:Reified.DataModule.ofConfiguration"; "M:Reified.DataModule.redisplay"; "M:Reified.DataModule.redisplayPath"]
+            "Input parsing", ["M:Reified.Schema.Schema.parse"; "M:Reified.Schema.Schema.parseRetainingInput"; "M:Reified.Schema.Schema.parseWith"; "T:Reified.Schema.SchemaParseOptions"; "T:Reified.Schema.RetainedParseResult`1"; "M:Reified.Schema.RetainedParseResultModule.create"; "M:Reified.Schema.RetainedParseResultModule.renderErrors"]
+            "Errors", ["T:Reified.Schema.SchemaError"; "T:Reified.Schema.Path"; "M:Reified.Schema.Path.root"; "M:Reified.Schema.Path.key"; "M:Reified.Schema.Path.index"; "M:Reified.Schema.Path.append"; "M:Reified.Schema.Path.format"; "M:Reified.Schema.Path.fold"; "T:Reified.Schema.SchemaIssue"; "T:Reified.Schema.SchemaErrors"; "M:Reified.Schema.SchemaErrors.toList"; "M:Reified.Schema.SchemaErrors.count"; "M:Reified.Schema.SchemaErrors.isEmpty"; "M:Reified.Schema.SchemaErrors.toString"; "M:Reified.Schema.SchemaErrors.messages"; "M:Reified.Schema.SchemaErrors.fullMessages"; "M:Reified.Schema.SchemaErrors.toStringWith"; "T:Reified.Schema.SchemaMessages"; "P:Reified.Schema.SchemaMessages.keys"; "P:Reified.Schema.SchemaMessages.arguments"; "P:Reified.Schema.SchemaMessages.english"]
+            "Refined catalog schemas", ["P:Reified.Schema.RefinedSchemas.nonBlankString"; "P:Reified.Schema.RefinedSchemas.finiteFloat"; "P:Reified.Schema.RefinedSchemas.unitInterval"; "M:Reified.Schema.RefinedSchemas.nonEmptyList"; "M:Reified.Schema.RefinedSchemas.nonEmptyArray"; "M:Reified.Schema.RefinedSchemas.distinctList"; "M:Reified.Schema.RefinedSchemas.interval"; "P:Reified.Schema.RefinedSchemas.dateRange"; "M:Reified.Schema.RefinedSchemas.bounded"]
+            "Existing values", ["M:Reified.Schema.Schema.check"]
         ]
         Alias = None
     }
@@ -355,17 +355,17 @@ let pageSpecs = [
         OutPath = ["data"; "_index.md"]
         Title = "Data"
         Description = "Source-documented portable structured values."
-        Intro = "This page shows `Axial.Data`: one owned tree for literals, source adapters, immutable edits, named cases, exact differences, and produced-data proofs. It has no dependencies on other Axial packages."
+        Intro = "This page shows `Reified.Data`: one owned tree for literals, source adapters, immutable edits, named cases, exact differences, and produced-data proofs. It has no dependencies on other Reified packages."
         SymbolIds = [
-            "The tree", ["T:Axial.Data"; "T:Axial.DataPathSegment"; "T:Axial.DataPath"]
-            "Constructors", ["M:Axial.DataModule.ofMap"; "M:Axial.DataModule.ofNameValues"; "M:Axial.DataModule.ofCliArgs"; "M:Axial.DataModule.ofJsonElement"; "M:Axial.DataModule.ofJsonDocument"; "M:Axial.DataModule.ofConfiguration"]
-            "Literal syntax", ["T:Axial.DataField"; "M:Axial.DataModule.assoc"; "M:Axial.DataModule.optionalAssoc"; "M:Axial.DataModule.data"; "M:Axial.DataModule.number"; "M:Axial.DataModule.fields"; "M:Axial.DataModule.Syntax.data"; "M:Axial.DataModule.Syntax.op_EqualsGreater"; "M:Axial.DataModule.Syntax.op_QmarkEqualsGreater"; "P:Axial.DataModule.Syntax.nil"; "M:Axial.DataModule.Syntax.num"; "M:Axial.DataModule.Syntax.fields"]
-            "Edits", ["T:Axial.DataEdit"; "T:Axial.DataPatchFailure"; "T:Axial.DataPatchException"; "M:Axial.DataEditModule.set"; "M:Axial.DataEditModule.replace"; "M:Axial.DataEditModule.remove"; "M:Axial.DataEditModule.append"; "M:Axial.DataEditModule.prepend"; "M:Axial.DataEditModule.insert"; "M:Axial.DataEditModule.rename"; "M:Axial.DataEditModule.update"; "M:Axial.DataModule.applyEdit"; "M:Axial.DataModule.patch"; "M:Axial.DataModule.set"; "M:Axial.DataModule.replace"; "M:Axial.DataModule.remove"; "M:Axial.DataModule.append"; "M:Axial.DataModule.prepend"; "M:Axial.DataModule.insert"; "M:Axial.DataModule.rename"; "M:Axial.DataModule.update"; "M:Axial.DataModule.Syntax.set"; "M:Axial.DataModule.Syntax.replace"; "M:Axial.DataModule.Syntax.remove"; "M:Axial.DataModule.Syntax.append"; "M:Axial.DataModule.Syntax.prepend"; "M:Axial.DataModule.Syntax.insert"; "M:Axial.DataModule.Syntax.rename"; "M:Axial.DataModule.Syntax.update"; "M:Axial.DataModule.tryPatch"]
-            "Cases", ["T:Axial.DataVariation"; "T:Axial.DataCase"; "T:Axial.DataDimension"; "M:Axial.DataModule.Syntax.variant"; "M:Axial.DataModule.Syntax.variants"; "M:Axial.DataModule.Syntax.dimension"; "M:Axial.DataModule.Syntax.matrix"]
-            "Comparison and matching", ["T:Axial.DataDifference"; "T:Axial.DataDifferenceCause"; "T:Axial.DataPattern"; "T:Axial.DataExpectation"; "T:Axial.DataMismatch"; "T:Axial.DataMatchException"; "M:Axial.DataModule.diff"; "M:Axial.DataModule.compare"; "M:Axial.DataModule.tryMatch"; "M:Axial.DataModule.Syntax.at"; "M:Axial.DataModule.Syntax.absent"; "M:Axial.DataModule.Syntax.matching"; "M:Axial.DataModule.Syntax.exactly"; "M:Axial.DataModule.Syntax.containing"; "M:Axial.DataModule.Syntax.containingItems"; "M:Axial.DataModule.Syntax.inOrder"; "M:Axial.DataModule.Syntax.allItems"; "M:Axial.DataModule.Syntax.someItem"; "P:Axial.DataModule.Syntax.any"; "P:Axial.DataModule.Syntax.anyText"; "P:Axial.DataModule.Syntax.anyNumber"; "M:Axial.DataModule.Syntax.oneOf"; "M:Axial.DataModule.Syntax.satisfying"]
-            "JSON rendering", ["P:Axial.DataModule.Json.render"; "P:Axial.DataModule.Json.renderIndented"]
-            "Rendering and extraction", ["M:Axial.DataModule.render"; "M:Axial.DataModule.renderIndented"; "M:Axial.DataModule.tryText"; "M:Axial.DataModule.tryBool"; "M:Axial.DataModule.tryNumberToken"; "M:Axial.DataModule.tryList"; "M:Axial.DataModule.tryObject"]
-            "Redisplay", ["M:Axial.DataModule.redisplay"; "M:Axial.DataModule.redisplayPath"]
+            "The tree", ["T:Reified.Data"; "T:Reified.DataPathSegment"; "T:Reified.DataPath"]
+            "Constructors", ["M:Reified.DataModule.ofMap"; "M:Reified.DataModule.ofNameValues"; "M:Reified.DataModule.ofCliArgs"; "M:Reified.DataModule.ofJsonElement"; "M:Reified.DataModule.ofJsonDocument"; "M:Reified.DataModule.ofConfiguration"]
+            "Literal syntax", ["T:Reified.DataField"; "M:Reified.DataModule.assoc"; "M:Reified.DataModule.optionalAssoc"; "M:Reified.DataModule.data"; "M:Reified.DataModule.number"; "M:Reified.DataModule.fields"; "M:Reified.DataModule.Syntax.data"; "M:Reified.DataModule.Syntax.op_EqualsGreater"; "M:Reified.DataModule.Syntax.op_QmarkEqualsGreater"; "P:Reified.DataModule.Syntax.nil"; "M:Reified.DataModule.Syntax.num"; "M:Reified.DataModule.Syntax.fields"]
+            "Edits", ["T:Reified.DataEdit"; "T:Reified.DataPatchFailure"; "T:Reified.DataPatchException"; "M:Reified.DataEditModule.set"; "M:Reified.DataEditModule.replace"; "M:Reified.DataEditModule.remove"; "M:Reified.DataEditModule.append"; "M:Reified.DataEditModule.prepend"; "M:Reified.DataEditModule.insert"; "M:Reified.DataEditModule.rename"; "M:Reified.DataEditModule.update"; "M:Reified.DataModule.applyEdit"; "M:Reified.DataModule.patch"; "M:Reified.DataModule.set"; "M:Reified.DataModule.replace"; "M:Reified.DataModule.remove"; "M:Reified.DataModule.append"; "M:Reified.DataModule.prepend"; "M:Reified.DataModule.insert"; "M:Reified.DataModule.rename"; "M:Reified.DataModule.update"; "M:Reified.DataModule.Syntax.set"; "M:Reified.DataModule.Syntax.replace"; "M:Reified.DataModule.Syntax.remove"; "M:Reified.DataModule.Syntax.append"; "M:Reified.DataModule.Syntax.prepend"; "M:Reified.DataModule.Syntax.insert"; "M:Reified.DataModule.Syntax.rename"; "M:Reified.DataModule.Syntax.update"; "M:Reified.DataModule.tryPatch"]
+            "Cases", ["T:Reified.DataVariation"; "T:Reified.DataCase"; "T:Reified.DataDimension"; "M:Reified.DataModule.Syntax.variant"; "M:Reified.DataModule.Syntax.variants"; "M:Reified.DataModule.Syntax.dimension"; "M:Reified.DataModule.Syntax.matrix"]
+            "Comparison and matching", ["T:Reified.DataDifference"; "T:Reified.DataDifferenceCause"; "T:Reified.DataPattern"; "T:Reified.DataExpectation"; "T:Reified.DataMismatch"; "T:Reified.DataMatchException"; "M:Reified.DataModule.diff"; "M:Reified.DataModule.compare"; "M:Reified.DataModule.tryMatch"; "M:Reified.DataModule.Syntax.at"; "M:Reified.DataModule.Syntax.absent"; "M:Reified.DataModule.Syntax.matching"; "M:Reified.DataModule.Syntax.exactly"; "M:Reified.DataModule.Syntax.containing"; "M:Reified.DataModule.Syntax.containingItems"; "M:Reified.DataModule.Syntax.inOrder"; "M:Reified.DataModule.Syntax.allItems"; "M:Reified.DataModule.Syntax.someItem"; "P:Reified.DataModule.Syntax.any"; "P:Reified.DataModule.Syntax.anyText"; "P:Reified.DataModule.Syntax.anyNumber"; "M:Reified.DataModule.Syntax.oneOf"; "M:Reified.DataModule.Syntax.satisfying"]
+            "JSON rendering", ["P:Reified.DataModule.Json.render"; "P:Reified.DataModule.Json.renderIndented"]
+            "Rendering and extraction", ["M:Reified.DataModule.render"; "M:Reified.DataModule.renderIndented"; "M:Reified.DataModule.tryText"; "M:Reified.DataModule.tryBool"; "M:Reified.DataModule.tryNumberToken"; "M:Reified.DataModule.tryList"; "M:Reified.DataModule.tryObject"]
+            "Redisplay", ["M:Reified.DataModule.redisplay"; "M:Reified.DataModule.redisplayPath"]
         ]
         Alias = None
     }
@@ -373,10 +373,10 @@ let pageSpecs = [
         OutPath = ["codec"; "_index.md"]
         Title = "Codec"
         Description = "Source-documented compiled JSON codecs over built model schemas."
-        Intro = "This page shows the `Axial.Schema.Json` surface: `Json.parseData` parses JSON into the source-neutral `Data` tree on .NET and Fable, while `Json.compile` turns a built `Schema<'model>` into a reusable `JsonCodec<'model>` with compiler-directed, runtime-reflection-free, constructor-specialized encode and decode plans. The codec is the trusted hot path for typed serialization; parse untrusted boundary input through `Data` and [schema input parsing](../schema/interpreters/) when path-aware diagnostics matter."
+        Intro = "This page shows the `Reified.Schema.Json` surface: `Json.parseData` parses JSON into the source-neutral `Data` tree on .NET and Fable, while `Json.compile` turns a built `Schema<'model>` into a reusable `JsonCodec<'model>` with compiler-directed, runtime-reflection-free, constructor-specialized encode and decode plans. The codec is the trusted hot path for typed serialization; parse untrusted boundary input through `Data` and [schema input parsing](../schema/interpreters/) when path-aware diagnostics matter."
         SymbolIds = [
-            "Core types", ["T:Axial.Schema.Json.JsonCodec`1"; "T:Axial.Schema.Json.JsonCodecException"]
-            "Module functions", ["M:Axial.Schema.Json.Json.parseData"; "M:Axial.Schema.Json.Json.compile"; "M:Axial.Schema.Json.Json.serialize"; "M:Axial.Schema.Json.Json.serializeBytes"; "M:Axial.Schema.Json.Json.serializeToStream"; "M:Axial.Schema.Json.Json.deserialize"; "M:Axial.Schema.Json.Json.deserializeBytes"; "M:Axial.Schema.Json.Json.deserializeStreamAsync"; "M:Axial.Schema.Json.Json.tryDeserialize"]
+            "Core types", ["T:Reified.Schema.Json.JsonCodec`1"; "T:Reified.Schema.Json.JsonCodecException"]
+            "Module functions", ["M:Reified.Schema.Json.Json.parseData"; "M:Reified.Schema.Json.Json.compile"; "M:Reified.Schema.Json.Json.serialize"; "M:Reified.Schema.Json.Json.serializeBytes"; "M:Reified.Schema.Json.Json.serializeToStream"; "M:Reified.Schema.Json.Json.deserialize"; "M:Reified.Schema.Json.Json.deserializeBytes"; "M:Reified.Schema.Json.Json.deserializeStreamAsync"; "M:Reified.Schema.Json.Json.tryDeserialize"]
         ]
         Alias = None
     }
@@ -384,19 +384,19 @@ let pageSpecs = [
         OutPath = ["schema"; "http"; "_index.md"]
         Title = "Schema HTTP Boundary"
         Description = "Source-documented host-neutral HTTP boundary support for schemas."
-        Intro = "This page shows the host-neutral server boundary in `Axial.Schema.Http`: `BoundaryInput` builds structured data from the name/value surfaces HTTP servers hand over, `ProblemDetails` renders failed parses as RFC 9457 bodies with RFC 6901 JSON pointers, and `EndpointSpec` values assemble into OpenAPI 3.1 documents whose schemas are embedded from `JsonSchema.generate` output. Host-specific Flow lowering is documented under [ASP.NET Core](./aspnetcore/) and [GenHTTP](./genhttp/); see the [HTTP servers guide](/schema/http-servers/) for complete usage."
+        Intro = "This page shows the host-neutral server boundary in `Reified.Schema.Http`: `BoundaryInput` builds structured data from the name/value surfaces HTTP servers hand over, `ProblemDetails` renders failed parses as RFC 9457 bodies with RFC 6901 JSON pointers, and `EndpointSpec` values assemble into OpenAPI 3.1 documents whose schemas are embedded from `JsonSchema.generate` output. Host-specific Flow lowering is documented under [ASP.NET Core](./aspnetcore/) and [GenHTTP](./genhttp/); see the [HTTP servers guide](/schema/http-servers/) for complete usage."
         SymbolIds = [
-            "Boundary input", ["M:Axial.Schema.Http.BoundaryInput.ofQuery"; "M:Axial.Schema.Http.BoundaryInput.ofForm"]
-            "Problem details", ["T:Axial.Schema.Http.ProblemDetails"; "T:Axial.Schema.Http.ProblemError"; "P:Axial.Schema.Http.ProblemDetailsModule.malformedJson"; "M:Axial.Schema.Http.ProblemDetailsModule.ofParsed"; "M:Axial.Schema.Http.ProblemDetailsModule.ofErrors"; "M:Axial.Schema.Http.ProblemDetailsModule.toJson"; "M:Axial.Schema.Http.ProblemDetailsModule.writeTo"; "M:Axial.Schema.Http.JsonPointer.ofPath"]
-            "Endpoint specs", ["T:Axial.Schema.Http.EndpointSpec"; "T:Axial.Schema.Http.ResponseSpec"; "M:Axial.Schema.Http.Endpoint.get"; "M:Axial.Schema.Http.Endpoint.post"; "M:Axial.Schema.Http.Endpoint.put"; "M:Axial.Schema.Http.Endpoint.patch"; "M:Axial.Schema.Http.Endpoint.delete"; "M:Axial.Schema.Http.Endpoint.summary"; "M:Axial.Schema.Http.Endpoint.operationId"; "M:Axial.Schema.Http.Endpoint.tag"; "M:Axial.Schema.Http.Endpoint.accepts"; "M:Axial.Schema.Http.Endpoint.returnsJson"; "M:Axial.Schema.Http.Endpoint.returns"; "M:Axial.Schema.Http.Endpoint.returnsProblemDetails"]
-            "OpenAPI assembly", ["T:Axial.Schema.Http.OpenApiInfo"; "M:Axial.Schema.Http.OpenApi.info"; "M:Axial.Schema.Http.OpenApi.document"; "M:Axial.Schema.Http.OpenApi.writeTo"]
+            "Boundary input", ["M:Reified.Schema.Http.BoundaryInput.ofQuery"; "M:Reified.Schema.Http.BoundaryInput.ofForm"]
+            "Problem details", ["T:Reified.Schema.Http.ProblemDetails"; "T:Reified.Schema.Http.ProblemError"; "P:Reified.Schema.Http.ProblemDetailsModule.malformedJson"; "M:Reified.Schema.Http.ProblemDetailsModule.ofParsed"; "M:Reified.Schema.Http.ProblemDetailsModule.ofErrors"; "M:Reified.Schema.Http.ProblemDetailsModule.toJson"; "M:Reified.Schema.Http.ProblemDetailsModule.writeTo"; "M:Reified.Schema.Http.JsonPointer.ofPath"]
+            "Endpoint specs", ["T:Reified.Schema.Http.EndpointSpec"; "T:Reified.Schema.Http.ResponseSpec"; "M:Reified.Schema.Http.Endpoint.get"; "M:Reified.Schema.Http.Endpoint.post"; "M:Reified.Schema.Http.Endpoint.put"; "M:Reified.Schema.Http.Endpoint.patch"; "M:Reified.Schema.Http.Endpoint.delete"; "M:Reified.Schema.Http.Endpoint.summary"; "M:Reified.Schema.Http.Endpoint.operationId"; "M:Reified.Schema.Http.Endpoint.tag"; "M:Reified.Schema.Http.Endpoint.accepts"; "M:Reified.Schema.Http.Endpoint.returnsJson"; "M:Reified.Schema.Http.Endpoint.returns"; "M:Reified.Schema.Http.Endpoint.returnsProblemDetails"]
+            "OpenAPI assembly", ["T:Reified.Schema.Http.OpenApiInfo"; "M:Reified.Schema.Http.OpenApi.info"; "M:Reified.Schema.Http.OpenApi.document"; "M:Reified.Schema.Http.OpenApi.writeTo"]
         ]
         Alias = None
     }
     {
         OutPath = ["schema"; "http"; "aspnetcore"; "_index.md"]
         Title = "Schema HTTP ASP.NET Core"
-        Description = "Source-documented ASP.NET Core hosting for schema-trusted Axial Flow endpoints."
+        Description = "Source-documented ASP.NET Core hosting for schema-trusted Reified Flow endpoints."
         Intro = "This page shows `Axial.Schema.Http.AspNetCore`. `Request` contributes schema-trusted values to an endpoint Flow, `EndpointFlow.run` embeds an HTTP-independent application workflow, `Response` constructs successful `IResult` values, and `flowEndpoint` lowers the completed Flow to the delegate accepted by ASP.NET Core routing. ASP.NET Core continues to own paths, verbs, middleware, authorization, filters, and endpoint metadata. The lower-level `SchemaRequest` and `SchemaResult` modules remain available when an endpoint needs the complete `RetainedParseResult` or direct host control."
         SymbolIds = [
             "Endpoint model", ["T:Axial.Schema.Http.AspNetCore.HttpEndpointEnv`1"; "T:Axial.Schema.Http.AspNetCore.EndpointError`1"]
@@ -413,7 +413,7 @@ let pageSpecs = [
     {
         OutPath = ["schema"; "http"; "genhttp"; "_index.md"]
         Title = "Schema HTTP GenHTTP"
-        Description = "Source-documented GenHTTP hosting for schema-trusted Axial Flow endpoints."
+        Description = "Source-documented GenHTTP hosting for schema-trusted Reified Flow endpoints."
         Intro = "This page shows `Axial.Schema.Http.GenHttp`. `Request` contributes schema-trusted values to an endpoint Flow, `EndpointFlow.run` embeds an HTTP-independent application workflow, `Response` constructs request-relative response plans, and `flowEndpoint` lowers the completed Flow to the delegate accepted by GenHTTP routing. GenHTTP continues to own paths, verbs, and handler composition. The lower-level `SchemaRequest` and `SchemaResponse` modules remain available when an endpoint needs the complete `RetainedParseResult` or direct host control."
         SymbolIds = [
             "Endpoint model", ["T:Axial.Schema.Http.GenHttp.HttpEndpointEnv`1"; "T:Axial.Schema.Http.GenHttp.EndpointError`1"; "T:Axial.Schema.Http.GenHttp.HttpResponse"]
@@ -430,7 +430,7 @@ let pageSpecs = [
     {
         OutPath = ["flow"; "_index.md"]
         Title = "Flow"
-        Description = "Source-documented workflow surface in Axial."
+        Description = "Source-documented workflow surface in Reified."
         Intro = "This page shows the Flow surface for cold workflow descriptions that only start when you call an execution member such as `workflow.ToTask(env)`, `workflow.ToValueTask(env)`, `workflow.ToAsync(env)`, or `workflow.RunSynchronously(env)`. The smallest useful signature is `Flow<'value>`: no environment and no typed failure. `Flow<'error, 'value>` adds typed failure with no environment; `EnvFlow<'env, 'value>` adds an environment with no typed failure; `ExnFlow`/`ExnEnvFlow` put recoverable exceptions in the typed error channel; the full `Flow<'env, 'error, 'value>` form carries both. Use this page as the API map for building fail-fast workflows with `flow { }`, `Flow.read`, `Flow.bind`, and `Flow.map`; reading dependencies from `env`; reshaping environments with `localEnv`; composing typed failures; and introducing concurrency with fibers, `zipPar`, or `race`. Reach for [runtime helpers](./runtime/) and parallel orchestration only at the boundary where the workflow actually needs them."
         SymbolIds = [
             "Core type", ["T:Axial.Flow.Flow`3"; "T:Axial.Flow.Flow`2"; "T:Axial.Flow.Flow`1"; "T:Axial.Flow.EnvFlow`2"; "T:Axial.Flow.ExnFlow`1"; "T:Axial.Flow.ExnEnvFlow`2"; "T:Axial.Flow.Never"]
@@ -492,7 +492,7 @@ let pageSpecs = [
         OutPath = ["fiber"; "_index.md"]
         Title = "Fiber"
         Description = "Source-documented handle for running workflows."
-        Intro = "This page shows the `Fiber<'error, 'value>` handle used by Axial concurrency. A fiber represents a flow that has already been started in the background; it keeps the workflow's typed error and success values attached to the running work, plus diagnostic metadata such as fiber id, parent id, start time, and lifecycle status. The operations that create and consume fibers are still part of the [`Flow`](../flow/) API: use [`Flow.fork`](../flow/concurrency/m-flow-fork.md), [`Flow.join`](../flow/concurrency/m-flow-join.md), and [`Flow.interrupt`](../flow/concurrency/m-flow-interrupt.md) when a workflow needs explicit child execution. Prefer higher-level helpers such as `Flow.zipPar` or `Flow.race` when the code only needs parallel composition."
+        Intro = "This page shows the `Fiber<'error, 'value>` handle used by Reified concurrency. A fiber represents a flow that has already been started in the background; it keeps the workflow's typed error and success values attached to the running work, plus diagnostic metadata such as fiber id, parent id, start time, and lifecycle status. The operations that create and consume fibers are still part of the [`Flow`](../flow/) API: use [`Flow.fork`](../flow/concurrency/m-flow-fork.md), [`Flow.join`](../flow/concurrency/m-flow-join.md), and [`Flow.interrupt`](../flow/concurrency/m-flow-interrupt.md) when a workflow needs explicit child execution. Prefer higher-level helpers such as `Flow.zipPar` or `Flow.race` when the code only needs parallel composition."
         SymbolIds = [
             "Core types", ["T:Axial.Flow.Fiber`2"; "T:Axial.Flow.FiberId"; "T:Axial.Flow.FiberStatus"; "T:Axial.Flow.FiberMetadata"; "T:Axial.Flow.FiberDump"; "T:Axial.Flow.FiberObserver"]
             "Module functions", ["M:Axial.Flow.Fiber.dump"; "P:Axial.Flow.FiberObserverModule.none"; "M:Axial.Flow.FiberObserverModule.compose"]
@@ -502,8 +502,8 @@ let pageSpecs = [
     {
         OutPath = ["concurrency"; "_index.md"]
         Title = "Concurrency"
-        Description = "Source-documented deferred and semaphore primitives for Axial."
-        Intro = "This page shows the small Flow-native concurrency primitives added for coordination that needs Axial semantics rather than raw .NET behavior. `Deferred<'error, 'value>` is a one-shot typed handoff point backed by a full `Exit<'value, 'error>`. `FlowSemaphore` limits concurrent workflow sections through scoped `Semaphore.withPermit`, releasing permits after success, typed failure, defect, or interruption."
+        Description = "Source-documented deferred and semaphore primitives for Reified."
+        Intro = "This page shows the small Flow-native concurrency primitives added for coordination that needs Reified semantics rather than raw .NET behavior. `Deferred<'error, 'value>` is a one-shot typed handoff point backed by a full `Exit<'value, 'error>`. `FlowSemaphore` limits concurrent workflow sections through scoped `Semaphore.withPermit`, releasing permits after success, typed failure, defect, or interruption."
         SymbolIds = [
             "Deferred", ["T:Axial.Flow.Deferred`2"; "M:Axial.Flow.Deferred.make"; "M:Axial.Flow.Deferred.await"; "M:Axial.Flow.Deferred.complete"; "M:Axial.Flow.Deferred.succeed"; "M:Axial.Flow.Deferred.fail"; "M:Axial.Flow.Deferred.die"; "M:Axial.Flow.Deferred.interrupt"]
             "Semaphore", ["T:Axial.Flow.FlowSemaphore"; "M:Axial.Flow.Semaphore.make"; "M:Axial.Flow.Semaphore.create"; "M:Axial.Flow.Semaphore.withPermit"]
@@ -514,7 +514,7 @@ let pageSpecs = [
         OutPath = ["exit"; "_index.md"]
         Title = "Exit"
         Description = "Documentation for the Exit workflow outcome."
-        Intro = "This page shows the `Exit<'value, 'error>` type, which is Axial's name for `Result<'value, Cause<'error>>`. We name it `Exit` because it represents a completed workflow execution, not an ordinary domain result. Use the `Exit` module functions to transform completed outcomes without manually pattern matching at every boundary."
+        Intro = "This page shows the `Exit<'value, 'error>` type, which is Reified's name for `Result<'value, Cause<'error>>`. We name it `Exit` because it represents a completed workflow execution, not an ordinary domain result. Use the `Exit` module functions to transform completed outcomes without manually pattern matching at every boundary."
         SymbolIds = [
             "Core type", ["T:Axial.Flow.Exit`2"]
             "Module functions", ["M:Axial.Flow.Exit.map"; "M:Axial.Flow.Exit.bind"; "M:Axial.Flow.Exit.mapError"; "M:Axial.Flow.Exit.mapBoth"; "M:Axial.Flow.Exit.fromResult"; "M:Axial.Flow.Exit.toResult"]
@@ -525,7 +525,7 @@ let pageSpecs = [
         OutPath = ["cause"; "_index.md"]
         Title = "Cause"
         Description = "Documentation for the Cause of workflow failure."
-        Intro = "This page shows the `Cause<'error>` type, which distinguishes expected domain failures, unexpected technical defects, administrative interruptions, sequential failure composition, parallel failure composition, and diagnostic traces. Understanding the cause tree lets Axial preserve what happened during retries, cleanup, parallel execution, and observability boundaries without flattening everything into one exception or one typed error."
+        Intro = "This page shows the `Cause<'error>` type, which distinguishes expected domain failures, unexpected technical defects, administrative interruptions, sequential failure composition, parallel failure composition, and diagnostic traces. Understanding the cause tree lets Reified preserve what happened during retries, cleanup, parallel execution, and observability boundaries without flattening everything into one exception or one typed error."
         SymbolIds = [
             "Core type", ["T:Axial.Flow.Cause`1"]
             "Module functions", ["M:Axial.Flow.Cause.map"; "M:Axial.Flow.Cause.thenCause"; "M:Axial.Flow.Cause.both"; "M:Axial.Flow.Cause.traced"; "M:Axial.Flow.Cause.failures"; "M:Axial.Flow.Cause.defects"; "M:Axial.Flow.Cause.isInterrupted"; "M:Axial.Flow.Cause.prettyPrint"]
@@ -546,7 +546,7 @@ let pageSpecs = [
     {
         OutPath = ["schedule"; "_index.md"]
         Title = "Schedule"
-        Description = "Source-documented retry and repeat logic for Axial."
+        Description = "Source-documented retry and repeat logic for Reified."
         Intro = "This page shows the `Schedule` surface for describing retry and repeat policies as values. A `Schedule` on its own does nothing — it is a definition of when to run again (recur or stop) and how long to wait, not an action. Build one with `recurs` (bounded repetition), `spaced` (fixed delay), `exponential` (backoff), and `jittered`/`jitteredWith` (randomized delay, so callers don't retry in lockstep; `jitteredWith` takes the sample source for deterministic schedules), then apply it to a flow with `Schedule.retry` (rerun on a typed failure) or `Schedule.repeat` (rerun on a success) — nothing happens until one of those two runs the schedule against an actual workflow. Use schedules when retry behavior is part of the workflow boundary and must stay explicit, testable, and separate from the domain operation being retried."
         SymbolIds = [
             "Core type", ["T:Axial.Flow.Schedule`3"]
@@ -557,7 +557,7 @@ let pageSpecs = [
     {
         OutPath = ["ref"; "_index.md"]
         Title = "Ref"
-        Description = "Source-documented atomic mutable references for Axial."
+        Description = "Source-documented atomic mutable references for Reified."
         Intro = "This page shows the `Ref` surface for small pieces of shared mutable state inside flows. A `Ref<'T>` is an atomic handle that can be created, read, set, updated, or modified from workflow code without turning the whole environment into a mutable object. Use `Ref` for counters, flags, request-local caches, and coordination points where a single value is enough. For multi-value invariants that must change together, use STM instead."
         SymbolIds = [
             "Core type", ["T:Axial.Flow.Ref`1"]
@@ -568,7 +568,7 @@ let pageSpecs = [
     {
         OutPath = ["stm"; "_index.md"]
         Title = "STM"
-        Description = "Source-documented Software Transactional Memory for Axial."
+        Description = "Source-documented Software Transactional Memory for Reified."
         Intro = "This page shows the STM surface for composable atomic state transitions. STM is for cases where several transactional references must be read and updated as one operation, or where a workflow should wait until state satisfies a condition. Build transactions with `TRef` reads and writes, compose them before execution, then cross back into `Flow` with `STM.atomically`. Use `Ref` for one independent mutable value; use STM when correctness depends on a group of values changing together. \n\n**Note**: The current implementation uses a global synchronizing lock for coordination and is available on .NET only."
         SymbolIds = [
             "Core types", ["T:Axial.Flow.TRef`1"; "T:Axial.Flow.STM`1"]
@@ -580,8 +580,8 @@ let pageSpecs = [
     {
         OutPath = ["stream"; "_index.md"]
         Title = "Stream"
-        Description = "Source-documented effectful streams for Axial."
-        Intro = "This page shows the Fable-compatible `FlowStream` surface for cold, pull-based streams that participate in Axial's environment, typed-error, cancellation, and scope model. Construct streams from values or effectful state transitions, transform them without starting work, and consume them back into an ordinary `Flow`."
+        Description = "Source-documented effectful streams for Reified."
+        Intro = "This page shows the Fable-compatible `FlowStream` surface for cold, pull-based streams that participate in Reified's environment, typed-error, cancellation, and scope model. Construct streams from values or effectful state transitions, transform them without starting work, and consume them back into an ordinary `Flow`."
         SymbolIds = [
             "Core type", ["T:Axial.Flow.FlowStream`3"]
             "Construction", ["M:Axial.Flow.FlowStream.empty"; "M:Axial.Flow.FlowStream.singleton"; "M:Axial.Flow.FlowStream.fromSeq"; "M:Axial.Flow.FlowStream.fromFlow"; "M:Axial.Flow.FlowStream.unfoldFlow"]
@@ -595,7 +595,7 @@ let pageSpecs = [
         OutPath = ["flow"; "builders-flow.md"]
         Title = "flow { }"
         Description = "Documentation for the flow { } computation expression."
-        Intro = "This page shows the `flow { }` computation expression, the primary syntax for writing Axial workflows. Inside the builder, ordinary values, `Result`, `Async`, `Task`, `Flow`, and guarded sources can be sequenced without manually unwrapping each layer. The builder preserves the important boundaries: expected errors stay typed, defects become `Cause.Die`, cancellation becomes interruption, and environment access remains explicit through `Flow.env` or `Flow.read`. Prefer `flow { }` for application orchestration; keep pure value rules and simple predicates in `Constraint` or `Result` until the code needs environment or effects."
+        Intro = "This page shows the `flow { }` computation expression, the primary syntax for writing Reified workflows. Inside the builder, ordinary values, `Result`, `Async`, `Task`, `Flow`, and guarded sources can be sequenced without manually unwrapping each layer. The builder preserves the important boundaries: expected errors stay typed, defects become `Cause.Die`, cancellation becomes interruption, and environment access remains explicit through `Flow.env` or `Flow.read`. Prefer `flow { }` for application orchestration; keep pure value rules and simple predicates in `Constraint` or `Result` until the code needs environment or effects."
         SymbolIds = [
             "Builder", ["P:Axial.Flow.Builders.flow"]
         ]
@@ -604,29 +604,29 @@ let pageSpecs = [
     {
         OutPath = ["constraint"; "_index.md"]
         Title = "Constraint"
-        Description = "Source-documented reusable value rules for Axial."
+        Description = "Source-documented reusable value rules for Reified."
         Intro = "This page shows `Constraint<'value>`: one reusable description of valid values, shared by direct checking, refined-value admission, Schema, and export. `check` runs it, `test` answers the same question as a `bool`, and `guard` keeps the input after success. There is no separate Check type and no second constructor catalogue. Interpreted constructors build one `ConstraintAtom` that drives both execution and description; `custom`, `customWith`, `notWith`, and `contramap` are the opaque escape hatch, which runs normally and is honestly invisible to export and proof."
         SymbolIds = [
-            "Core types", ["T:Axial.Constraint.Constraint`1"; "T:Axial.Constraint.Violation"; "T:Axial.Constraint.AtomicViolation"; "T:Axial.Constraint.ConstraintDescription"; "T:Axial.Constraint.ConstraintExpression"; "T:Axial.Constraint.ConstraintAtom"; "T:Axial.Constraint.OpaqueConstraint"; "T:Axial.Constraint.ConstraintValue"]
-            "Expectations", ["T:Axial.Constraint.Presence"; "T:Axial.Constraint.Cardinality"; "T:Axial.Constraint.RelationOperator"; "T:Axial.Constraint.Relation"; "T:Axial.Constraint.Membership"; "T:Axial.Constraint.Format"; "T:Axial.Constraint.Number"; "T:Axial.Constraint.UnsupportedOperation"]
-            "Execution", ["M:Axial.Constraint.ConstraintModule.test"; "M:Axial.Constraint.ConstraintModule.check"; "M:Axial.Constraint.ConstraintModule.guard"; "M:Axial.Constraint.ConstraintModule.inspect"]
-            "Composition", ["M:Axial.Constraint.ConstraintModule.all"; "M:Axial.Constraint.ConstraintModule.any"; "M:Axial.Constraint.ConstraintModule.optional"; "M:Axial.Constraint.ConstraintModule.notWith"; "M:Axial.Constraint.ConstraintModule.custom"; "M:Axial.Constraint.ConstraintModule.customLocalized"; "M:Axial.Constraint.ConstraintModule.customLocalizedWith"; "M:Axial.Constraint.ConstraintModule.customWith"; "M:Axial.Constraint.ConstraintModule.contramap"; "M:Axial.Constraint.ConstraintModule.describe"]
-            "Presence and size", ["M:Axial.Constraint.ConstraintModule.present"; "M:Axial.Constraint.ConstraintModule.blank"; "M:Axial.Constraint.ConstraintModule.length"; "M:Axial.Constraint.ConstraintModule.minLength"; "M:Axial.Constraint.ConstraintModule.maxLength"; "M:Axial.Constraint.ConstraintModule.lengthBetween"]
-            "Text formats", ["M:Axial.Constraint.ConstraintModule.email"; "M:Axial.Constraint.ConstraintModule.trimmed"; "M:Axial.Constraint.ConstraintModule.numeric"; "M:Axial.Constraint.ConstraintModule.alphanumeric"; "M:Axial.Constraint.ConstraintModule.pattern"]
-            "Relations and membership", ["M:Axial.Constraint.ConstraintModule.equalTo"; "M:Axial.Constraint.ConstraintModule.notEqualTo"; "M:Axial.Constraint.ConstraintModule.greaterThan"; "M:Axial.Constraint.ConstraintModule.lessThan"; "M:Axial.Constraint.ConstraintModule.atLeast"; "M:Axial.Constraint.ConstraintModule.atMost"; "M:Axial.Constraint.ConstraintModule.between"; "M:Axial.Constraint.ConstraintModule.oneOf"; "M:Axial.Constraint.ConstraintModule.contains"; "M:Axial.Constraint.ConstraintModule.distinct"]
-            "Numeric properties", ["M:Axial.Constraint.ConstraintModule.multipleOf"; "M:Axial.Constraint.ConstraintModule.finite"; "M:Axial.Constraint.ConstraintModule.finite32"]
-            "Messages", ["T:Axial.Constraint.MessageTree"; "T:Axial.Constraint.MessageLeaf"; "T:Axial.Constraint.MessageDescriptor"; "T:Axial.Constraint.MessageFormatSpec"; "T:Axial.Constraint.MessageKeyError"; "T:Axial.Constraint.MessageFormatSpecError"; "M:Axial.Constraint.MessageDescriptorModule.key"; "M:Axial.Constraint.MessageDescriptorModule.arguments"; "M:Axial.Constraint.MessageDescriptorModule.segments"; "M:Axial.Constraint.MessageDescriptorModule.Advanced.create"; "M:Axial.Constraint.MessageDescriptorModule.Advanced.tryCreate"; "M:Axial.Constraint.MessageDescriptorModule.Advanced.ofSegments"; "M:Axial.Constraint.MessageFormatSpecModule.descriptor"; "M:Axial.Constraint.MessageFormatSpecModule.fallback"; "M:Axial.Constraint.MessageFormatSpecModule.pluralArgument"; "M:Axial.Constraint.MessageFormatSpecModule.Advanced.create"; "M:Axial.Constraint.MessageFormatSpecModule.Advanced.tryCreate"]
-            "Rendering", ["T:Axial.Constraint.Renderer"; "T:Axial.Constraint.MessageLookup"; "T:Axial.Constraint.MessageRequest"; "T:Axial.Constraint.MessageResolution"; "T:Axial.Constraint.MessageResolver"; "T:Axial.Constraint.ValueFormatRequest"; "P:Axial.Constraint.RendererModule.english"; "M:Axial.Constraint.RendererModule.ofLookup"; "M:Axial.Constraint.RendererModule.ofResourceManager"; "M:Axial.Constraint.RendererModule.ofResourceManagerWithCultures"; "M:Axial.Constraint.RendererModule.ofCurrentCulture"; "M:Axial.Constraint.RendererModule.context"; "M:Axial.Constraint.RendererModule.attribute"; "M:Axial.Constraint.RendererModule.unscoped"; "M:Axial.Constraint.RendererModule.withValues"; "M:Axial.Constraint.RendererModule.attributeName"; "M:Axial.Constraint.RendererModule.fullMessage"; "M:Axial.Constraint.RendererModule.Advanced.ofResolver"; "M:Axial.Constraint.RendererModule.Advanced.withValueFormatting"; "M:Axial.Constraint.RendererModule.Advanced.attributePath"; "M:Axial.Constraint.RendererModule.Advanced.lookupCandidates"; "M:Axial.Constraint.RendererModule.Advanced.messageRequests"; "M:Axial.Constraint.RendererModule.Advanced.attributeCandidates"; "M:Axial.Constraint.RendererModule.Advanced.format"]
-            "Catalogue", ["P:Axial.Constraint.Catalogue.keys"; "P:Axial.Constraint.Catalogue.arguments"; "P:Axial.Constraint.Catalogue.english"; "P:Axial.Constraint.Catalogue.pluralArgument"]
-            "Violations", ["M:Axial.Constraint.ViolationModule.render"; "M:Axial.Constraint.ViolationModule.message"; "M:Axial.Constraint.ViolationModule.fullMessage"; "M:Axial.Constraint.ViolationModule.renderWith"; "M:Axial.Constraint.ViolationModule.toMessageTree"; "M:Axial.Constraint.ViolationModule.children"; "M:Axial.Constraint.ViolationModule.flatten"; "M:Axial.Constraint.ViolationModule.tryExpectation"; "M:Axial.Constraint.ViolationModule.tryActual"; "M:Axial.Constraint.ViolationModule.tryDescription"; "M:Axial.Constraint.ViolationModule.conjoin"; "M:Axial.Constraint.ViolationModule.alternatives"]
-            "Descriptions and values", ["M:Axial.Constraint.ConstraintDescriptionModule.children"; "M:Axial.Constraint.ConstraintDescriptionModule.atoms"; "M:Axial.Constraint.ConstraintDescriptionModule.isOpaque"; "M:Axial.Constraint.ConstraintAtomModule.key"; "M:Axial.Constraint.ConstraintAtomModule.render"; "M:Axial.Constraint.ConstraintAtomModule.arguments"; "M:Axial.Constraint.ConstraintValueModule.tryCreate"; "M:Axial.Constraint.ConstraintValueModule.render"]
+            "Core types", ["T:Reified.Constraint.Constraint`1"; "T:Reified.Constraint.Violation"; "T:Reified.Constraint.AtomicViolation"; "T:Reified.Constraint.ConstraintDescription"; "T:Reified.Constraint.ConstraintExpression"; "T:Reified.Constraint.ConstraintAtom"; "T:Reified.Constraint.OpaqueConstraint"; "T:Reified.Constraint.ConstraintValue"]
+            "Expectations", ["T:Reified.Constraint.Presence"; "T:Reified.Constraint.Cardinality"; "T:Reified.Constraint.RelationOperator"; "T:Reified.Constraint.Relation"; "T:Reified.Constraint.Membership"; "T:Reified.Constraint.Format"; "T:Reified.Constraint.Number"; "T:Reified.Constraint.UnsupportedOperation"]
+            "Execution", ["M:Reified.Constraint.ConstraintModule.test"; "M:Reified.Constraint.ConstraintModule.check"; "M:Reified.Constraint.ConstraintModule.guard"; "M:Reified.Constraint.ConstraintModule.inspect"]
+            "Composition", ["M:Reified.Constraint.ConstraintModule.all"; "M:Reified.Constraint.ConstraintModule.any"; "M:Reified.Constraint.ConstraintModule.optional"; "M:Reified.Constraint.ConstraintModule.notWith"; "M:Reified.Constraint.ConstraintModule.custom"; "M:Reified.Constraint.ConstraintModule.customLocalized"; "M:Reified.Constraint.ConstraintModule.customLocalizedWith"; "M:Reified.Constraint.ConstraintModule.customWith"; "M:Reified.Constraint.ConstraintModule.contramap"; "M:Reified.Constraint.ConstraintModule.describe"]
+            "Presence and size", ["M:Reified.Constraint.ConstraintModule.present"; "M:Reified.Constraint.ConstraintModule.blank"; "M:Reified.Constraint.ConstraintModule.length"; "M:Reified.Constraint.ConstraintModule.minLength"; "M:Reified.Constraint.ConstraintModule.maxLength"; "M:Reified.Constraint.ConstraintModule.lengthBetween"]
+            "Text formats", ["M:Reified.Constraint.ConstraintModule.email"; "M:Reified.Constraint.ConstraintModule.trimmed"; "M:Reified.Constraint.ConstraintModule.numeric"; "M:Reified.Constraint.ConstraintModule.alphanumeric"; "M:Reified.Constraint.ConstraintModule.pattern"]
+            "Relations and membership", ["M:Reified.Constraint.ConstraintModule.equalTo"; "M:Reified.Constraint.ConstraintModule.notEqualTo"; "M:Reified.Constraint.ConstraintModule.greaterThan"; "M:Reified.Constraint.ConstraintModule.lessThan"; "M:Reified.Constraint.ConstraintModule.atLeast"; "M:Reified.Constraint.ConstraintModule.atMost"; "M:Reified.Constraint.ConstraintModule.between"; "M:Reified.Constraint.ConstraintModule.oneOf"; "M:Reified.Constraint.ConstraintModule.contains"; "M:Reified.Constraint.ConstraintModule.distinct"]
+            "Numeric properties", ["M:Reified.Constraint.ConstraintModule.multipleOf"; "M:Reified.Constraint.ConstraintModule.finite"; "M:Reified.Constraint.ConstraintModule.finite32"]
+            "Messages", ["T:Reified.Constraint.MessageTree"; "T:Reified.Constraint.MessageLeaf"; "T:Reified.Constraint.MessageDescriptor"; "T:Reified.Constraint.MessageFormatSpec"; "T:Reified.Constraint.MessageKeyError"; "T:Reified.Constraint.MessageFormatSpecError"; "M:Reified.Constraint.MessageDescriptorModule.key"; "M:Reified.Constraint.MessageDescriptorModule.arguments"; "M:Reified.Constraint.MessageDescriptorModule.segments"; "M:Reified.Constraint.MessageDescriptorModule.Advanced.create"; "M:Reified.Constraint.MessageDescriptorModule.Advanced.tryCreate"; "M:Reified.Constraint.MessageDescriptorModule.Advanced.ofSegments"; "M:Reified.Constraint.MessageFormatSpecModule.descriptor"; "M:Reified.Constraint.MessageFormatSpecModule.fallback"; "M:Reified.Constraint.MessageFormatSpecModule.pluralArgument"; "M:Reified.Constraint.MessageFormatSpecModule.Advanced.create"; "M:Reified.Constraint.MessageFormatSpecModule.Advanced.tryCreate"]
+            "Rendering", ["T:Reified.Constraint.Renderer"; "T:Reified.Constraint.MessageLookup"; "T:Reified.Constraint.MessageRequest"; "T:Reified.Constraint.MessageResolution"; "T:Reified.Constraint.MessageResolver"; "T:Reified.Constraint.ValueFormatRequest"; "P:Reified.Constraint.RendererModule.english"; "M:Reified.Constraint.RendererModule.ofLookup"; "M:Reified.Constraint.RendererModule.ofResourceManager"; "M:Reified.Constraint.RendererModule.ofResourceManagerWithCultures"; "M:Reified.Constraint.RendererModule.ofCurrentCulture"; "M:Reified.Constraint.RendererModule.context"; "M:Reified.Constraint.RendererModule.attribute"; "M:Reified.Constraint.RendererModule.unscoped"; "M:Reified.Constraint.RendererModule.withValues"; "M:Reified.Constraint.RendererModule.attributeName"; "M:Reified.Constraint.RendererModule.fullMessage"; "M:Reified.Constraint.RendererModule.Advanced.ofResolver"; "M:Reified.Constraint.RendererModule.Advanced.withValueFormatting"; "M:Reified.Constraint.RendererModule.Advanced.attributePath"; "M:Reified.Constraint.RendererModule.Advanced.lookupCandidates"; "M:Reified.Constraint.RendererModule.Advanced.messageRequests"; "M:Reified.Constraint.RendererModule.Advanced.attributeCandidates"; "M:Reified.Constraint.RendererModule.Advanced.format"]
+            "Catalogue", ["P:Reified.Constraint.Catalogue.keys"; "P:Reified.Constraint.Catalogue.arguments"; "P:Reified.Constraint.Catalogue.english"; "P:Reified.Constraint.Catalogue.pluralArgument"]
+            "Violations", ["M:Reified.Constraint.ViolationModule.render"; "M:Reified.Constraint.ViolationModule.message"; "M:Reified.Constraint.ViolationModule.fullMessage"; "M:Reified.Constraint.ViolationModule.renderWith"; "M:Reified.Constraint.ViolationModule.toMessageTree"; "M:Reified.Constraint.ViolationModule.children"; "M:Reified.Constraint.ViolationModule.flatten"; "M:Reified.Constraint.ViolationModule.tryExpectation"; "M:Reified.Constraint.ViolationModule.tryActual"; "M:Reified.Constraint.ViolationModule.tryDescription"; "M:Reified.Constraint.ViolationModule.conjoin"; "M:Reified.Constraint.ViolationModule.alternatives"]
+            "Descriptions and values", ["M:Reified.Constraint.ConstraintDescriptionModule.children"; "M:Reified.Constraint.ConstraintDescriptionModule.atoms"; "M:Reified.Constraint.ConstraintDescriptionModule.isOpaque"; "M:Reified.Constraint.ConstraintAtomModule.key"; "M:Reified.Constraint.ConstraintAtomModule.render"; "M:Reified.Constraint.ConstraintAtomModule.arguments"; "M:Reified.Constraint.ConstraintValueModule.tryCreate"; "M:Reified.Constraint.ConstraintValueModule.render"]
         ]
         Alias = None
     }
     {
         OutPath = ["bind"; "_index.md"]
         Title = "Bind"
-        Description = "Source-documented flow bind-site error adaptation for Axial."
+        Description = "Source-documented flow bind-site error adaptation for Reified."
         Intro = "This page shows the `Bind` helpers used when a source needs its error assigned or mapped immediately before `flow { }` binds it. Use `Bind.error` for option or value-option absence and unit-error failures such as `Result<'value, unit>` or `Flow<'env, unit, 'value>`. Use `Bind.mapError` when the source already carries a meaningful error that must be wrapped or translated into the surrounding flow error. The helpers return a `BindError` marker for the flow builder. Do not use `Bind` as a general Result adapter; in pure code use `Result.mapError` or `Result.orError`."
         SymbolIds = [
             "Core type", ["T:Axial.Flow.BindError`3"]
@@ -637,51 +637,51 @@ let pageSpecs = [
     {
         OutPath = ["result"; "_index.md"]
         Title = "Result"
-        Description = "Source-documented fail-fast Result helpers for Axial."
-        Intro = "This page shows `Axial.Result`: helpers over the standard F# `Result<'value, 'error>` type. Use `Result.requireTrue` when a bare `bool` condition should become a `Result` (nothing to preserve). Use `Result.okIf`/`Result.failIf` (mirroring `Option.filter`) when a predicate over the value itself should keep that value on success, then attach the real error afterward with `Result.orError`. Extraction helpers such as `Result.someOr` change the success shape. The `result { }` builder sequences fail-fast steps; `result.list { }` and `result.array { }` accumulate independent failures through `and!`. The package is a standalone leaf: for reusable value rules and the structured `Violation` they produce, see the Values reference."
+        Description = "Source-documented fail-fast Result helpers for Reified."
+        Intro = "This page shows `Reified.Result`: helpers over the standard F# `Result<'value, 'error>` type. Use `Result.requireTrue` when a bare `bool` condition should become a `Result` (nothing to preserve). Use `Result.okIf`/`Result.failIf` (mirroring `Option.filter`) when a predicate over the value itself should keep that value on success, then attach the real error afterward with `Result.orError`. Extraction helpers such as `Result.someOr` change the success shape. The `result { }` builder sequences fail-fast steps; `result.list { }` and `result.array { }` accumulate independent failures through `and!`. The package is a standalone leaf: for reusable value rules and the structured `Violation` they produce, see the Values reference."
         SymbolIds = [
-            "Core helpers", ["M:Axial.Result.Result.ok"; "M:Axial.Result.Result.error"; "M:Axial.Result.Result.map"; "M:Axial.Result.Result.mapError"; "M:Axial.Result.Result.bind"; "M:Axial.Result.Result.orElse"; "M:Axial.Result.Result.orElseWith"]
-            "Lifts and conversions", ["M:Axial.Result.Result.requireTrue"; "M:Axial.Result.Result.okIf"; "M:Axial.Result.Result.failIf"; "M:Axial.Result.Result.orError"; "M:Axial.Result.Result.fromTry"; "M:Axial.Result.Result.fromChoice"; "M:Axial.Result.Result.toOption"; "M:Axial.Result.Result.toValueOption"; "M:Axial.Result.Result.defaultValue"]
-            "Extraction helpers", ["M:Axial.Result.Result.someOr"; "M:Axial.Result.Result.noneOr"; "M:Axial.Result.Result.valueSomeOr"; "M:Axial.Result.Result.valueNoneOr"; "M:Axial.Result.Result.nullableOr"; "M:Axial.Result.Result.notNullOr"; "M:Axial.Result.Result.okOr"; "M:Axial.Result.Result.errorOr"; "M:Axial.Result.Result.headOr"]
-            "Traversal", ["M:Axial.Result.Result.traverse"; "M:Axial.Result.Result.sequence"]
-            "Side effects", ["M:Axial.Result.Result.tap"; "M:Axial.Result.Result.tapError"]
-            "Builder", ["P:Axial.Result.Builders.result"]
+            "Core helpers", ["M:Reified.Result.Result.ok"; "M:Reified.Result.Result.error"; "M:Reified.Result.Result.map"; "M:Reified.Result.Result.mapError"; "M:Reified.Result.Result.bind"; "M:Reified.Result.Result.orElse"; "M:Reified.Result.Result.orElseWith"]
+            "Lifts and conversions", ["M:Reified.Result.Result.requireTrue"; "M:Reified.Result.Result.okIf"; "M:Reified.Result.Result.failIf"; "M:Reified.Result.Result.orError"; "M:Reified.Result.Result.fromTry"; "M:Reified.Result.Result.fromChoice"; "M:Reified.Result.Result.toOption"; "M:Reified.Result.Result.toValueOption"; "M:Reified.Result.Result.defaultValue"]
+            "Extraction helpers", ["M:Reified.Result.Result.someOr"; "M:Reified.Result.Result.noneOr"; "M:Reified.Result.Result.valueSomeOr"; "M:Reified.Result.Result.valueNoneOr"; "M:Reified.Result.Result.nullableOr"; "M:Reified.Result.Result.notNullOr"; "M:Reified.Result.Result.okOr"; "M:Reified.Result.Result.errorOr"; "M:Reified.Result.Result.headOr"]
+            "Traversal", ["M:Reified.Result.Result.traverse"; "M:Reified.Result.Result.sequence"]
+            "Side effects", ["M:Reified.Result.Result.tap"; "M:Reified.Result.Result.tapError"]
+            "Builder", ["P:Reified.Result.Builders.result"]
         ]
         Alias = None
     }
     {
         OutPath = ["parse"; "_index.md"]
         Title = "Parse"
-        Description = "Source-documented serialized primitive parsers for Axial."
-        Intro = "`Axial.Parse` decodes serialized strings into primitive F# values. Every named parser returns `Result<'value, ParseError>` and remains independent of Constraint, Refined, Result, and Schema."
+        Description = "Source-documented serialized primitive parsers for Reified."
+        Intro = "`Reified.Parse` decodes serialized strings into primitive F# values. Every named parser returns `Result<'value, ParseError>` and remains independent of Constraint, Refined, Result, and Schema."
         SymbolIds = [
-            "Error", ["T:Axial.Parse.ParseError"]
-            "Functions", ["M:Axial.Parse.Parse.int"; "M:Axial.Parse.Parse.long"; "M:Axial.Parse.Parse.decimal"; "M:Axial.Parse.Parse.float"; "M:Axial.Parse.Parse.bool"; "M:Axial.Parse.Parse.guid"; "M:Axial.Parse.Parse.dateTime"; "M:Axial.Parse.Parse.dateTimeOffset"; "M:Axial.Parse.Parse.dateOnly"; "M:Axial.Parse.Parse.timeOnly"; "M:Axial.Parse.Parse.enum"; "M:Axial.Parse.Parse.optional"; "M:Axial.Parse.Parse.optionalOr"; "M:Axial.Parse.Parse.intOption"; "M:Axial.Parse.Parse.boolOption"; "M:Axial.Parse.Parse.decimalOption"; "M:Axial.Parse.Parse.guidOption"; "M:Axial.Parse.Parse.intOrDefault"; "M:Axial.Parse.Parse.boolOrDefault"; "M:Axial.Parse.Parse.decimalOrDefault"]
+            "Error", ["T:Reified.Parse.ParseError"]
+            "Functions", ["M:Reified.Parse.Parse.int"; "M:Reified.Parse.Parse.long"; "M:Reified.Parse.Parse.decimal"; "M:Reified.Parse.Parse.float"; "M:Reified.Parse.Parse.bool"; "M:Reified.Parse.Parse.guid"; "M:Reified.Parse.Parse.dateTime"; "M:Reified.Parse.Parse.dateTimeOffset"; "M:Reified.Parse.Parse.dateOnly"; "M:Reified.Parse.Parse.timeOnly"; "M:Reified.Parse.Parse.enum"; "M:Reified.Parse.Parse.optional"; "M:Reified.Parse.Parse.optionalOr"; "M:Reified.Parse.Parse.intOption"; "M:Reified.Parse.Parse.boolOption"; "M:Reified.Parse.Parse.decimalOption"; "M:Reified.Parse.Parse.guidOption"; "M:Reified.Parse.Parse.intOrDefault"; "M:Reified.Parse.Parse.boolOrDefault"; "M:Reified.Parse.Parse.decimalOrDefault"]
         ]
         Alias = None
     }
     {
         OutPath = ["refined"; "_index.md"]
         Title = "Refined"
-        Description = "Source-documented invariant-carrying values and refinements for Axial."
-        Intro = "`Axial.Refined` supplies invariant-carrying values and the operations that justify them. A type earns its place by making a partial operation total, guaranteeing a property later operations rely on, or removing a branch from consumers — validation that carries no invariant past the boundary belongs in `Constraint` instead. `Refinement` couples checking, total construction, and a total reverse projection."
+        Description = "Source-documented invariant-carrying values and refinements for Reified."
+        Intro = "`Reified.Refinements` supplies invariant-carrying values and the operations that justify them. A type earns its place by making a partial operation total, guaranteeing a property later operations rely on, or removing a branch from consumers — validation that carries no invariant past the boundary belongs in `Constraint` instead. `Refinement` couples checking, total construction, and a total reverse projection."
         SymbolIds = [
             "Refined types", [
-                "T:Axial.Refined.NonBlankString"
+                "T:Reified.Refinements.NonBlankString"
                 
                 
-                "T:Axial.Refined.FiniteFloat"; "T:Axial.Refined.FiniteFloat32"; "T:Axial.Refined.UnitInterval"
-                "T:Axial.Refined.NonEmptyList`1"; "T:Axial.Refined.NonEmptyArray`1"; "T:Axial.Refined.DistinctList`1"
-                "T:Axial.Refined.Interval`1"; "T:Axial.Refined.Bounded`1"
+                "T:Reified.Refinements.FiniteFloat"; "T:Reified.Refinements.FiniteFloat32"; "T:Reified.Refinements.UnitInterval"
+                "T:Reified.Refinements.NonEmptyList`1"; "T:Reified.Refinements.NonEmptyArray`1"; "T:Reified.Refinements.DistinctList`1"
+                "T:Reified.Refinements.Interval`1"; "T:Reified.Refinements.Bounded`1"
             ]
-            "Text", ["M:Axial.Refined.Text.nonBlankString"]
-            "Collection", ["M:Axial.Refined.Collection.nonEmptyList"; "M:Axial.Refined.Collection.nonEmptyArray"; "M:Axial.Refined.Collection.distinctList"]
-            "Interval", ["M:Axial.Refined.Interval.between"; "M:Axial.Refined.Interval.create"; "M:Axial.Refined.Interval.lower"; "M:Axial.Refined.Interval.upper"; "M:Axial.Refined.Interval.duration"; "M:Axial.Refined.Interval.widthInt"; "M:Axial.Refined.Interval.widthDecimal"; "M:Axial.Refined.Interval.singleton"; "M:Axial.Refined.Interval.contains"; "M:Axial.Refined.Interval.intersect"; "M:Axial.Refined.Interval.overlaps"; "M:Axial.Refined.Interval.clamp"; "M:Axial.Refined.Interval.span"]
-            "Character", ["M:Axial.Refined.Character.isAsciiDigit"; "M:Axial.Refined.Character.isAsciiHexDigit"; "M:Axial.Refined.Character.isLowercase"; "M:Axial.Refined.Character.isUppercase"; "M:Axial.Refined.Character.isWhitespace"; "M:Axial.Refined.Character.isControl"; "M:Axial.Refined.Character.isNumeric"]
-            "Choice", ["M:Axial.Refined.Choice.orElse"; "M:Axial.Refined.Choice.tryAny"]
-            "Refinement", ["T:Axial.Refined.Refinement`2"; "M:Axial.Refined.Refinement.define"; "M:Axial.Refined.Refinement.create"; "M:Axial.Refined.Refinement.underlying"; "M:Axial.Refined.Refinement.constraint'"]
-            "Invariant-preserving operations", ["M:Axial.Refined.NonBlankString.value"; "M:Axial.Refined.NonBlankString.create"; "M:Axial.Refined.NonBlankString.append"; "M:Axial.Refined.NonBlankString.trim"; "M:Axial.Refined.NonBlankString.split"; "M:Axial.Refined.NonEmptyList.toList"; "M:Axial.Refined.NonEmptyList.create"; "M:Axial.Refined.NonEmptyList.cons"; "M:Axial.Refined.NonEmptyList.map"; "M:Axial.Refined.NonEmptyList.head"; "M:Axial.Refined.NonEmptyList.last"; "M:Axial.Refined.NonEmptyList.reduce"; "M:Axial.Refined.NonEmptyList.traverseResult"; "M:Axial.Refined.NonEmptyList.groupBy"; "M:Axial.Refined.NonEmptyList.chunkBySize"; "M:Axial.Refined.NonEmptyList.zip"; "M:Axial.Refined.NonEmptyList.filter"; "M:Axial.Refined.NonEmptyList.tryFilter"; "M:Axial.Refined.DistinctList.toMap"; "M:Axial.Refined.DistinctList.toSet"; "M:Axial.Refined.UnitInterval.multiply"; "M:Axial.Refined.UnitInterval.complement"; "M:Axial.Refined.UnitInterval.lerp"; "M:Axial.Refined.UnitInterval.inverseLerp"; "M:Axial.Refined.FiniteFloat.create"; "M:Axial.Refined.FiniteFloat.negate"; "M:Axial.Refined.FiniteFloat.average"; "M:Axial.Refined.Bounded.clamp"]
-            "Refine facade", ["M:Axial.Refined.Refine.nonBlankString"; "M:Axial.Refined.Refine.finiteFloat"; "M:Axial.Refined.Refine.unitInterval"; "M:Axial.Refined.Refine.interval"; "M:Axial.Refined.Refine.nonEmptyList"; "M:Axial.Refined.Refine.nonEmptyArray"; "M:Axial.Refined.Refine.distinctList"]
+            "Text", ["M:Reified.Refinements.Text.nonBlankString"]
+            "Collection", ["M:Reified.Refinements.Collection.nonEmptyList"; "M:Reified.Refinements.Collection.nonEmptyArray"; "M:Reified.Refinements.Collection.distinctList"]
+            "Interval", ["M:Reified.Refinements.Interval.between"; "M:Reified.Refinements.Interval.create"; "M:Reified.Refinements.Interval.lower"; "M:Reified.Refinements.Interval.upper"; "M:Reified.Refinements.Interval.duration"; "M:Reified.Refinements.Interval.widthInt"; "M:Reified.Refinements.Interval.widthDecimal"; "M:Reified.Refinements.Interval.singleton"; "M:Reified.Refinements.Interval.contains"; "M:Reified.Refinements.Interval.intersect"; "M:Reified.Refinements.Interval.overlaps"; "M:Reified.Refinements.Interval.clamp"; "M:Reified.Refinements.Interval.span"]
+            "Character", ["M:Reified.Refinements.Character.isAsciiDigit"; "M:Reified.Refinements.Character.isAsciiHexDigit"; "M:Reified.Refinements.Character.isLowercase"; "M:Reified.Refinements.Character.isUppercase"; "M:Reified.Refinements.Character.isWhitespace"; "M:Reified.Refinements.Character.isControl"; "M:Reified.Refinements.Character.isNumeric"]
+            "Choice", ["M:Reified.Refinements.Choice.orElse"; "M:Reified.Refinements.Choice.tryAny"]
+            "Refinement", ["T:Reified.Refinements.Refinement`2"; "M:Reified.Refinements.Refinement.define"; "M:Reified.Refinements.Refinement.create"; "M:Reified.Refinements.Refinement.underlying"; "M:Reified.Refinements.Refinement.constraint'"]
+            "Invariant-preserving operations", ["M:Reified.Refinements.NonBlankString.value"; "M:Reified.Refinements.NonBlankString.create"; "M:Reified.Refinements.NonBlankString.append"; "M:Reified.Refinements.NonBlankString.trim"; "M:Reified.Refinements.NonBlankString.split"; "M:Reified.Refinements.NonEmptyList.toList"; "M:Reified.Refinements.NonEmptyList.create"; "M:Reified.Refinements.NonEmptyList.cons"; "M:Reified.Refinements.NonEmptyList.map"; "M:Reified.Refinements.NonEmptyList.head"; "M:Reified.Refinements.NonEmptyList.last"; "M:Reified.Refinements.NonEmptyList.reduce"; "M:Reified.Refinements.NonEmptyList.traverseResult"; "M:Reified.Refinements.NonEmptyList.groupBy"; "M:Reified.Refinements.NonEmptyList.chunkBySize"; "M:Reified.Refinements.NonEmptyList.zip"; "M:Reified.Refinements.NonEmptyList.filter"; "M:Reified.Refinements.NonEmptyList.tryFilter"; "M:Reified.Refinements.DistinctList.toMap"; "M:Reified.Refinements.DistinctList.toSet"; "M:Reified.Refinements.UnitInterval.multiply"; "M:Reified.Refinements.UnitInterval.complement"; "M:Reified.Refinements.UnitInterval.lerp"; "M:Reified.Refinements.UnitInterval.inverseLerp"; "M:Reified.Refinements.FiniteFloat.create"; "M:Reified.Refinements.FiniteFloat.negate"; "M:Reified.Refinements.FiniteFloat.average"; "M:Reified.Refinements.Bounded.clamp"]
+            "Refine facade", ["M:Reified.Refinements.Refine.nonBlankString"; "M:Reified.Refinements.Refine.finiteFloat"; "M:Reified.Refinements.Refine.unitInterval"; "M:Reified.Refinements.Refine.interval"; "M:Reified.Refinements.Refine.nonEmptyList"; "M:Reified.Refinements.Refine.nonEmptyArray"; "M:Reified.Refinements.Refine.distinctList"]
 
         ]
         Alias = None
@@ -689,8 +689,8 @@ let pageSpecs = [
     {
         OutPath = ["service"; "_index.md"]
         Title = "Service"
-        Description = "Source-documented service contracts and dependency access helpers for Axial."
-        Intro = "This page shows the service helpers around Axial's explicit environment model. In Axial, a service is a named dependency contract such as `IClock`, `IConsole`, or `IHttp`. Prefer plain records plus `Flow.read` for local workflow code, use `IHas<'T>` plus `Service<'service>.get()` when reusable helpers need a nominal service contract, and keep `Service<'service>.resolve()` at .NET host boundaries where `IServiceProvider` interop is useful. Layers provision explicit services, while the ambient runtime is reserved for closed executor mechanics only.\n\nSee the standard service packages: [Core](./core/), [Console](./console/), [FileSystem](./filesystem/), [Http](./http/), and [Process](./process/)."
+        Description = "Source-documented service contracts and dependency access helpers for Reified."
+        Intro = "This page shows the service helpers around Reified's explicit environment model. In Reified, a service is a named dependency contract such as `IClock`, `IConsole`, or `IHttp`. Prefer plain records plus `Flow.read` for local workflow code, use `IHas<'T>` plus `Service<'service>.get()` when reusable helpers need a nominal service contract, and keep `Service<'service>.resolve()` at .NET host boundaries where `IServiceProvider` interop is useful. Layers provision explicit services, while the ambient runtime is reserved for closed executor mechanics only.\n\nSee the standard service packages: [Core](./core/), [Console](./console/), [FileSystem](./filesystem/), [Http](./http/), and [Process](./process/)."
         SymbolIds = [
             "Service contracts", ["T:Axial.Flow.IHas`1"; "T:Axial.Flow.Service`1"]
             "Service accessors", ["M:Axial.Flow.Service.get"; "M:Axial.Flow.Service.resolve"]
@@ -701,7 +701,7 @@ let pageSpecs = [
     {
         OutPath = ["layer"; "_index.md"]
         Title = "Layer"
-        Description = "Source-documented service provisioning surface for Axial."
+        Description = "Source-documented service provisioning surface for Reified."
         Intro = "This page shows the `Layer<'input, 'error, 'output>` surface used to provision explicit services and environments. Layers build service values inside a `Scope`, can fail during provisioning, and are consumed through `Flow.provide`. Use `layer { }` for application environment construction: plain `let!` is dependent and sequential, while sibling `and!` bindings use `Layer.merge` / `Layer.zipPar` for independent parallel provisioning."
         SymbolIds = [
             "Core type", ["T:Axial.Flow.Layer`3"]
@@ -714,7 +714,7 @@ let pageSpecs = [
     {
         OutPath = ["scope"; "_index.md"]
         Title = "Scope"
-        Description = "Source-documented resource scope for Axial."
+        Description = "Source-documented resource scope for Reified."
         Intro = "This page shows the `Scope` surface used to own cleanup for resources acquired during provisioning and execution. Scopes register finalizers, disposables, and async disposables, and they close in reverse registration order."
         SymbolIds = [
             "Core type", ["T:Axial.Flow.Scope"]
@@ -945,7 +945,7 @@ let groupedFlowConstructionMembers =
 
 let serviceCoreSectionDirectories =
     dict [
-        "Base runtime", ("base-runtime", "Base runtime", "This page shows the `Core.BaseRuntime` helpers for building the standard explicit service bundle used by Axial workflow hosts.")
+        "Base runtime", ("base-runtime", "Base runtime", "This page shows the `Core.BaseRuntime` helpers for building the standard explicit service bundle used by Reified workflow hosts.")
         "Clock", ("clock", "Clock", "This page shows the `Core.Clock` helpers for reading time from an explicit clock service.")
         "Logging", ("log", "Logging", "This page shows the `Core.Log` helpers for writing messages through an explicit logging service.")
         "Random", ("random", "Random", "This page shows the `Core.Random` helpers for reading values from an explicit random-number service.")
@@ -1035,7 +1035,7 @@ let sectionTitleForDirectory = function
 let sectionIntroForDirectory = function
     | "result" -> "This page shows the helpers on the `Result` module."
     | "result-ce" -> "This page shows the `result { }` computation expression."
-    | "types" -> "Errors and refined value types defined by `Axial.Refined`."
+    | "types" -> "Errors and refined value types defined by `Reified.Refinements`."
     | "parse" -> "`Parse` functions convert serialized strings into primitive values."
     | "text" -> "`Text` functions construct refined string values."
     | "collection" -> "Functions in this section operate on collections."
@@ -1053,7 +1053,7 @@ let sectionIntroForDirectory = function
     | "resources" -> "This page shows the Flow helpers that register cleanup and manage scoped resources during execution."
     | "concurrency" -> "This page shows the Flow helpers that fork work, coordinate fibers, and run independent workflows in parallel."
     | "scheduling" -> "This page shows the Flow helpers that apply retry and repeat schedules."
-    | "base-runtime" -> "This page shows the `Core.BaseRuntime` helpers for building the standard explicit service bundle used by Axial workflow hosts."
+    | "base-runtime" -> "This page shows the `Core.BaseRuntime` helpers for building the standard explicit service bundle used by Reified workflow hosts."
     | "clock" -> "This page shows the `Core.Clock` helpers for reading time from an explicit clock service."
     | "log" -> "This page shows the `Core.Log` helpers for writing messages through an explicit logging service."
     | "random" -> "This page shows the `Core.Random` helpers for reading values from an explicit random-number service."
@@ -1159,10 +1159,10 @@ let relativeLinkFrom (fromFile: string) (toFile: string) =
 // these slugs are unwrapped to plain text instead of being left as broken hrefs.
 let noLinkGeneratedReferenceSlugs =
     set [
-        "axial-schema-fieldbuilder-2"          // FieldBuilder<'model, 'value> (<exclude/>, EditorBrowsable.Never)
-        "axial-schema-constructorstep-2"       // ConstructorStep<'model, 'constructor> (EditorBrowsable.Never)
-        "axial-schema-checkedconstructorstep-2" // CheckedConstructorStep<'model, 'constructor> (EditorBrowsable.Never)
-        "axial-schema-schemabuilder-1"         // SchemaBuilder<'model> (<exclude/>, EditorBrowsable.Never)
+        "reified-schema-fieldbuilder-2"          // FieldBuilder<'model, 'value> (<exclude/>, EditorBrowsable.Never)
+        "reified-schema-constructorstep-2"       // ConstructorStep<'model, 'constructor> (EditorBrowsable.Never)
+        "reified-schema-checkedconstructorstep-2" // CheckedConstructorStep<'model, 'constructor> (EditorBrowsable.Never)
+        "reified-schema-schemabuilder-1"         // SchemaBuilder<'model> (<exclude/>, EditorBrowsable.Never)
         "axial-flow-platform-finalizer"        // Axial.Flow.Platform.Finalizer: source-internal module, leaked into
         "axial-flow-platform-deed"             // public signatures only via reflection visibility, not a documented type
     ]
@@ -1173,7 +1173,7 @@ let rewriteApiDocHtml (slugMap: IDictionary<string, string>) (filePath: string) 
     let linksRewritten =
         Regex.Replace(
             content,
-            "<a href=\"(?:https://adz\\.github\\.io/Axial)?/reference/Axial/([a-z0-9\\-]+)\\.html(#[^\"]*)?\">((?:(?!</a>).)*)</a>",
+            "<a href=\"(?:https://adz\\.github\\.io/Reified)?/reference/Reified/([a-z0-9\\-]+)\\.html(#[^\"]*)?\">((?:(?!</a>).)*)</a>",
             MatchEvaluator(fun m ->
                 let slug = m.Groups[1].Value
                 let fragment = m.Groups[2].Value
@@ -1192,7 +1192,7 @@ let rewriteApiDocHtml (slugMap: IDictionary<string, string>) (filePath: string) 
         let unique = unresolved |> Seq.distinct |> String.concat ", "
         printfn "Warning: unresolved generated reference links in %s -> %s" filePath unique
 
-    // FSharp.Formatting checks isolated XML examples without the source file's namespace context. In Axial.Data
+    // FSharp.Formatting checks isolated XML examples without the source file's namespace context. In Reified.Data
     // examples it can therefore bind the short name `Data` to Microsoft.FSharp.Data and emit a false hover tooltip.
     // Keep the copyable source unchanged, but remove tooltip bindings whose generated definition is known to be wrong.
     let incorrectTooltipIds =
@@ -1303,29 +1303,29 @@ let main argv =
     // surface (e.g. ValueSchema.date and ofJsonElement); netstandard2.1-only builds would
     // silently drop those members from the docs instead of describing them as unavailable there.
     let resultDllPaths = [
-        Path.Combine(artifactsDir, "Axial.Result/debug_net8.0/Axial.Result.dll")
+        Path.Combine(artifactsDir, "Reified.Result/debug_net8.0/Reified.Result.dll")
     ]
 
     let valuesDllPaths = [
-        Path.Combine(artifactsDir, "Axial.Constraint/debug_net8.0/Axial.Constraint.dll")
-        Path.Combine(artifactsDir, "Axial.Parse/debug_net8.0/Axial.Parse.dll")
-        Path.Combine(artifactsDir, "Axial.Refined/debug_net8.0/Axial.Refined.dll")
+        Path.Combine(artifactsDir, "Reified.Constraint/debug_net8.0/Reified.Constraint.dll")
+        Path.Combine(artifactsDir, "Reified.Parse/debug_net8.0/Reified.Parse.dll")
+        Path.Combine(artifactsDir, "Reified.Refinements/debug_net8.0/Reified.Refinements.dll")
     ]
 
     let validationDllPaths = resultDllPaths @ valuesDllPaths |> List.distinct
 
     let schemaDllPaths = [
         yield! validationDllPaths
-        Path.Combine(artifactsDir, "Axial.Data/debug_net8.0/Axial.Data.dll")
-        Path.Combine(artifactsDir, "Axial.Schema/debug_net8.0/Axial.Schema.dll")
-        Path.Combine(artifactsDir, "Axial.Schema.Json/debug_net8.0/Axial.Schema.Json.dll")
-        Path.Combine(artifactsDir, "Axial.Schema.Http/debug/Axial.Schema.Http.dll")
+        Path.Combine(artifactsDir, "Reified.Data/debug_net8.0/Reified.Data.dll")
+        Path.Combine(artifactsDir, "Reified.Schema/debug_net8.0/Reified.Schema.dll")
+        Path.Combine(artifactsDir, "Reified.Schema.Json/debug_net8.0/Reified.Schema.Json.dll")
+        Path.Combine(artifactsDir, "Reified.Schema.Http/debug/Reified.Schema.Http.dll")
         Path.Combine(artifactsDir, "Axial.Schema.Http.AspNetCore/debug/Axial.Schema.Http.AspNetCore.dll")
         Path.Combine(artifactsDir, "Axial.Schema.Http.GenHttp/debug/Axial.Schema.Http.GenHttp.dll")
     ]
 
     let dataDllPaths = [
-        Path.Combine(artifactsDir, "Axial.Data/debug_net8.0/Axial.Data.dll")
+        Path.Combine(artifactsDir, "Reified.Data/debug_net8.0/Reified.Data.dll")
     ]
 
     let flowDllPaths = [
@@ -1374,7 +1374,7 @@ let main argv =
     let model =
         ApiDocs.GenerateModel(
             apiDocInputs,
-            "Axial",
+            "Reified",
             substitutions,
             root="/",
             qualify=true,
@@ -1465,25 +1465,25 @@ let main argv =
 
     let canonicalAliases =
         dict [
-            formatterApiSlug "Axial.ConstraintModule", Path.Combine(outRoot, "constraint", "_index.md")
-            formatterApiSlug "Axial.BindModule", Path.Combine(outRoot, "bind", "_index.md")
-            formatterApiSlug "Axial.BindErrorModule", Path.Combine(outRoot, "bind", "_index.md")
+            formatterApiSlug "Reified.ConstraintModule", Path.Combine(outRoot, "constraint", "_index.md")
+            formatterApiSlug "Reified.BindModule", Path.Combine(outRoot, "bind", "_index.md")
+            formatterApiSlug "Reified.BindErrorModule", Path.Combine(outRoot, "bind", "_index.md")
             formatterApiSlug "Axial.FlowModule", Path.Combine(outRoot, "flow", "_index.md")
-            formatterApiSlug "Axial.PolicyModule", Path.Combine(outRoot, "flow", "_index.md")
-            formatterApiSlug "Axial.LayerBuilder", Path.Combine(outRoot, "layer", "p-layer.md")
+            formatterApiSlug "Reified.PolicyModule", Path.Combine(outRoot, "flow", "_index.md")
+            formatterApiSlug "Reified.LayerBuilder", Path.Combine(outRoot, "layer", "p-layer.md")
             formatterApiSlug "Axial.FlowBuilder", Path.Combine(outRoot, "flow", "builders-flow.md")
-            formatterApiSlug "Axial.ResultBuilder", Path.Combine(outRoot, "result", "result-ce", "p-errorhandling--result.md")
-            formatterApiSlug "Axial.RefineBuilder", Path.Combine(outRoot, "refined", "refine-ce", "p-refined--refine.md")
+            formatterApiSlug "Reified.ResultBuilder", Path.Combine(outRoot, "result", "result-ce", "p-errorhandling--result.md")
+            formatterApiSlug "Reified.RefineBuilder", Path.Combine(outRoot, "refined", "refine-ce", "p-refined--refine.md")
             formatterApiSlug "Axial.Flow.LayerBuilder", Path.Combine(outRoot, "layer", "p-flow--layer.md")
             formatterApiSlug "Axial.Flow.FlowBuilder", Path.Combine(outRoot, "flow", "builders-flow.md")
-            formatterApiSlug "Axial.Result.ResultBuilder", Path.Combine(outRoot, "result", "result-ce", "p-errorhandling--result.md")
-            formatterApiSlug "Axial.Refined.RefineBuilder", Path.Combine(outRoot, "refined", "refine-ce", "p-refined--refine.md")
-            formatterApiSlug "Axial.StmBuilder", Path.Combine(outRoot, "stm", "t-flow-stmbuilder.md")
-            formatterApiSlug "Axial.BindError`3", Path.Combine(outRoot, "bind", "t-binderror.md")
-            formatterApiSlug "Axial.LogLevel", Path.Combine(outRoot, "service", "core", "t-flow-loglevel.md")
-            formatterApiSlug "Axial.RetryPolicy`1", Path.Combine(outRoot, "flow", "runtime", "t-flow-retrypolicy.md")
-            formatterApiSlug "Axial.SupervisePolicy", Path.Combine(outRoot, "flow", "runtime", "t-flow-supervisepolicy.md")
-            formatterApiSlug "Axial.Never", Path.Combine(outRoot, "flow", "t-flow-never.md")
+            formatterApiSlug "Reified.Result.ResultBuilder", Path.Combine(outRoot, "result", "result-ce", "p-errorhandling--result.md")
+            formatterApiSlug "Reified.Refinements.RefineBuilder", Path.Combine(outRoot, "refined", "refine-ce", "p-refined--refine.md")
+            formatterApiSlug "Reified.StmBuilder", Path.Combine(outRoot, "stm", "t-flow-stmbuilder.md")
+            formatterApiSlug "Reified.BindError`3", Path.Combine(outRoot, "bind", "t-binderror.md")
+            formatterApiSlug "Reified.LogLevel", Path.Combine(outRoot, "service", "core", "t-flow-loglevel.md")
+            formatterApiSlug "Reified.RetryPolicy`1", Path.Combine(outRoot, "flow", "runtime", "t-flow-retrypolicy.md")
+            formatterApiSlug "Reified.SupervisePolicy", Path.Combine(outRoot, "flow", "runtime", "t-flow-supervisepolicy.md")
+            formatterApiSlug "Reified.Never", Path.Combine(outRoot, "flow", "t-flow-never.md")
             formatterApiSlug "Axial.Flow.PlatformService.Clock", Path.Combine(outRoot, "service", "core", "_index.md")
             formatterApiSlug "Axial.Flow.PlatformService.Log", Path.Combine(outRoot, "service", "core", "_index.md")
             formatterApiSlug "Axial.Flow.PlatformService.Random", Path.Combine(outRoot, "service", "core", "_index.md")
@@ -1495,7 +1495,7 @@ let main argv =
             formatterApiSlug "Axial.Flow.FileSystem.FileSystemError", Path.Combine(outRoot, "service", "filesystem", "_index.md")
             formatterApiSlug "Axial.Flow.HttpClient.Http", Path.Combine(outRoot, "service", "http", "_index.md")
             formatterApiSlug "Axial.Flow.Process.Process", Path.Combine(outRoot, "service", "process", "_index.md")
-            formatterApiSlug "Axial.Schema.Json.Json", Path.Combine(outRoot, "codec", "_index.md")
+            formatterApiSlug "Reified.Schema.Json.Json", Path.Combine(outRoot, "codec", "_index.md")
         ]
 
     for KeyValue(slug, path) in canonicalAliases do

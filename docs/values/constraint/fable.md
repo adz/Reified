@@ -7,7 +7,7 @@ description: What constraint rendering does, and deliberately does not do, under
 
 # Fable support
 
-`Axial.Constraint` compiles to JavaScript through Fable, including the rendering edge. Constraints, violations,
+`Reified.Constraint` compiles to JavaScript through Fable, including the rendering edge. Constraints, violations,
 descriptors, the catalogue, and `Renderer` all work there. What differs is culture: the browser has no .NET
 resource manager and no `CultureInfo` machinery, so the constructors that depend on them are absent rather than
 present-and-useless.
@@ -17,7 +17,7 @@ present-and-useless.
 `Renderer.ofLookup` is the constructor to use. It takes any key-to-template function:
 
 ```fsharp
-open Axial.Constraint
+open Reified.Constraint
 
 let translations =
     Map [ "constraint.presence.present", "doit être renseigné"
@@ -32,7 +32,7 @@ violation |> Violation.fullMessage (renderer |> Renderer.attribute "name")
 ```
 
 A `Map`, an object fetched as JSON, or a function reaching into an existing i18n library all satisfy
-`MessageLookup`. Axial owns the candidate order, so a lookup only ever answers "do you have this exact key".
+`MessageLookup`. Reified owns the candidate order, so a lookup only ever answers "do you have this exact key".
 
 Everything the [Localization](../localization/) page describes about candidate order, contextual fallback,
 `.one`/`.other` selection, named interpolation, attribute nouns, humanization, segment encoding, and group and list
@@ -94,7 +94,7 @@ Use `Renderer.withValues` instead when one uniform rendering is enough and suffi
 A constraint must mean the same thing on both runtimes, and its message must too. Two behaviours matter here.
 
 Fable erases a `Guid` to a string and a `TimeSpan` to a number, so a boxed type test labels them `Text` and
-`Integer` there while .NET labels them correctly. Axial's constructors resolve the operand at the call site, where
+`Integer` there while .NET labels them correctly. Reified's constructors resolve the operand at the call site, where
 the type is still concrete, so the same constraint describes itself identically — and therefore interpolates
 identically — on both targets. This is checked by the shared Fable surface test, not assumed.
 

@@ -5,11 +5,11 @@ description: Checks, result {}, parsing, and refinement in one small program.
 
 # Introductory Reference App
 
-The introductory app uses `Axial.Result`, `Axial.Constraint`, `Axial.Refined`, and `Axial.Parse` without Schema or
+The introductory app uses `Reified.Result`, `Reified.Constraint`, `Reified.Refinements`, and `Reified.Parse` without Schema or
 Flow.
 
 ```bash
-dotnet run --project examples/Axial.ReferenceApp.Intro/Axial.ReferenceApp.Intro.fsproj --nologo
+dotnet run --project examples/Reified.ReferenceApp.Intro/Reified.ReferenceApp.Intro.fsproj --nologo
 ```
 
 ## Reusable checks

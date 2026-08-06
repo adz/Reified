@@ -1,4 +1,4 @@
-# Reference App Findings: What Axial Earned, What It Did Not
+# Reference App Findings: What Reified Earned, What It Did Not
 
 > Status: this report records the application exercise before the Schema reorientation. The implementation now uses
 > one `Schema<'value>` catalog, `Schema.parse`, `Schema.check`, fallible `Schema.refine`, bare successful contract
@@ -35,7 +35,7 @@ Direct smart-constructor failures from `createWorkspace`, `addMember`, `addWorkI
 `AppError.InvalidValue of RefinementError` case. They remain distinguishable from schema diagnostics and domain
 transition failures without being mislabeled as persistence errors or flattened to strings before rendering.
 
-This report evaluates Axial through the implementation of `examples/Axial.ReferenceApp`: a workspace tracker with
+This report evaluates Reified through the implementation of `examples/Reified.ReferenceApp`: a workspace tracker with
 related domain types, four schemas, refined values, smart constructors, application admission, Flow application services,
 CLI commands, HTML forms, a JSON API, versioned JSON files, migration, and focused tests.
 
@@ -45,7 +45,7 @@ remove.
 
 ## Executive assessment
 
-Axial has two pieces worth being loud about:
+Reified has two pieces worth being loud about:
 
 1. A schema can be an explicit, typed, reflection-free boundary declaration that drives parsing, diagnostics,
    inspection, JSON Schema, codecs, generated test data, and versioned contracts.
@@ -63,9 +63,9 @@ with optional interpreters around the same declaration.
 The weakest area is the trust-wrapper and refined-value ergonomics. `Model<'value>` currently makes the trust story
 less coherent, not more coherent. The built-in refined catalog proves useful invariants, but ordinary programming pays
 repeated unwrapping costs and `ValueSchema.refined` does not compose naturally with the `Result`-returning smart constructors
-the rest of Axial encourages.
+the rest of Reified encourages.
 
-The reference app also reinforced a scope warning: Axial should own semantic boundary machinery and Flow composition,
+The reference app also reinforced a scope warning: Reified should own semantic boundary machinery and Flow composition,
 but should not grow replacements for mature platform infrastructure merely because ZIO has an equivalent module.
 
 ## Excellent: preserve and emphasize
@@ -73,7 +73,7 @@ but should not grow replacements for mature platform infrastructure merely becau
 ### One explicit schema, several real interpreters
 
 The most valuable idea is that `Schema<'model>` is inspectable data while retaining a typed constructor/field chain.
-That combination is unusual and genuinely useful. It gives Axial a credible story across:
+That combination is unusual and genuinely useful. It gives Reified a credible story across:
 
 - parsing configuration, forms, and JSON-shaped input;
 - accumulated, path-aware diagnostics;
@@ -98,7 +98,7 @@ Schema.define<WorkspaceV2>
 ```
 
 It is explicit, local, searchable, compiler-checked, and does not require reflection or a bespoke computation
-expression. This is one of Axial's clearest differentiators and should be shown prominently.
+expression. This is one of Reified's clearest differentiators and should be shown prominently.
 
 ### Data as a common boundary currency
 
@@ -130,7 +130,7 @@ The contract chain was useful and pleasantly explicit:
 - storage can read old versions while writing only the head version.
 
 Revalidation was the excellent, slightly surprising part. Migration functions are ordinary code and can accidentally
-produce invalid current values; treating migration as trusted would create a hole in the boundary model. Axial closes
+produce invalid current values; treating migration as trusted would create a hole in the boundary model. Reified closes
 that hole.
 
 ### Flow for application orchestration
@@ -151,7 +151,7 @@ The reference app used public wire records for schema parsing and private-constr
 This was conceptually clean and made version migration honest: old wire shapes are not pretend domain models.
 
 The cost is duplication and conversion code. For four small schemas it was acceptable; for a hundred variants it may
-become the dominant authoring burden. Axial should not pretend this cost is absent. The contract generator may help at
+become the dominant authoring burden. Reified should not pretend this cost is absent. The contract generator may help at
 the wire tier, but generated wire records do not eliminate deliberate domain conversion.
 
 The recommended architecture should be conditional:
@@ -236,7 +236,7 @@ The reference app had to declare raw constraints and then call an internal const
 already ran. This manually duplicates the invariant and creates a maintenance hazard: change the smart constructor but
 forget the schema constraints, and the supposedly safe total constructor can throw or admit the wrong thing.
 
-Axial already has the necessary error-mapping concepts. It should provide a refined-schema constructor that accepts a
+Reified already has the necessary error-mapping concepts. It should provide a refined-schema constructor that accepts a
 fallible smart constructor and maps its failure into schema diagnostics. Metadata constraints can still be supplied for
 inspection, JSON Schema, forms, and generators, but executable correctness should have one authority.
 
@@ -264,7 +264,7 @@ error DU. Some application functions temporarily mapped smart-constructor failur
 because the small app lacked a clean shared admission-error type. That is an example smell, not a recommended pattern.
 
 The reference architecture should grow a first-class `InvalidValue` application error case and preserve structured
-failures. Axial documentation should show this translation explicitly. `BindError` may help at Flow bind sites, but the
+failures. Reified documentation should show this translation explicitly. `BindError` may help at Flow bind sites, but the
 underlying error vocabulary still belongs to the application.
 
 ## Likely speculative garbage unless demand proves otherwise
@@ -279,13 +279,13 @@ infrastructure, custom metrics primitives, channel internals, and a large sink/p
 the reference app. Most are ideas imported from a different runtime ecosystem rather than needs discovered in .NET
 applications.
 
-They should remain absent until a concrete Axial application cannot be served well by existing .NET libraries. A TODO
+They should remain absent until a concrete Reified application cannot be served well by existing .NET libraries. A TODO
 line is not evidence of product value.
 
-### Axial-owned concurrency should extend proven Flow semantics
+### Reified-owned concurrency should extend proven Flow semantics
 
 .NET already has `Channel<T>`, `SemaphoreSlim`, concurrent collections, `TaskCompletionSource`, cancellation tokens,
-`IAsyncEnumerable`, TPL Dataflow, and mature reactive/streaming libraries. Axial wrappers are worthwhile when they add
+`IAsyncEnumerable`, TPL Dataflow, and mature reactive/streaming libraries. Reified wrappers are worthwhile when they add
 specific typed-failure, scope, interruption, backpressure, or environment semantics that cannot be expressed cleanly
 with a thin adapter.
 
@@ -310,7 +310,7 @@ model from Process and the next real streaming consumer, test it against `IAsync
 
 ### More validation layers
 
-Axial already has `Constraint`, `Result`, `Refined`, `Schema`, policies, and
+Reified already has `Constraint`, `Result`, `Refined`, `Schema`, policies, and
 `Model`. Each can be explained individually, but the total cognitive load is high. Adding advisory validation, another
 rules container, dynamic values, or more wrapper types would make the product worse.
 
@@ -325,7 +325,7 @@ Everything else should be introduced only as machinery used by those doors.
 
 ### Persistence
 
-Use `System.Text.Json`, database drivers, EF Core, Dapper, or application-owned repositories. Axial should provide
+Use `System.Text.Json`, database drivers, EF Core, Dapper, or application-owned repositories. Reified should provide
 boundary parsing, codecs, and Flow adapters—not an ORM, document database, migration framework for storage engines, or
 transaction manager.
 
@@ -334,33 +334,33 @@ The local JSON store was useful for proving versioned contracts, but it is not a
 ### HTTP and hosting
 
 ASP.NET Core should own routing, model transport, authentication, authorization, DI, logging configuration, OpenAPI
-hosting, and response negotiation. Axial should integrate schemas and Flow at those boundaries. A focused endpoint
-filter/model binder/result adapter would provide more value than building an Axial web framework.
+hosting, and response negotiation. Reified should integrate schemas and Flow at those boundaries. A focused endpoint
+filter/model binder/result adapter would provide more value than building an Reified web framework.
 
 The reference app had to hand-write repeated endpoint adaptation. This is a strong integration opportunity.
 
 ### Forms and UI
 
 Schema inspection can provide field metadata and diagnostics, but established UI frameworks should own controls,
-accessibility, localization, antiforgery, progressive enhancement, and client state. Axial should expose stable metadata
+accessibility, localization, antiforgery, progressive enhancement, and client state. Reified should expose stable metadata
 and adapters rather than a form framework.
 
 ### Observability
 
-Use `ActivitySource`, OpenTelemetry, `ILogger`, and host-owned exporters. Axial's responsibility is propagating Flow
+Use `ActivitySource`, OpenTelemetry, `ILogger`, and host-owned exporters. Reified's responsibility is propagating Flow
 metadata and recording typed exits, defects, cancellation, and fiber context correctly. Custom tracing or metrics
 backends would be wasted effort.
 
 ### Resilience
 
 Basic Flow schedules are useful for typed retry/repeat composition, but production HTTP resilience is better integrated
-with `Microsoft.Extensions.Http.Resilience`/Polly and host-configured `HttpClient`. Axial should not hide handler
+with `Microsoft.Extensions.Http.Resilience`/Polly and host-configured `HttpClient`. Reified should not hide handler
 lifetime, connection pooling, circuit breakers, or client ownership behind a parallel stack.
 
 ### Testing
 
 FsCheck integration is valuable because schemas can derive valid boundary inputs. Keep integrating with xUnit, FsCheck,
-and established test hosts. Do not build an Axial test framework.
+and established test hosts. Do not build an Reified test framework.
 
 ## Missing from the current experience
 
@@ -378,7 +378,7 @@ and overridable, especially for error rendering.
 
 ### A canonical diagnostics renderer contract
 
-The app wrote its own path formatting. Axial has `SchemaError.render`, but applications repeatedly need a stable DTO
+The app wrote its own path formatting. Reified has `SchemaError.render`, but applications repeatedly need a stable DTO
 such as `{ path; code; message }`, plus plain-text and problem-details renderers. Codes must remain machine-readable;
 messages should be localizable and application-controlled.
 
@@ -391,7 +391,7 @@ reduce mistakes. Writing old versions should remain opt-in and probably uncommon
 ### Update and patch boundaries
 
 CRUD quickly raises partial-update questions. A create schema and a full persisted schema are not automatically a good
-PATCH schema. The reference app avoided pretending otherwise. Axial needs a deliberate story for drafts/patches before
+PATCH schema. The reference app avoided pretending otherwise. Reified needs a deliberate story for drafts/patches before
 claiming complete CRUD ergonomics—probably explicit application-authored patch schemas, not magical optionalization of
 every field.
 
@@ -425,7 +425,7 @@ that dogfood, generator value remains only partly demonstrated.
 5. `Data` was more valuable than expected because form redisplay and JSON parsing genuinely shared it.
 6. Refined values do preserve their invariant; the real problem is primitive interop and wrapper stacking, not loss of
    validity.
-7. The reference app needed much less of Axial's catalog than the size of the repository suggests. Schema, diagnostics,
+7. The reference app needed much less of Reified's catalog than the size of the repository suggests. Schema, diagnostics,
    contracts, codecs, a few refined types, and core Flow covered nearly everything.
 
 ## What to shout from the rooftops
@@ -444,7 +444,7 @@ These claims should be backed by runnable examples and benchmarks, not broad “
 - Do not imply that every domain value should be carried as `Model<'value>`.
 - Do not present every helper subsystem as a peer entry point.
 - Do not imply that a compiled codec validates untrusted input fully.
-- Do not imply that Axial needs equivalents of the entire ZIO module catalog.
+- Do not imply that Reified needs equivalents of the entire ZIO module catalog.
 - Do not call local JSON persistence or the current STM production architecture without evidence. Treat Process
   streaming as proven, while keeping broader stream claims proportional to the consumers that exercise them.
 - Do not claim refined wrappers behave transparently like primitives; explain the interop tradeoff honestly.
@@ -466,7 +466,7 @@ These claims should be backed by runnable examples and benchmarks, not broad “
 
 ## Bottom line
 
-The reference app validated Axial's central thesis but not its full surface area. Schema plus interpreters is a strong,
+The reference app validated Reified's central thesis but not its full surface area. Schema plus interpreters is a strong,
 differentiated product. Contracts, diagnostics, Data, and the typed builder materially improve real boundary code.
 Flow is useful when orchestration complexity warrants it.
 
@@ -474,6 +474,6 @@ The wrapper story is not ready. `Model<'value>` is inconsistent, refined-schema 
 constructor logic, and primitive-like refined values require too much ceremony. Those are pre-1.0 design problems and
 should be changed rather than documented around.
 
-The rest of the roadmap should be judged ruthlessly by application demand. Axial becomes more compelling by making its
+The rest of the roadmap should be judged ruthlessly by application demand. Reified becomes more compelling by making its
 boundary declaration and workflow core exceptionally coherent—not by accumulating every abstraction available in its
 inspiration ecosystem.

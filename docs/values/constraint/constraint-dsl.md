@@ -2,19 +2,19 @@
 weight: 10
 title: Constraint DSL
 type: docs
-description: Write concise constraint modules and adapt results without depending on Axial.Result.
+description: Write concise constraint modules and adapt results without depending on Reified.Result.
 ---
 
 # Constraint DSL
 
-`Axial.Constraint.ConstraintDSL` exposes the common constructors without the `Constraint.` prefix. Open it locally
+`Reified.Constraint.ConstraintDSL` exposes the common constructors without the `Constraint.` prefix. Open it locally
 where a module's purpose already makes the context clear:
 
 ```fsharp
-open Axial.Constraint
+open Reified.Constraint
 
 module SignupRules =
-    open Axial.Constraint.ConstraintDSL
+    open Reified.Constraint.ConstraintDSL
 
     let name : Constraint<string> =
         Constraint.all [ present; minLength 2; maxLength 80 ]
@@ -93,7 +93,7 @@ entries; the atom is shape-neutral and an interpreter combines it with the surro
 `maxItems`, or `maxProperties`.
 
 Blankness is defined the same way on both runtimes: .NET's whitespace set plus U+FEFF. Adding U+FEFF makes a JSON
-Schema validator's whitespace a strict subset of Axial's, which is what lets `present` and `trimmed` export a
+Schema validator's whitespace a strict subset of Reified's, which is what lets `present` and `trimmed` export a
 sound `\S` pattern instead of staying runtime-only.
 
 ## Names left off, and why
@@ -111,11 +111,11 @@ core operation is named `notContains`. `test` has no collision either and is exp
 ## Result adapters
 
 `guard`, `orError`, and `mapError` are small structural adapters matching the corresponding `Result` operations. They
-live here because `Axial.Constraint` does not depend on `Axial.Result`, so a constraint pipeline can retain its input
+live here because `Reified.Constraint` does not depend on `Reified.Result`, so a constraint pipeline can retain its input
 and finish with the application's own error type without adding a package reference:
 
 ```fsharp
-open Axial.Constraint.ConstraintDSL
+open Reified.Constraint.ConstraintDSL
 
 let requiredName (value: string) =
     value |> guard present |> orError NameRequired
@@ -124,4 +124,4 @@ let quantity value =
     value |> guard (atLeast 1) |> mapError InvalidQuantity
 ```
 
-`Result.guard` provides the same value-preserving operation for code that already uses `Axial.Result`.
+`Result.guard` provides the same value-preserving operation for code that already uses `Reified.Result`.

@@ -10,8 +10,8 @@ output_dir="artifacts/package"
 mkdir -p "$output_dir"
 find "$output_dir" -maxdepth 1 -type f \( -name '*.nupkg' -o -name '*.snupkg' \) -delete
 
-# Axial and FsFlow are separate release trains with separate version properties (see
-# Directory.Build.props). Overriding one must not move the other, so -v sets the Axial version and
+# Reified and FsFlow are separate release trains with separate version properties (see
+# Directory.Build.props). Overriding one must not move the other, so -v sets the Reified version and
 # -f sets the FsFlow version; either may be omitted to take the checked-in default.
 VERSION=""
 FSFLOW_VERSION=""
@@ -19,13 +19,13 @@ while getopts "v:f:" opt; do
   case $opt in
     v) VERSION="$OPTARG" ;;
     f) FSFLOW_VERSION="$OPTARG" ;;
-    *) echo "Usage: $0 [-v <axial-version>] [-f <fsflow-version>]"; exit 1 ;;
+    *) echo "Usage: $0 [-v <reified-version>] [-f <fsflow-version>]"; exit 1 ;;
   esac
 done
 
 version_args=()
 if [[ -n "$VERSION" ]]; then
-  version_args+=("-p:AxialVersion=$VERSION")
+  version_args+=("-p:ReifiedVersion=$VERSION")
 fi
 if [[ -n "$FSFLOW_VERSION" ]]; then
   version_args+=("-p:FsFlowVersion=$FSFLOW_VERSION")
@@ -33,17 +33,17 @@ fi
 
 projects=(
   "src/Axial.Flow/Axial.Flow.fsproj"
-  "src/Axial.Data/Axial.Data.fsproj"
-  "src/Axial.Result/Axial.Result.fsproj"
-  "src/Axial.Constraint/Axial.Constraint.fsproj"
-  "src/Axial.Refined/Axial.Refined.fsproj"
-  "src/Axial.Parse/Axial.Parse.fsproj"
-  "src/Axial.Schema/Axial.Schema.fsproj"
-  "src/Axial.Schema.Json/Axial.Schema.Json.fsproj"
-  "src/Axial.Schema.Http/Axial.Schema.Http.fsproj"
+  "src/Reified.Data/Reified.Data.fsproj"
+  "src/Reified.Result/Reified.Result.fsproj"
+  "src/Reified.Constraint/Reified.Constraint.fsproj"
+  "src/Reified.Refinements/Reified.Refinements.fsproj"
+  "src/Reified.Parse/Reified.Parse.fsproj"
+  "src/Reified.Schema/Reified.Schema.fsproj"
+  "src/Reified.Schema.Json/Reified.Schema.Json.fsproj"
+  "src/Reified.Schema.Http/Reified.Schema.Http.fsproj"
   "src/Axial.Schema.Http.AspNetCore/Axial.Schema.Http.AspNetCore.fsproj"
   "src/Axial.Schema.Http.GenHttp/Axial.Schema.Http.GenHttp.fsproj"
-  "src/Axial.Schema.Contracts.Build/Axial.Schema.Contracts.Build.fsproj"
+  "src/Reified.Schema.Contracts.Build/Reified.Schema.Contracts.Build.fsproj"
   "src/Axial.Flow.Console/Axial.Flow.Console.fsproj"
   "src/Axial.Flow.FileSystem/Axial.Flow.FileSystem.fsproj"
   "src/Axial.Flow.HttpClient/Axial.Flow.HttpClient.fsproj"

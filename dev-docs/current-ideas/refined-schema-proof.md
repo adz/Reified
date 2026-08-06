@@ -1,4 +1,4 @@
-# Axial — Refined schema proof and safe record updates
+# Reified — Refined schema proof and safe record updates
 
 **Status:** unresolved design exploration; split from the implemented Parse/Check/Refine/Schema cleanup.
 
@@ -135,7 +135,7 @@ Booking.fs          // user Booking and Create(BookingDraft)
 Booking.post.g.fs   // projection, schema, parse/check/update; compiled after Booking.fs
 ```
 
-Current `Axial.Schema.Contracts.Build.targets` inserts generated output immediately after its declaration file. Supporting a generated draft in the constructor therefore requires generator and MSBuild ordering changes.
+Current `Reified.Schema.Contracts.Build.targets` inserts generated output immediately after its declaration file. Supporting a generated draft in the constructor therefore requires generator and MSBuild ordering changes.
 
 Until that complexity is justified, constructor parameters remain the simpler shape:
 
@@ -228,7 +228,7 @@ This exploration does not block the implemented Parse/Check/Refine/Schema cleanu
 
 - unit-returning `Check`;
 - portable `Constraint` metadata;
-- independent `Axial.Parse`;
+- independent `Reified.Parse`;
 - `Refinement` and `Schema.refine` for named invariant-carrying types;
 - `Schema.convert`, `Schema.tryConvert`, and `Schema.admit`;
 - canonical reconstruction through `Schema.check`.

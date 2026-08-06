@@ -8,7 +8,7 @@
   {{- $active := eq $current $node -}}
   {{- $activePath := or $active ($current.IsDescendant $node) -}}
   {{- $id := printf "package-%s" ($node.RelPermalink | anchorize) -}}
-  <li class="axial-package-nav__item{{ if $activePath }} active-path{{ end }}{{ if gt (len $children) 0 }} with-child{{ end }}">
+  <li class="reified-package-nav__item{{ if $activePath }} active-path{{ end }}{{ if gt (len $children) 0 }} with-child{{ end }}">
     {{- if gt (len $children) 0 -}}
       <input type="checkbox" id="{{ $id }}-check"{{ if $activePath }} checked{{ end }}>
       <label for="{{ $id }}-check">

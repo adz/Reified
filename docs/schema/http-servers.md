@@ -8,12 +8,12 @@ description: Schema-driven endpoints with problem-details errors and generated O
 # HTTP Servers
 
 An HTTP endpoint is a trust boundary: the body, form, or query string arrives untrusted, and the handler wants a
-typed model. `Axial.Schema.Http` turns one schema declaration into everything that boundary needs — parsing, an
+typed model. `Reified.Schema.Http` turns one schema declaration into everything that boundary needs — parsing, an
 error contract, and the published API document — and stays out of routing entirely.
 
 The package split matters:
 
-- `Axial.Schema.Http` is host-neutral. It depends only on `Axial.Schema` and defines the boundary contract: how
+- `Reified.Schema.Http` is host-neutral. It depends only on `Reified.Schema` and defines the boundary contract: how
   name/value input becomes `Data`, how parse diagnostics render as an error response, and how endpoint
   declarations assemble into an OpenAPI document.
 - `Axial.Schema.Http.AspNetCore` and `Axial.Schema.Http.GenHttp` adapt one host each. Their default API turns an
@@ -25,9 +25,9 @@ error bodies and publish the same OpenAPI fragments from the same schema declara
 
 The host adapters intentionally have a larger dependency surface than the host-neutral package:
 
-- `Axial.Schema.Http` depends on `Axial.Schema` and does not require Flow.
-- `Axial.Schema.Http.AspNetCore` depends on `Axial.Schema.Http`, `Axial.Schema.Json`, `Axial.Flow`, and ASP.NET Core.
-- `Axial.Schema.Http.GenHttp` depends on `Axial.Schema.Http`, `Axial.Schema.Json`, `Axial.Flow`, and GenHTTP.
+- `Reified.Schema.Http` depends on `Reified.Schema` and does not require Flow.
+- `Axial.Schema.Http.AspNetCore` depends on `Reified.Schema.Http`, `Reified.Schema.Json`, `Axial.Flow`, and ASP.NET Core.
+- `Axial.Schema.Http.GenHttp` depends on `Reified.Schema.Http`, `Reified.Schema.Json`, `Axial.Flow`, and GenHTTP.
 
 Use the host-neutral package when parsing and rendering are enough. Install one host adapter when an HTTP handler should
 run as a Flow.
@@ -64,7 +64,7 @@ response shape.
 `JsonSchema.generate` output, so the published contract cannot drift from what the parser accepts:
 
 ```fsharp
-open Axial.Schema.Http
+open Reified.Schema.Http
 
 let openApiDocument =
     OpenApi.document
@@ -226,7 +226,7 @@ Use `Request.raw projection` when deliberate direct mapping is enough, and `Requ
 streaming, signatures, upgrades, or other host-specific behavior. Those names keep the loss of schema-established
 trust visible at the call site.
 
-The runnable version of this is `examples/Axial.Api` — one schema declaration driving parsing, problem details,
+The runnable version of this is `examples/Reified.Api` — one schema declaration driving parsing, problem details,
 OpenAPI, a compiled response codec, and a redisplaying HTML form.
 
 ## GenHTTP

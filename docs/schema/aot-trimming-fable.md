@@ -1,14 +1,14 @@
 ---
 weight: 82
 title: Compiler-Directed, AOT, and Fable
-description: Why Axial works under NativeAOT, aggressive trimming, and Fable by construction.
+description: Why Reified works under NativeAOT, aggressive trimming, and Fable by construction.
 ---
 
 # Compiler-Directed: AOT and Fable
 
-This page explains Axial's runtime-portability guarantees and what makes them hold.
+This page explains Reified's runtime-portability guarantees and what makes them hold.
 
-Axial performs no runtime reflection in any hot path — everything is compiler-directed, for maximal deterministic
+Reified performs no runtime reflection in any hot path — everything is compiler-directed, for maximal deterministic
 verification. That is not an optimization applied afterwards; it is an architectural rule: schemas, constructors,
 getters, checks, codecs, and service access are all explicit declarations the compiler can see, so there is nothing
 for the trimmer to remove by mistake and nothing NativeAOT cannot compile ahead of time. Where build-phase metadata
@@ -23,7 +23,7 @@ natively to prove it.
   and no `Activator.CreateInstance`.
 - **Codecs compile from the typed shape.** `Json.compile` turns the schema's retained typed constructor and fields
   into encode/decode plans — cached wire-name bytes and typed field decoders — where `System.Text.Json`'s default path
-  builds converters through reflection and asks you to switch to source generators for AOT. Axial has nothing to
+  builds converters through reflection and asks you to switch to source generators for AOT. Reified has nothing to
   switch: the explicit path is the only path.
 - **Refined values are functions, not conventions.** `Schema.convert construct inspect` carries the conversion in both
   directions as ordinary closures.
@@ -41,8 +41,8 @@ introduced reflection the trimmer could not prove safe, CI fails.
 
 ## Fable
 
-The same explicitness is what makes Fable compilation work: `Axial.Flow`, `Axial.Result`, `Axial.Constraint`, `Axial.Refined`, and
-`Axial.Schema` all compile to JavaScript, so a browser front end can parse
+The same explicitness is what makes Fable compilation work: `Axial.Flow`, `Reified.Result`, `Reified.Constraint`, `Reified.Refinements`, and
+`Reified.Schema` all compile to JavaScript, so a browser front end can parse
 and redisplay through the same schema declaration the server uses. CI compiles the Fable JavaScript surface
 (`bash scripts/check-fable-js-surface.sh`), and the [benchmarks]({{< relref "/schema/benchmarks.md" >}}) include
 Node and Erlang runs of the same workloads. .NET-only conveniences — such as `Data.ofJsonDocument` and the

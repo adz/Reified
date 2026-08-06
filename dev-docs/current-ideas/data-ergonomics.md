@@ -1,4 +1,4 @@
-# Axial.Data ergonomic structured values
+# Reified.Data ergonomic structured values
 
 ## Status
 
@@ -8,11 +8,11 @@ Phase 1 now supplies the coherent authoring language described below. Later phas
 
 ## Product role
 
-`Axial.Data` should be an independent package for immutable structured values. It should make constructed, transformed, and produced data equally easy to work with.
+`Reified.Data` should be an independent package for immutable structured values. It should make constructed, transformed, and produced data equally easy to work with.
 
 Its initial uses include:
 
-- source-neutral input passed to `Axial.Schema`
+- source-neutral input passed to `Reified.Schema`
 - concise boundary and integration-test fixtures
 - malformed and partially supplied input
 - nested maps and lists used for bulk operations
@@ -43,7 +43,7 @@ The interface succeeds only if construction, editing, case generation, lookup, a
 
 Normal callers should not spell union cases, conversion witnesses, lexical-number formatting, or parsed path values in ordinary examples.
 
-After opening `Axial.Data.Syntax`, the Phase 1 vocabulary should remain close to:
+After opening `Reified.Data.Syntax`, the Phase 1 vocabulary should remain close to:
 
 ```text
 data  =>  ?=>  nil  num  fields
@@ -60,13 +60,13 @@ Throwing functions are for authored fixtures and test declarations. Result-retur
 
 ## Package boundaries
 
-`Axial.Data` owns the tree, literal conversion, strict paths, lookup and extraction, edits, deterministic traversal, comparison, mismatch data, and framework-neutral matching.
+`Reified.Data` owns the tree, literal conversion, strict paths, lookup and extraction, edits, deterministic traversal, comparison, mismatch data, and framework-neutral matching.
 
 Source adapters own conversion to and from JSON, query strings, forms, configuration, command-line arguments, and JavaScript values.
 
 Snapshot adapters own files, approval and update policies, source locations, and test-runner integration. FsCheck adapters own generators and shrinkers.
 
-`Axial.Schema` owns typed parsing and contracts. HTTP packages own transport metadata. Neither concern should be absorbed into `Axial.Data` merely because it consumes `Data`.
+`Reified.Schema` owns typed parsing and contracts. HTTP packages own transport metadata. Neither concern should be absorbed into `Reified.Data` merely because it consumes `Data`.
 
 # Phase 1: one expressive data language
 
@@ -77,7 +77,7 @@ Phase 1 establishes the complete everyday workflow: author a value, derive cases
 `=>` returns an opaque field instruction rather than a raw tuple. Recursive conversion distinguishes object fields from an ordinary list, so nested objects do not repeat `data`.
 
 ```fsharp
-open Axial.Data.Syntax
+open Reified.Data.Syntax
 
 let customer =
     data [
@@ -113,7 +113,7 @@ The intended public shape is approximately:
 ```fsharp
 type DataField = private DataField
 
-module Axial.Data.Syntax =
+module Reified.Data.Syntax =
     val inline data : value: ^value -> Data
     val inline (=>) : name: string -> value: ^value -> DataField
     val inline (?=>) : name: string -> value: ^value option -> DataField
@@ -199,7 +199,7 @@ Data.tryList
 Data.tryObject
 ```
 
-These functions inspect the owned tree. Typed domain decoding remains the responsibility of `Axial.Schema` or an explicit codec.
+These functions inspect the owned tree. Typed domain decoding remains the responsibility of `Reified.Schema` or an explicit codec.
 
 ## Immutable edits
 
@@ -233,7 +233,7 @@ The proposed surface is:
 ```fsharp
 type DataEdit = private DataEdit
 
-module Axial.Data.Syntax =
+module Reified.Data.Syntax =
     val inline set : path: string -> value: ^value -> DataEdit
     val inline put : path: string -> value: ^value -> DataEdit
     val remove : path: string -> DataEdit
@@ -292,7 +292,7 @@ type DataCase =
         Value: Data
     }
 
-module Axial.Data.Syntax =
+module Reified.Data.Syntax =
     val variant : name: string -> edits: DataEdit list -> DataVariation
     val variants : variations: DataVariation list -> baseline: Data -> DataCase list
 ```
@@ -335,7 +335,7 @@ type DataDimension =
         Variations: DataVariation list
     }
 
-module Axial.Data.Syntax =
+module Reified.Data.Syntax =
     val dimension : name: string -> variations: DataVariation list -> DataDimension
     val matrix : dimensions: DataDimension list -> baseline: Data -> DataCase list
 ```
@@ -379,7 +379,7 @@ The authored and dynamic forms share one engine:
 ```fsharp
 type DataExpectation = private DataExpectation
 
-module Axial.Data.Syntax =
+module Reified.Data.Syntax =
     val inline at : path: string -> expected: ^value -> DataExpectation
     val absent : path: string -> DataExpectation
     val matching : expectations: DataExpectation list -> actual: Data -> unit
@@ -463,7 +463,7 @@ Captures, wildcard paths, regex helpers, numeric tolerance, and negation are not
 The JSON adapter materializes owned `Data`; it must not copy `JsonDocument`'s borrowed lifetime into the canonical model.
 
 ```fsharp
-Axial.Schema.Json.Json.parseData
+Reified.Schema.Json.Json.parseData
 Data.ofJsonElement // .NET 8+
 Data.ofJsonValue // Fable
 Data.Json.render
@@ -577,7 +577,7 @@ let proof =
 
 Captures require deterministic branch selection, conflict rules for repeated names, and clear behavior inside alternatives and unordered collections.
 
-Ordinary F# bindings remain preferable when they are equally clear. Do not turn `Axial.Data` into a general test computation framework.
+Ordinary F# bindings remain preferable when they are equally clear. Do not turn `Reified.Data` into a general test computation framework.
 
 ## Phase 5: property generation and shrinking
 
@@ -589,7 +589,7 @@ DataGen.withMaximumDepth 5
 DataGen.jsonCompatible
 ```
 
-Generic `Data` generation belongs in an `Axial.Data` testing adapter. Schema-conforming generation remains in `Axial.Schema.Testing`.
+Generic `Data` generation belongs in an `Reified.Data` testing adapter. Schema-conforming generation remains in `Reified.Schema.Testing`.
 
 The core package must not acquire an FsCheck dependency.
 
@@ -651,10 +651,10 @@ If native typed dynamic scalars become necessary, revisit a generic internal tre
 
 # Documentation consequences
 
-This design gives `Axial.Data` a standalone role and justifies its independent NuGet package.
+This design gives `Reified.Data` a standalone role and justifies its independent NuGet package.
 
 It remains a dependency of Schema, HTTP input adapters, and contract tooling, while becoming directly useful for fixtures, produced-data proofs, diffs, and bulk variation.
 
-`Axial.Data` does not require a top-level product navigation item. Introduce it under structured Schema input and test authoring, with a focused package and reference page.
+`Reified.Data` does not require a top-level product navigation item. Introduce it under structured Schema input and test authoring, with a focused package and reference page.
 
 When Phase 1 becomes active architecture, teach the end-to-end workflow before listing individual operations. The documentation should show one value moving through construction, variation, transport, and proof.

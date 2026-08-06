@@ -15,7 +15,7 @@ UI metadata.
 `Inspect.model` turns a built schema into a plain metadata tree:
 
 ```fsharp
-open Axial.Schema
+open Reified.Schema
 
 let description = Inspect.model signupSchema
 
@@ -47,7 +47,7 @@ Refined values expose their raw representation through `SchemaShape.Refined`, so
 
 ## Understand The Constraint Types
 
-There is one constraint type. `Schema.constrain` takes the same `Axial.Constraint.Constraint<'value>` you would check
+There is one constraint type. `Schema.constrain` takes the same `Reified.Constraint.Constraint<'value>` you would check
 directly, and inspection hands back the same `ConstraintDescription` that `Constraint.inspect` returns. Schema erases
 the value type when it stores a constraint in its heterogeneous field plan, but that erasure is internal: nothing in
 the public inspection surface is Schema-specific.
@@ -82,7 +82,7 @@ Atoms are shape-neutral. `Cardinality.Maximum 5` becomes `maxLength`, `maxItems`
 `SchemaShape` it is attached to, so combine the two rather than reading the description alone.
 
 The repository keeps three worked prototypes — a JSON Schema emitter, a docs describer, and a UI metadata producer —
-in `tests/Axial.Schema.Tests/SchemaInterpreterPrototypeTests.fs`, all built only on `Inspect`.
+in `tests/Reified.Schema.Tests/SchemaInterpreterPrototypeTests.fs`, all built only on `Inspect`.
 
 ## Why This Matters
 

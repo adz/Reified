@@ -4,8 +4,8 @@ Snapshot after the reference cleanup pass.
 
 ## Fixed
 
-- Legacy `https://adz.github.io/Axial/reference/Axial/*.html` links and root-relative
-  `/reference/Axial/*.html` links are rewritten to local generated reference pages.
+- Legacy `https://adz.github.io/Reified/reference/Reified/*.html` links and root-relative
+  `/reference/Reified/*.html` links are rewritten to local generated reference pages.
 - `Flow` reference pages are grouped into sub-sections:
   - `construction`
   - `environment`

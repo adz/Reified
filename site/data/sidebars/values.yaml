@@ -8,7 +8,7 @@ groups:
       - /values/getting-started
       - /values/reference-app
 
-  - title: Axial.Constraint
+  - title: Reified.Constraint
     home: /values/constraint
     caption: One reusable description of valid values, shared by every interpreter.
     children_of:
@@ -19,7 +19,7 @@ groups:
       children_of:
         - /values/reference/constraint
 
-  - title: Axial.Refined
+  - title: Reified.Refinements
     home: /values/refined
     caption: Construct values whose types record successful checks.
     children_of:
@@ -28,7 +28,7 @@ groups:
       children_of:
         - /values/reference/refined
 
-  - title: Axial.Parse
+  - title: Reified.Parse
     home: /values/parse
     caption: Named parsers for serialized primitive values.
     descendants: false

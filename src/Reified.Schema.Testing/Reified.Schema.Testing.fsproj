@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <AssemblyName>Reified.Schema.Testing</AssemblyName>
+    <RootNamespace>Reified.Schema.Testing</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="FsCheck" Version="3.3.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Reified.Data\Reified.Data.fsproj" />
+    <ProjectReference Include="..\Reified.Schema\Reified.Schema.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="SchemaGen.fs" />
+  </ItemGroup>
+</Project>

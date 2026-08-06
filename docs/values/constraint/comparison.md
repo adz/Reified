@@ -1,12 +1,12 @@
 ---
 weight: 5
 title: How it compares
-description: Axial.Constraint against DataAnnotations, FluentValidation, and Validus — including where they are the better choice.
+description: Reified.Constraint against DataAnnotations, FluentValidation, and Validus — including where they are the better choice.
 ---
 
 # How it compares
 
-The short version: most validation libraries treat a rule and its message as two artefacts. Axial treats
+The short version: most validation libraries treat a rule and its message as two artefacts. Reified treats
 the message as a projection of the rule, which is why one declaration can also produce JSON Schema, test
 data, and translations.
 
@@ -19,7 +19,7 @@ That difference matters in some projects and not others. This page tries to say 
 | DataAnnotations | an attribute on a property | `ErrorMessage`, or a resource key you name |
 | FluentValidation | a rule in a validator class | a message override on that rule, or a localizer you wire up |
 | Validus | a validator function | a message function supplied alongside it |
-| **Axial.Constraint** | a `Constraint<'value>` value | **derived from the constraint** |
+| **Reified.Constraint** | a `Constraint<'value>` value | **derived from the constraint** |
 
 Everything below follows from that row.
 
@@ -52,7 +52,7 @@ Refinement.define retryCount RetryCount _.Value    // used in a refined type
 ```
 
 The same declaration lowers to JSON Schema and generates test data. A predicate — in any library, including
-Axial's own `Constraint.custom` escape hatch — cannot be inspected, and Axial says so rather than
+Reified's own `Constraint.custom` escape hatch — cannot be inspected, and Reified says so rather than
 pretending otherwise.
 
 If you only ever need to answer "is this valid?", this buys you nothing and a predicate is simpler.
@@ -61,7 +61,7 @@ If you only ever need to answer "is this valid?", this buys you nothing and a pr
 
 **Choose DataAnnotations when** you are validating an ASP.NET MVC or Blazor model, want zero setup, and are
 content with what attributes can express. Model binding, client-side validation, and the surrounding
-tooling all work out of the box. That integration is real and Axial does not replace it.
+tooling all work out of the box. That integration is real and Reified does not replace it.
 
 **Its limits** are structural rather than incidental: attributes are declarations on properties, so a rule
 cannot be named, passed around, composed, or reused between two types that share a concept. Conditional and
@@ -72,7 +72,7 @@ keys.
 
 **Choose FluentValidation when** you want a mature, widely-known library with a large community, ASP.NET
 integration, async and DI-driven validators, and a team already fluent in it. It is a good library and the
-ecosystem around it is far larger than Axial's.
+ecosystem around it is far larger than Reified's.
 
 **Where it differs:** a rule belongs to a validator for a type, rather than being a free-standing value.
 Sharing "what a valid retry count is" between two types means sharing a validator or repeating the rule.
@@ -87,11 +87,11 @@ compose, results accumulate, and there is very little to learn. For many F# appl
 amount of machinery.
 
 **Where it differs:** validators are functions, so the message is supplied alongside the rule rather than
-derived from it, and nothing can inspect a validator afterwards. Axial's extra concepts — `Violation`,
+derived from it, and nothing can inspect a validator afterwards. Reified's extra concepts — `Violation`,
 `Renderer`, interpreted versus opaque rules — exist to buy inspectability and derived messages. If you do
 not want those, they are cost without return.
 
-## What Axial costs you
+## What Reified costs you
 
 Stated plainly, because the sections above are about what it gives:
 
@@ -100,11 +100,11 @@ Stated plainly, because the sections above are about what it gives:
 - **F# only.** There is no C# story.
 - **A young ecosystem.** Fewer answers, fewer integrations, and a smaller community than FluentValidation
   or DataAnnotations.
-- **No model-binding integration by default.** Axial validates values and models you hand it; wiring that
-  into an ASP.NET pipeline is [`Axial.Schema.Http`]({{% relref "/schema/http-servers/" %}})'s job, not an
+- **No model-binding integration by default.** Reified validates values and models you hand it; wiring that
+  into an ASP.NET pipeline is [`Reified.Schema.Http`]({{% relref "/schema/http-servers/" %}})'s job, not an
   attribute you add to an existing controller.
 
-## When Axial is worth it
+## When Reified is worth it
 
 The benefit compounds where the same value rule is needed in more than one place — a domain type's
 invariant, a request schema, a published JSON Schema, a generated fixture, a form message in two languages.
@@ -115,7 +115,7 @@ If your validation is a handful of checks in one place and never leaves it, a pr
 
 ## Related comparisons
 
-- [`Axial.Result` against FsToolkit.ErrorHandling]({{% relref "/result/fstoolkit-comparison/" %}}) — for
+- [`Reified.Result` against FsToolkit.ErrorHandling]({{% relref "/result/fstoolkit-comparison/" %}}) — for
   composing failures rather than describing valid values.
 - Decoding serialized input is a different job from validating a typed value: see
-  [`Axial.Parse`](../parse/) and [Schema]({{% relref "/schema/" %}}) rather than this page.
+  [`Reified.Parse`](../parse/) and [Schema]({{% relref "/schema/" %}}) rather than this page.

@@ -1,7 +1,7 @@
-# Axial.Schema internals
+# Reified.Schema internals
 
 How the schema library is put together, for someone working on it for the first time.
-Read this before touching `src/Axial.Schema`. Everything here is checkable against the source; when the
+Read this before touching `src/Reified.Schema`. Everything here is checkable against the source; when the
 source and this document disagree, fix this document.
 
 ## The one idea
@@ -37,10 +37,10 @@ the overview, the comments are the ground truth.
 | `RefinedSchemas.fs` | Stock refined schemas (ranges etc.). |
 | `Inspection.fs` | The metadata interpreter: `Inspect.model`, `Inspect.schema`. |
 
-`Data` lives in its own dependency-free package (`src/Axial.Data`).
+`Data` lives in its own dependency-free package (`src/Reified.Data`).
 
-The JSON Schema interpreter lives in `src/Axial.Schema/JsonSchema.fs`, and the compiled
-JSON codecs in `src/Axial.Schema.Json`; both keep the `Axial.Schema` namespace family.
+The JSON Schema interpreter lives in `src/Reified.Schema/JsonSchema.fs`, and the compiled
+JSON codecs in `src/Reified.Schema.Json`; both keep the `Reified.Schema` namespace family.
 
 ## Map of the core files (former Schema.fs), in compile order:
 
@@ -58,7 +58,7 @@ JSON codecs in `src/Axial.Schema.Json`; both keep the `Axial.Schema` namespace f
    `ConstructorApplication`. Interpreters that don't need field value types work from this.
 6. **`FieldDefinition<'model,'value>` / `Field<'model,'value>`** — the *typed* view of one field.
 7. **The typed record plan** (`IRecordPlanCompiler`, `IRecordPlanState`, internal `IShapeFields`) — the
-   interpreter-facing typed view retained when a constructor-last shape closes. `Axial.Schema.Json` folds it
+   interpreter-facing typed view retained when a constructor-last shape closes. `Reified.Schema.Json` folds it
    into direct typed encoders and decoders. Checked constructors use the same compiled path as total constructors.
 8. **`Schema<'model>`** — a sealed wrapper over `SchemaDefinition` (model or value) plus an optional compiled
    record plan.
@@ -104,7 +104,7 @@ a boxed `FieldDefinition<'model,'last>` — the cursor.
 - `field`/`fieldWith` are inline and dispatch on the shape via an SRTP static member (`Field`) present
   on both `DefineShape` and `ObjectShape` — that is how `define` stays single-type-parameter (F# has
   no partial explicit type application) while the first field fixes `'constructor`.
-- `open type Axial.Schema.Syntax` adds the overloaded `field` member: the same named form, plus a
+- `open type Reified.Schema.Syntax` adds the overloaded `field` member: the same named form, plus a
   bare-getter form (`field _.Name`) that reads the property name from the getter quotation
   (`ReflectedDefinition(includeValue = true)`) once at schema build, camelCases it, and keeps the
   compiled getter for the hot path. Explicit names are never transformed; the camelCase policy applies
@@ -117,7 +117,7 @@ a boxed `FieldDefinition<'model,'last>` — the cursor.
 - `Schema.list<'item>()` and `Schema.map<'item>()` use the same resolver. `listWith`/`mapWith` accept an explicit member
   schema for recursion or local configuration. `constrainItems`/`constrainValues` rewrite the nested value definition;
   collection constraints remain on the outer definition.
-- `Axial.Schema.Contracts.Emitter` mirrors handwritten authoring: it emits `field` for canonically resolvable fields,
+- `Reified.Schema.Contracts.Emitter` mirrors handwritten authoring: it emits `field` for canonically resolvable fields,
   `withSchema` when a field carries an explicit value schema (documentation, defaults, unions, recursion, or generated
   references), and one `constrain` line or a grouped `constraints` list for non-optional field constraints. Optional constraints stay inside the
   explicit inner schema because their type is `Constraint<'item>`, not `Constraint<'item option>`.
@@ -145,7 +145,7 @@ changes, so wire names, constraints, docs, parsing, and checking all survive int
 
 | You want to… | Touch |
 |---|---|
-| Add a constraint | `Constraint` module (`Schema.fs`), its check in `SchemaValidation.fs`, JSON Schema lowering in `Axial.Schema.JsonSchema`, typed wrapper in `Syntax` (`Shape.fs`) |
+| Add a constraint | `Constraint` module (`Schema.fs`), its check in `SchemaValidation.fs`, JSON Schema lowering in `Reified.Schema.JsonSchema`, typed wrapper in `Syntax` (`Shape.fs`) |
 | Add a primitive | `PrimitiveValueKind`, `Value` module, parsing in `SchemaValidation.fs`, `SchemaDefaults` overloads |
 | Add an interpreter | New file after `SchemaApi.fs` (as `JsonSchema.fs` does), or a new package; walk `Inspect.model` output or compile the typed record plan |
-| Change generated code | `src/Axial.Schema.Contracts` (Emitter) — not this project |
+| Change generated code | `src/Reified.Schema.Contracts` (Emitter) — not this project |

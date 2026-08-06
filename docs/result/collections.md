@@ -11,7 +11,7 @@ want. `traverse` and `sequence` turn that inside out: one result holding every v
 
 ```fsharp
 open System
-open Axial.Result
+open Reified.Result
 
 type SignupError =
     | AgeMissing

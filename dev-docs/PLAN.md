@@ -1,4 +1,4 @@
-# Axial Plan
+# Reified Plan
 
 This file tracks current product and architecture direction.
 High-level durable decisions live in `dev-docs/decisions/`.
@@ -6,8 +6,8 @@ Speculative sketches live in `dev-docs/current-ideas/`, but this file is the liv
 
 ## Release Strategy
 
-Per `prd.md`: the boundary stack — `Axial.Result`, `Axial.Constraint`, `Axial.Refined`, and `Axial.Parse` as focused
-packages, plus `Axial.Schema` and `Axial.Schema.Json` — is the 1.0 gate, driven by
+Per `prd.md`: the boundary stack — `Reified.Result`, `Reified.Constraint`, `Reified.Refinements`, and `Reified.Parse` as focused
+packages, plus `Reified.Schema` and `Reified.Schema.Json` — is the 1.0 gate, driven by
 a real adoption target (a ~100-variant versioned config system). The Flow group's remaining pre-1.0 scope in
 `LATER_TODO.md` is demand-driven — pulled forward when a concrete application needs it. The contract-declaration
 thread originally sequenced versioning/migration machinery before the grammar; in practice the grammar and generator
@@ -18,21 +18,21 @@ and contracts) and should be treated as settling rather than settled.
 
 ## Current Direction
 
-Axial began as a Reader-Async-Result workflow monad in the ZIO tradition; the result side has since expanded into a
+Reified began as a Reader-Async-Result workflow monad in the ZIO tradition; the result side has since expanded into a
 full input and value toolkit. The public surface has three identities:
 
-- **Error Handling**: four focused packages — ordinary `Result` and `result { }` in `Axial.Result`; reusable,
-  reusable, inspectable value constraints in `Axial.Constraint` (returns the standard F# `Result` type, no dependency
-  on `Axial.Result`); primitive parsing in the independent `Axial.Parse`; and refined domain values in `Axial.Refined`
-  (depends only on `Axial.Constraint`). All four install independently; there is no meta-package.
+- **Error Handling**: four focused packages — ordinary `Result` and `result { }` in `Reified.Result`; reusable,
+  reusable, inspectable value constraints in `Reified.Constraint` (returns the standard F# `Result` type, no dependency
+  on `Reified.Result`); primitive parsing in the independent `Reified.Parse`; and refined domain values in `Reified.Refinements`
+  (depends only on `Reified.Constraint`). All four install independently; there is no meta-package.
 - **Schema**: structured input, accumulated path-aware errors, model construction, codecs, contracts, and boundary
   interpreters.
 - **Flow**: effectful workflows. Useful with or without Schema, and always installed separately.
 
-There is no umbrella package. `Axial.ErrorHandling` and `Axial` were both removed pre-1.0; consumers install the
+There is no umbrella package. `Reified.ErrorHandling` and `Reified` were both removed pre-1.0; consumers install the
 focused packages they use.
 
-Within the effects group, Axial has one fully expanded workflow shape:
+Within the effects group, Reified has one fully expanded workflow shape:
 
 ```fsharp
 Flow<'env, 'error, 'value>
@@ -62,7 +62,7 @@ The active direction splits concerns like this:
 First-party service packages and standard operational services should be expressed as explicit services, not runtime
 slots.
 
-Axial's data-boundary direction splits concerns like this:
+Reified's data-boundary direction splits concerns like this:
 
 - `Data` is the owned source-neutral structured-value model and fixture language. Its Phase 1 surface covers recursive
   literals, strict immutable edits, named variations, bounded matrices, paths and extraction, exact structural diffs,
@@ -76,7 +76,7 @@ Axial's data-boundary direction splits concerns like this:
   consumers
 - policies adapt checks, parsers, validations, and application admission functions into `Flow`
 
-Core schema declarations and their interpreters share the single `Axial.Schema` namespace and package (module names,
+Core schema declarations and their interpreters share the single `Reified.Schema` namespace and package (module names,
 not namespaces, separate declaration from interpretation); the package stays independent of flow execution.
 
 Constructor-level intrinsic errors are a second stage after field parsing and field constraints, not an error source that
@@ -102,8 +102,8 @@ schema<Customer> {
 `constrain`, type-directed `refine`, and executable `validate`. The typed field chain lets `construct` or
 `constructResult` match the closing constructor by arity and position.
 Build-time generation exists as wire-tier tooling: `[<DeriveSchema>]`-marked records are the
-primary declaration (FCS syntax-only frontend in `src/Axial.Schema.Contracts`, run by `scripts/schemagen` or the
-`Axial.Schema.Contracts.Build` MSBuild package), with `.contract` files as the parked secondary form. Generated contracts
+primary declaration (FCS syntax-only frontend in `src/Reified.Schema.Contracts`, run by `scripts/schemagen` or the
+`Reified.Schema.Contracts.Build` MSBuild package), with `.contract` files as the parked secondary form. Generated contracts
 remain wire-tier records; domain models stay hand-written F# rather than becoming a second generated authoring surface.
 
 The public schema-authoring vocabulary keeps `field` plus the field-block operations.
@@ -123,8 +123,8 @@ Schema must also preserve a high-performance codec lowering path. The inspectabl
 but JSON codecs should not interpret that metadata tree directly on the hot path. A codec interpreter must be able to
 compile schemas into direct record plans: ordered field descriptors, cached wire-name bytes, indexed field slots,
 typed field decoders, and constructor application that does not require per-value reflection or `obj array` dispatch.
-CodecMapper is the performance reference for this shape. This path now ships as `Axial.Schema.Json` (`Json.compile` over the
-retained compiled record plan, benchmarked against `System.Text.Json` in `benchmarks/Axial.Schema.Benchmarks/CodecSuites.fs`);
+CodecMapper is the performance reference for this shape. This path now ships as `Reified.Schema.Json` (`Json.compile` over the
+retained compiled record plan, benchmarked against `System.Text.Json` in `benchmarks/Reified.Schema.Benchmarks/CodecSuites.fs`);
 remaining codec work is optimization and format breadth, not proving the shape.
 
 The built `Schema<'model>` value itself must retain typed constructor and field information sufficient for that codec
@@ -234,7 +234,7 @@ packages are JavaScript-only Fable bindings and fail immediately outside their n
 
 The internal registry has been removed rather than promoted.
 
-Axial v1 intentionally does not add tagged services or automatic service-environment merging. Multiple services of the
+Reified v1 intentionally does not add tagged services or automatic service-environment merging. Multiple services of the
 same type should be modeled with explicit named record fields or distinct nominal contracts. If boilerplate becomes a
 real problem, prefer a future source generator that emits named environment records and `IHas<'service>` implementations
 over reflection, proxy types, or hidden service maps.

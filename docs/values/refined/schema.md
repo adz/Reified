@@ -11,8 +11,8 @@ A refinement supplies the value-level step that turns an already-decoded underly
 invariant-carrying domain value. Schema can apply that refinement at a field boundary and report its failures at the
 field's path.
 
-`Axial.Refined` has no Schema dependency. Domain types can define refinements without choosing a wire format; an
-application that uses `Axial.Schema` decides where those refinements participate in structured decoding and encoding.
+`Reified.Refinements` has no Schema dependency. Domain types can define refinements without choosing a wire format; an
+application that uses `Reified.Schema` decides where those refinements participate in structured decoding and encoding.
 
 If Schema is new to you, start with [Schema Getting Started]({{< relref "/schema/getting-started/" >}}) for fields,
 record construction, and path-aware diagnostics. Then read [Refined Values in Schema]({{< relref
@@ -22,8 +22,8 @@ schema-local restrictions. This page is the shorter API-oriented view of that in
 ## Refine a primitive schema
 
 ```fsharp
-open Axial.Refined
-open Axial.Schema
+open Reified.Refinements
+open Reified.Schema
 
 let nameSchema : Schema<NonBlankString> =
     Schema.text

@@ -5,7 +5,7 @@ set -euo pipefail
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 fixture_dir="$root_dir/tests/compile-fail/schema-ce"
 
-dotnet build "$root_dir/src/Axial.Schema/Axial.Schema.fsproj" --nologo -v quiet
+dotnet build "$root_dir/src/Reified.Schema/Reified.Schema.fsproj" --nologo -v quiet
 
 check_failure() {
   local fixture="$1"

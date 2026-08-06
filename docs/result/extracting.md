@@ -10,7 +10,7 @@ At the edge of a pipeline you usually stop working in `Result` and hand a plain 
 about it.
 
 ```fsharp
-open Axial.Result
+open Reified.Result
 
 type SignupError = AgeMissing
 ```

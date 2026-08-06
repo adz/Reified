@@ -8,14 +8,14 @@ Everything below is work to do or current state. Superseded directions are not r
 
 **Two independent projects, split on the one seam that is real — description versus execution.**
 
-1. **Axial** (this repository, keeps its name and history) — the effect system and its satellites.
+1. **Reified** (this repository, keeps its name and history) — the effect system and its satellites.
 2. **Reified** (new repository, extracted) — constraints, values, schema, and data. Packages:
    `Reified.Result`, `Reified.Parse`, `Reified.Constraint`, `Reified.Refinements`, `Reified.Data`,
    `Reified.Schema` and its satellites.
 
 There is **no third repository** and no shared documentation site. Each project has one repository, one
 site, one release train. The shared thesis — Reified encodes invariants about values, boundaries, and
-models; Axial encodes invariants about computation — is stated in prose on each site, not encoded in
+models; Reified encodes invariants about computation — is stated in prose on each site, not encoded in
 package IDs.
 
 Nothing has been published under either name that has users, so package boundaries and identities are free
@@ -23,10 +23,10 @@ to change today and breaking after first publish. That window governs the sequen
 
 ### Why this allocation, and why it is not the earlier one
 
-The earlier plan had Axial keeping the description side and the effect system returning to `FsFlow`. Three
+The earlier plan had Reified keeping the description side and the effect system returning to `FsFlow`. Three
 things overturned it.
 
-**`Axial` never meant anything for constraints and schema.** "Along an axis" describes nothing about
+**`Reified` never meant anything for constraints and schema.** "Along an axis" describes nothing about
 declaring a rule once and deriving a parser, a codec, a contract, and a fixture from it. The name survived
 because it was there. It reads better against directed, controlled execution, which is where it now sits.
 
@@ -41,7 +41,7 @@ which maintain rules and messages separately.
 
 **The effect system is this repository's trunk.** The first commit, `d3b9617a` (2026-03-30, "Initial
 Effect.FS baseline"), is the effect system. The description packages do not appear until `3a2a13f2`
-(2026-06-21, "Split FsFlow into Axial packages"). So this repository *is* the Axial repository, by name and
+(2026-06-21, "Split FsFlow into Reified packages"). So this repository *is* the Reified repository, by name and
 by history, and the extraction inverts — see "Repository Extraction". That is worth real money: it removes
 the risk of truncating the effect system's history across its five historical path names.
 
@@ -55,7 +55,7 @@ The two concepts land differently when explained, so the doors are different.
 **Reified leads with the concept.** People hear "the rule and its message are the same object, so they
 cannot drift" and immediately understand why that is better. Say it.
 
-**Axial does not lead with "effect system".** Most .NET developers, and many F# developers, have never used
+**Reified does not lead with "effect system".** Most .NET developers, and many F# developers, have never used
 one, and the phrase produces blank stares. Lead with *easier async and Result* — failures visible in the
 signature, dependencies visible in the signature, swap them in a test — and let the reader discover they
 have been using an effect system afterwards. This is the Polly precedent: an unfamiliar concept carried by
@@ -65,32 +65,32 @@ an opaque name and a concrete pitch.
 
 Landed in the combined repository:
 
-- `Axial.Result` holds only general Result composition and `result { }`, plus `Accumulate.fs` (accumulating
+- `Reified.Result` holds only general Result composition and `result { }`, plus `Accumulate.fs` (accumulating
   `result.list` / `result.array`), `Result.traverse`/`sequence`, `tap`/`tapError`, and `BindReturn`.
-- `Axial.Constraint` holds the reusable path-free constraint surface and returns the standard F# `Result`,
-  with no dependency on `Axial.Result`.
-- `Axial.Refined` depends only on `Axial.Constraint`.
-- `Axial.Parse` is a separate leaf depending on nothing.
-- `Axial.Schema` depends on Data, Constraint, Refined, and Parse directly, never on `Axial.Result`.
-- `Axial.Flow` depends on no other Axial package.
-- Both meta-packages are gone: `src/Axial.ErrorHandling/` and `src/Axial/`, deleted with their solution,
-  pack, and docs-build entries. `Axial.ApiShape.Tests` asserts no meta-package remains in the graph.
+- `Reified.Constraint` holds the reusable path-free constraint surface and returns the standard F# `Result`,
+  with no dependency on `Reified.Result`.
+- `Reified.Refinements` depends only on `Reified.Constraint`.
+- `Reified.Parse` is a separate leaf depending on nothing.
+- `Reified.Schema` depends on Data, Constraint, Refined, and Parse directly, never on `Reified.Result`.
+- `Axial.Flow` depends on no other Reified package.
+- Both meta-packages are gone: `src/Reified.ErrorHandling/` and `src/Reified/`, deleted with their solution,
+  pack, and docs-build entries. `Reified.ApiShape.Tests` asserts no meta-package remains in the graph.
 - Per-package test projects, AOT probes, source inventory checks, and doc generator inputs track the
   focused package set.
 
-- The two products have separate version properties. `Directory.Build.props` declares `AxialVersion` and
+- The two products have separate version properties. `Directory.Build.props` declares `ReifiedVersion` and
   `FsFlowVersion` — both 0.7.0 for now, which is convenience, not a rule — and selects between them with
   `IsFsFlowProject`, which is true for `Axial.Flow*` and for the two HTTP adapters. `scripts/pack.sh` takes
   `-v` for one train and `-f` for the other; it no longer has a single `-p:Version` override that would
   silently re-couple them. **The property names now point the wrong way** and are renamed with the rest:
-  `FsFlowVersion` → `AxialVersion` (the effect system), `AxialVersion` → `ReifiedVersion`,
-  `IsFsFlowProject` → `IsAxialProject`. Mechanical, but do it in the rename pass rather than piecemeal.
+  `FsFlowVersion` → `ReifiedVersion` (the effect system), `ReifiedVersion` → `ReifiedVersion`,
+  `IsFsFlowProject` → `IsReifiedProject`. Mechanical, but do it in the rename pass rather than piecemeal.
 - Package-consumer fixtures exist at `tests/package-consumers/`, run by
   `scripts/run-package-consumers.sh`: Result alone, Parse alone, Refined alone, Schema alone, and
   FsToolkit + Refined/Schema. They restore from `artifacts/package` through their own `nuget.config`
   with `<clear />`, deliberately do not inherit the repository `Directory.Build.props`, and evict the
   matching version from the global cache first, so they see the packages as an outside consumer does.
-  They are not in `Axial.slnx` — they only build after a pack.
+  They are not in `Reified.slnx` — they only build after a pack.
 
 Open follow-ups, still pre-extraction:
 
@@ -138,13 +138,13 @@ pushing in either direction.
 
 Revisit before first publish, since it is free now and breaking afterwards.
 
-### Fold `Axial.Schema.JsonSchema` into `Axial.Schema`
+### Fold `Reified.Schema.JsonSchema` into `Reified.Schema`
 
-Done. 635 lines in one file, depending only on Schema, and already declared in `namespace Axial.Schema` —
+Done. 635 lines in one file, depending only on Schema, and already declared in `namespace Reified.Schema` —
 so the fold was a file move plus package deletion, with no call-site changes. JSON Schema emission is part
 of "declare once, derive everything" rather than an optional extra.
 
-`Axial.Parse` stays as it is: zero dependencies, a crisp standalone story, a self-explanatory name.
+`Reified.Parse` stays as it is: zero dependencies, a crisp standalone story, a self-explanatory name.
 
 ### Resulting package list — eleven, in three tiers
 
@@ -185,50 +185,50 @@ dotnet add package Reified.Data
 dotnet add package Reified.Schema
 ```
 
-### Axial's package list
+### Reified's package list
 
-The effect system's satellites drop the `.Flow` infix, since the product is now the flow: `Axial` (core),
-`Axial.Console`, `Axial.FileSystem`, `Axial.Process`, `Axial.PlatformService`, `Axial.HttpClient`,
-`Axial.Hosting`, `Axial.Hosting.Browser`, `Axial.Hosting.Node`, `Axial.Telemetry`,
-`Axial.Telemetry.JavaScript`, `Axial.Telemetry.Shared`, plus the two adapters below.
+The effect system's satellites drop the `.Flow` infix, since the product is now the flow: `Reified` (core),
+`Reified.Console`, `Reified.FileSystem`, `Reified.Process`, `Reified.PlatformService`, `Reified.HttpClient`,
+`Reified.Hosting`, `Reified.Hosting.Browser`, `Reified.Hosting.Node`, `Reified.Telemetry`,
+`Reified.Telemetry.JavaScript`, `Reified.Telemetry.Shared`, plus the two adapters below.
 
-This **reverses the "nothing declares into `namespace Axial`" rule**, which existed to stop `open Axial`
-becoming an unscoped catch-all across many unrelated value packages. Axial is now one product with one root
-type, so `namespace Axial` holding `Flow<'env,'error,'value>` and the `flow { }` builder is correct:
-`open Axial` gives you exactly what you installed. The rule survives in its new form on the other side —
+This **reverses the "nothing declares into `namespace Reified`" rule**, which existed to stop `open Reified`
+becoming an unscoped catch-all across many unrelated value packages. Reified is now one product with one root
+type, so `namespace Reified` holding `Flow<'env,'error,'value>` and the `flow { }` builder is correct:
+`open Reified` gives you exactly what you installed. The rule survives in its new form on the other side —
 nothing declares into `namespace Reified`.
 
-Whether the core package is `Axial` or stays `Axial.Flow` is listed under "Choices To Resolve".
+Whether the core package is `Reified` or stays `Axial.Flow` is listed under "Choices To Resolve".
 
 ### Namespace convention — unified on A
 
-Every package now declares its own namespace equal to its package id, and `namespace Axial` is empty.
+Every package now declares its own namespace equal to its package id, and `namespace Reified` is empty.
 
-`Axial.Data` was the last holdout. It declared `namespace Axial` with `module Data` inside, so the module
-path already equalled the package id — deliberate, but it meant `open Axial` was the way to reach Data, and
+`Reified.Data` was the last holdout. It declared `namespace Reified` with `module Data` inside, so the module
+path already equalled the package id — deliberate, but it meant `open Reified` was the way to reach Data, and
 `[<AutoOpen>] module DataErgonomicsHelpers` leaked from the root namespace on any such open.
 
 What made the move work, after one failed attempt:
 
-- `namespace Axial.Data`, keeping `module Data`. The resulting `Axial.Data.Data` stutter is invisible at
-  call sites — consumers write `open Axial.Data` then `Data.assoc` — and matches `Axial.Result.Result`.
-- **`module Syntax` promoted out of `module Data` to namespace level**, so it stays `Axial.Data.Syntax` and
-  every `open Axial.Data.Syntax` is unchanged. Its body needed `Data.` qualification on eight helpers it
+- `namespace Reified.Data`, keeping `module Data`. The resulting `Reified.Data.Data` stutter is invisible at
+  call sites — consumers write `open Reified.Data` then `Data.assoc` — and matches `Reified.Result.Result`.
+- **`module Syntax` promoted out of `module Data` to namespace level**, so it stays `Reified.Data.Syntax` and
+  every `open Reified.Data.Syntax` is unchanged. Its body needed `Data.` qualification on eight helpers it
   had been reaching unqualified from inside the enclosing module.
-- **`module Json` deliberately left nested**, as `Axial.Data.Data.Json`. Promoting it would put a `Json`
-  module in `Axial.Data` that shadows `Axial.Schema.Json`'s `module rec Json` in the twelve files that open
+- **`module Json` deliberately left nested**, as `Reified.Data.Data.Json`. Promoting it would put a `Json`
+  module in `Reified.Data` that shadows `Reified.Schema.Json`'s `module rec Json` in the twelve files that open
   both, and `Data.Json.render` is used directly in tests and examples. It is referenced as `Data.Json`, so
   nesting costs nothing.
 
-Consumer impact was one line each: `open Axial` → `open Axial.Data`. Ten fully-qualified `Axial.Data.X`
-references became `Axial.Data.Data.X`; the CLR module types moved from `Axial.DataModule` to
-`Axial.Data.DataModule`, which two ApiShape assertions name directly.
+Consumer impact was one line each: `open Reified` → `open Reified.Data`. Ten fully-qualified `Reified.Data.X`
+references became `Reified.Data.Data.X`; the CLR module types moved from `Reified.DataModule` to
+`Reified.Data.DataModule`, which two ApiShape assertions name directly.
 
-Also fixed: `tests/Axial.Schema.Tests/SchemaTestSupport.fs` declared `namespace Axial`, squatting the root
-namespace from a test project. Moved to `Axial.Tests`.
+Also fixed: `tests/Reified.Schema.Tests/SchemaTestSupport.fs` declared `namespace Reified`, squatting the root
+namespace from a test project. Moved to `Reified.Tests`.
 
 **Rule going forward: nothing declares into the product root namespace.** After the rename this attaches to
-`namespace Reified`, not `namespace Axial` — Axial is one product with one root type and *should* populate
+`namespace Reified`, not `namespace Reified` — Reified is one product with one root type and *should* populate
 its root. The mechanics above (package id equals namespace, `Syntax` promoted, `Json` left nested) carry
 over unchanged under the new names; only the prefix differs.
 
@@ -237,20 +237,20 @@ for satellites. See `docs-information-architecture.md` §6 item 5.
 
 ### Reserve NuGet prefixes
 
-`Reified.*` and `Axial.*`. Two applications; one per project.
+`Reified.*` and `Reified.*`. Two applications; one per project.
 
-Both are verified free as of 2026-08-06: no package holds `Reified`, `Reified.*`, `Axial`, or `Axial.*`.
-`Reified` is fully coined for this purpose and should reserve without argument. `Axial` is a common
+Both are verified free as of 2026-08-06: no package holds `Reified`, `Reified.*`, `Reified`, or `Reified.*`.
+`Reified` is fully coined for this purpose and should reserve without argument. `Reified` is a common
 technical adjective, so expect the reservation to be scrutinised more; it has no same-prefix squatters,
 which is the main thing NuGet weighs.
 
-**Trademark note, not legal advice.** `axial.net` is an active US software business, which is the highest
+**Trademark note, not legal advice.** `reified.net` is an active US software business, which is the highest
 same-class exposure of any name considered. No practical risk to an unfunded OSS library, but run a real
 clearance search before commercialising the packages that will sit on top of both products.
 
-## The HTTP Adapters Move To Axial
+## The HTTP Adapters Move To Reified
 
-`Axial.Schema.Http.AspNetCore` → **`Axial.AspNetCore`**, `Axial.Schema.Http.GenHttp` → **`Axial.GenHttp`**.
+`Axial.Schema.Http.AspNetCore` → **`Reified.AspNetCore`**, `Axial.Schema.Http.GenHttp` → **`Reified.GenHttp`**.
 
 These are the only two packages that depend on both products, so they determine how expensive the split is.
 The code is unambiguous about where they belong:
@@ -275,31 +275,31 @@ direction inverts:
 ```text
 released Reified.Schema.Http / Reified.Schema.Json / Reified.Data
             ↓
-Axial.AspNetCore / Axial.GenHttp          (stay in this repository)
+Reified.AspNetCore / Reified.GenHttp          (stay in this repository)
 ```
 
 This points the cross-repository version range at the **stable** side instead of at Flow's moving
 environment surface, and leaves Reified with **zero** cross-product edges — it builds, tests, packs, and
-releases with no Axial package present.
+releases with no Reified package present.
 
 `Reified.Schema.Http` extracts with Reified. It is already Flow-free and describes boundaries for any host.
 
-**Naming.** `Axial.AspNetCore` and `Axial.GenHttp` sit at top level as siblings of `Axial.HttpClient` — the
-client-side counterpart — rather than under `Axial.Hosting.*`, which is about application lifecycle and
+**Naming.** `Reified.AspNetCore` and `Reified.GenHttp` sit at top level as siblings of `Reified.HttpClient` — the
+client-side counterpart — rather than under `Reified.Hosting.*`, which is about application lifecycle and
 platform host. Worth a second look during implementation; both readings are defensible.
 
 **What the move touches** — note that with the inverted extraction these two projects **stay put** and it is
 `Schema.Http` that leaves, so this is a rename rather than a move:
 
-- `src/Axial.Schema.Http.{AspNetCore,GenHttp}/` — project rename, `PackageId`, `RootNamespace`,
+- `src/Reified.Schema.Http.{AspNetCore,GenHttp}/` — project rename, `PackageId`, `RootNamespace`,
   `AssemblyName`, and the module namespaces in `AspNetCore.fs` / `GenHttp.fs`.
-- `tests/Axial.Schema.Http.Tests/` — holds `AspNetCoreAdapterTests.fs` and `GenHttpAdapterTests.fs`
+- `tests/Reified.Schema.Http.Tests/` — holds `AspNetCoreAdapterTests.fs` and `GenHttpAdapterTests.fs`
   alongside the Schema.Http tests. Split; the Schema.Http tests go to Reified, the adapter tests stay.
 - `docs/schema/http-servers.md` and the generated reference trees under
   `docs/schema/reference/schema/http/{aspnetcore,genhttp}/` (~35 pages) — the adapter pages stay, the
   contract-declaration pages go to Reified.
-- `examples/Axial.Api` and `examples/Axial.Api.GenHttp` stay with the adapters.
-- `scripts/pack.sh`, `scripts/docs-build.proj`, `scripts/docgen/Program.fs` symbol ids, and `Axial.slnx`.
+- `examples/Reified.Api` and `examples/Reified.Api.GenHttp` stay with the adapters.
+- `scripts/pack.sh`, `scripts/docs-build.proj`, `scripts/docgen/Program.fs` symbol ids, and `Reified.slnx`.
 
 Do the rename **before** extraction, while it is a single-repository refactor with the compiler checking
 every call site.
@@ -316,16 +316,16 @@ unrelated file's history forever and is marked as a fork by GitHub. Not currentl
 
 ```
 flow lineage    first commit  d3b9617a  2026-03-30  "Initial Effect.FS baseline"     171 commits
-values lineage  first commit  3a2a13f2  2026-06-21  "Split FsFlow into Axial..."     189 commits
+values lineage  first commit  3a2a13f2  2026-06-21  "Split FsFlow into Reified..."     189 commits
 ```
 
 The effect system *is* the trunk — it is the initial commit. The description packages do not exist until
 2026-06-21. So:
 
-- **Axial** — keeps this repository, its name, its full history, its tags, and its GitHub identity. Removing
+- **Reified** — keeps this repository, its name, its full history, its tags, and its GitHub identity. Removing
   the description paths is an ordinary `git rm` commit. **Do not `filter-repo` this repository**: it rewrites
   every SHA, breaks existing clones and branches, and orphans the v0.6.0 objects that published FsFlow 0.6
-  sourcelink still resolves into via the `adz/FsFlow` → `adz/Axial` redirect.
+  sourcelink still resolves into via the `adz/FsFlow` → `adz/Reified` redirect.
 - **Reified** — fresh `git clone --no-local` into scratch, filter down to the description paths, push to a
   new empty repository.
 
@@ -335,32 +335,32 @@ effect system, whose paths have been renamed four times — `src/EffectFs` → `
 **does not follow renames**, filtering on the `Axial.Flow*` names alone would have produced a repository
 whose history began 2026-06-21 and **omitted the v0.6.0 tag entirely** (`git ls-tree v0.6.0 src/` is all
 `src/FsFlow*`). That loss is unrecoverable once the original is gone. Filtering the description side has no
-such exposure: its whole history is six weeks under one `Axial.*` family.
+such exposure: its whole history is six weeks under one `Reified.*` family.
 
 ### Paths to extract into Reified
 
 ```
-src/Axial.Result                    src/Axial.Schema
-src/Axial.Parse                     src/Axial.Schema.Json
-src/Axial.Constraint                src/Axial.Schema.Contracts
-src/Axial.Refined                   src/Axial.Schema.Contracts.Build
-src/Axial.Data                      src/Axial.Schema.Http
-                                    src/Axial.Schema.Testing
+src/Reified.Result                    src/Reified.Schema
+src/Reified.Parse                     src/Reified.Schema.Json
+src/Reified.Constraint                src/Reified.Schema.Contracts
+src/Reified.Refinements                   src/Reified.Schema.Contracts.Build
+src/Reified.Data                      src/Reified.Schema.Http
+                                    src/Reified.Schema.Testing
 
-tests/Axial.Result.Tests            tests/Axial.Schema.Tests
-tests/Axial.Constraint.Tests        tests/Axial.Schema.Json.Tests
-tests/Axial.Refined.Tests           tests/Axial.Schema.Contracts.Tests
-tests/Axial.Data.Tests              tests/Axial.Schema.Testing.Tests
-                                    tests/Axial.Schema.Http.Tests  ← split; adapter tests stay
+tests/Reified.Result.Tests            tests/Reified.Schema.Tests
+tests/Reified.Constraint.Tests        tests/Reified.Schema.Json.Tests
+tests/Reified.Refinements.Tests           tests/Reified.Schema.Contracts.Tests
+tests/Reified.Data.Tests              tests/Reified.Schema.Testing.Tests
+                                    tests/Reified.Schema.Http.Tests  ← split; adapter tests stay
 
 docs/schema  docs/values  docs/result  docs/data
-benchmarks/Axial.Schema.Benchmarks
+benchmarks/Reified.Schema.Benchmarks
 ```
 
 **Historical names on this side too — still use `--path-glob`.** The description lineage is shorter but not
-flat: `src/Axial.Validation`, `src/Axial.Validation.Schema`, `src/Axial.Check`, `src/Axial.Codec`,
-`src/Axial.Diagnostics`, `src/Axial.ErrorHandling`, `src/Axial` and the matching `tests/Axial.*.Tests` all
-appear before the current names settle. They are all under `Axial.*`, so one glob family covers them, but
+flat: `src/Reified.Validation`, `src/Reified.Validation.Schema`, `src/Reified.Check`, `src/Reified.Codec`,
+`src/Reified.Diagnostics`, `src/Reified.ErrorHandling`, `src/Reified` and the matching `tests/Reified.*.Tests` all
+appear before the current names settle. They are all under `Reified.*`, so one glob family covers them, but
 enumerate rather than assume. Verify with `git log --oneline | wc -l` on the filtered result against the
 189 commits that touch the description lineage before pushing anywhere.
 
@@ -369,14 +369,14 @@ test project classified by its actual project references:
 
 | Destination | Projects |
 | --- | --- |
-| **Axial** — stays, Flow-only | `Axial.App.Example`, `Axial.Flow.AotProbe`, `Axial.Flow.Comparisons`, `Axial.Flow.PlatformService.Examples`, `Axial.Hosting.Browser`, `Axial.Hosting.Desktop`, `Axial.Hosting.GenericHost`, `Axial.Hosting.Node`, `benchmarks/Axial.Flow.Benchmarks` |
-| **Axial** — stays, adapter examples | `Axial.Api`, `Axial.Api.GenHttp` (no direct Flow reference, but they consume the AspNetCore/GenHttp adapters, which stay) |
-| **Axial** — stays, with released Reified deps | `Axial.Hosting.DotNet` (Flow.Hosting plus incidental Parse and Refinements) |
-| **Reified** — extracts | `Axial.Constraint.AotProbe`, `Axial.Refined.AotProbe`, `Axial.Result.AotProbe`, `Axial.Schema.AotProbe`, `Axial.ReferenceApp.Intro`, `Axial.ReferenceApp.Wire`, `benchmarks/Axial.Schema.Benchmarks` |
-| **Must split in two** | `Axial.Examples`, `Axial.MaintenanceExamples`, `Axial.Playground`, `Axial.ReadmeExample`, `benchmarks/Axial.Benchmarks.Fable`, `tests/Axial.ApiShape.Tests` |
-| **Integration app** | `Axial.ReferenceApp` — consumes both sides plus both adapters. Becomes the integration application against released packages, per "Examples And Reference Applications". |
+| **Reified** — stays, Flow-only | `Reified.App.Example`, `Axial.Flow.AotProbe`, `Axial.Flow.Comparisons`, `Axial.Flow.PlatformService.Examples`, `Reified.Hosting.Browser`, `Reified.Hosting.Desktop`, `Reified.Hosting.GenericHost`, `Reified.Hosting.Node`, `benchmarks/Axial.Flow.Benchmarks` |
+| **Reified** — stays, adapter examples | `Reified.Api`, `Reified.Api.GenHttp` (no direct Flow reference, but they consume the AspNetCore/GenHttp adapters, which stay) |
+| **Reified** — stays, with released Reified deps | `Reified.Hosting.DotNet` (Flow.Hosting plus incidental Parse and Refinements) |
+| **Reified** — extracts | `Reified.Constraint.AotProbe`, `Reified.Refinements.AotProbe`, `Reified.Result.AotProbe`, `Reified.Schema.AotProbe`, `Reified.ReferenceApp.Intro`, `Reified.ReferenceApp.Wire`, `benchmarks/Reified.Schema.Benchmarks` |
+| **Must split in two** | `Reified.Examples`, `Reified.MaintenanceExamples`, `Reified.Playground`, `Reified.ReadmeExample`, `benchmarks/Reified.Benchmarks.Fable`, `tests/Reified.ApiShape.Tests` |
+| **Integration app** | `Reified.ReferenceApp` — consumes both sides plus both adapters. Becomes the integration application against released packages, per "Examples And Reference Applications". |
 
-The six in "must split" each hold content from both products in one project. `Axial.ApiShape.Tests` is
+The six in "must split" each hold content from both products in one project. `Reified.ApiShape.Tests` is
 the most consequential: it asserts package layout across both products, so each repository needs its own
 copy asserting only its own packages.
 
@@ -393,20 +393,20 @@ and optimization into one opaque migration.
 2. Create Reified from filtered history; verify tags, authors, and retained files.
 3. Confirm the extracted repository builds and its tests pass standalone.
 4. Make path and package renames in normal commits, **one per repository against a tree containing nothing
-   else**: `Axial.*` description packages → `Reified.*` (with `Refined` → `Refinements`) in the new
-   repository; `Axial.Flow*` → `Axial*` and the two adapters → `Axial.AspNetCore` / `Axial.GenHttp` here.
+   else**: `Reified.*` description packages → `Reified.*` (with `Refined` → `Refinements`) in the new
+   repository; `Axial.Flow*` → `Reified*` and the two adapters → `Reified.AspNetCore` / `Reified.GenHttp` here.
 5. Update build, CI, docs, and release configuration; install maintainer files.
 6. Publish prerelease packages from each repository.
 7. Run consumer and integration tests.
-8. Remove the description paths from Axial only after Reified is usable.
+8. Remove the description paths from Reified only after Reified is usable.
 
 ## Versioning After The Split
 
 Each repository has an independent release train. Packages within a repository may share one version while
 coordinated releases remain convenient. Do not require the two repositories' versions to match — a tag such
-as `v0.8.0` in Axial says nothing about Reified. Both sit at 0.7.0 today by convenience, not by rule.
+as `v0.8.0` in Reified says nothing about Reified. Both sit at 0.7.0 today by convenience, not by rule.
 
-The Axial HTTP adapters should float within Reified's current pre-1.0 minor — `0.7.*` on
+The Reified HTTP adapters should float within Reified's current pre-1.0 minor — `0.7.*` on
 `Reified.Schema.Http`, `Reified.Schema.Json`, and `Reified.Data` — rather than pinning a closed range. While
 those shapes are still moving, a float surfaces breaks in the adapter's own CI instead of at release time.
 
@@ -424,15 +424,15 @@ Release notes describe only the packages in that repository.
 Each repository owns complete tests for its own public behavior.
 
 Reified must test Result, Parse, Constraint, Refinements, Data, Schema, formats, and contract tooling —
-with no Axial package anywhere in the tree.
+with no Reified package anywhere in the tree.
 
-Axial must test Flow, its services and hosts, and the two HTTP adapters. Only the adapter tests may
+Reified must test Flow, its services and hosts, and the two HTTP adapters. Only the adapter tests may
 reference Reified, and only as released packages.
 
 Package-consumer tests already exist at `tests/package-consumers/` — see "Current State". They extract with
-Reified; Axial needs its own equivalents for the effect system's packages.
+Reified; Reified needs its own equivalents for the effect system's packages.
 
-Cross-product CI lives in Axial and should cover the current released Reified packages against the adapters,
+Cross-product CI lives in Reified and should cover the current released Reified packages against the adapters,
 the lowest Reified version the adapters claim to support, and the integration reference application against
 released packages. Do not make either core repository's ordinary pull-request build depend on the other
 repository's main branch.
@@ -441,7 +441,7 @@ repository's main branch.
 
 Move product-specific examples with their repository. Reified examples cover input sources, private domain
 construction, diagnostics, JSON, contracts, migrations, HTTP contract declaration, and property testing.
-Axial examples cover dependencies, errors, cancellation, scopes, layers, concurrency, services, and hosts.
+Reified examples cover dependencies, errors, cancellation, scopes, layers, concurrency, services, and hosts.
 
 The combined reference application becomes either a separate integration repository consuming published
 packages, or a small integration application in one repository consuming the other's published packages. A
@@ -455,10 +455,10 @@ Each repository needs its own `AGENTS.md`, `dev-docs/AGENT_INDEX.md`, `PLAN.md`,
 documentation scripts.
 
 Remove instructions for the other product; do not copy the whole plan into both. Reified's agent index should
-explain generated contract paths and documentation generation. Axial's should explain runtime, service
+explain generated contract paths and documentation generation. Reified's should explain runtime, service
 packages, hosts, platform targets, and effect-boundary rules.
 
-Axial inherits this repository's files and must have the description-side instructions **removed**; Reified
+Reified inherits this repository's files and must have the description-side instructions **removed**; Reified
 starts from the extracted copy and must have the effect-system instructions removed. Neither should be
 written from scratch.
 
@@ -482,34 +482,34 @@ Update repository URLs and source-link metadata before publishing from the new l
 | 6 | Verify the effect system builds and tests with no description source present | **done** — with one caveat below |
 | 7 | Split the six "must split in two" projects, plus `Axial.Flow.Tests` | not started — **now a prerequisite for phase 8**, see the caveat |
 | 8 | `filter-repo` into Reified; install maintainer files and CI; confirm green | blocked — needs `git-filter-repo` installed and the target repository created |
-| 9 | Rename in each repository: `Axial.*` → `Reified.*` there, `Axial.Flow*` → `Axial*` and the adapters here | not started — see below |
+| 9 | Rename in each repository: `Reified.*` → `Reified.*` there, `Axial.Flow*` → `Reified*` and the adapters here | not started — see below |
 | 10 | Publish prerelease Reified packages; run adapters against them | not started |
-| 11 | Remove the description paths from Axial | not started |
+| 11 | Remove the description paths from Reified | not started |
 | 12 | Documentation work — see `docs-information-architecture.md` | in progress |
-| 13 | Prefix reservations for `Reified.*` and `Axial.*`; publish Reified, then Axial | not started |
+| 13 | Prefix reservations for `Reified.*` and `Reified.*`; publish Reified, then Reified | not started |
 
 Phases 1–4 were much cheaper in the combined repository, with the compiler checking every call site.
 
 **On phase 6.** Verified by copying only `src/Axial.Flow*`, `tests/Axial.Flow*`,
 `examples/Axial.Flow.Comparisons`, and `benchmarks/Axial.Flow.Benchmarks` into a scratch tree with no
 description source and building it standalone: **build succeeded, 258 of 259 tests passed.** No Flow project
-holds a `ProjectReference` to a description project, and no Flow source file opens `Axial.Result`,
-`Axial.Parse`, `Axial.Constraint`, `Axial.Refined`, `Axial.Data`, or `Axial.Schema`. The core seam is
+holds a `ProjectReference` to a description project, and no Flow source file opens `Reified.Result`,
+`Reified.Parse`, `Reified.Constraint`, `Reified.Refinements`, `Reified.Data`, or `Reified.Schema`. The core seam is
 genuinely clean.
 
 The single failure was `Axial.Flow.Tests` asserting that **both** `docs/schema/examples.md` and
 `docs/flow/examples.md` regenerate from `scripts/generate-example-docs.sh` — a cross-product test in a
 Flow project, and the only coverage the schema page had. Now split: the Flow test passes `flow` and
-asserts only the flow page, and `tests/Axial.Schema.Tests/ExampleDocsTests.fs` passes `schema` and
+asserts only the flow page, and `tests/Reified.Schema.Tests/ExampleDocsTests.fs` passes `schema` and
 asserts only the schema page. `runBashScript` grew a `runBashScriptWithArguments` form to carry the
 product argument. So **`tests/Axial.Flow.Tests` belongs on the "must split in two" list**, which it was
 not on.
 
 **Caveat, now promoted to phase 7.** The flow half of that generator renders its page from
-`examples/Axial.Examples`, `examples/Axial.Playground`, and `examples/Axial.MaintenanceExamples` — all three
-on the "must split in two" list, and between them they reference `Axial.Result`, `Axial.Constraint`,
-`Axial.Refined`, `Axial.Parse`, `Axial.Schema`, and `Axial.Data`. Under the inverted extraction those
-examples **stay here**, so it is now *Axial's* docs test that cannot go green until they are split or
+`examples/Reified.Examples`, `examples/Reified.Playground`, and `examples/Reified.MaintenanceExamples` — all three
+on the "must split in two" list, and between them they reference `Reified.Result`, `Reified.Constraint`,
+`Reified.Refinements`, `Reified.Parse`, `Reified.Schema`, and `Reified.Data`. Under the inverted extraction those
+examples **stay here**, so it is now *Reified's* docs test that cannot go green until they are split or
 repointed at released Reified packages. Do it before extraction, while both halves are still in one tree and
 the compiler can check the split.
 
@@ -525,30 +525,30 @@ description-side rename to be comparable.
 
 ## Acceptance Criteria
 
-- Reified builds, tests, packs, and releases with no Axial package anywhere in the tree.
-- Axial's core builds, tests, packs, and releases without checking out Reified.
-- `Axial.AspNetCore` and `Axial.GenHttp` consume released Reified packages and are the only packages in
+- Reified builds, tests, packs, and releases with no Reified package anywhere in the tree.
+- Reified's core builds, tests, packs, and releases without checking out Reified.
+- `Reified.AspNetCore` and `Reified.GenHttp` consume released Reified packages and are the only packages in
   either repository depending on both products.
 - `Reified.Result`, `Reified.Parse`, `Reified.Refinements`, and `Reified.Data` are independently installable.
-- `Reified.Schema` depends on Data, Refinements, and Parse directly; Axial's core depends on none of them.
+- `Reified.Schema` depends on Data, Refinements, and Parse directly; Reified's core depends on none of them.
 - A clean consumer can install and run each product from published packages.
 - The integration reference application works against published versions.
 - Repository instructions contain no stale paths or rules from the other product.
 - Release tags and notes no longer imply synchronized versions.
-- `git log` in each repository reads as that product's history; Axial's still reaches `d3b9617a`.
+- `git log` in each repository reads as that product's history; Reified's still reaches `d3b9617a`.
 
 ## Risks And Mitigations
 
 **Cross-repository changes become slower.** Keep the core seam small, use package dependency ranges, test
 adapters against released versions.
 
-**The adapters lag behind Reified.** Float `0.7.*` so Axial's CI builds them against current Reified on every
+**The adapters lag behind Reified.** Float `0.7.*` so Reified's CI builds them against current Reified on every
 run, and treat an adapter break as a signal about the Reified surface rather than only as adapter maintenance.
 
 **History extraction obscures changes.** Extract first; make semantic changes in later ordinary commits.
 
 **`filter-repo` silently truncating the extracted history.** It does not follow renames. Enumerate the
-historical `Axial.*` description path names, and check the filtered commit count against 189 before pushing.
+historical `Reified.*` description path names, and check the filtered commit count against 189 before pushing.
 Keep the unfiltered scratch clone until the new repository is verified.
 
 **FsLiveDocs is on the critical path for documentation.** It is not on the critical path for the split.
@@ -556,16 +556,16 @@ Phases 1–11 need nothing from it.
 
 ## Choices To Resolve During Implementation
 
-- Whether Axial's core package is `Axial` or stays `Axial.Flow`. `Axial` is the natural reading now that the
-  product is the flow, and it makes `open Axial` give exactly what was installed — but it is a larger change
+- Whether Reified's core package is `Reified` or stays `Axial.Flow`. `Reified` is the natural reading now that the
+  product is the flow, and it makes `open Reified` give exactly what was installed — but it is a larger change
   and interacts with the namespace rule above.
-- Final GitHub repository name and documentation URL for Reified. Axial keeps this repository.
+- Final GitHub repository name and documentation URL for Reified. Reified keeps this repository.
 - Whether the integration reference application gets its own repository.
 - Whether packages within a repository continue sharing a version after 1.0.
-- The minimum Reified version supported by the Axial HTTP adapters.
-- Whether the adapters sit at `Axial.*` or under `Axial.Hosting.*`.
-- Where `benchmarks/Axial.Benchmarks.Fable` lives.
+- The minimum Reified version supported by the Reified HTTP adapters.
+- Whether the adapters sit at `Reified.*` or under `Reified.Hosting.*`.
+- Where `benchmarks/Reified.Benchmarks.Fable` lives.
 - Whether to request a transfer of the unlisted `Flow` package ID. Low value now that the product is named
-  Axial; previously listed as an FsFlow-era option.
+  Reified; previously listed as an FsFlow-era option.
 
 None requires returning to one combined repository.

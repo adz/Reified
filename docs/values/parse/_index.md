@@ -8,15 +8,15 @@ description: Decode serialized strings into primitive F# values.
 
 # Parse
 
-`Axial.Parse` is an independent package. Each named parser changes representation and returns
+`Reified.Parse` is an independent package. Each named parser changes representation and returns
 `Result<'value, ParseError>`.
 
 ```sh
-dotnet add package Axial.Parse
+dotnet add package Reified.Parse
 ```
 
 ```fsharp
-open Axial.Parse
+open Reified.Parse
 
 let count : Result<int, ParseError> = Parse.int "12"
 let enabled : Result<bool, ParseError> = Parse.bool "true"
@@ -96,9 +96,9 @@ Parsing changes representation; refinement checks an already-typed value and con
 [Refined values]({{< relref "/values/refined/" >}}) for the refinement model and its built-in types.
 
 ```fsharp
-open Axial.Constraint
-open Axial.Refined
-open Axial.Result
+open Reified.Constraint
+open Reified.Refinements
+open Reified.Result
 
 type QuantityError =
     | InvalidInteger of ParseError

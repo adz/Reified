@@ -6,9 +6,9 @@ weight: 100
 
 # For AI agents
 
-Values is a navigation grouping over three packages that admit values: `Axial.Constraint`, `Axial.Refined`, and
-`Axial.Parse`. There is no `Axial.Values` package and no `Axial.Values` namespace. `Axial.Refined` depends on
-`Axial.Constraint`; `Axial.Parse` depends on neither; none depends on `Axial.Result`.
+Values is a navigation grouping over three packages that admit values: `Reified.Constraint`, `Reified.Refinements`, and
+`Reified.Parse`. There is no `Reified.Values` package and no `Reified.Values` namespace. `Reified.Refinements` depends on
+`Reified.Constraint`; `Reified.Parse` depends on neither; none depends on `Reified.Result`.
 
 - Use `Constraint<'value>` to test one typed value without replacing it.
 - Use `Constraint<'value>` when executable checking and portable metadata must stay together.
@@ -20,10 +20,10 @@ Values is a navigation grouping over three packages that admit values: `Axial.Co
   mappings, and `Schema.admit` for structured draft-to-domain construction.
 
 ```fsharp
-open Axial.Constraint
-open Axial.Parse
-open Axial.Refined
-open Axial.Result
+open Reified.Constraint
+open Reified.Parse
+open Reified.Refinements
+open Reified.Result
 
 type InputError =
     | InvalidCount of ParseError
@@ -37,7 +37,7 @@ let count raw =
     }
 ```
 
-The `result { }` above is [`Axial.Result`]({{< relref "/result/" >}}) and is optional — these packages return the
+The `result { }` above is [`Reified.Result`]({{< relref "/result/" >}}) and is optional — these packages return the
 standard F# `Result`, so any Result vocabulary composes them.
 
 Start with [Getting Started](./getting-started/), then read [Define Refined Types](./refined/domain-values/).

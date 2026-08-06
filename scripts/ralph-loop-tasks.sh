@@ -153,7 +153,7 @@ ${task_line}
 Repository rules to follow:
 - Read and follow AGENTS.md, dev-docs/PLAN.md, and dev-docs/TASKS.md.
 - Complete this task end-to-end and do not start any later tasks.
-- Keep the repository's Axial architecture direction intact.
+- Keep the repository's Reified architecture direction intact.
 - Update dev-docs/TASKS.md to mark this task complete, or remove it from the active queue,
   only if it is actually complete.
 - Do not run git commit yourself. Leave your changes uncommitted; the wrapper script commits

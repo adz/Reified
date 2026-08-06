@@ -11,7 +11,7 @@ description: Write dependent fallible steps as straight-line code with result { 
 
 ```fsharp
 open System
-open Axial.Result
+open Reified.Result
 
 type SignupError =
     | NameMissing

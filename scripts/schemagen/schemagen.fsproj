@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <!-- net8.0 + Major roll-forward so the published tool runs on any consumer's runtime when shipped
-         inside the Axial.Schema.Contracts.Build package. -->
+         inside the Reified.Schema.Contracts.Build package. -->
     <TargetFramework>net8.0</TargetFramework>
     <RollForward>Major</RollForward>
     <NoWarn>$(NoWarn);NU1608</NoWarn>
@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Axial.Schema.Contracts\Axial.Schema.Contracts.fsproj" />
+    <ProjectReference Include="..\..\src\Reified.Schema.Contracts\Reified.Schema.Contracts.fsproj" />
     <PackageReference Include="Microsoft.Build.Framework" Version="17.11.4" PrivateAssets="all" ExcludeAssets="runtime" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.11.4" PrivateAssets="all" ExcludeAssets="runtime" />
   </ItemGroup>

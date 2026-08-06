@@ -15,9 +15,9 @@ been folded into `AGENTS.md`, `dev-docs/PLAN.md`, or this summary.
   the Values packages admit values. Result's sidebar is a single primary group; Values' sidebar is a primary group
   with Constraint, Refined, and Parse subgroups. Presenting Result inside Values was tried and rejected — it
   reproduced the meta-package framing the split removes.
-- **Values is navigation only.** No `Axial.Values` package, namespace, or meta-package will be created. Every nav
+- **Values is navigation only.** No `Reified.Values` package, namespace, or meta-package will be created. Every nav
   caption and both landing pages say the packages install independently, and `validate-values-docs.sh` fails if any
-  rendered page tells a reader to install `Axial.Values`.
+  rendered page tells a reader to install `Reified.Values`.
 - The shared prose pages were split rather than duplicated: `getting-started.md` became a Result-composition page
   and a value-admission page; `overview.md` was folded into the two landing pages and deleted.
 - The docs pipeline is now five areas, not four. `AXIAL_DOCS_PRODUCT` accepts `result` and `values` in place of
@@ -25,7 +25,7 @@ been folded into `AGENTS.md`, `dev-docs/PLAN.md`, or this summary.
   `constraint`/`refined`/`parse` to `docs/values/reference/`; `populate-hugo-content.sh` iterates a product list
   instead of four hardcoded pairs, and deletes any leftover `error-handling` tree so a stale area cannot keep
   serving pages.
-- `Axial.Constraint.Violation` was dropped from the Result reference page. Result is a standalone leaf with no
+- `Reified.Constraint.Violation` was dropped from the Result reference page. Result is a standalone leaf with no
   Constraint dependency, so advertising a type from another product there was wrong, and it duplicated the page
   Values owns.
 - Search vocabulary is unaffected: package tags and descriptions keep "error-handling" and "validation" where they
@@ -33,22 +33,22 @@ been folded into `AGENTS.md`, `dev-docs/PLAN.md`, or this summary.
 
 ## 2026-08-03: Both meta-packages are retired
 
-- `Axial.ErrorHandling` and the `Axial` umbrella are deleted: projects, package ids, solution and pack entries,
+- `Reified.ErrorHandling` and the `Reified` umbrella are deleted: projects, package ids, solution and pack entries,
   docs-build entries, and the API-shape assertions asserting they exist. This is project-split Phase 1B(a), the
   package half of `dev-docs/current-ideas/retire-errorhandling.md`, and a hard precondition for extracting Flow —
   every project that straddled the Schema/Flow seam did so through a meta-package.
-- The umbrella's only source was `Builders.fs`, one re-export of `Axial.Result.Builders.result`. Consumers open
-  `Axial.Result` instead. `open Axial` remains valid where it means `Axial.Data`'s namespace.
-- Seven projects were rewritten onto focused package references: `examples/Axial.{Hosting.DotNet,
+- The umbrella's only source was `Builders.fs`, one re-export of `Reified.Result.Builders.result`. Consumers open
+  `Reified.Result` instead. `open Reified` remains valid where it means `Reified.Data`'s namespace.
+- Seven projects were rewritten onto focused package references: `examples/Reified.{Hosting.DotNet,
   MaintenanceExamples,ReadmeExample,Playground,Examples,ReferenceApp,ReferenceApp.Intro}` and
-  `tests/Axial.ApiShape.Tests`.
-- The graph is pinned by `Axial.ApiShape.Tests`' `no meta-package remains in the graph`: no package assembly may
-  reference `Axial` or `Axial.ErrorHandling`, and neither DLL may appear in the test output directory.
-- **Values** — Constraint, Refined, Parse — is navigation and search vocabulary only. No `Axial.Values` package
+  `tests/Reified.ApiShape.Tests`.
+- The graph is pinned by `Reified.ApiShape.Tests`' `no meta-package remains in the graph`: no package assembly may
+  reference `Reified` or `Reified.ErrorHandling`, and neither DLL may appear in the test output directory.
+- **Values** — Constraint, Refined, Parse — is navigation and search vocabulary only. No `Reified.Values` package
   will be created. The `docs/error-handling/` → `docs/result/` + `docs/values/` move followed immediately; see the
   entry above.
-- This supersedes the entries below that describe `Axial.ErrorHandling` as a current dependency-only meta-package
-  and the `Axial` umbrella as kept: the "required role" that kept the umbrella was example convenience, and
+- This supersedes the entries below that describe `Reified.ErrorHandling` as a current dependency-only meta-package
+  and the `Reified` umbrella as kept: the "required role" that kept the umbrella was example convenience, and
   focused references cost nothing.
 
 ## 2026-08-03: Localization lives at the rendering edge, in a Renderer
@@ -70,14 +70,14 @@ been folded into `AGENTS.md`, `dev-docs/PLAN.md`, or this summary.
   `constraint.list.*`). That keeps `{actual}` optional without an optional-placeholder rule and lets a locale
   reorder the sentence without touching the twenty-five predicates.
 - `MessageDescriptor` is validated runtime identity plus arguments; `MessageFormatSpec` adds the owning
-  catalogue's neutral fallback and optional plural operand. The split is what lets `Axial.Schema` push its own
-  `schema.*` entries through every renderer mechanic without `Axial.Constraint` learning a Schema identity or
+  catalogue's neutral fallback and optional plural operand. The split is what lets `Reified.Schema` push its own
+  `schema.*` entries through every renderer mechanic without `Reified.Constraint` learning a Schema identity or
   acquiring a reverse dependency.
 - Ordinary plural support is `.one`/`.other` on entries that declare exactly one operand, tried before the bare key
   *at the same contextual level*. Full CLDR selection, and any language whose group joining cannot be expressed as
   pair/start/middle/end, belong to `Renderer.Advanced.ofResolver` and `Violation.toMessageTree` respectively — a
   stated limit, not a gap.
-- Custom constraints declare no plural operand and Axial never invents a message key for `Constraint.custom` prose.
+- Custom constraints declare no plural operand and Reified never invents a message key for `Constraint.custom` prose.
   An invented key names a catalogue entry that does not exist and fails in the language nobody tested.
 - `Violation.render` remains the resource-free, culture-free compatibility path with its existing English exactly.
   Localized English is allowed to read better because it composes.
@@ -109,7 +109,7 @@ been folded into `AGENTS.md`, `dev-docs/PLAN.md`, or this summary.
 
 ## 2026-07-30: Refined types earn their place by removing branches, not by wrapping validation
 
-- `Axial.Refined` is now a modelling library rather than a catalogue of smart constructors. A type ships only if it
+- `Reified.Refinements` is now a modelling library rather than a catalogue of smart constructors. A type ships only if it
   makes a partial operation total, guarantees an algebraic property later operations rely on, encodes a relationship
   between values, preserves an invariant across a useful family of operations, or removes branches from *consumers*
   rather than only from construction.
@@ -149,7 +149,7 @@ been folded into `AGENTS.md`, `dev-docs/PLAN.md`, or this summary.
   rounding, which is documented rather than claimed.
 - Numeric genericity uses `inline internal` SRTP with a fully monomorphic public surface. `INumber<'T>` is not an
   option: netstandard2.1 predates it and Fable does not support static abstract interface members. Any future shared
-  generic-math engine belongs outside `Axial.Refined` and should reuse the `SchemaDefaults` witness convention.
+  generic-math engine belongs outside `Reified.Refinements` and should reuse the `SchemaDefaults` witness convention.
 - `PrimitiveValueKind` gained `Int64` and `Float`, so every refined numeric type has a wire schema and resolves as a
   bare field. Mapping 64-bit integers onto `decimal` was rejected: it changes the type's meaning, and a test parses
   `9007199254740993` (beyond 2^53) to prove the value never round-trips through a float. `Schema.int64` and
@@ -176,39 +176,39 @@ been folded into `AGENTS.md`, `dev-docs/PLAN.md`, or this summary.
 
 ## 2026-07-24: Error Handling splits into Result, Check, and Refined (supersedes the 2026-07-22 and prior 2026-07-24 package details)
 
-- Pre-repository-split reorganization completed in the combined repository. `Axial.Result` (`src/Axial.Result/`,
-  namespace `Axial.Result`) now owns only generic Result combinators, conversions/extraction helpers, and
+- Pre-repository-split reorganization completed in the combined repository. `Reified.Result` (`src/Reified.Result/`,
+  namespace `Reified.Result`) now owns only generic Result combinators, conversions/extraction helpers, and
   `result { }`. `Check<'value>`, `CheckFailure`, `Predicate`, `CheckDSL`, and their collection helpers moved out of
-  `Axial.Result` into a new `Axial.Check` package (`src/Axial.Check/`, namespace `Axial.Check`,
-  `Axial.Check.CheckDSL`). `Axial.Check` does not depend on `Axial.Result`; it returns the standard F# `Result` type
-  directly, so a project can add `Axial.Check` and/or `Axial.Refined` without opening `Axial.Result` and without
+  `Reified.Result` into a new `Reified.Check` package (`src/Reified.Check/`, namespace `Reified.Check`,
+  `Reified.Check.CheckDSL`). `Reified.Check` does not depend on `Reified.Result`; it returns the standard F# `Result` type
+  directly, so a project can add `Reified.Check` and/or `Reified.Refinements` without opening `Reified.Result` and without
   builder/module ambiguity when FsToolkit.ErrorHandling is also open.
-- `Axial.Refined` now depends on `Axial.Check` only, not `Axial.Result`. Its own code used only `Check.*` and plain
-  FSharp.Core `Result.bind`/`Result.map`/`Result.mapError`, so dropping `open Axial.ErrorHandling` in favor of
-  `open Axial.Check` removed the `Axial.Result` project reference with no functional change.
-- `Axial.Schema` now depends directly on `Axial.Check` and `Axial.Refined`, not `Axial.Result`. Schema's source used
-  only `Check.*` and plain FSharp.Core `Result` functions, never an `Axial.Result`-specific helper (`orError`,
+- `Reified.Refinements` now depends on `Reified.Check` only, not `Reified.Result`. Its own code used only `Check.*` and plain
+  FSharp.Core `Result.bind`/`Result.map`/`Result.mapError`, so dropping `open Reified.ErrorHandling` in favor of
+  `open Reified.Check` removed the `Reified.Result` project reference with no functional change.
+- `Reified.Schema` now depends directly on `Reified.Check` and `Reified.Refinements`, not `Reified.Result`. Schema's source used
+  only `Check.*` and plain FSharp.Core `Result` functions, never an `Reified.Result`-specific helper (`orError`,
   `okIf`, `Collection.*`, etc.), so the same swap applied there.
-- `Axial.ErrorHandling` is now a true dependency-only meta-package: `IncludeBuildOutput=false` keeps its `.nupkg` free
+- `Reified.ErrorHandling` is now a true dependency-only meta-package: `IncludeBuildOutput=false` keeps its `.nupkg` free
   of a `lib/` assembly (verified: the packed `.nupkg` contains only `README.md` and metadata), while its nuspec
-  declares direct dependencies on `Axial.Result`, `Axial.Check`, and `Axial.Refined` (verified in the packed nuspec).
-  It exposes no public API and no `Axial.ErrorHandling` namespace.
-- Final dependency edges (verified by `dotnet pack` nuspec inspection and `Axial.ApiShape.Tests`):
-  `Axial.ErrorHandling` → `Axial.Result` + `Axial.Check` + `Axial.Refined`; `Axial.Refined` → `Axial.Check`;
-  `Axial.Schema` → `Axial.Check` + `Axial.Refined` (+ `Axial.Data`); `Axial.Flow` depends on none of the above.
-  `Axial.Result` and `Axial.Check` are independent leaves.
-- The broad `Axial` umbrella package is kept for now: several example projects (`Axial.Examples`,
-  `Axial.MaintenanceExamples`, `Axial.Playground`, `Axial.ReadmeExample`, `Axial.ReferenceApp`,
-  `Axial.ApiShape.Tests`) still reference it for one-package convenience across Error Handling + Schema. Removing it
+  declares direct dependencies on `Reified.Result`, `Reified.Check`, and `Reified.Refinements` (verified in the packed nuspec).
+  It exposes no public API and no `Reified.ErrorHandling` namespace.
+- Final dependency edges (verified by `dotnet pack` nuspec inspection and `Reified.ApiShape.Tests`):
+  `Reified.ErrorHandling` → `Reified.Result` + `Reified.Check` + `Reified.Refinements`; `Reified.Refinements` → `Reified.Check`;
+  `Reified.Schema` → `Reified.Check` + `Reified.Refinements` (+ `Reified.Data`); `Axial.Flow` depends on none of the above.
+  `Reified.Result` and `Reified.Check` are independent leaves.
+- The broad `Reified` umbrella package is kept for now: several example projects (`Reified.Examples`,
+  `Reified.MaintenanceExamples`, `Reified.Playground`, `Reified.ReadmeExample`, `Reified.ReferenceApp`,
+  `Reified.ApiShape.Tests`) still reference it for one-package convenience across Error Handling + Schema. Removing it
   and rewriting every example's dependency list to the narrowest focused set was judged out of scope for this pass;
   revisit before 1.0 per the standing "remove the umbrella unless a required role remains" rule.
-- Tests reorganized into focused projects: `tests/Axial.Result.Tests`, `tests/Axial.Check.Tests`,
-  `tests/Axial.Refined.Tests` replace the combined `tests/Axial.ErrorHandling.Tests`. `Axial.ApiShape.Tests` gained
-  package-layout assertions for the new graph, including that `Axial.ErrorHandling`'s assembly exports no public
-  types. A dedicated `Axial.Check.AotProbe` example was split out of `Axial.Result.AotProbe`.
+- Tests reorganized into focused projects: `tests/Reified.Result.Tests`, `tests/Reified.Check.Tests`,
+  `tests/Reified.Refinements.Tests` replace the combined `tests/Reified.ErrorHandling.Tests`. `Reified.ApiShape.Tests` gained
+  package-layout assertions for the new graph, including that `Reified.ErrorHandling`'s assembly exports no public
+  types. A dedicated `Reified.Check.AotProbe` example was split out of `Reified.Result.AotProbe`.
   Package-consumer proof of items 1-3, 5, and 6 from the spec (Result/Check/Refined working independently, Schema's
   direct dependencies, FsToolkit + Check + Refined + Schema coexistence) is currently covered indirectly through the
-  focused test projects' own project references and `Axial.ApiShape.Tests`, not as separate standalone consumer
+  focused test projects' own project references and `Reified.ApiShape.Tests`, not as separate standalone consumer
   fixture projects; adding literal minimal consumer-fixture projects for all six items remains open follow-up work.
 - Doc generator inputs (`scripts/docgen/Program.fs`) and `scripts/generate-api-docs.sh` were updated to the new
   namespaces/assemblies and re-run; `bash scripts/validate-docs.sh` (including the Hugo build) and `cd site &&
@@ -229,17 +229,17 @@ been folded into `AGENTS.md`, `dev-docs/PLAN.md`, or this summary.
 
 - `/error-handling/`, `/schema/`, and `/flow/` each have their own homepage, guides, generated reference, `llms.txt`, and
   agent context. Validation and Schema can remain in one repository initially; Flow can move independently.
-- `Axial.Result`, `Axial.Diagnostics`, and `Axial.Refined` are focused implementation packages.
-  `Axial.ErrorHandling` is their meta-package; the public namespaces remain `Axial.ErrorHandling`,
-  `Axial.Validation`, and `Axial.Refined`.
-- The `Axial` umbrella installs Validation, Schema, and the core Schema interpreters. `Axial.Flow` remains an
+- `Reified.Result`, `Reified.Diagnostics`, and `Reified.Refinements` are focused implementation packages.
+  `Reified.ErrorHandling` is their meta-package; the public namespaces remain `Reified.ErrorHandling`,
+  `Reified.Validation`, and `Reified.Refinements`.
+- The `Reified` umbrella installs Validation, Schema, and the core Schema interpreters. `Axial.Flow` remains an
   independent package and is not re-exported by the umbrella.
 
 ## 2026-07-24: Schema owns accumulated path-aware validation
 
-- `Axial.Diagnostics`, `Validation<'value,'error>`, `Diagnostics<'error>`, `PathSegment`, and `validate { }` are
+- `Reified.Diagnostics`, `Validation<'value,'error>`, `Diagnostics<'error>`, `PathSegment`, and `validate { }` are
   removed. Schema owns opaque `Path`, `SchemaIssue`, and `SchemaErrors`.
-- `Axial.ErrorHandling` installs Result and Refined. `Axial.Schema` depends on Data, Result, and Refined.
+- `Reified.ErrorHandling` installs Result and Refined. `Reified.Schema` depends on Data, Result, and Refined.
 - One `Refinement<'raw,'value>` contains fallible construction and total inspection. `Refine.from`, `refine { }`, and
   `Schema.refine` use the same definition.
 - Record schemas use `schema<Model> { }`. Field blocks contain `withSchema`, `constrain`, type-directed `refine`, and
@@ -248,9 +248,9 @@ been folded into `AGENTS.md`, `dev-docs/PLAN.md`, or this summary.
 ## 2026-07-21: Documentation had two product homes (superseded 2026-07-22)
 
 - `/schema/` is the complete input-to-domain documentation home. It owns the guides and generated reference for
-  `Axial.Data`, `Axial.ErrorHandling`, Schema, codecs, contracts, and Schema HTTP adapters while continuing to state
+  `Reified.Data`, `Reified.ErrorHandling`, Schema, codecs, contracts, and Schema HTTP adapters while continuing to state
   their individual NuGet package boundaries.
-- `/flow/` is the complete workflow documentation home. The Axial root is a short index linking the two products;
+- `/flow/` is the complete workflow documentation home. The Reified root is a short index linking the two products;
   ErrorHandling and Data are no longer peer top-level documentation areas.
 - Hand-written guides, generated API reference, AI-agent guidance, and `llms.txt` context are product-local. API and
   example generation plus Hugo validation can run through `validate-schema-docs.sh` or `validate-flow-docs.sh`.
@@ -259,7 +259,7 @@ been folded into `AGENTS.md`, `dev-docs/PLAN.md`, or this summary.
 
 ## 2026-07-16: HTTP hosts lower schema-trusted endpoint Flows without owning routing
 
-- `Axial.Schema.Http.AspNetCore` and `.GenHttp` depend on both `Axial.Schema.Http` and `Axial.Flow`. Their default
+- `Axial.Schema.Http.AspNetCore` and `.GenHttp` depend on both `Reified.Schema.Http` and `Axial.Flow`. Their default
   endpoint API is an ordinary `flow { }`: `Request.json`/`form`/`query` establish trusted input,
   `EndpointFlow.run` embeds an HTTP-independent application workflow by projecting the explicit application
   environment, and `Response` constructs the successful native response plan.
@@ -267,7 +267,7 @@ been folded into `AGENTS.md`, `dev-docs/PLAN.md`, or this summary.
   cancellation where available, renders invalid schema input as RFC 9457 problem details, maps expected application
   failures through a supplied renderer, and preserves interruption and defects. ASP.NET request-scoped DI may be
   used only inside the environment factory; application workflows continue to receive typed environments.
-- The server still owns route registration, middleware, authorization, and endpoint metadata. Axial produces the
+- The server still owns route registration, middleware, authorization, and endpoint metadata. Reified produces the
   native handler passed to `MapPost` or GenHTTP `Post`; it does not introduce a cross-host router. The lower-level
   `SchemaRequest`/`SchemaResult` and `SchemaResponse` primitives remain for endpoints that need `RetainedParseResult` or
   other host-specific boundary control.
@@ -407,7 +407,7 @@ been folded into `AGENTS.md`, `dev-docs/PLAN.md`, or this summary.
   actual choice. The first adapter uses FsCheck 3.3.3 because this repository already uses xUnit and FsCheck has the
   established F# generator API and xUnit integration. This is not a core dependency or a commitment against a later
   Hedgehog adapter.
-- `Axial.Schema.Testing` is non-packable and references `Axial.Schema` plus FsCheck. `Axial.Schema` remains
+- `Reified.Schema.Testing` is non-packable and references `Reified.Schema` plus FsCheck. `Reified.Schema` remains
   dependency-free from test frameworks.
 - Generation produces constraint-satisfying `Data` from `Inspect` metadata. `SchemaGen.model` then parses it and
   filters constructor rejections, so successful samples are schema-checked `'model` values and constructor
@@ -428,16 +428,16 @@ been folded into `AGENTS.md`, `dev-docs/PLAN.md`, or this summary.
 - Setters operate on draft model values. Code that requires schema trust must pass the updated draft through
   `Schema.check`; a field setter does not imply that cross-field constructor invariants still hold.
 
-Superseded 2026-07-20: no Axial interpreter or reference application consumed the generated references. The generator
-and `Axial.Schema` no longer expose `Fields`/`FieldRef`; a future diff/patch or UI consumer should establish the
+Superseded 2026-07-20: no Reified interpreter or reference application consumed the generated references. The generator
+and `Reified.Schema` no longer expose `Fields`/`FieldRef`; a future diff/patch or UI consumer should establish the
 required update abstraction before it becomes public API again.
 
 ## Current Invariants
 
 - `Flow<'env, 'error, 'value>` is the public workflow model. Platform carriers are execution/adaptation boundaries, not
   user-facing workflow types.
-- `Axial.Result` and `Axial.Flow` are independent leaves. `Axial.Refined` depends only on `Axial.Result`;
-  `Axial.ErrorHandling` installs both. `Axial.Schema` depends on Data, Result, and Refined. Flow stays independent of
+- `Reified.Result` and `Axial.Flow` are independent leaves. `Reified.Refinements` depends only on `Reified.Result`;
+  `Reified.ErrorHandling` installs both. `Reified.Schema` depends on Data, Result, and Refined. Flow stays independent of
   the whole group.
 - Explicit dependencies live in `'env`. The ambient runtime is reserved for closed executor mechanics such as
   cancellation, scope, scheduling, interruption, and trace metadata.
@@ -447,23 +447,23 @@ required update abstraction before it becomes public API again.
   contracts and operations belong to the optional `Axial.Flow.PlatformService` package. Its internal `Platform` file
   is the only place target-specific implementations may use `FABLE_COMPILER`; the public operation layer stays
   portable and host-specific capabilities such as process environment access are injected at the boundary.
-- `Check` and `Result` helpers belong to the `Axial.ErrorHandling` namespace; `Parse`, `Refine`, and the `refine { }`
-  builder belong to `Axial.Refined`; path-aware accumulated errors belong to `Axial.Schema`; `Policy`, `Bind`, and
+- `Check` and `Result` helpers belong to the `Reified.ErrorHandling` namespace; `Parse`, `Refine`, and the `refine { }`
+  builder belong to `Reified.Refinements`; path-aware accumulated errors belong to `Reified.Schema`; `Policy`, `Bind`, and
   `BindError` belong to `Axial.Flow`.
 - `Check` is a complete typed value-constraint subsystem:
   `Check<'value> = 'value -> Result<'value, CheckFailure list>`. Checks are path-free, raw-input-free value programs;
   value-preserving guards and extraction helpers belong in `Result`, and parsing and refined value construction belong in
-  `Axial.Refined`. `Result` itself stays generic `Option`/`seq`/nullable → `Result` plumbing (`someOr`, `headOr`, etc.)
+  `Reified.Refinements`. `Result` itself stays generic `Option`/`seq`/nullable → `Result` plumbing (`someOr`, `headOr`, etc.)
   — it must not grow a predicate- or domain-specific helper when the same rule already is, or should be, a named type
-  in `Axial.Refined`'s catalog (`NonBlankString`, `Slug`, `PositiveInt`, ...); that catalog is the "reusable named
+  in `Reified.Refinements`'s catalog (`NonBlankString`, `Slug`, `PositiveInt`, ...); that catalog is the "reusable named
   proof" tier, `Result` is the "generic container extraction" tier, and the two must not blur together.
-- Built-in refined schema helpers live in `Axial.Schema.RefinedSchema`, not `Axial.Refined`, so the refined
+- Built-in refined schema helpers live in `Reified.Schema.RefinedSchema`, not `Reified.Refinements`, so the refined
   namespace stays independent of schema metadata even though both now ship in the same package. Standalone refined
   constructors continue to use executable `Check` programs; the integration catalog mirrors those same constraints as
   `SchemaConstraint` metadata and tests the lowered boundary failures. Do not move `SchemaConstraint` into
-  `Axial.Refined` or add an extra shared metadata package unless a second integration package needs that abstraction.
+  `Reified.Refinements` or add an extra shared metadata package unless a second integration package needs that abstraction.
 - `Result` keeps fail-fast adapters around `Check`, not a second accumulating constraint language. The current
-  surface (`src/Axial.Result/Result.fs`) is: generic combinators and conversions (`ok`, `error`, `map`,
+  surface (`src/Reified.Result/Result.fs`) is: generic combinators and conversions (`ok`, `error`, `map`,
   `mapError`, `bind`, `orElse`, `orElseWith`, `requireTrue`, `okIf`, `failIf`, `orError`, `fromTry`, `fromChoice`,
   `toOption`, `toValueOption`, `defaultValue`) and extraction helpers for option, value option, nullable, result, and
   sequence values (`someOr`, `noneOr`, `valueSomeOr`, `valueNoneOr`, `nullableOr`, `notNullOr`, `okOr`, `errorOr`,
@@ -471,12 +471,12 @@ required update abstraction before it becomes public API again.
   ordered range, sequence count) has actually been added — an earlier version of this doc described that family as
   already retained; it was aspirational, not built. If it's added later, the same don't-duplicate-`Refined` rule
   above applies: a guard that proves a value satisfies a rule, rather than merely converting a container, belongs in
-  `Axial.Refined`'s catalog, not `Result`. Do not add new predicate-specific `Result` helpers when the same rule
-  belongs in `Check.*` or `Axial.Refined` instead.
+  `Reified.Refinements`'s catalog, not `Result`. Do not add new predicate-specific `Result` helpers when the same rule
+  belongs in `Check.*` or `Reified.Refinements` instead.
 - First-pass ordered range checks stay in generic `Check.Number` helpers over comparable values. Do not add separate
   `Check.Int`, `Check.Decimal`, `Check.Float`, or date/time check modules until a schema, refined value, or diagnostics
   requirement needs type-specific semantics beyond plain ordering.
-- `Axial.Schema` owns structured input, executable validation, paths, accumulated errors, and schema interpreters.
+- `Reified.Schema` owns structured input, executable validation, paths, accumulated errors, and schema interpreters.
 - Constructor-last `schema<Customer> { }` declarations are the sole public record-schema authoring surface. Field
   blocks use `withSchema`, `constrain`, type-directed `refine`, and `validate`. `construct` and `constructResult` check
   the closing constructor by position and arity. Completed schemas retain a typed record plan beside erased metadata
@@ -493,11 +493,11 @@ required update abstraction before it becomes public API again.
   which describes a built schema as plain metadata trees (`ModelDescription`, `FieldDescription`, `SchemaDescription`,
   `SchemaShape`). Inspection never parses input, runs checks, or constructs models. JSON Schema, documentation, and UI
   metadata generators are prototype interpreters over that read model, not core packages, until a consumer demands one.
-- CodecMapper-style codecs consume schema by referencing `Axial.Schema` only, in their own package: metadata comes from
+- CodecMapper-style codecs consume schema by referencing `Reified.Schema` only, in their own package: metadata comes from
   `Inspect`, and hot-path plans come from the record-plan compiler protocol that walks typed fields and a typed
-  constructor finalizer. `Axial.Schema` never references a codec
-  package, and codec packages never reference `Axial.Schema`, so no dependency cycle can form.
-- `Axial.Schema.Syntax` contains only the constructor-last shape operations and typed field constraints intended for a
+  constructor finalizer. `Reified.Schema` never references a codec
+  package, and codec packages never reference `Reified.Schema`, so no dependency cycle can form.
+- `Reified.Schema.Syntax` contains only the constructor-last shape operations and typed field constraints intended for a
   local declaration-module `open`. Primitive and composite value-schema functions remain qualified under `Schema`.
 - Build-time generation emits the same constructor-last syntax as handwritten schemas. Reflection remains rejected as
   a schema foundation.
@@ -505,14 +505,14 @@ required update abstraction before it becomes public API again.
   `Result.mapError` or `Validation.mapError`.
 - Generated reference docs come from XML comments and generator inputs. Do not hand-edit generated reference pages as the
   primary source of truth.
-- Compiled JSON codecs live in `Axial.Schema.Json`, a package that references only `Axial.Schema` (through
+- Compiled JSON codecs live in `Reified.Schema.Json`, a package that references only `Reified.Schema` (through
   `InternalsVisibleTo` for the type-erased definitions) and mirrors CodecMapper's byte-level runtime. The codec is the
   trusted hot path: it enforces wire shape and required fields but does not run constraint metadata. Untrusted boundary
   input keeps going through `Data` + `Schema.parse` for complete path-aware diagnostics. Do not fold codecs into
-  `Axial.Schema`: codecs must not pull diagnostics into the schema package, and the schema core stays free of any
+  `Reified.Schema`: codecs must not pull diagnostics into the schema package, and the schema core stays free of any
   wire runtime.
-- A `dotnet new axial-api` template is evaluated and deferred until the public surface stabilizes (at or near 1.0).
-  The seed exists as `examples/Axial.Api`, which CI smoke-runs on every push, so the template would only add packaging
+- A `dotnet new reified-api` template is evaluated and deferred until the public surface stabilizes (at or near 1.0).
+  The seed exists as `examples/Reified.Api`, which CI smoke-runs on every push, so the template would only add packaging
   around a sample that still changes with the pre-1.0 API. Revisit when (a) the schema/codec/boundary surface has been
   stable for two consecutive releases, and (b) at least one external user asks for a scaffold; then package the sample
   as a template repo folder with `dotnet new` metadata rather than a separate NuGet-first workflow.
@@ -521,11 +521,11 @@ required update abstraction before it becomes public API again.
   line; parity on speed with the 6x boundary-lane gap is the current story. If pursued, the pre-chosen approach is
   fixed-arity typed decoders for arities 1..8 with the slot decoder as fallback — no reflection, dispatch on field
   count from the compiled record plan in `Schema.compilePlan` — with a target of ≤ 2.0 µs / ≤ 1.5 KB on the benchmark aggregate.
-- There is no "checked codec" compile option. `Axial.Schema.Json` enforces wire shape only; a consumer who wants constraint
+- There is no "checked codec" compile option. `Reified.Schema.Json` enforces wire shape only; a consumer who wants constraint
   enforcement on trusted-lane decode composes `Json.deserialize` then `Schema.check` (one extra model walk). If
   that composition proves too slow for a real consumer, the pre-chosen answer is a `Json.deserializeValidated` helper
-  in `Axial.Schema` (interpreters may reference Codec, never the reverse). Duplicating constraint lowering
-  inside `Axial.Schema.Json` stays rejected.
+  in `Reified.Schema` (interpreters may reference Codec, never the reverse). Duplicating constraint lowering
+  inside `Reified.Schema.Json` stays rejected.
 - Unions support three wire shapes: the externally-wrapped `{discriminator, payload}` object (`Schema.union`, the
   default), internally-tagged objects (`Schema.inlineUnion` — valid only when every payload is an object whose field
   names don't collide with the discriminator, checked at construction), and bare-string enums (`Schema.enum`) for
@@ -538,7 +538,7 @@ required update abstraction before it becomes public API again.
 - The UI-metadata interpreter stays a prototype. Promotion waits for an external consumer; if promoted, the API sample
   must consume the shipped module, otherwise the duplication just moves. UI scope stays field list + control kinds —
   layout, localization, and widget options are application concerns.
-- `Axial.Schema.Json` is part of the supported Fable surface: the package compiles in `check-fable-js-surface.sh` and a Node
+- `Reified.Schema.Json` is part of the supported Fable surface: the package compiles in `check-fable-js-surface.sh` and a Node
   round-trip test exercises it. The `FABLE_COMPILER` gates are load-bearing, and every future codec optimization must
   keep the JS branch working. This completes the zod-comparison story — one declaration shared between server and
   browser covers serialization as well as parsing.
@@ -554,7 +554,7 @@ required update abstraction before it becomes public API again.
   (untyped `Data` → `RetainedParseResult<'model, SchemaError>`) and `Schema.check` (an already-existing model value,
   re-checked through its field constraints and its constructor so cross-field invariants aren't silently skipped).
   There is no separate public `Model` module.
-- `Schema.check` replaced the old `Axial.Schema.Validation.validate`, which only re-checked per-field constraints
+- `Schema.check` replaced the old `Reified.Schema.Validation.validate`, which only re-checked per-field constraints
   and silently skipped the model's own constructor invariant (a `DateRange` with `Start` after `End` would have
   passed it). `Schema.check` re-runs field constraints and then re-invokes the constructor over the field getters'
   outputs specifically so the constructor re-check isn't a bolt-on special case.
@@ -594,7 +594,7 @@ or in `AGENTS.md`, then delete the detailed sketch.
   tested in CheckResultTests.fs). Do not
   extend type-directed dispatch beyond the presence/emptiness trio — other shared names (`some`, `ok`, numeric
   comparisons) are either container-specific or already generic without SRTP dispatch.
-- **Refined guide docs area.** `Axial.Refined`'s API reference lives under `/values/reference/refined/` (moved from
+- **Refined guide docs area.** `Reified.Refinements`'s API reference lives under `/values/reference/refined/` (moved from
   `/error-handling/reference/refined/` on 2026-08-03), and its guide pages under `/values/refined/`. Some
   Schema-side refined prose (`docs/schema/refined-values.md`) still lives under `/schema/`, which is correct: it is
   about refined *fields in a schema*, not about the Refined package.
@@ -604,24 +604,24 @@ or in `AGENTS.md`, then delete the detailed sketch.
   durable guarantee use private representations and authoritative smart constructors, with `Schema.refine` or a record
   schema invoking those same constructors. A separate draft is useful for named assembly/editing of a private
   cross-field aggregate, not as a universal wrapper pattern. See `docs/schema/trusted-construction.md`.
-- The contract grammar/generator (`src/Axial.Schema.Contracts`, `scripts/schemagen`) is WIRE-tier tooling only.
+- The contract grammar/generator (`src/Reified.Schema.Contracts`, `scripts/schemagen`) is WIRE-tier tooling only.
   Domain models are hand-written F#; a domain-tier declaration kind was designed and rejected (generated types
-  can't carry methods; DUs don't fit a JSON-shaped grammar). Golden corpus: `tests/Axial.Schema.Tests/contracts/`
-  (compiled + behavior-tested) with byte-for-byte emission tests in `tests/Axial.Schema.Contracts.Tests`.
+  can't carry methods; DUs don't fit a JSON-shaped grammar). Golden corpus: `tests/Reified.Schema.Tests/contracts/`
+  (compiled + behavior-tested) with byte-for-byte emission tests in `tests/Reified.Schema.Contracts.Tests`.
 
 ## 2026-08-02 — Constraint unification
 
-- `Axial.Check` is renamed to `Axial.Constraint` (project, assembly, package, namespace, tests, AOT probe). There is
+- `Reified.Check` is renamed to `Reified.Constraint` (project, assembly, package, namespace, tests, AOT probe). There is
   one public value-rule concept, `Constraint<'value>`: a reusable description of valid values that `check` executes.
-  The `Check<'value>` alias, `CheckFailure`, `CheckDSL`, the public `Predicate` catalogue, `Axial.Check.Constraint`'s
-  code/metadata surface, `Axial.Schema.SchemaConstraint`, `ConstraintDescriptor`, and the `Axial.Schema.Constraint`
+  The `Check<'value>` alias, `CheckFailure`, `CheckDSL`, the public `Predicate` catalogue, `Reified.Check.Constraint`'s
+  code/metadata surface, `Reified.Schema.SchemaConstraint`, `ConstraintDescriptor`, and the `Reified.Schema.Constraint`
   facade are all removed outright, with no aliases. Pre-1.0, no released users.
 - A constraint carries `Test`, `Check`, and a `ConstraintDescription`. Both closures are retained deliberately:
   `test` over a conjunction may fail fast, while `check` must run every child to accumulate. Interpreted atoms and
   `custom` predicates keep a Boolean path that does no violation work; `customWith` derives `test` from its callback
   and carries that cost, which is inherent in the information the author chose to supply.
 - Two tiers. **Interpreted** constructors build one `ConstraintAtom` and place that same value in both the
-  description and any violation, so identity and failure cannot drift. The algebra is closed and grows only by Axial
+  description and any violation, so identity and failure cannot drift. The algebra is closed and grows only by Reified
   release. **Opaque** constraints (`custom`, `customWith`, `notWith`, `contramap`, unsupported operands) run normally
   and are honestly invisible to export and proof. There is no interpreted `not`: several families have no complement,
   float comparisons are not complementable under NaN, and an operation that is sometimes interpreted is worse than
@@ -639,7 +639,7 @@ or in `AGENTS.md`, then delete the detailed sketch.
 - Interpreters divide by what they *claim*, not by whether they produce a value — the earlier "value producers fail
   closed" rule contradicted the trusted JSON codec's documented contract. Admission and constraint-satisfying
   generation fail closed; trusted structural codecs make no constraint claim; documentation and export degrade
-  honestly via `x-axial-runtime-constraints`.
+  honestly via `x-reified-runtime-constraints`.
 - Semantics corrected where runtime and export disagreed: text cardinality counts code points, not UTF-16 units;
   `Constraint.numeric` is ASCII `^[0-9]+$` rather than `\d`, so the runtime rule and its lowering agree by
   construction; text `present` emits only `minLength: 1` and keeps the non-blank rule as runtime metadata, because

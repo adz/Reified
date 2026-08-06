@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.1;net8.0</TargetFrameworks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsAotCompatible Condition="'$(TargetFramework)' == 'net8.0'">true</IsAotCompatible>
+    <PackageId>Reified.Parse</PackageId>
+    <AssemblyName>Reified.Parse</AssemblyName>
+    <RootNamespace>Reified.Parse</RootNamespace>
+    <Authors>Adam Davies</Authors>
+    <Description>Primitive parsers for untrusted serialized input, returning standard Result values.</Description>
+    <PackageProjectUrl>https://github.com/adz/Reified</PackageProjectUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/adz/Reified</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PackageTags>fsharp;parsing;result;error-handling</PackageTags>
+    <FsDocsCollectionName>Reified</FsDocsCollectionName>
+    <FsDocsLogoSource>content/img/reified-inline-light.svg</FsDocsLogoSource>
+    <FsDocsLogoAlt>Reified.Parse</FsDocsLogoAlt>
+    <FsDocsLogoLink>https://github.com/adz/Reified</FsDocsLogoLink>
+    <FsDocsLicenseLink>https://github.com/adz/Reified/blob/main/LICENSE</FsDocsLicenseLink>
+    <FsDocsReleaseNotesLink>https://github.com/adz/Reified/blob/main/RELEASE_NOTES.md</FsDocsReleaseNotesLink>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Fable.Core" Version="4.3.0" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Errors.fs" />
+    <Compile Include="Parse.fs" />
+  </ItemGroup>
+</Project>

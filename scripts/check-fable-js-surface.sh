@@ -3,7 +3,7 @@
 set -euo pipefail
 
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-project="$root_dir/benchmarks/Axial.Benchmarks.Fable/Axial.Benchmarks.Fable.fsproj"
+project="$root_dir/benchmarks/Reified.Benchmarks.Fable/Reified.Benchmarks.Fable.fsproj"
 out_dir="$root_dir/artifacts/fable-js-surface"
 
 rm -rf "$out_dir"
@@ -12,15 +12,15 @@ printf '%s\n' '{ "type": "module" }' > "$out_dir/package.json"
 
 dotnet fable "$project" --lang javascript --define BENCHMARK_NODE --outDir "$out_dir"
 
-if [ ! -f "$out_dir/src/Axial.Schema.Json/Json.js" ]; then
-  echo "Axial.Schema.Json's Json.fs did not compile into the Fable JavaScript output." >&2
+if [ ! -f "$out_dir/src/Reified.Schema.Json/Json.js" ]; then
+  echo "Reified.Schema.Json's Json.fs did not compile into the Fable JavaScript output." >&2
   exit 1
 fi
 
 program_output="$(node "$out_dir/Program.js")"
 
 if ! grep -q "Codec round-trip: ok" <<<"$program_output"; then
-  echo "Axial.Schema.Json encode/decode round-trip did not run in the Fable JavaScript output." >&2
+  echo "Reified.Schema.Json encode/decode round-trip did not run in the Fable JavaScript output." >&2
   echo "$program_output" >&2
   exit 1
 fi
@@ -66,4 +66,4 @@ if grep -R "ColdTask" "$out_dir" >/dev/null; then
   exit 1
 fi
 
-echo "Fable JavaScript surface compiles, includes Axial.Schema.Json, and excludes .NET-only ColdTask."
+echo "Fable JavaScript surface compiles, includes Reified.Schema.Json, and excludes .NET-only ColdTask."

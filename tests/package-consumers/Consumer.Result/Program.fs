@@ -1,7 +1,7 @@
-// Axial.Result installed alone. Asserts the package restores with no sibling Axial package present
+// Reified.Result installed alone. Asserts the package restores with no sibling Reified package present
 // and that the result { } builder and accumulating helpers are reachable from one open.
 
-open Axial.Result
+open Reified.Result
 
 type SignupError = MissingName
 

@@ -6,14 +6,14 @@ description: Compose operations that can fail into one application error type, u
 
 # Getting Started
 
-`Axial.Result` is a standalone leaf. Nothing else in Axial is required, and it depends on no other Axial package:
+`Reified.Result` is a standalone leaf. Nothing else in Reified is required, and it depends on no other Reified package:
 
 ```bash
-dotnet add package Axial.Result
+dotnet add package Reified.Result
 ```
 
 ```fsharp
-open Axial.Result
+open Reified.Result
 ```
 
 The package works with the standard F# `Result<'value, 'error>` — it does not wrap or replace it. What it supplies is
@@ -70,7 +70,7 @@ it can depend on the earlier results. See [Collecting every error](./collecting-
 
 This accumulation is **flat**: a list of your error values with no field identity and no path. Admitting values in the
 first place belongs to the [Values]({{< relref "/values/" >}}) packages, and path-aware accumulated diagnostics over a
-whole structured input belong to [Axial.Schema]({{< relref "/schema/" >}}).
+whole structured input belong to [Reified.Schema]({{< relref "/schema/" >}}).
 
 All of them return the standard F# `Result`, so these helpers work on their output — but none of them requires this
 package.

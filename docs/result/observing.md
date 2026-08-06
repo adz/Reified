@@ -11,7 +11,7 @@ break a pipeline apart.
 
 ```fsharp
 open System
-open Axial.Result
+open Reified.Result
 
 type SignupError =
     | AgeNotANumber of string

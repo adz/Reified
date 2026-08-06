@@ -13,7 +13,7 @@ All examples share one error type:
 
 ```fsharp
 open System
-open Axial.Result
+open Reified.Result
 
 type SignupError =
     | NameMissing

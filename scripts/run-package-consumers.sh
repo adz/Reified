@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-# Package-consumer fixtures: pack the Axial packages, then restore and run tiny projects that install
+# Package-consumer fixtures: pack the Reified packages, then restore and run tiny projects that install
 # them the way an outside consumer would. Project references inside the solution hide missing package
 # files, wrong dependency ranges, broken build targets, and source-order problems; these fixtures do
 # not, because they only ever see the .nupkg.
 #
-# Usage: scripts/run-package-consumers.sh [-v <axial-version>] [--no-pack]
+# Usage: scripts/run-package-consumers.sh [-v <reified-version>] [--no-pack]
 
 set -euo pipefail
 
@@ -20,15 +20,15 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     -v) version="$2"; shift 2 ;;
     --no-pack) skip_pack=true; shift ;;
-    *) echo "Usage: $0 [-v <axial-version>] [--no-pack]" >&2; exit 2 ;;
+    *) echo "Usage: $0 [-v <reified-version>] [--no-pack]" >&2; exit 2 ;;
   esac
 done
 
 if [[ -z "$version" ]]; then
-  version="$(dotnet msbuild src/Axial.Result/Axial.Result.fsproj -getProperty:Version -nologo | tr -d '[:space:]')"
+  version="$(dotnet msbuild src/Reified.Result/Reified.Result.fsproj -getProperty:Version -nologo | tr -d '[:space:]')"
 fi
 
-echo "Testing Axial $version as an installed package."
+echo "Testing Reified $version as an installed package."
 
 if ! $skip_pack; then
   ./scripts/pack.sh -v "$version"
@@ -36,7 +36,7 @@ fi
 
 # A stale package of the same version in the global cache would shadow what we just packed, so the
 # fixtures must never restore from it.
-for package in Axial.Result Axial.Parse Axial.Constraint Axial.Refined Axial.Data Axial.Schema; do
+for package in Reified.Result Reified.Parse Reified.Constraint Reified.Refinements Reified.Data Reified.Schema; do
   cached="$HOME/.nuget/packages/$(echo "$package" | tr '[:upper:]' '[:lower:]')/$version"
   if [[ -d "$cached" ]]; then
     echo "Evicting cached $package $version"
@@ -52,7 +52,7 @@ for fixture in "$fixtures_dir"/Consumer.*; do
   echo "=== $name ==="
 
   if dotnet run --project "$fixture/$name.fsproj" \
-      -p:AxialPackageVersion="$version" \
+      -p:ReifiedPackageVersion="$version" \
       --configuration Release --nologo; then
     echo "$name passed"
   else

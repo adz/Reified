@@ -1,12 +1,12 @@
-# Axial Values
+# Reified Values
 
-- Values is a navigation grouping over `Axial.Constraint`, `Axial.Refined`, and `Axial.Parse` — three packages about
-  admitting values. There is no `Axial.Values` package or namespace, and no meta-package.
-- `Axial.Refined` depends only on `Axial.Constraint`. `Axial.Parse` depends on neither. None depends on
-  `Axial.Result`: they all return the standard F# `Result`, so any Result vocabulary composes them.
-- Composing the failures they return is `Axial.Result`'s job (a separate product); path-aware accumulation over a
-  whole structured input is `Axial.Schema`'s.
-- `Axial.Constraint` owns `Constraint<'value>`, `Violation`, and the `ConstraintDescription` read model.
+- Values is a navigation grouping over `Reified.Constraint`, `Reified.Refinements`, and `Reified.Parse` — three packages about
+  admitting values. There is no `Reified.Values` package or namespace, and no meta-package.
+- `Reified.Refinements` depends only on `Reified.Constraint`. `Reified.Parse` depends on neither. None depends on
+  `Reified.Result`: they all return the standard F# `Result`, so any Result vocabulary composes them.
+- Composing the failures they return is `Reified.Result`'s job (a separate product); path-aware accumulation over a
+  whole structured input is `Reified.Schema`'s.
+- `Reified.Constraint` owns `Constraint<'value>`, `Violation`, and the `ConstraintDescription` read model.
 - A constraint is a reusable description of valid values; `check` runs it. There is no separate `Check` type.
 - `Constraint.test` answers `bool`; `Constraint.check` returns `Result<unit, Violation>`; `Constraint.guard` keeps the input.
 - Constraints never replace or normalize values.
@@ -23,8 +23,8 @@
 - `Constraint.customLocalized key description predicate` makes an opaque rule translatable; the prose stays the fallback.
 - `SchemaErrors.messages`/`fullMessages`/`toStringWith` render Schema failures; Schema supplies its typed path as the attribute.
 - `Violation.toMessageTree` is the escape hatch for a language that must reorder a whole group.
-- `Axial.Parse` owns `ParseError` and named primitive parsers such as `Parse.int` and `Parse.guid`.
-- `Axial.Refined` depends only on Constraint. It owns `Refinement<'underlying,'refined>` and named refined types.
+- `Reified.Parse` owns `ParseError` and named primitive parsers such as `Parse.int` and `Parse.guid`.
+- `Reified.Refinements` depends only on Constraint. It owns `Refinement<'underlying,'refined>` and named refined types.
 - Parsing and refinement are explicit operations. Map their errors into an application error before binding them together.
 - `Refinement.define` accepts one constraint, a total constructor, and a total reverse projection.
 - Compose several rules with `Constraint.all` before defining; there is no plural or check-taking constructor.
@@ -36,10 +36,10 @@
 Golden path:
 
 ```fsharp
-open Axial.Constraint
-open Axial.Parse
-open Axial.Refined
-open Axial.Result
+open Reified.Constraint
+open Reified.Parse
+open Reified.Refinements
+open Reified.Result
 
 type QuantityError =
     | InvalidInteger of ParseError

@@ -52,10 +52,10 @@ jobs:
         run: npm install --prefix site
 
       - name: Build
-        run: dotnet build Axial.slnx --configuration Release --no-restore --nologo -v minimal
+        run: dotnet build Reified.slnx --configuration Release --no-restore --nologo -v minimal
 
       - name: Test
-        run: dotnet test Axial.slnx --configuration Release --no-build --nologo -v minimal
+        run: dotnet test Reified.slnx --configuration Release --no-build --nologo -v minimal
 
       - name: Check Schema CE compiler errors
         run: bash scripts/check-schema-ce-errors.sh

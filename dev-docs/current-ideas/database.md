@@ -1,13 +1,13 @@
 # Typed Relational Layer
 
 The strongest direction is an immutable, generated, typed relational AST interpreted through Flow. It should not
-resemble EF's tracked object graph, and it should not copy Ecto's Changeset wholesale because Axial already has Schema,
+resemble EF's tracked object graph, and it should not copy Ecto's Changeset wholesale because Reified already has Schema,
 path-aware diagnostics, and typed Flow errors.
 
   The result could be genuinely compelling: database-first correctness like SqlHydra, query composition closer to Ecto, immutable F# values throughout, and
   first-class Flow integration.
 
-  ## Where Axial is currently up to
+  ## Where Reified is currently up to
 
   The existing architecture gives SQL a solid foundation:
 
@@ -25,9 +25,9 @@ path-aware diagnostics, and typed Flow errors.
 
   The package dependency direction matters:
 
-  Axial.Flow         Axial.Schema
+  Axial.Flow         Reified.Schema
        \                 /
-            Axial.Sql
+            Reified.Sql
             /       \
    Postgres         Sqlite
 
@@ -138,7 +138,7 @@ path-aware diagnostics, and typed Flow errors.
   2. an immutable Insert or Update;
   3. explicit constraint translations attached to the mutation.
 
-  That separation fits Axial much better than copying Changeset.
+  That separation fits Reified much better than copying Changeset.
 
   ## Recommended synthesis
 
@@ -304,7 +304,7 @@ path-aware diagnostics, and typed Flow errors.
 
   ## Constraint errors and Schema diagnostics
 
-  This is where Axial can be unusually good.
+  This is where Reified can be unusually good.
 
   type DbError =
       | Constraint of ConstraintViolation
@@ -384,7 +384,7 @@ path-aware diagnostics, and typed Flow errors.
    catalog interrogation
             │
             ▼
-   versioned .axialdb.json snapshot
+   versioned .reifieddb.json snapshot
             │
             ▼
    deterministic F# source generation
@@ -407,10 +407,10 @@ path-aware diagnostics, and typed Flow errors.
 
   Commands could be:
 
-  axial sql import --provider postgres schema.sql --output db.axial.json
-  axial sql snapshot --provider sqlite app.db --output db.axial.json
-  axial sql generate db.axial.json
-  axial sql verify db.axial.json --connection ...
+  reified sql import --provider postgres schema.sql --output db.reified.json
+  reified sql snapshot --provider sqlite app.db --output db.reified.json
+  reified sql generate db.reified.json
+  reified sql verify db.reified.json --connection ...
 
   Normal builds consume the checked-in snapshot and never need a live database. This gives:
 
@@ -468,7 +468,7 @@ path-aware diagnostics, and typed Flow errors.
 
   A more ergonomic environment-lens mechanism could later locally replace IDatabase so existing repository functions automatically participate. That likely
   exposes a small missing capability in Flow worth designing independently. The connection should not be hidden in runtime-local ambient state because that
-  conflicts with Axial’s explicit-environment direction.
+  conflicts with Reified’s explicit-environment direction.
 
   Transactions must guarantee rollback and disposal on typed failure, defect, or interruption. Nested transactions become savepoints where supported.
 
@@ -495,19 +495,19 @@ path-aware diagnostics, and typed Flow errors.
 
   ## Package layout
 
-  Axial.Sql
-  Axial.Sql.Postgres
-  Axial.Sql.Sqlite
-  Axial.Sql.Tooling
-  Axial.Sql.Generator
+  Reified.Sql
+  Reified.Sql.Postgres
+  Reified.Sql.Sqlite
+  Reified.Sql.Tooling
+  Reified.Sql.Generator
 
   Potentially split execution from pure query construction later:
 
-  Axial.Sql             // metadata and immutable AST
+  Reified.Sql             // metadata and immutable AST
   Axial.Flow.Sql        // IDatabase and Flow execution
 
   That split is architecturally cleaner if users might want query generation without Flow, though it creates another package to explain. I would begin with
-  Axial.Sql as the integrated add-on unless a non-Flow consumer appears.
+  Reified.Sql as the integrated add-on unless a non-Flow consumer appears.
 
   ## What makes it preferable
 

@@ -7,7 +7,7 @@ description: Domain types whose invariant removes work from the code that uses t
 
 # Refined
 
-`Axial.Refined` supplies types that carry an invariant, together with the operations that
+`Reified.Refinements` supplies types that carry an invariant, together with the operations that
 invariant makes possible. Guarded construction is how a value is admitted, but it is not
 the reason to reach for a refined type — a wrapper that only checks on the way in leaves
 callers unwrapping it at first use, and the invariant buys nothing after the boundary.
@@ -31,16 +31,16 @@ carry nothing forward — concatenating two trimmed strings is not trimmed — s
 `Constraint.trimmed` and `Constraint.pattern` on an ordinary `string`, not types. See
 [When not to make a type](./catalog/#when-not-to-make-a-type).
 
-`Axial.Refined` depends only on `Axial.Constraint`. It does not
+`Reified.Refinements` depends only on `Reified.Constraint`. It does not
 [parse text]({{< relref "/values/parse/" >}}) and does not normalize input.
 
 ```sh
-dotnet add package Axial.Refined
+dotnet add package Reified.Refinements
 ```
 
 ```fsharp
-open Axial.Constraint
-open Axial.Refined
+open Reified.Constraint
+open Reified.Refinements
 ```
 
 ## Admission

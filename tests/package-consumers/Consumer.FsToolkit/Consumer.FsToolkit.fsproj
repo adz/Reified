@@ -5,8 +5,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Axial.Refined" Version="$(AxialPackageVersion)" />
-    <PackageReference Include="Axial.Schema" Version="$(AxialPackageVersion)" />
+    <PackageReference Include="Reified.Refinements" Version="$(ReifiedPackageVersion)" />
+    <PackageReference Include="Reified.Schema" Version="$(ReifiedPackageVersion)" />
     <PackageReference Include="FsToolkit.ErrorHandling" Version="4.18.0" />
   </ItemGroup>
 

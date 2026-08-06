@@ -46,7 +46,7 @@ no runtime reflection.
 `Constraint<'v> list`. Both demand the current field type, and the plural form preserves declaration order.
 `constrain (minLength 1)` after an `int` field is a type mismatch on the constraint line.
 
-**The bare-getter form.** `open type Axial.Schema.Syntax` overloads `field` with a bare form:
+**The bare-getter form.** `open type Reified.Schema.Syntax` overloads `field` with a bare form:
 `field _.FirstName` derives the wire name from the property (camelCased) by reading the getter
 quotation once at schema build (`ReflectedDefinition(includeValue = true)`), and keeps the compiled
 getter for parsing and checking. Explicit names are never transformed. Build-phase metadata reading,

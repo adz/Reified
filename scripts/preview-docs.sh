@@ -5,7 +5,7 @@ set -euo pipefail
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 port="${AXIAL_DOCS_PREVIEW_PORT:-3000}"
 HUGO_BASEURL="${HUGO_BASEURL:-http://192.168.86.180:$port/}"
-stop_file="${AXIAL_DOCS_PREVIEW_STOP_FILE:-/tmp/axial-docs-preview.stop}"
+stop_file="${AXIAL_DOCS_PREVIEW_STOP_FILE:-/tmp/reified-docs-preview.stop}"
 hugo_pid=""
 generate=true
 force_generate=false
@@ -23,10 +23,10 @@ generation_fingerprint() {
   {
     find \
       "$root_dir/src" \
-      "$root_dir/examples/Axial.Examples" \
-      "$root_dir/examples/Axial.Api" \
-      "$root_dir/examples/Axial.Playground" \
-      "$root_dir/examples/Axial.MaintenanceExamples" \
+      "$root_dir/examples/Reified.Examples" \
+      "$root_dir/examples/Reified.Api" \
+      "$root_dir/examples/Reified.Playground" \
+      "$root_dir/examples/Reified.MaintenanceExamples" \
       "$root_dir/scripts/docgen" \
       -type f \
       \( -name "*.fs" -o -name "*.fsproj" -o -name "*.props" -o -name "*.targets" -o -name "*.json" \) \

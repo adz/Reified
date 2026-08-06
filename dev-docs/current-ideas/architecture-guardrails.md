@@ -1,11 +1,11 @@
 # Architecture Guardrails
 
-Axial should help applications compress intent, domain knowledge, and invariants into human-reviewable interfaces that
+Reified should help applications compress intent, domain knowledge, and invariants into human-reviewable interfaces that
 also constrain generated code. Schema establishes trust at data boundaries; private domain types preserve it; named
 domain transitions evolve it; Flow makes operational dependencies and failures explicit.
 
 This note records the remaining recommendations from the 2026-07 architecture review. Contract generation freshness is
-not listed as a separate CI command because `Axial.Schema.Contracts.Build` now makes generation part of the ordinary
+not listed as a separate CI command because `Reified.Schema.Contracts.Build` now makes generation part of the ordinary
 build.
 
 ## Terms
@@ -13,7 +13,7 @@ build.
 - **Domain**: the business concepts and rules used by application logic, independent of transport and storage formats.
 - **Aggregate**: related values that are created and updated as one thing.
 - **Invariant**: a rule that must hold for every valid value of a domain type.
-- **Schema**: Axial's typed description of input shape, field constraints, and construction.
+- **Schema**: Reified's typed description of input shape, field constraints, and construction.
 - **Wire model**: a record shaped for serialized or stored data rather than business operations.
 - **Transition**: a named operation that changes one valid domain state into another or returns a typed refusal.
 - **Guardrail**: a compiler, build, interface, or test mechanism that prevents or reports a specific class of mistake.
@@ -110,7 +110,7 @@ drift observable with reusable laws:
 - Every migration result passes the current schema.
 - Every successful domain transition preserves intrinsic schema checks.
 
-`Axial.Schema.Testing` is the natural place for FsCheck adapters implementing these laws without adding a property-test
+`Reified.Schema.Testing` is the natural place for FsCheck adapters implementing these laws without adding a property-test
 dependency to public runtime packages.
 
 ## Schema Knowledge For Tools
@@ -204,7 +204,7 @@ An optional future build package could classify projects:
 
 ```xml
 <PropertyGroup>
-  <AxialArchitectureRole>Domain</AxialArchitectureRole>
+  <ReifiedArchitectureRole>Domain</ReifiedArchitectureRole>
 </PropertyGroup>
 ```
 
@@ -324,7 +324,7 @@ operations and callers already need to pattern match.
 
 ## Schema Law Helpers
 
-`Axial.Schema.Testing` can grow reusable FsCheck properties over its existing generators:
+`Reified.Schema.Testing` can grow reusable FsCheck properties over its existing generators:
 
 ```fsharp
 SchemaLaws.parseThenCheck schema
@@ -374,7 +374,7 @@ This guards claims such as:
 Normalize paths and volatile compiler wording before comparing diagnostics. Reject unexpected additional errors so a
 broken fixture cannot pass for the wrong reason.
 
-These fixtures belong in Axial's conformance suite and example templates. Do not add them to every consumer build.
+These fixtures belong in Reified's conformance suite and example templates. Do not add them to every consumer build.
 
 ## Generated Architecture Manifest
 
@@ -384,7 +384,7 @@ A build task can generate a compact description from compiled truth and explicit
 {
   "assembly": "MyApp.Domain",
   "role": "Domain",
-  "references": ["Axial.Result", "Axial.Constraint", "Axial.Refined"],
+  "references": ["Reified.Result", "Reified.Constraint", "Reified.Refinements"],
   "opaqueTypes": ["Booking"],
   "forbiddenCalls": [],
   "publicBoundaryTypes": []
@@ -408,10 +408,10 @@ business meaning from names.
 Build the smallest high-confidence mechanisms first:
 
 1. Document opaque `.fsi` domain modules and project separation using current F# features.
-2. Add schema law helpers to `Axial.Schema.Testing` after their call shapes are proven in repository tests.
-3. Add a compile-negative harness for Axial's own compiler guarantees and contract MSBuild integration.
+2. Add schema law helpers to `Reified.Schema.Testing` after their call shapes are proven in repository tests.
+3. Add a compile-negative harness for Reified's own compiler guarantees and contract MSBuild integration.
 4. Prototype project-role validation and compiled-call/public-surface audits in a repository script or test project.
-5. Package proven checks as an optional `Axial.Architecture.Build` package.
+5. Package proven checks as an optional `Reified.Architecture.Build` package.
 6. Add editor analyzers only for repeated, high-signal violations where faster feedback matters.
 
 The contracts build package should remain focused on contract generation. Architecture policy can reuse its MSBuild
@@ -436,7 +436,7 @@ Reviewers can then discuss the business decision instead of checking repeated pl
 
 User-facing material should repeat these points:
 
-- Axial is not primarily a validator.
+- Reified is not primarily a validator.
 - Schema converts untrusted representations into admitted values or diagnostics.
 - The type system, not schema metadata, carries durable invariants through the application.
 - Application functions decide whether an already trusted value is acceptable for one operation.

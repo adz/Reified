@@ -12,7 +12,7 @@
     <RestorePackagesWithLockFile>false</RestorePackagesWithLockFile>
 
     <!-- Overridden by scripts/run-package-consumers.sh with the version it just packed. -->
-    <AxialPackageVersion Condition="'$(AxialPackageVersion)' == ''">0.7.0</AxialPackageVersion>
+    <ReifiedPackageVersion Condition="'$(ReifiedPackageVersion)' == ''">0.7.0</ReifiedPackageVersion>
   </PropertyGroup>
 
 </Project>

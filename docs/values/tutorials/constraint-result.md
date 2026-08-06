@@ -9,8 +9,8 @@ description: Apply reusable constraints and compose the values they keep through
 This tutorial validates a signup request and maps each `Violation` into an application error.
 
 ```fsharp
-open Axial.Constraint
-open Axial.Result
+open Reified.Constraint
+open Reified.Result
 
 type SignupRequest =
     { Name: string

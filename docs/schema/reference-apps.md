@@ -10,19 +10,19 @@ The reference apps exercise the schema group the way an application does — val
 storage boundaries — so that API friction invisible in a snippet has nowhere to hide. There are three tiers, each
 runnable:
 
-1. [`Axial.ReferenceApp.Intro`]({{< relref "/values/reference-app.md" >}}) — plain `Result`, checks,
+1. [`Reified.ReferenceApp.Intro`]({{< relref "/values/reference-app.md" >}}) — plain `Result`, checks,
    refined values, and accumulated validation, with no schemas at all. Start there if you are new; this page
    covers the schema tiers.
-2. `examples/Axial.ReferenceApp` — the workspace tracker: hand-written schemas, refined domain values, versioned
+2. `examples/Reified.ReferenceApp` — the workspace tracker: hand-written schemas, refined domain values, versioned
    contracts, application admission, codecs, and Flow use cases.
-3. `examples/Axial.ReferenceApp.Wire` — the same boundary discipline with the wire tier **generated** from
+3. `examples/Reified.ReferenceApp.Wire` — the same boundary discipline with the wire tier **generated** from
    `[<DeriveSchema>]` records.
 
 ## The workspace tracker
 
 ```bash
-dotnet run --project examples/Axial.ReferenceApp/Axial.ReferenceApp.fsproj -- create-workspace Delivery
-dotnet run --project examples/Axial.ReferenceApp/Axial.ReferenceApp.fsproj -- web --urls http://localhost:5080
+dotnet run --project examples/Reified.ReferenceApp/Reified.ReferenceApp.fsproj -- create-workspace Delivery
+dotnet run --project examples/Reified.ReferenceApp/Reified.ReferenceApp.fsproj -- web --urls http://localhost:5080
 ```
 
 The app tracks workspaces, members, and work items across a CLI, an HTML form, a JSON API, and versioned JSON
@@ -49,11 +49,11 @@ files. The features it leans on, and why they matter at this size:
   `Axial.Schema.Http.AspNetCore` parses routes, JSON, and forms before embedding those application workflows with
   `EndpointFlow.run`. Flow is never part of the schema entry price.
 
-`examples/Axial.ReferenceApp/README.md` explains the current boundary and domain split in the runnable app.
+`examples/Reified.ReferenceApp/README.md` explains the current boundary and domain split in the runnable app.
 
 ### Schema-derived property tests
 
-`tests/Axial.ReferenceApp.Tests/SchemaGenTests.fs` uses the non-packable `Axial.Schema.Testing` FsCheck adapter:
+`tests/Reified.ReferenceApp.Tests/SchemaGenTests.fs` uses the non-packable `Reified.Schema.Testing` FsCheck adapter:
 `SchemaGen.raw` derives a generator of valid structured boundary values from the workspace schema, and `SchemaGen.model`
 derives trusted model values. The properties pin three claims with no hand-written fixtures:
 
@@ -67,7 +67,7 @@ same declaration the parser executes.
 ## The generated-wire slice
 
 ```bash
-dotnet run --project examples/Axial.ReferenceApp.Wire/Axial.ReferenceApp.Wire.fsproj --nologo
+dotnet run --project examples/Reified.ReferenceApp.Wire/Reified.ReferenceApp.Wire.fsproj --nologo
 ```
 
 The wire slice answers the question the hand-written tier leaves open: what does the day-to-day authoring
@@ -96,20 +96,20 @@ through a compiled codec. Generated schemas are ordinary schemas, so `JsonSchema
 come along for free.
 
 See [Versioned Contracts]({{< relref "/schema/contracts.md" >}}) for the full attribute vocabulary, the
-`.contract` grammar alternative, and running generation in your build with `Axial.Schema.Contracts.Build`.
+`.contract` grammar alternative, and running generation in your build with `Reified.Schema.Contracts.Build`.
 
 ## One boundary contract, two HTTP hosts
 
-`examples/Axial.Api` (ASP.NET Core) and `examples/Axial.Api.GenHttp` (GenHTTP) serve the same schema-driven
+`examples/Reified.Api` (ASP.NET Core) and `examples/Reified.Api.GenHttp` (GenHTTP) serve the same schema-driven
 boundary: the request body parses through the schema (invalid input becomes an RFC 9457 problem-details 400 with
 JSON-pointer paths), the trusted model flows through an ordinary application Flow, the response serializes
 through the compiled codec, and `/openapi.json` is assembled from the same declaration.
 
 ```bash
-AXIAL_EXAMPLE=smoke dotnet run --project examples/Axial.Api/Axial.Api.fsproj --nologo
-AXIAL_EXAMPLE=smoke dotnet run --project examples/Axial.Api.GenHttp/Axial.Api.GenHttp.fsproj --nologo
+AXIAL_EXAMPLE=smoke dotnet run --project examples/Reified.Api/Reified.Api.fsproj --nologo
+AXIAL_EXAMPLE=smoke dotnet run --project examples/Reified.Api.GenHttp/Reified.Api.GenHttp.fsproj --nologo
 ```
 
-The point of the twin is that nothing schema-facing changes between hosts: `Axial.Schema.Http` owns structured data,
+The point of the twin is that nothing schema-facing changes between hosts: `Reified.Schema.Http` owns structured data,
 problem details, and OpenAPI assembly; each host package adapts its own request/response idiom. Routing and app
 wiring remain the host's ([HTTP Servers]({{< relref "/schema/http-servers.md" >}})).

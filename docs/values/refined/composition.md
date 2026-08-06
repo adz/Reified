@@ -10,10 +10,10 @@ Parsing and refinement have different failure types because they answer differen
 error that preserves that distinction, then compose with `result { }`.
 
 ```fsharp
-open Axial.Constraint
-open Axial.Parse
-open Axial.Refined
-open Axial.Result
+open Reified.Constraint
+open Reified.Parse
+open Reified.Refinements
+open Reified.Result
 
 type QuantityError =
     | InvalidInteger of ParseError

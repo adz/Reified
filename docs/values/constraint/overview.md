@@ -7,7 +7,7 @@ description: Naming rules, composing them, and keeping the value.
 # Using constraints
 
 ```fsharp
-open Axial.Constraint
+open Reified.Constraint
 ```
 
 A constraint tests an existing typed value. It never trims, normalizes, or replaces its input.
@@ -81,12 +81,12 @@ character is deliberate, and it is what lets the rule be published at all.
 
 A JSON Schema validator decides whitespace by ECMA-262's `\s`, which is not quite .NET's set. The two used to
 disagree in both directions, and one of those directions is genuinely harmful: where a validator treats a character
-as whitespace and Axial does not, an exported schema rejects a payload the library would have accepted — and the
+as whitespace and Reified does not, an exported schema rejects a payload the library would have accepted — and the
 library never sees it to explain why. U+FEFF was the whole of that direction, since .NET Core dropped it from
 `Char.IsWhiteSpace` while ECMA-262 keeps it. Treating it as blank removes the problem.
 
 What remains is the harmless direction: a few characters, U+0085 among them, are blank here but ordinary to a
-validator. Such a value passes the wire check and then fails at Axial with a proper diagnostic, which is what you
+validator. Such a value passes the wire check and then fails at Reified with a proper diagnostic, which is what you
 want anyway. Because of that, `present` on text exports as `pattern: "\\S"` and `trimmed` exports too, where both
 were previously runtime-only.
 

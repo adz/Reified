@@ -1,10 +1,10 @@
-module Axial.Schema.Contracts.SchemaGen
+module Reified.Schema.Contracts.SchemaGen
 
 open System
 open System.IO
-open Axial.Schema.Contracts
+open Reified.Schema.Contracts
 
-/// axial schemagen: generates checked-in F# from .contract files and [<DeriveSchema>]-marked records.
+/// reified schemagen: generates checked-in F# from .contract files and [<DeriveSchema>]-marked records.
 ///
 /// Usage:
 ///   schemagen [--namespace <ns>] [--naming camel|snake|verbatim] [--check] <file-or-directory>...

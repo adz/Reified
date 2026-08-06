@@ -42,10 +42,10 @@ upsert_frontmatter() {
   mv "$tmp" "$file"
 }
 
-# Axial has five product documentation areas: /result/, /values/, /data/,
+# Reified has five product documentation areas: /result/, /values/, /data/,
 # /schema/, and /flow/. Generated API reference is distributed under the product
 # that owns each package. Values is a navigation grouping over Constraint,
-# Refined, and Parse — there is no Axial.Values package behind it.
+# Refined, and Parse — there is no Reified.Values package behind it.
 products=(result values data schema flow)
 
 result_dir="$root_dir/site/content/result"

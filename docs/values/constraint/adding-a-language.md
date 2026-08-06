@@ -7,7 +7,7 @@ description: Generating, filling, and proving a new translation of the constrain
 
 # Adding a language
 
-Adding a language means supplying entries for keys Axial already publishes. The catalogue is available at runtime,
+Adding a language means supplying entries for keys Reified already publishes. The catalogue is available at runtime,
 so the resource file, the coverage test, and this page never have to be kept in sync by hand.
 
 The order below is the one that pays off: get the base catalogue rendering in the new language first, then
@@ -15,13 +15,13 @@ override the handful of fields whose wording actually differs.
 
 ## 1. Generate the skeleton
 
-`Catalogue.keys` is every key Axial can produce, including the composition and joining entries.
+`Catalogue.keys` is every key Reified can produce, including the composition and joining entries.
 `Catalogue.english` and `Catalogue.pluralArgument` give the starting text and which entries take `.one`/`.other`.
 
 A short script writes a starting file for a translator:
 
 ```fsharp
-open Axial.Constraint
+open Reified.Constraint
 
 let skeleton () =
     Catalogue.keys
@@ -39,12 +39,12 @@ let skeleton () =
 Do the same with `SchemaMessages.keys` if the application parses boundary input:
 
 ```fsharp
-open Axial.Schema
+open Reified.Schema
 
 SchemaMessages.keys |> List.map (fun key -> $"{key} = {SchemaMessages.english[key]}")
 ```
 
-Nothing in this step is Axial-specific beyond the three maps. Emit `.resx`, JSON, `.po`, or whatever your
+Nothing in this step is Reified-specific beyond the three maps. Emit `.resx`, JSON, `.po`, or whatever your
 localization pipeline already reads.
 
 ## 2. Translate the predicates
@@ -78,7 +78,7 @@ constraint.actual      = reçu {actual} au lieu de « {message} »
 constraint.fullMessage = {message} — {attribute}
 ```
 
-`{message}` and `{attribute}` hold text Axial has already rendered. They are substituted as-is and never
+`{message}` and `{attribute}` hold text Reified has already rendered. They are substituted as-is and never
 re-interpolated, so braces inside them stay literal.
 
 ## 4. Translate the joining patterns
@@ -165,7 +165,7 @@ let renderer =
         | _, None -> None)
 ```
 
-Axial keeps contextual fallback and violation composition; the resolver owns category selection and the entry's own
+Reified keeps contextual fallback and violation composition; the resolver owns category selection and the entry's own
 rendering.
 
 ## 8. Wire it up
@@ -198,7 +198,7 @@ Base-catalogue coverage is a one-line test:
 
 ```fsharp
 [<Fact>]
-let ``the French catalogue covers every Axial key`` () =
+let ``the French catalogue covers every Reified key`` () =
     let missing =
         Catalogue.keys @ SchemaMessages.keys
         |> List.filter (fun key -> not (french.ContainsKey key))
@@ -206,7 +206,7 @@ let ``the French catalogue covers every Axial key`` () =
     test <@ missing = [] @>
 ```
 
-Axial cannot enumerate your contexts and fields — it has never seen them. For contextual coverage, enumerate the
+Reified cannot enumerate your contexts and fields — it has never seen them. For contextual coverage, enumerate the
 ones you care about and ask the renderer exactly what it will look up:
 
 ```fsharp

@@ -50,16 +50,16 @@
               {{- end -}}
             {{- end -}}
           {{- end -}}
-          <section class="axial-package-nav{{ if $activeGroup }} active-path{{ end }}{{ if eq .kind "primary" }} axial-package-nav--primary{{ end }}">
-            <h2 class="axial-package-nav__title">
+          <section class="reified-package-nav{{ if $activeGroup }} active-path{{ end }}{{ if eq .kind "primary" }} reified-package-nav--primary{{ end }}">
+            <h2 class="reified-package-nav__title">
               <a href="{{ $home.RelPermalink }}"{{ if eq $context $home }} class="active"{{ end }}>{{ .title }}</a>
             </h2>
             {{- with .caption }}
-            <p class="axial-package-nav__caption">{{ . }}</p>
+            <p class="reified-package-nav__caption">{{ . }}</p>
             {{- end }}
             {{- if $activeGroup -}}
             <div class="td-sidebar-nav__section">
-            <ul class="axial-package-nav__items ul-1">
+            <ul class="reified-package-nav__items ul-1">
               {{- $excludes := .exclude | default slice -}}
               {{- range .children_of -}}
                 {{- $root := $context.Site.GetPage . -}}
@@ -89,7 +89,7 @@
                     {{- $referenceActive = true -}}
                   {{- end -}}
                 {{- end -}}
-                <li class="axial-package-nav__item with-child{{ if $referenceActive }} active-path{{ end }}">
+                <li class="reified-package-nav__item with-child{{ if $referenceActive }} active-path{{ end }}">
                   <input type="checkbox" id="package-{{ $home.RelPermalink | anchorize }}-reference-check"{{ if $referenceActive }} checked{{ end }}>
                   <label for="package-{{ $home.RelPermalink | anchorize }}-reference-check">
                     <span class="td-sidebar-link td-sidebar-link__section">Reference</span>
@@ -128,7 +128,7 @@
 (function () {
   var nav = document.getElementById('td-section-nav');
   if (!nav) return;
-  var key = 'axial-sidebar-scroll';
+  var key = 'reified-sidebar-scroll';
   var saved = sessionStorage.getItem(key);
   if (saved !== null) {
     nav.scrollTop = parseInt(saved, 10) || 0;

@@ -144,7 +144,7 @@ Interpreters divide by what they *claim*:
 - **Trusted structural codecs make no constraint claim** at all. They enforce wire shape and construction, and stay
   outside constraint interpretation entirely.
 - **Documentation and export degrade honestly.** JSON Schema emits every keyword the target really enforces and
-  retains the rest as readable prose plus `x-axial-runtime-constraints` entries, so a published document never implies
+  retains the rest as readable prose plus `x-reified-runtime-constraints` entries, so a published document never implies
   a rule is enforced when it is not.
 
 That last rule has teeth, and lowering has three fidelities rather than two:
@@ -161,7 +161,7 @@ blank set is defined to make it impossible.
 
 An authored `Constraint.pattern` stays runtime-only because the .NET regex dialect is not ECMA-262 — `\d`, for one,
 matches any Unicode decimal digit on .NET and only `[0-9]` under ECMA-262, so publishing an authored pattern could
-silently change what it means. Axial's own patterns are written in the common subset and lower exactly:
+silently change what it means. Reified's own patterns are written in the common subset and lower exactly:
 `Constraint.email` emits its exact runtime pattern, and `Constraint.numeric` is defined as ASCII digits for
 precisely this reason.
 

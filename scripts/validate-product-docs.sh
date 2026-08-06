@@ -42,8 +42,8 @@ case "$product" in
     test -f "$validate_dir/values/refined/domain-values/index.html"
     test -f "$validate_dir/values/parse/index.html"
     test -f "$validate_dir/values/reference/constraint/t-constraint-renderer/index.html"
-    # Values is navigation only: no page may advertise an Axial.Values package.
-    ! grep -rqF 'dotnet add package Axial.Values' "$validate_dir/values"
+    # Values is navigation only: no page may advertise an Reified.Values package.
+    ! grep -rqF 'dotnet add package Reified.Values' "$validate_dir/values"
     ;;
   schema)
     test -f "$validate_dir/schema/getting-started/index.html"

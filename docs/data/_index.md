@@ -12,7 +12,7 @@ menu:
 
 # Data
 
-`Axial.Data` makes structured data concise to build and change. Its objects, lists, text, numbers, Booleans, and null
+`Reified.Data` makes structured data concise to build and change. Its objects, lists, text, numbers, Booleans, and null
 map directly to JSON, but the same model works well for test fixtures, configuration, command-line input, form values,
 events, and other tree-shaped data.
 
@@ -27,13 +27,13 @@ The data stays structured, edits identify exactly what changes, and failures poi
 Install the package with:
 
 ```sh
-dotnet add package Axial.Data
+dotnet add package Reified.Data
 ```
 
 ## Build, change, and check one value
 
 ```fsharp
-open Axial.Data
+open Reified.Data
 open Data.Syntax
 
 let baseline =
@@ -84,7 +84,7 @@ Use `data` to build a `Data` value. Lists represent both objects and lists. A li
 is an object; a list containing ordinary values is a list.
 
 ```fsharp
-open Axial.Data
+open Reified.Data
 open Data.Syntax
 
 let person = data [ "name" => "Ada"; "active" => true ]

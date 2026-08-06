@@ -1,7 +1,7 @@
 baseURL = "/"
 canonifyURLs = true
 locale = "en-us"
-title = "Axial"
+title = "Reified"
 theme = ["github.com/google/docsy"]
 
 # Language configuration
@@ -47,19 +47,19 @@ defaultContentLanguage = "en"
 [params]
   offlineSearch = true
   copyright = "Adam Davies"
-  github_repo = "https://github.com/adz/Axial"
+  github_repo = "https://github.com/adz/Reified"
   version = "next"
   version_menu = "next"
   version_menu_pagelinks = true
   [[params.versions]]
     version = "next"
     name = "next"
-    url = "/Axial/"
+    url = "/Reified/"
   
   # Navigation links
   [[params.links.user]]
     name = "GitHub"
-    url = "https://github.com/adz/Axial"
+    url = "https://github.com/adz/Reified"
     icon = "fab fa-github"
     desc = "Source Code"
 

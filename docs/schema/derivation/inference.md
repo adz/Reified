@@ -54,7 +54,7 @@ Marked-record references stay within one source file so generation and F# compil
 ## Names
 
 The default naming policy is `camel`, so `MarketingOptIn` becomes `marketingOptIn`. Set
-[`AxialSchemaNaming`](../msbuild/#msbuild-properties) to `snake` or `verbatim` for the whole project. Use
+[`ReifiedSchemaNaming`](../msbuild/#msbuild-properties) to `snake` or `verbatim` for the whole project. Use
 `[<SchemaName "marketing_opt_in">]` on one field or nullary union case to override the policy locally.
 
 ## Options, supplied fields, and defaults

@@ -1,5 +1,5 @@
 groups:
-  - title: Axial.Result
+  - title: Reified.Result
     home: /result
     kind: primary
     caption: Compose operations that can fail, using the standard F# Result type. Installs on its own.

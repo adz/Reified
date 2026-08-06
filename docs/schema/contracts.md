@@ -37,7 +37,7 @@ Parse or migrate to the current wire model first, then call `toDomain`. See
 `Contract.supersedes`, then choose how the input version is discovered with `Contract.build`.
 
 ```fsharp
-open Axial.Schema
+open Reified.Schema
 
 type ConfigV1 = { Host: string }
 type Config = { Host: string; Port: int }
@@ -88,7 +88,7 @@ match Contract.parse configContract raw with
 The generator groups marked records ending in `Vn` and treats a bare record as the current version:
 
 ```fsharp
-open Axial.Schema.Derive
+open Reified.Schema.Derive
 
 [<DeriveSchema>]
 type ProfileV1 = { Name: string }

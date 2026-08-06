@@ -1,4 +1,4 @@
-# Retire Axial.ErrorHandling; promote Result to a top-level product
+# Retire Reified.ErrorHandling; promote Result to a top-level product
 
 **Status: all four phases implemented.** Phase 1 expanded Result. Phases 2-3 moved `docs/error-handling/` to
 `docs/result/` + `docs/values/`. Phase 4 deleted the package, the old docs tree, the old sidebar, and
@@ -6,7 +6,7 @@
 
 Two things went further than this document originally proposed:
 
-- The `Axial` umbrella was deleted too, not repointed at the four leaves — `project-split.md` requires both
+- The `Reified` umbrella was deleted too, not repointed at the four leaves — `project-split.md` requires both
   meta-packages gone before Flow is extracted, so there is no meta-package left at any tier.
 - Result is a **top-level navigation area with its own sidebar**, not a group inside a shared error-handling
   sidebar. The top nav is Result | Values | Data | Schema | Flow.
@@ -15,7 +15,7 @@ Two things went further than this document originally proposed:
 
 ## Thesis
 
-`Axial.ErrorHandling` is a dependency-only meta-package with no API. It exists only as an install
+`Reified.ErrorHandling` is a dependency-only meta-package with no API. It exists only as an install
 convenience, but it costs a documentation area, a sidebar `kind: primary` group, a URL prefix on four
 unrelated packages, a validation script, and a landing-page door. The bundle it names is not a concept
 adopters reason about: `Result` is about failure composition, while `Constraint`, `Refined`, and `Parse`
@@ -23,25 +23,25 @@ are about admitting values.
 
 Target end state:
 
-- `Axial.Result` becomes a top-level product entry point next to `Axial.Data`, `Axial.Schema`, and
+- `Reified.Result` becomes a top-level product entry point next to `Reified.Data`, `Reified.Schema`, and
   `Axial.Flow`, with its own docs tree at `/result`.
 - `Constraint`, `Refined`, and `Parse` collapse under a single nav group titled **Values**.
-  Values is a *navigation* grouping only — there is no `Axial.Values` package, no namespace, and no
+  Values is a *navigation* grouping only — there is no `Reified.Values` package, no namespace, and no
   meta-package. The packages stay independent leaves and install individually.
-- `Axial.ErrorHandling` is deleted: project, package id, solution entry, pack entry, docs-build entry,
+- `Reified.ErrorHandling` is deleted: project, package id, solution entry, pack entry, docs-build entry,
   umbrella reference, and API-shape assertions.
 
 ## Package graph after the change
 
 Unchanged code-wise. Only the meta-package edge disappears:
 
-- `Axial.Result` — independent leaf.
-- `Axial.Constraint` — independent leaf.
-- `Axial.Parse` — independent leaf.
-- `Axial.Refined` — depends on `Axial.Constraint`.
+- `Reified.Result` — independent leaf.
+- `Reified.Constraint` — independent leaf.
+- `Reified.Parse` — independent leaf.
+- `Reified.Refinements` — depends on `Reified.Constraint`.
 
-The `Axial` umbrella was removed in the same change rather than repointed at the four leaves, so there is no
-meta-package left at any tier. Adopters who used `Axial.ErrorHandling` or `Axial` install the leaves they
+The `Reified` umbrella was removed in the same change rather than repointed at the four leaves, so there is no
+meta-package left at any tier. Adopters who used `Reified.ErrorHandling` or `Reified` install the leaves they
 actually use.
 
 ## Phases
@@ -82,7 +82,7 @@ the package can express**; everything else is ergonomics. Priority order:
    ```
 
 2. `result.array` — same semantics, different container.
-3. **Surface `traverse`/`sequence` naturally.** The namespace is already `Axial.Result`, so
+3. **Surface `traverse`/`sequence` naturally.** The namespace is already `Reified.Result`, so
    `Collection.traverseResult`/`sequenceResult` stutter. Rename to `Result.traverse`/`Result.sequence`.
    Make the seq-in/list-out shape explicit in the docs rather than leaving it implied by the signature.
    Accumulating counterparts (`traverseAll`/`sequenceAll`) fit naturally afterwards, but the
@@ -150,20 +150,20 @@ the package can express**; everything else is ergonomics. Priority order:
 
 #### Constraints
 
-- `Axial.Result` must remain an independent leaf. Nothing added here may reference `Axial.Constraint`,
-  `Axial.Refined`, or `Axial.Data`. Any violation preset belongs in `Axial.Constraint`.
-- Path-aware accumulation stays `Axial.Schema`'s. These builders accumulate a flat container of errors
+- `Reified.Result` must remain an independent leaf. Nothing added here may reference `Reified.Constraint`,
+  `Reified.Refinements`, or `Reified.Data`. Any violation preset belongs in `Reified.Constraint`.
+- Path-aware accumulation stays `Reified.Schema`'s. These builders accumulate a flat container of errors
   with no path, no field identity, and no reconstruction.
-- Each addition needs an XML doc comment with an example, tests in `tests/Axial.Result.Tests`, and a
+- Each addition needs an XML doc comment with an example, tests in `tests/Reified.Result.Tests`, and a
   regenerated reference page.
 
 #### What shipped
 
-`src/Axial.Result/Collection.fs` is deleted; `Accumulate.fs` holds the two accumulating builders and the
+`src/Reified.Result/Collection.fs` is deleted; `Accumulate.fs` holds the two accumulating builders and the
 shared merge core. `Result.traverse`/`Result.sequence`/`Result.tap`/`Result.tapError` are on the `Result`
 module; `ResultBuilder` gained `BindReturn` and the `list`/`array` members. `recoverWith` (item 6)
 was not implemented — no call site wanted it. Reference pages regenerate correctly after updating the
-`Axial.Result.Collection.*` symbol ids in `scripts/docgen/Program.fs`; leaving them stale made the
+`Reified.Result.Collection.*` symbol ids in `scripts/docgen/Program.fs`; leaving them stale made the
 generator fuzzy-match Refined's `traverseResult` into the Result reference.
 
 #### Extra impact from the rename in (3)
@@ -185,7 +185,7 @@ Followed the precedent set by `ce58acad` ("Promote Data to an independent docs e
 - Added `docs/result/_index.md` (product landing, `menu.main` weight 1), `docs/result/agent.md`,
   `docs/result/llms.txt`, `docs/result/getting-started.md`, `docs/result/reference/_index.md`, and
   `site/data/sidebars/result.yaml`.
-- Dropped `Axial.Constraint.Violation` from the Result reference page. Result is a standalone leaf; carrying another
+- Dropped `Reified.Constraint.Violation` from the Result reference page. Result is a standalone leaf; carrying another
   product's type there was wrong and duplicated the page Values owns.
 
 ### Phase 3 — Collapse the rest under "Values" — **done**
@@ -197,11 +197,11 @@ Followed the precedent set by `ce58acad` ("Promote Data to an independent docs e
 - `fstoolkit-comparison.md` went to Result. `reference-app.md` went to Values — the introductory app is about
   admitting values. `getting-started.md` was split into two pages, and `overview.md` was folded into the two
   landing pages and deleted rather than split twice.
-- `validate-values-docs.sh` fails if any rendered page tells a reader to `dotnet add package Axial.Values`.
+- `validate-values-docs.sh` fails if any rendered page tells a reader to `dotnet add package Reified.Values`.
 
 ### Phase 4 — Delete the package and the old tree — **done**
 
-Deleted `src/Axial.ErrorHandling/`, `src/Axial/`, `docs/error-handling/`,
+Deleted `src/Reified.ErrorHandling/`, `src/Reified/`, `docs/error-handling/`,
 `site/data/sidebars/error-handling.yaml`, and `scripts/validate-error-handling-docs.sh`.
 `populate-hugo-content.sh` also removes any leftover `site/content/error-handling` and
 `site/static/error-handling`, so a stale build cannot keep serving the retired area.
@@ -212,21 +212,21 @@ Deleted `src/Axial.ErrorHandling/`, `src/Axial/`, `docs/error-handling/`,
 
 | File | Change |
 | --- | --- |
-| `src/Axial.ErrorHandling/Axial.ErrorHandling.fsproj` | deleted |
-| `src/Axial/` (umbrella project and `Builders.fs`) | deleted |
-| `Axial.slnx:53` | remove project entry |
+| `src/Reified.ErrorHandling/Reified.ErrorHandling.fsproj` | deleted |
+| `src/Reified/` (umbrella project and `Builders.fs`) | deleted |
+| `Reified.slnx:53` | remove project entry |
 | `scripts/pack.sh:28` | remove from the pack list |
 | `scripts/docs-build.proj:7` | remove `DocsProject` entry |
 | `scripts/build-docs-site.sh`, `scripts/docs-build.proj` | the umbrella and meta entries built the leaves transitively; the four leaves are now listed explicitly |
-| `src/Axial.{Result,Constraint,Parse}/*.fsproj` | drop `Axial.ErrorHandling` from `PackageTags`/description text where present |
+| `src/Reified.{Result,Constraint,Parse}/*.fsproj` | drop `Reified.ErrorHandling` from `PackageTags`/description text where present |
 
 ### Tests
 
 - **Done.** The assertions that the meta-package exists and exports no public type are replaced by
-  `no meta-package remains in the graph`: no package assembly may reference `Axial` or `Axial.ErrorHandling`, and
+  `no meta-package remains in the graph`: no package assembly may reference `Reified` or `Reified.ErrorHandling`, and
   neither DLL may appear in the test output directory. Since the umbrella went too, there is no "umbrella
   references the four leaves" assertion to write.
-- No behavioural test changes. Phase 1 adds tests to `tests/Axial.Result.Tests`.
+- No behavioural test changes. Phase 1 adds tests to `tests/Reified.Result.Tests`.
 
 ### Docs pipeline
 
@@ -240,7 +240,7 @@ Deleted `src/Axial.ErrorHandling/`, `src/Axial/`, `docs/error-handling/`,
 - **Done.** `scripts/generate-api-docs.sh` and `scripts/docgen/Program.fs` — `AXIAL_DOCS_PRODUCT` takes `result`
   and `values` in place of `validation`, each with its own DLL set, page-group filter, and output root.
   (There is no `scripts/generate-api-docs.mjs`; that name was stale.)
-- **Done.** `site/assets/scss/_styles_project.scss` — added `$axial-values`, `.axial-door--values`,
+- **Done.** `site/assets/scss/_styles_project.scss` — added `$reified-values`, `.reified-door--values`,
   `.td-section-nav--result`, and `.td-section-nav--values`.
 - **Done.** `site/layouts/_partials/{sidebar,pager,page-meta-links}.html` — all three selected on
   `.Section == "error-handling"`; they now select `result` and `values`.
@@ -248,16 +248,16 @@ Deleted `src/Axial.ErrorHandling/`, `src/Axial/`, `docs/error-handling/`,
 ### Prose to update
 
 `docs/index.md` (the ErrorHandling door becomes two: Result and Values), `docs/error-handling/_index.md`
-(the "Packages" table and the "`Axial.ErrorHandling` installs all four" line), `docs/result/_index.md`
-(the "installs as part of `Axial.ErrorHandling`" installation line), `README.md`, `llms.txt`,
+(the "Packages" table and the "`Reified.ErrorHandling` installs all four" line), `docs/result/_index.md`
+(the "installs as part of `Reified.ErrorHandling`" installation line), `README.md`, `llms.txt`,
 `RELEASE_NOTES.md`, `prd.md`, `examples/README.md`,
-`examples/Axial.ReferenceApp.Intro/{README.md,Program.fs,*.fsproj}`,
-`examples/Axial.Hosting.DotNet/*.fsproj`, `benchmarks/Axial.Flow.Benchmarks/*`, plus cross-links in
+`examples/Reified.ReferenceApp.Intro/{README.md,Program.fs,*.fsproj}`,
+`examples/Reified.Hosting.DotNet/*.fsproj`, `benchmarks/Axial.Flow.Benchmarks/*`, plus cross-links in
 `docs/{schema,flow}/**`.
 
 ### dev-docs to update
 
-- `AGENT_INDEX.md` — drop the `Axial.ErrorHandling` bullet from the package graph; state that Values is a
+- `AGENT_INDEX.md` — drop the `Reified.ErrorHandling` bullet from the package graph; state that Values is a
   docs grouping with no package behind it.
 - `PLAN.md:10,27,33` — the 1.0 gate and umbrella description are stated in terms of the meta-package.
 - `DOCS.md` — the product list, the source-of-truth list, and the validate-script list.
@@ -269,7 +269,7 @@ Deleted `src/Axial.ErrorHandling/`, `src/Axial/`, `docs/error-handling/`,
 
 ### Release
 
-The `Axial.ErrorHandling` package id is retired. Since this lands pre-1.0 and no released version is
+The `Reified.ErrorHandling` package id is retired. Since this lands pre-1.0 and no released version is
 depended on downstream, no deprecation push is planned; `RELEASE_NOTES.md` records the removal and the
 "install the leaves or the umbrella" migration line.
 
@@ -277,10 +277,10 @@ depended on downstream, no deprecation push is planned; `RELEASE_NOTES.md` recor
 
 - **Discoverability.** ErrorHandling was the single door for four packages. Two doors plus a Values group
   must not read as "Result is unrelated to checking." The `/result` and `/values` landing pages each need
-  a one-line cross-link stating how they compose (`Constraint` returns the standard `Result`; `Axial.Result`
+  a one-line cross-link stating how they compose (`Constraint` returns the standard `Result`; `Reified.Result`
   helpers work on it).
 - **"Values" without a package.** Every nav caption and both landing pages must say the packages install
-  independently, or adopters will search NuGet for `Axial.Values`.
+  independently, or adopters will search NuGet for `Reified.Values`.
 - **Docs-pipeline breadth.** Five product areas is a hardcoded-list change in at least four scripts;
   Phases 2 and 3 should each end with a full `bash scripts/validate-docs.sh`.
 - **Scope creep in Phase 1.** Expanding Result invites reimplementing FsToolkit. The filter stays: add an

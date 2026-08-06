@@ -17,9 +17,9 @@ be redisplayed with the user's original input and per-field errors.
 The schema declares each field once: external name, getter, and constraints.
 
 ```fsharp
-open Axial.Schema
-open Axial.Schema.Syntax
-open type Axial.Schema.Syntax
+open Reified.Schema
+open Reified.Schema.Syntax
+open type Reified.Schema.Syntax
 
 type Signup = { Email: string; Age: int }
 

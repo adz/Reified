@@ -65,12 +65,12 @@ Outside this module, callers cannot construct `Booking` or use `{ booking with E
 
 ## Build the schema through the same constructor
 
-A **schema** is Axial's typed description of input shape, field constraints, and construction. It parses boundary fields,
+A **schema** is Reified's typed description of input shape, field constraints, and construction. It parses boundary fields,
 then calls the authoritative constructor.
 
 ```fsharp
-open Axial.Schema
-open type Axial.Schema.Syntax
+open Reified.Schema
+open type Reified.Schema.Syntax
 
 module Booking =
     // create, accessors, and toDraft from above
@@ -104,7 +104,7 @@ normal record. It also gives reviewers a short list of allowed operations.
 namespace MyApp.Domain
 
 open System
-open Axial.Schema
+open Reified.Schema
 
 type BookingDraft =
     { Start: DateOnly

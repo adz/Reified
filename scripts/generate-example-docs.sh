@@ -33,7 +33,7 @@ mkdir -p "$(dirname "$schema_output")" "$(dirname "$flow_output")"
 
 # Build the pages in temp files and move them into place only after every section succeeded,
 # so a mid-run failure (or a killed run) can never leave truncated docs behind.
-schema_staging="$(mktemp "${TMPDIR:-/tmp}/axial-schema-examples.XXXXXX")"
+schema_staging="$(mktemp "${TMPDIR:-/tmp}/reified-schema-examples.XXXXXX")"
 flow_staging="$(mktemp "${TMPDIR:-/tmp}/axial-flow-examples.XXXXXX")"
 trap 'rm -f "$schema_staging" "$flow_staging"' EXIT
 
@@ -118,10 +118,10 @@ output_file="$flow_staging"
 render_example_section \
   "Request Boundary Example" \
   "This example shows a request boundary that pulls a user from a database-like environment, threads a trace id through the request context, and reuses the same validation shape across Flow." \
-  "$root_dir/examples/Axial.Examples/Axial.Examples.fsproj" \
-  "$root_dir/examples/Axial.Examples/RequestBoundaryExample.fs" \
-  "https://github.com/adz/Axial/blob/main/examples/Axial.Examples/RequestBoundaryExample.fs" \
-  "AXIAL_EXAMPLE=request-boundary dotnet run --project examples/Axial.Examples/Axial.Examples.fsproj --nologo" \
+  "$root_dir/examples/Reified.Examples/Reified.Examples.fsproj" \
+  "$root_dir/examples/Reified.Examples/RequestBoundaryExample.fs" \
+  "https://github.com/adz/Reified/blob/main/examples/Reified.Examples/RequestBoundaryExample.fs" \
+  "AXIAL_EXAMPLE=request-boundary dotnet run --project examples/Reified.Examples/Reified.Examples.fsproj --nologo" \
   "request-boundary"
 fi
 
@@ -130,19 +130,19 @@ output_file="$schema_staging"
 render_example_section \
   "Refined Catalog Example" \
   "This example shows a request boundary that parses strings, builds refined numeric/text/collection values, chooses a domain union case, and rejects invalid input before the domain record is created." \
-  "$root_dir/examples/Axial.Schema.Examples/Axial.Schema.Examples.fsproj" \
-  "$root_dir/examples/Axial.Schema.Examples/RefinedCatalogExample.fs" \
-  "https://github.com/adz/Axial/blob/main/examples/Axial.Schema.Examples/RefinedCatalogExample.fs" \
-  "AXIAL_EXAMPLE=refined-catalog dotnet run --project examples/Axial.Schema.Examples/Axial.Schema.Examples.fsproj --nologo" \
+  "$root_dir/examples/Reified.Schema.Examples/Reified.Schema.Examples.fsproj" \
+  "$root_dir/examples/Reified.Schema.Examples/RefinedCatalogExample.fs" \
+  "https://github.com/adz/Reified/blob/main/examples/Reified.Schema.Examples/RefinedCatalogExample.fs" \
+  "AXIAL_EXAMPLE=refined-catalog dotnet run --project examples/Reified.Schema.Examples/Reified.Schema.Examples.fsproj --nologo" \
   "refined-catalog"
 
 render_example_section \
   "Refined Value Schema Example" \
   "This example shows total domain conversions built with Schema.convert, composed into a record schema, and lowered to executable checks." \
-  "$root_dir/examples/Axial.Schema.Examples/Axial.Schema.Examples.fsproj" \
-  "$root_dir/examples/Axial.Schema.Examples/RefinedValueSchemaExample.fs" \
-  "https://github.com/adz/Axial/blob/main/examples/Axial.Schema.Examples/RefinedValueSchemaExample.fs" \
-  "AXIAL_EXAMPLE=refined-value-schema dotnet run --project examples/Axial.Schema.Examples/Axial.Schema.Examples.fsproj --nologo" \
+  "$root_dir/examples/Reified.Schema.Examples/Reified.Schema.Examples.fsproj" \
+  "$root_dir/examples/Reified.Schema.Examples/RefinedValueSchemaExample.fs" \
+  "https://github.com/adz/Reified/blob/main/examples/Reified.Schema.Examples/RefinedValueSchemaExample.fs" \
+  "AXIAL_EXAMPLE=refined-value-schema dotnet run --project examples/Reified.Schema.Examples/Reified.Schema.Examples.fsproj --nologo" \
   "refined-value-schema"
 
 fi
@@ -152,26 +152,26 @@ output_file="$flow_staging"
 render_example_section \
   'Playground Example' \
   "This example shows the same core boundary across Flow using the normal direct-bind style inside each computation expression." \
-  "$root_dir/examples/Axial.Playground/Axial.Playground.fsproj" \
-  "$root_dir/examples/Axial.Playground/Program.fs" \
-  "https://github.com/adz/Axial/blob/main/examples/Axial.Playground/Program.fs" \
-  "dotnet run --project examples/Axial.Playground/Axial.Playground.fsproj --nologo"
+  "$root_dir/examples/Reified.Playground/Reified.Playground.fsproj" \
+  "$root_dir/examples/Reified.Playground/Program.fs" \
+  "https://github.com/adz/Reified/blob/main/examples/Reified.Playground/Program.fs" \
+  "dotnet run --project examples/Reified.Playground/Reified.Playground.fsproj --nologo"
 
 render_example_section \
   "Maintenance Example" \
   "This example shows smaller, focused shapes for maintenance and interop scenarios without switching away from the normal direct-bind style." \
-  "$root_dir/examples/Axial.MaintenanceExamples/Axial.MaintenanceExamples.fsproj" \
-  "$root_dir/examples/Axial.MaintenanceExamples/Program.fs" \
-  "https://github.com/adz/Axial/blob/main/examples/Axial.MaintenanceExamples/Program.fs" \
-  "dotnet run --project examples/Axial.MaintenanceExamples/Axial.MaintenanceExamples.fsproj --nologo"
+  "$root_dir/examples/Reified.MaintenanceExamples/Reified.MaintenanceExamples.fsproj" \
+  "$root_dir/examples/Reified.MaintenanceExamples/Program.fs" \
+  "https://github.com/adz/Reified/blob/main/examples/Reified.MaintenanceExamples/Program.fs" \
+  "dotnet run --project examples/Reified.MaintenanceExamples/Reified.MaintenanceExamples.fsproj --nologo"
 
 render_example_section \
   "Supervision and Fiber Observability Example" \
   "This example shows Flow.Runtime.supervise restarting a background worker that dies with a defect, a FiberObserver reporting the defect of a fiber whose fork handle was discarded, and Flow.forkDetached stating intentional fire-and-forget so the report is suppressed." \
-  "$root_dir/examples/Axial.Examples/Axial.Examples.fsproj" \
-  "$root_dir/examples/Axial.Examples/SupervisionExample.fs" \
-  "https://github.com/adz/Axial/blob/main/examples/Axial.Examples/SupervisionExample.fs" \
-  "AXIAL_EXAMPLE=supervision dotnet run --project examples/Axial.Examples/Axial.Examples.fsproj --nologo" \
+  "$root_dir/examples/Reified.Examples/Reified.Examples.fsproj" \
+  "$root_dir/examples/Reified.Examples/SupervisionExample.fs" \
+  "https://github.com/adz/Reified/blob/main/examples/Reified.Examples/SupervisionExample.fs" \
+  "AXIAL_EXAMPLE=supervision dotnet run --project examples/Reified.Examples/Reified.Examples.fsproj --nologo" \
   "supervision"
 fi
 

@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.1;net8.0</TargetFrameworks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsAotCompatible Condition="'$(TargetFramework)' == 'net8.0'">true</IsAotCompatible>
+    <PackageId>Reified.Schema.Json</PackageId>
+    <AssemblyName>Reified.Schema.Json</AssemblyName>
+    <RootNamespace>Reified.Schema.Json</RootNamespace>
+    <Authors>Adam Davies</Authors>
+    <Description>Compiled, runtime-reflection-free, compiler-directed JSON codecs over Reified.Schema declarations for trusted hot-path serialization.</Description>
+    <PackageProjectUrl>https://github.com/adz/Reified</PackageProjectUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/adz/Reified</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PackageTags>fsharp;schema;json;codec;serialization;aot</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <FsDocsCollectionName>Reified</FsDocsCollectionName>
+    <FsDocsLogoSource>content/img/reified-inline-light.svg</FsDocsLogoSource>
+    <FsDocsLogoAlt>Reified.Schema.Json</FsDocsLogoAlt>
+    <FsDocsLogoLink>https://github.com/adz/Reified</FsDocsLogoLink>
+    <FsDocsLicenseLink>https://github.com/adz/Reified/blob/main/LICENSE</FsDocsLicenseLink>
+    <FsDocsReleaseNotesLink>https://github.com/adz/Reified/blob/main/RELEASE_NOTES.md</FsDocsReleaseNotesLink>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Fable.Core" Version="4.3.0" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Reified.Schema\Reified.Schema.fsproj" />
+    <ProjectReference Include="..\Reified.Data\Reified.Data.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="Buffers.fs" />
+    <Compile Include="JsonRuntime.fs" />
+    <Compile Include="Json.fs" />
+  </ItemGroup>
+
+</Project>

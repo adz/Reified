@@ -1,13 +1,13 @@
 ---
 weight: 1
-title: Axial.Schema
+title: Reified.Schema
 description: The core package's mental model, installation, and guides.
 ---
 
-# Axial.Schema
+# Reified.Schema
 
 [Result]({{< relref "/result/" >}}) and the [Values]({{< relref "/values/" >}}) packages supply operations over individual values and ordinary
-`Result` composition. Axial.Schema assembles checks, constraints, parsing steps, and refinements into declarations for
+`Result` composition. Reified.Schema assembles checks, constraints, parsing steps, and refinements into declarations for
 whole structured models. It adds field identity, path-aware accumulated errors, checked reconstruction, and multiple
 interpreters; it does not replace the underlying value-level APIs.
 
@@ -69,20 +69,20 @@ current domain model.
 
 ## Installation
 
-Schema installs as part of `Axial`.
+Schema installs as part of `Reified`.
 
-Or install it individually with `dotnet add package Axial.Schema`.
+Or install it individually with `dotnet add package Reified.Schema`.
 
 Schema metadata, input parsing, checking, accumulated errors, and executable validation live in this package. Checks
 and refined values arrive through its focused package dependencies, so Schema users do not need a second install.
 
-`Axial.Schema.Json` is separate and optional: add it only if you want a compiled, runtime-reflection-free JSON codec generated from
-your schema (`Json.compile`). `Axial.Schema.JsonSchema` is also separate and optional; it supplies
-`JsonSchema.generate` in the `Axial.Schema` namespace. Parsing, checking, rules, redisplay, and metadata inspection need
+`Reified.Schema.Json` is separate and optional: add it only if you want a compiled, runtime-reflection-free JSON codec generated from
+your schema (`Json.compile`). `Reified.Schema.JsonSchema` is also separate and optional; it supplies
+`JsonSchema.generate` in the `Reified.Schema` namespace. Parsing, checking, rules, redisplay, and metadata inspection need
 neither optional package.
 
-`Axial.Schema.Json` also installs as part of `Axial`, or individually with `dotnet add package Axial.Schema.Json`.
+`Reified.Schema.Json` also installs as part of `Reified`, or individually with `dotnet add package Reified.Schema.Json`.
 
-JSON Schema generation ships in `Axial.Schema`; no extra package is needed.
+JSON Schema generation ships in `Reified.Schema`; no extra package is needed.
 
 See [JSON Codec](../json-codec/) for what that package buys you.

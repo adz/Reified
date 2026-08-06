@@ -80,7 +80,7 @@ groups:
 
   - title: Axial.Flow.Process
     home: /flow/processes
-    caption: Run external commands as typed Axial workflows.
+    caption: Run external commands as typed Reified workflows.
     children_of:
       - /flow/processes
     reference:

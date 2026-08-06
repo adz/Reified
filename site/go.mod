@@ -1,4 +1,4 @@
-module github.com/adz/Axial/site
+module github.com/adz/Reified/site
 
 go 1.26.3
 

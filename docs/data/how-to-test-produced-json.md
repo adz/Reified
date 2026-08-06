@@ -10,7 +10,7 @@ description: Check paths, partial objects, lists, alternatives, types, and predi
 Matching checks only the values relevant to a test. Unmentioned fields and items can vary without breaking it.
 
 ```fsharp
-open Axial.Data
+open Reified.Data
 open Data.Syntax
 
 let actual =

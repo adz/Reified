@@ -1,11 +1,11 @@
-namespace Axial.Schema.Contracts.Build
+namespace Reified.Schema.Contracts.Build
 
 open System
 open System.IO
 open System.Text.RegularExpressions
 open Microsoft.Build.Framework
 open Microsoft.Build.Utilities
-open Axial.Schema.Contracts
+open Reified.Schema.Contracts
 
 /// Discovers schema declarations, generates changed files, and preserves F# compile order.
 type GenerateSchemas() =
@@ -57,7 +57,7 @@ type GenerateSchemas() =
                 | _ -> None
 
             match schemaNaming with
-            | None -> this.Fail $"Unknown AxialSchemaNaming '{naming}' (expected camel, snake, or verbatim)."
+            | None -> this.Fail $"Unknown ReifiedSchemaNaming '{naming}' (expected camel, snake, or verbatim)."
             | Some schemaNaming ->
                 let sourcePaths =
                     sources
@@ -80,7 +80,7 @@ type GenerateSchemas() =
                 let contractPaths = contracts |> Array.map (fun item -> Path.GetFullPath item.ItemSpec) |> Array.distinct
 
                 if contractPaths.Length > 0 && String.IsNullOrWhiteSpace contractNamespace then
-                    this.Fail "AxialContractNamespace must be set when AxialContract items are declared."
+                    this.Fail "ReifiedContractNamespace must be set when ReifiedContract items are declared."
                 else
                     let parsed =
                         [ for path in contractPaths -> path, Parser.parse path (File.ReadAllText path)
@@ -111,10 +111,10 @@ type GenerateSchemas() =
                         let checkedIn = outputMode.Equals("CheckedIn", StringComparison.OrdinalIgnoreCase)
 
                         if not checkedIn && not (outputMode.Equals("Intermediate", StringComparison.OrdinalIgnoreCase)) then
-                            this.Fail $"Unknown AxialSchemaGeneratedFiles value '{outputMode}' (expected Intermediate or CheckedIn)."
+                            this.Fail $"Unknown ReifiedSchemaGeneratedFiles value '{outputMode}' (expected Intermediate or CheckedIn)."
                         else
                             let projectRoot = Path.GetFullPath projectDirectory
-                            let generatedRoot = Path.GetFullPath(Path.Combine(projectRoot, intermediateOutputPath, "Axial.Schema"))
+                            let generatedRoot = Path.GetFullPath(Path.Combine(projectRoot, intermediateOutputPath, "Reified.Schema"))
                             let fallbackNamespace = if String.IsNullOrWhiteSpace contractNamespace then "Generated" else contractNamespace
 
                             let outputPath (inputPath: string) =
@@ -150,7 +150,7 @@ type GenerateSchemas() =
                             let checkedInSiblings = outputsByInput |> Map.toSeq |> Seq.map (fun (input, _) -> Path.ChangeExtension(input, ".g.fs")) |> Set.ofSeq
                             let result = ResizeArray<ITaskItem>()
 
-                            // Preserve AxialContract item order: generated declarations can reference contracts
+                            // Preserve ReifiedContract item order: generated declarations can reference contracts
                             // from earlier files, just like ordinary F# Compile items.
                             for input in contractPaths do
                                 match Map.tryFind input outputsByInput with

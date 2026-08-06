@@ -15,7 +15,7 @@ DSL code before F# compilation.
 ```fsharp
 namespace MyApp.Wire
 
-open Axial.Schema.Derive
+open Reified.Schema.Derive
 
 [<DeriveSchema>]
 type Signup =

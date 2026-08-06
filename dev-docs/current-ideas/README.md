@@ -19,7 +19,7 @@ Active sketches:
   entry point each.
 - `format-and-json-runtime.md` — extracted from `project-split.md`: one package per representation format, and a
   shared schema-to-codec compiler over platform-specific .NET and Fable JSON runtimes.
-- `retire-errorhandling.md` — delete the `Axial.ErrorHandling` meta-package, promote `Axial.Result` to a
+- `retire-errorhandling.md` — delete the `Reified.ErrorHandling` meta-package, promote `Reified.Result` to a
   top-level docs entry point next to Data, and collapse Constraint, Refined, and Parse under a docs-only "Values"
   nav group. Phase 1 (expanding Result) and the package half of Phase 4 are implemented — both meta-packages are
   gone. The docs-tree move (Phases 2-3) is outstanding.

@@ -2,32 +2,21 @@
   <PropertyGroup>
     <UseArtifactsOutput>true</UseArtifactsOutput>
 
-    <!-- Two independent release trains, split ahead of the repository split. They hold the same value
-         today, which is convenient rather than required: nothing may assume they move together, and a
-         v0.8.0 tag on one side says nothing about the other. The point of the split is that either can
-         be bumped alone. -->
-    <AxialVersion>0.7.0</AxialVersion>
-    <FsFlowVersion>0.7.0</FsFlowVersion>
+    <!-- Every package in this repository ships on one release train. The Flow train moved out with
+         Flow itself: a tag here says nothing about a version in the Axial repository. -->
+    <ReifiedVersion>0.7.0</ReifiedVersion>
 
-    <!-- A project belongs to the FsFlow train if it is a Flow project, or one of the two HTTP adapters
-         that become FsFlow.AspNetCore / FsFlow.GenHttp. Everything else is Axial. -->
-    <IsFsFlowProject Condition="'$(IsFsFlowProject)' == '' And $(MSBuildProjectName.StartsWith('Axial.Flow'))">true</IsFsFlowProject>
-    <IsFsFlowProject Condition="'$(IsFsFlowProject)' == '' And '$(MSBuildProjectName)' == 'Axial.Schema.Http.AspNetCore'">true</IsFsFlowProject>
-    <IsFsFlowProject Condition="'$(IsFsFlowProject)' == '' And '$(MSBuildProjectName)' == 'Axial.Schema.Http.GenHttp'">true</IsFsFlowProject>
-    <IsFsFlowProject Condition="'$(IsFsFlowProject)' == ''">false</IsFsFlowProject>
-
-    <Version Condition="'$(IsFsFlowProject)' == 'true'">$(FsFlowVersion)</Version>
-    <Version Condition="'$(Version)' == ''">$(AxialVersion)</Version>
+    <Version Condition="'$(Version)' == ''">$(ReifiedVersion)</Version>
     <NuGetAudit>false</NuGetAudit>
-    <RepositoryUrl>https://github.com/adz/Axial</RepositoryUrl>
+    <RepositoryUrl>https://github.com/adz/Reified</RepositoryUrl>
     <RepositoryBranch>main</RepositoryBranch>
-    <PackageProjectUrl>https://github.com/adz/Axial</PackageProjectUrl>
-    <FsDocsCollectionName>Axial</FsDocsCollectionName>
-    <FsDocsLogoLink>https://github.com/adz/Axial</FsDocsLogoLink>
-    <FsDocsLogoSource>content/img/axial-inline-light.svg</FsDocsLogoSource>
+    <PackageProjectUrl>https://github.com/adz/Reified</PackageProjectUrl>
+    <FsDocsCollectionName>Reified</FsDocsCollectionName>
+    <FsDocsLogoLink>https://github.com/adz/Reified</FsDocsLogoLink>
+    <FsDocsLogoSource>content/img/reified-inline-light.svg</FsDocsLogoSource>
     <FsDocsFaviconSource>content/img/favicon-light.svg</FsDocsFaviconSource>
-    <FsDocsLicenseLink>https://github.com/adz/Axial/blob/main/LICENSE</FsDocsLicenseLink>
-    <FsDocsReleaseNotesLink>https://github.com/adz/Axial/blob/main/RELEASE_NOTES.md</FsDocsReleaseNotesLink>
+    <FsDocsLicenseLink>https://github.com/adz/Reified/blob/main/LICENSE</FsDocsLicenseLink>
+    <FsDocsReleaseNotesLink>https://github.com/adz/Reified/blob/main/RELEASE_NOTES.md</FsDocsReleaseNotesLink>
     <PackageReadmeFile Condition="'$(PackageReadmeFile)' == ''">README.md</PackageReadmeFile>
   </PropertyGroup>
 

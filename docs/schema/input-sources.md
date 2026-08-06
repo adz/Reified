@@ -14,8 +14,8 @@ package, useful beyond schemas — see [its docs]({{< relref "/data/" >}}).)
 ## The Schema
 
 ```fsharp
-open Axial.Schema.Syntax
-open type Axial.Schema.Syntax
+open Reified.Schema.Syntax
+open type Reified.Schema.Syntax
 type Contact = { Kind: string; Value: string }
 
 type Customer =
@@ -84,11 +84,11 @@ exact lexical representation. The adapter uses the in-box `System.Text.Json`, so
 
 ## Parse JSON portably
 
-For the same lossless behavior on .NET and Fable, install `Axial.Schema.Json` and parse JSON text with
+For the same lossless behavior on .NET and Fable, install `Reified.Schema.Json` and parse JSON text with
 `Json.parseData`:
 
 ```fsharp
-open Axial.Schema.Json
+open Reified.Schema.Json
 
 let raw = Json.parseData """{"name":"Ada","score":1.20e+3}"""
 ```
@@ -136,7 +136,7 @@ sequences and values — and call as plain static methods. `ofMap` and `ofConfig
 a sequence of F# tuples), so use their C#-friendly equivalents instead:
 
 ```csharp
-using Axial.Schema;
+using Reified.Schema;
 
 // ofMap's C# equivalent — takes IDictionary<string, string> instead of an F# Map:
 Data raw = DataModule.ofDictionary(new Dictionary<string, string> { ["name"] = "Ada Lovelace" });
