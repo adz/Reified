@@ -8,8 +8,6 @@
   {{- $sidebar = hugo.Data.sidebars.result -}}
 {{- else if eq .Section "values" -}}
   {{- $sidebar = hugo.Data.sidebars.values -}}
-{{- else if eq .Section "flow" -}}
-  {{- $sidebar = hugo.Data.sidebars.flow -}}
 {{- end -}}
 
 <div id="td-sidebar-menu" class="td-sidebar__inner">

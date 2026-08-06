@@ -691,11 +691,10 @@ samp,
 }
 
 // ---------------------------------------------------------------------------
-// Product landing pages (/, /result/, /values/, /data/, /schema/, /flow/)
+// Product landing pages (/, /result/, /values/, /data/, /schema/)
 // ---------------------------------------------------------------------------
 
 $reified-parse: #0b55d9;
-$axial-flow: #6d4fc4;
 $reified-result: #0a7d62;
 $reified-values: #1f7a8c;
 $reified-data: #a34f00;
@@ -844,11 +843,6 @@ body.reified-home .reified-doors {
   .reified-door-kicker, .reified-door-cta { color: $reified-data; }
 }
 
-.reified-door--flow {
-  border-top-color: $axial-flow;
-  .reified-door-kicker, .reified-door-cta { color: $axial-flow; }
-}
-
 .reified-door--result {
   border-top-color: $reified-result;
   .reified-door-kicker, .reified-door-cta { color: $reified-result; }
@@ -931,10 +925,6 @@ body.reified-home .reified-doors {
   }
 }
 
-.reified-checks--flow li::before {
-  color: $axial-flow;
-}
-
 .reified-lanes {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -1001,12 +991,6 @@ body.reified-home .reified-doors {
     white-space: nowrap;
     font-weight: 750;
   }
-}
-
-.reified-strip--flow {
-  background: rgba(109, 79, 196, 0.07);
-  border: 1px solid rgba(109, 79, 196, 0.18);
-  a { color: $axial-flow; }
 }
 
 .reified-strip--parse {
@@ -1258,12 +1242,6 @@ body.reified-home .reified-doors {
   --pkg-accent: #{$reified-parse};
   --pkg-accent-bg: rgba(11, 85, 217, 0.06);
   --pkg-accent-border: rgba(11, 85, 217, 0.25);
-}
-
-.td-section-nav--flow {
-  --pkg-accent: #{$axial-flow};
-  --pkg-accent-bg: rgba(109, 79, 196, 0.06);
-  --pkg-accent-border: rgba(109, 79, 196, 0.25);
 }
 
 .reified-package-nav__caption {

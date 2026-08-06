@@ -6,7 +6,6 @@ read -r -p "Stop other processes and run the .NET benchmark suite? [y/N] " answe
 
 case "$answer" in
   y|Y|yes|YES)
-    dotnet run --project benchmarks/Axial.Flow.Benchmarks/Axial.Flow.Benchmarks.fsproj --nologo
     dotnet run --project benchmarks/Reified.Schema.Benchmarks/Reified.Schema.Benchmarks.fsproj --nologo
     ;;
   *)

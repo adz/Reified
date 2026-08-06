@@ -8,9 +8,9 @@ skip_build=false
 
 for arg in "$@"; do
   case "$arg" in
-    data|result|values|schema|flow|all) product="$arg" ;;
+    data|result|values|schema|all) product="$arg" ;;
     --no-build) skip_build=true ;;
-    *) echo "Usage: $0 [data|result|values|schema|flow|all] [--no-build]" >&2; exit 2 ;;
+    *) echo "Usage: $0 [data|result|values|schema|all] [--no-build]" >&2; exit 2 ;;
   esac
 done
 
@@ -23,7 +23,7 @@ run_docgen() {
   local selected_product="$1"
   (
     cd "$root_dir/scripts/docgen"
-    AXIAL_DOCS_PRODUCT="$selected_product" \
+    REIFIED_DOCS_PRODUCT="$selected_product" \
       dotnet run --no-build --no-restore --nologo
   )
 }
@@ -41,9 +41,6 @@ case "$product" in
   schema)
     run_docgen "$product"
     ;;
-  flow)
-    run_docgen "$product"
-    ;;
   all)
     run_docgen data &
     data_pid=$!
@@ -53,19 +50,16 @@ case "$product" in
     values_pid=$!
     run_docgen schema &
     schema_pid=$!
-    run_docgen flow &
-    flow_pid=$!
 
     generation_status=0
     wait "$data_pid" || generation_status=$?
     wait "$result_pid" || generation_status=$?
     wait "$values_pid" || generation_status=$?
     wait "$schema_pid" || generation_status=$?
-    wait "$flow_pid" || generation_status=$?
     exit "$generation_status"
     ;;
   *)
-    echo "Usage: $0 [data|result|values|schema|flow|all] [--no-build]" >&2
+    echo "Usage: $0 [data|result|values|schema|all] [--no-build]" >&2
     exit 2
     ;;
 esac

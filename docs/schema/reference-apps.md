@@ -106,8 +106,8 @@ JSON-pointer paths), the trusted model flows through an ordinary application Flo
 through the compiled codec, and `/openapi.json` is assembled from the same declaration.
 
 ```bash
-AXIAL_EXAMPLE=smoke dotnet run --project examples/Reified.Api/Reified.Api.fsproj --nologo
-AXIAL_EXAMPLE=smoke dotnet run --project examples/Reified.Api.GenHttp/Reified.Api.GenHttp.fsproj --nologo
+REIFIED_EXAMPLE=smoke dotnet run --project examples/Reified.Api/Reified.Api.fsproj --nologo
+REIFIED_EXAMPLE=smoke dotnet run --project examples/Reified.Api.GenHttp/Reified.Api.GenHttp.fsproj --nologo
 ```
 
 The point of the twin is that nothing schema-facing changes between hosts: `Reified.Schema.Http` owns structured data,

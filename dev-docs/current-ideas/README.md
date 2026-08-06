@@ -10,14 +10,11 @@ Active sketches:
 
 - `refined-schema-proof.md` — unresolved exploration of refined schema proof and safe record updates, with a prototype
   under `prototypes/refined-private-record/`.
-- `flow-gate-rename.md` — extracted proposal for Axial.Flow application gate naming, independent of the
-  Parse/Constraint/Refinement/Schema work.
 - `architecture-guardrails.md` — proposed adopter-facing architecture guidance and a staged tooling direction for
   schema laws, compile-negative proofs, project roles, and compiled-code/public-surface audits.
-- `project-split.md` — proposal to separate two repositories: Schema (carrying Data, Result, and the Values packages
-  plus all Schema satellites) and Flow (plus its satellites), with an independent release train and documentation
-  entry point each.
-- `format-and-json-runtime.md` — extracted from `project-split.md`: one package per representation format, and a
+- `docs-information-architecture.md` — the split and documentation plan. The split, the rename, and the umbrella
+  package are done; the per-project documentation shape (section 5) and FsLiveDocs (section 6) are not.
+- `format-and-json-runtime.md` — one package per representation format, and a
   shared schema-to-codec compiler over platform-specific .NET and Fable JSON runtimes.
 - `retire-errorhandling.md` — delete the `Reified.ErrorHandling` meta-package, promote `Reified.Result` to a
   top-level docs entry point next to Data, and collapse Constraint, Refined, and Parse under a docs-only "Values"
@@ -25,10 +22,6 @@ Active sketches:
   gone. The docs-tree move (Phases 2-3) is outstanding.
 - `database.md` — direction sketch for a typed relational layer (generated immutable query AST interpreted through
   Flow, building on `Schema`; its older `FieldRef` references need redesign if the idea is promoted).
-- `flow-stream-proving.md` — pre-1.0 plan to prove and freeze resource-safe, portable FlowStream semantics through
-  Process and narrow TCP, Serial, WebSocket, and SSE slices.
-- `flow-transport-packages.md` — package and API direction layered on the FlowStream proving plan for Transport,
-  framing, Network, Serial, WebSocket, streaming HTTP/SSE, Compression, and later Process integration.
 
 Implemented work and settled decisions do not remain in this folder. Constraint unification and contextual
 constraint localization shipped and are recorded in `dev-docs/decisions/README.md` and `AGENTS.md`; the term
@@ -36,4 +29,7 @@ language, `FieldReference`, `Origin`, and `ConstraintExpression.Relational` were
 rather than deferred as placeholders, so they return only when a real consumer establishes field identity,
 nesting, and proof semantics. Contract generation, versioning, and record-first
 derivation outcomes are recorded in `dev-docs/decisions/README.md`; remaining consumer-gated schema work is in
-`dev-docs/TASKS.md`. The implemented Flow comparison examples live in `examples/Axial.Flow.Comparisons`.
+`dev-docs/TASKS.md`.
+
+Flow sketches are not kept here. FlowStream proving, transport packages, and the application gate naming
+proposal moved to the [Axial repository](https://github.com/adz/Axial) with Flow itself.

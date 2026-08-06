@@ -53,17 +53,6 @@ groups:
     reference:
       children_of:
         - /schema/reference/schema/http
-    exclude:
-      - /schema/reference/schema/http/aspnetcore
-      - /schema/reference/schema/http/genhttp
-
-  - title: Axial.Schema.Http.AspNetCore
-    home: /schema/reference/schema/http/aspnetcore
-    caption: Schema-trusted requests and responses for ASP.NET Core routing.
-
-  - title: Axial.Schema.Http.GenHttp
-    home: /schema/reference/schema/http/genhttp
-    caption: Schema-trusted requests and responses for GenHTTP routing.
 
   - title: Reified.Schema.Testing
     home: /schema/patterns/testing-schema-guarantees

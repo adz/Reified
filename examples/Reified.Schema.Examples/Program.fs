@@ -8,7 +8,7 @@ module Runner =
 
 [<EntryPoint>]
 let main _ =
-    match Environment.GetEnvironmentVariable "AXIAL_EXAMPLE" with
+    match Environment.GetEnvironmentVariable "REIFIED_EXAMPLE" with
     | "refined-catalog" -> RefinedCatalogExample.run()
     | "refined-value-schema" -> RefinedValueSchemaExample.run()
     | _ -> Runner.run()

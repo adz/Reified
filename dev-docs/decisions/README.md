@@ -20,7 +20,7 @@ been folded into `AGENTS.md`, `dev-docs/PLAN.md`, or this summary.
   rendered page tells a reader to install `Reified.Values`.
 - The shared prose pages were split rather than duplicated: `getting-started.md` became a Result-composition page
   and a value-admission page; `overview.md` was folded into the two landing pages and deleted.
-- The docs pipeline is now five areas, not four. `AXIAL_DOCS_PRODUCT` accepts `result` and `values` in place of
+- The docs pipeline is now five areas, not four. `REIFIED_DOCS_PRODUCT` accepts `result` and `values` in place of
   `validation`; `scripts/docgen/Program.fs` routes the `result` page group to `docs/result/reference/` and
   `constraint`/`refined`/`parse` to `docs/values/reference/`; `populate-hugo-content.sh` iterates a product list
   instead of four hardcoded pairs, and deletes any leftover `error-handling` tree so a stale area cannot keep

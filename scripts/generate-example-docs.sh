@@ -8,20 +8,17 @@ skip_build=false
 
 for arg in "$@"; do
   case "$arg" in
-    schema|flow|all) product="$arg" ;;
+    schema|all) product="$arg" ;;
     --no-build) skip_build=true ;;
-    *) echo "Usage: $0 [schema|flow|all] [--no-build]" >&2; exit 2 ;;
+    *) echo "Usage: $0 [schema|all] [--no-build]" >&2; exit 2 ;;
   esac
 done
 
 schema_output="${DOCS_SCHEMA_EXAMPLES_OUTPUT:-$root_dir/docs/schema/examples.md}"
-flow_output="${DOCS_FLOW_EXAMPLES_OUTPUT:-$root_dir/docs/flow/examples.md}"
 
 case "$product" in
-  schema) emit_schema=true; emit_flow=false ;;
-  flow) emit_schema=false; emit_flow=true ;;
-  all) emit_schema=true; emit_flow=true ;;
-  *) echo "Usage: $0 [schema|flow|all] [--no-build]" >&2; exit 2 ;;
+  schema|all) emit_schema=true ;;
+  *) echo "Usage: $0 [schema|all] [--no-build]" >&2; exit 2 ;;
 esac
 
 if ! $skip_build; then
@@ -29,13 +26,12 @@ if ! $skip_build; then
     -t:Build -m -nologo -verbosity:minimal -p:DocsBuildScope=Examples
 fi
 
-mkdir -p "$(dirname "$schema_output")" "$(dirname "$flow_output")"
+mkdir -p "$(dirname "$schema_output")"
 
 # Build the pages in temp files and move them into place only after every section succeeded,
 # so a mid-run failure (or a killed run) can never leave truncated docs behind.
 schema_staging="$(mktemp "${TMPDIR:-/tmp}/reified-schema-examples.XXXXXX")"
-flow_staging="$(mktemp "${TMPDIR:-/tmp}/axial-flow-examples.XXXXXX")"
-trap 'rm -f "$schema_staging" "$flow_staging"' EXIT
+trap 'rm -f "$schema_staging"' EXIT
 
 render_code_block() {
   local language="$1"
@@ -51,7 +47,7 @@ run_example() {
   local example_filter="${2:-}"
 
   if [[ -n "$example_filter" ]]; then
-    AXIAL_EXAMPLE="$example_filter" dotnet run --project "$project_path" --no-build --no-restore --nologo 2>&1
+    REIFIED_EXAMPLE="$example_filter" dotnet run --project "$project_path" --no-build --no-restore --nologo 2>&1
   else
     dotnet run --project "$project_path" --no-build --no-restore --nologo 2>&1
   fi
@@ -109,21 +105,7 @@ write_page_header() {
 if $emit_schema; then
   write_page_header "$schema_staging" "Executable schema, refined, diagnostics, and policy examples mirrored back into the docs."
 fi
-if $emit_flow; then
-  write_page_header "$flow_staging" "Executable workflow boundary examples mirrored back into the docs."
-fi
 
-if $emit_flow; then
-output_file="$flow_staging"
-render_example_section \
-  "Request Boundary Example" \
-  "This example shows a request boundary that pulls a user from a database-like environment, threads a trace id through the request context, and reuses the same validation shape across Flow." \
-  "$root_dir/examples/Reified.Examples/Reified.Examples.fsproj" \
-  "$root_dir/examples/Reified.Examples/RequestBoundaryExample.fs" \
-  "https://github.com/adz/Reified/blob/main/examples/Reified.Examples/RequestBoundaryExample.fs" \
-  "AXIAL_EXAMPLE=request-boundary dotnet run --project examples/Reified.Examples/Reified.Examples.fsproj --nologo" \
-  "request-boundary"
-fi
 
 if $emit_schema; then
 output_file="$schema_staging"
@@ -133,7 +115,7 @@ render_example_section \
   "$root_dir/examples/Reified.Schema.Examples/Reified.Schema.Examples.fsproj" \
   "$root_dir/examples/Reified.Schema.Examples/RefinedCatalogExample.fs" \
   "https://github.com/adz/Reified/blob/main/examples/Reified.Schema.Examples/RefinedCatalogExample.fs" \
-  "AXIAL_EXAMPLE=refined-catalog dotnet run --project examples/Reified.Schema.Examples/Reified.Schema.Examples.fsproj --nologo" \
+  "REIFIED_EXAMPLE=refined-catalog dotnet run --project examples/Reified.Schema.Examples/Reified.Schema.Examples.fsproj --nologo" \
   "refined-catalog"
 
 render_example_section \
@@ -142,45 +124,14 @@ render_example_section \
   "$root_dir/examples/Reified.Schema.Examples/Reified.Schema.Examples.fsproj" \
   "$root_dir/examples/Reified.Schema.Examples/RefinedValueSchemaExample.fs" \
   "https://github.com/adz/Reified/blob/main/examples/Reified.Schema.Examples/RefinedValueSchemaExample.fs" \
-  "AXIAL_EXAMPLE=refined-value-schema dotnet run --project examples/Reified.Schema.Examples/Reified.Schema.Examples.fsproj --nologo" \
+  "REIFIED_EXAMPLE=refined-value-schema dotnet run --project examples/Reified.Schema.Examples/Reified.Schema.Examples.fsproj --nologo" \
   "refined-value-schema"
 
 fi
 
-if $emit_flow; then
-output_file="$flow_staging"
-render_example_section \
-  'Playground Example' \
-  "This example shows the same core boundary across Flow using the normal direct-bind style inside each computation expression." \
-  "$root_dir/examples/Reified.Playground/Reified.Playground.fsproj" \
-  "$root_dir/examples/Reified.Playground/Program.fs" \
-  "https://github.com/adz/Reified/blob/main/examples/Reified.Playground/Program.fs" \
-  "dotnet run --project examples/Reified.Playground/Reified.Playground.fsproj --nologo"
-
-render_example_section \
-  "Maintenance Example" \
-  "This example shows smaller, focused shapes for maintenance and interop scenarios without switching away from the normal direct-bind style." \
-  "$root_dir/examples/Reified.MaintenanceExamples/Reified.MaintenanceExamples.fsproj" \
-  "$root_dir/examples/Reified.MaintenanceExamples/Program.fs" \
-  "https://github.com/adz/Reified/blob/main/examples/Reified.MaintenanceExamples/Program.fs" \
-  "dotnet run --project examples/Reified.MaintenanceExamples/Reified.MaintenanceExamples.fsproj --nologo"
-
-render_example_section \
-  "Supervision and Fiber Observability Example" \
-  "This example shows Flow.Runtime.supervise restarting a background worker that dies with a defect, a FiberObserver reporting the defect of a fiber whose fork handle was discarded, and Flow.forkDetached stating intentional fire-and-forget so the report is suppressed." \
-  "$root_dir/examples/Reified.Examples/Reified.Examples.fsproj" \
-  "$root_dir/examples/Reified.Examples/SupervisionExample.fs" \
-  "https://github.com/adz/Reified/blob/main/examples/Reified.Examples/SupervisionExample.fs" \
-  "AXIAL_EXAMPLE=supervision dotnet run --project examples/Reified.Examples/Reified.Examples.fsproj --nologo" \
-  "supervision"
-fi
 
 # mktemp creates the staging files with mode 600; the docs should stay world-readable.
 if $emit_schema; then
   chmod 644 "$schema_staging"
   mv "$schema_staging" "$schema_output"
-fi
-if $emit_flow; then
-  chmod 644 "$flow_staging"
-  mv "$flow_staging" "$flow_output"
 fi

@@ -16,8 +16,10 @@ Working on `src/Reified.Schema`? Read `dev-docs/schema/internals.md` first (impl
 
 ## Package Graph
 
-- `Axial.Flow`: independent workflow package (`src/Axial.Flow/`). Must not depend on the ErrorHandling packages or
-  `Reified.Schema`.
+- `Reified` (`src/Reified/`): umbrella package. No sources and no assembly — only a dependency on every packable
+  runtime package below. `Reified.Package.Tests` pins its contents; adding a packable package without adding it
+  here fails that suite. `Reified.Schema.Contracts.Build` is deliberately excluded: MSBuild `build/` assets are not
+  transitive, so an umbrella dependency would install the targets without running them.
 - `Reified.Result` (`src/Reified.Result/`): generic Result combinators, conversions/extraction helpers, and `result { }`
   in the `Reified.Result` namespace. Independent leaf.
 - `Reified.Constraint` (`src/Reified.Constraint/`): `Constraint<'value>`, `Violation`, the `ConstraintDescription` read model, and `ConstraintDSL`, all in the `Reified.Constraint` namespace. One value-rule vocabulary; there is no `Check` type and no second catalogue.
@@ -30,16 +32,11 @@ Working on `src/Reified.Schema`? Read `dev-docs/schema/internals.md` first (impl
   `Schema.parseRetainingInput`, `Schema.check`), inspection (`Inspect`), contracts,
   and refined schema adapters (`RefinedSchemas`) in one package. Depends on `Reified.Data`, `Reified.Constraint`, and
   `Reified.Refinements` (never `Reified.Result`). Schema owns path-aware accumulated errors.
-- `Reified.Schema.JsonSchema` (`src/Reified.Schema.JsonSchema/`): JSON Schema generation (`JsonSchema.generate`) in the
-  `Reified.Schema` namespace. Depends on `Reified.Schema`.
 - `Reified.Schema.Json` (`src/Reified.Schema.Json/`): compiled JSON codecs. Depends on `Reified.Schema`.
 - `Reified.Schema.Http` (`src/Reified.Schema.Http/`): host-neutral HTTP boundary support — query/form structured data
   (`BoundaryInput`), RFC 9457 problem details from parse diagnostics, and OpenAPI 3.1 documents assembled from
-  `EndpointSpec` values. Depends on `Reified.Schema` only; never on `Axial.Flow`.
-- `Axial.Schema.Http.AspNetCore` / `Axial.Schema.Http.GenHttp` (`src/Reified.Schema.Http.*/`): host boundaries over
-  `Reified.Schema.Http` and `Axial.Flow`. The default API lowers an ordinary endpoint Flow from schema-trusted request
-  input through explicit application services to a native response; lower-level `RetainedParseResult` adapters remain for
-  redisplay and custom boundaries. Routing and app wiring remain the host's idiom.
+  `EndpointSpec` values. Depends on `Reified.Schema` only, and never on the effect system. The host adapters that
+  serve these contracts (ASP.NET Core, GenHTTP) live in the [Axial repository](https://github.com/adz/Axial).
 - `Reified.Schema.Testing` (`src/Reified.Schema.Testing/`): non-packable FsCheck adapter deriving test data from Schema.
   Depends on `Reified.Schema` and FsCheck; never move the test-library dependency into a public package.
 - `Reified.Schema.Contracts` (`src/Reified.Schema.Contracts/`): non-packable wire-tier generation library — the
@@ -48,18 +45,16 @@ Working on `src/Reified.Schema`? Read `dev-docs/schema/internals.md` first (impl
   FCS stays tool-tier only: never referenced from a packable library.
 - `Reified.Schema.Contracts.Build` (`src/Reified.Schema.Contracts.Build/`): packable targets-only MSBuild package
   running `scripts/schemagen` before compile over `<ReifiedDeriveSchema>`/`<ReifiedContract>` items.
-- `Axial.Flow.*` add-on packages depend on `Axial.Flow`.
-- There are no meta-packages. `Reified.ErrorHandling` and the `Reified` umbrella were both deleted; every install is a
-  focused package. **Values** — Constraint, Refined, and Parse — is a documentation grouping only: no package, no
-  namespace. `Reified.ApiShape.Tests` pins this with `no meta-package remains in the graph`.
+- `Reified` is the only umbrella. `Reified.ErrorHandling` is gone and does not come back: a grouping that is not a
+  capability does not earn a package. **Values** — Constraint, Refinements, and Parse — is a documentation grouping
+  only: no package, no namespace.
 
 ## Open These First
 
-- Flow/runtime/layers/services: `src/Axial.Flow/**`, relevant `src/Axial.Flow.*/*`, `tests/Axial.Flow.Tests/*Workflow*`,
-  `tests/Axial.Flow.PlatformService.Tests/**`, and `dev-docs/PLAN.md`.
-- Check/Result: `src/Reified.Constraint/Check.fs`, `src/Reified.Result/Result.fs`,
-  `tests/Reified.Constraint.Tests/CheckTests.fs`, `tests/Reified.Result.Tests/ResultTests.fs`,
-  `tests/Reified.ApiShape.Tests/ApiShapeTests.fs`, and `dev-docs/PLAN.md`.
+- Constraint/Result: `src/Reified.Constraint/Constraint.fs`, `src/Reified.Result/Result.fs`,
+  `tests/Reified.Constraint.Tests/**`, `tests/Reified.Result.Tests/ResultTests.fs`, and `dev-docs/PLAN.md`.
+- Package graph, umbrella contents, and pack/consumer wiring: `src/Reified/Reified.fsproj`,
+  `tests/Reified.Package.Tests/PackageGraphTests.fs`, `scripts/pack.sh`, and `tests/package-consumers/**`.
 - Parsing and refined values: `src/Reified.Parse/{Errors,Parse}.fs`, and in `src/Reified.Refinements/` (compile order)
   `Refinement.fs` -> `NonEmpty.fs` -> `Interval.fs` -> `Bounded.fs` -> `Finite.fs` -> `UnitInterval.fs` ->
   `Refine.fs`. Tests are one file per area under `tests/Reified.Refinements.Tests/`. Adding or removing a refined type
@@ -70,8 +65,8 @@ Working on `src/Reified.Schema`? Read `dev-docs/schema/internals.md` first (impl
   `dev-docs/PLAN.md`.
 - Schema input/rules/interpreters: `src/Reified.Schema/{Model,Data,SchemaValidation,RetainedParseResult,Rules}.fs` and
   `tests/Reified.Schema.Tests/*ParseTests.fs`.
-- User-facing docs: one area per top-nav product — `docs/result/`, `docs/values/`, `docs/data/`, `docs/schema/`,
-  `docs/flow/`. Values covers Constraint, Refined, and Parse and is navigation only. Read `dev-docs/DOCS.md`
+- User-facing docs: one area per top-nav product — `docs/result/`, `docs/values/`, `docs/data/`, `docs/schema/`.
+  Values covers Constraint, Refinements, and Parse and is navigation only. Read `dev-docs/DOCS.md`
   before editing `docs/**`, source comments, generated reference pages, `llms.txt`, or site content.
 - Agent process/docs: `AGENTS.md`, this file, `dev-docs/TASKS.md`, and `dev-docs/PLAN.md`.
 
@@ -83,7 +78,6 @@ Default `rg` ignores generated/vendor-heavy paths through `.rgignore`:
 - `docs/values/reference/**`
 - `docs/data/reference/**`
 - `docs/schema/reference/**`
-- `docs/flow/reference/**`
 - `site/content/reference/**`
 - `site/_vendor/**`
 - `site/public/**`

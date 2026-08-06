@@ -38,40 +38,16 @@ jobs:
       - name: Test
         run: dotnet test Reified.slnx --configuration Release --no-build --nologo -v minimal
 
-      - name: Check Schema CE compiler errors
-        run: bash scripts/check-schema-ce-errors.sh
+      - name: Run schema examples
+        run: |
+          for example in refined-catalog refined-value-schema; do
+            REIFIED_EXAMPLE="$example" dotnet run --project examples/Reified.Schema.Examples/Reified.Schema.Examples.fsproj --configuration Release --no-build --nologo
+          done
 
-      - name: Run main example
-        run: dotnet run --project examples/Reified.Examples/Reified.Examples.fsproj --configuration Release --no-build --nologo
-
-      - name: Run API sample smoke pass
-        run: AXIAL_EXAMPLE=smoke dotnet run --project examples/Reified.Api/Reified.Api.fsproj --configuration Release --no-build --nologo
-
-      - name: Run maintenance example
-        run: dotnet run --project examples/Reified.MaintenanceExamples/Reified.MaintenanceExamples.fsproj --configuration Release --no-build --nologo
-
-  fable:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up .NET 10
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 10.0.x
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22.x
-
-      - name: Restore local tools
-        run: dotnet tool restore
-
-      - name: Compile Fable JavaScript surface
-        run: bash scripts/check-fable-js-surface.sh
+      - name: Run reference applications
+        run: |
+          dotnet run --project examples/Reified.ReferenceApp.Intro/Reified.ReferenceApp.Intro.fsproj --configuration Release --no-build --nologo
+          dotnet run --project examples/Reified.ReferenceApp.Wire/Reified.ReferenceApp.Wire.fsproj --configuration Release --no-build --nologo
 
   native-aot:
     runs-on: ubuntu-latest
@@ -106,8 +82,8 @@ jobs:
       - name: Restore
         run: dotnet restore
 
-      - name: Pack libraries
-        run: bash scripts/pack.sh
+      - name: Pack libraries and run package-consumer fixtures
+        run: bash scripts/run-package-consumers.sh
 
   docs:
     runs-on: ubuntu-latest

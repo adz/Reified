@@ -1,6 +1,6 @@
 // SchemaError: the one portable error vocabulary every schema interpreter reports through, so
 // parsing, checking, and refinement failures render and compose the same way regardless of which
-// interpreter raised them. AXIAL_SCHEMA_CORE_ONLY trims the Refined-dependent cases for
+// interpreter raised them. REIFIED_SCHEMA_CORE_ONLY trims the Refined-dependent cases for
 // consumers that only need the core shape.
 namespace Reified.Schema
 
@@ -44,7 +44,7 @@ type SchemaError =
     /// <summary>A Schema-owned intrinsic check failed.</summary>
     | Custom of code: string * message: string option
 
-#if !AXIAL_SCHEMA_CORE_ONLY
+#if !REIFIED_SCHEMA_CORE_ONLY
 /// <summary>Functions for lowering and rendering boundary schema failures.</summary>
 [<RequireQualifiedAccess>]
 module SchemaError =

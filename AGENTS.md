@@ -19,15 +19,16 @@ Refer to [`dev-docs/PLAN.md`](dev-docs/PLAN.md) for architectural direction and
 
 ## Architecture Invariants
 
-### EFFECT BOUNDARY — DO NOT HIDE AMBIENT EFFECTS IN SERVICE ADAPTERS
+### NO EFFECTS — REIFIED DESCRIBES, IT DOES NOT RUN
 
-- `Axial.Flow.Process` and `Axial.Flow.HttpClient` may perform only the effect named by their core, mockable service type (`IProcess` or `IHttp`). Any additional effect must be an explicit, mockable dependency visible in the implementation signature.
-- In particular, never call `DateTimeOffset.UtcNow`, `DateTime.Now`, or another ambient clock from Process or Http. Inject `Axial.Flow.PlatformService.IClock` into live implementations and use `clock.UtcNow()`.
-- Apply the same rule to randomness, GUID generation, environment variables, filesystem, console, and other operational effects: use the appropriate explicit service from `Axial.Flow.PlatformService` or another package whose core type is present in the signature.
+- Reified is the description side. No package here performs I/O, and none may take a dependency on the effect
+  system: `Axial.Flow` and its satellites live in the [Axial repository](https://github.com/adz/Axial), and the
+  dependency never points this way either. `Reified.Schema.Http` is host-neutral by construction — it assembles
+  contracts, problem details, and OpenAPI documents as values, and never opens a socket or reads a request.
+- Never call `DateTimeOffset.UtcNow`, `DateTime.Now`, another ambient clock, randomness, GUID generation,
+  environment variables, the filesystem, or the console from a Reified package. A schema that parses differently
+  on Tuesday is not a description.
 
-- `Flow<'env, 'error, 'value>` is the public workflow model. Do not reintroduce public `Effect`, `EffectFlow`, `AsyncFlow`, `TaskFlow`, or carrier-specific workflow concepts.
-- Keep `Axial.Flow` and `Reified.Schema` independent; neither package may depend on the other.
-- Model application and operational dependencies explicitly in `'env`; keep the ambient runtime for executor mechanics only.
 - Keep `Constraint<'value>` as the one public value-rule concept. A constraint is a reusable description of valid values; `check` is the operation that runs it. There is no separate `Check` type and no second constructor catalogue: `Reified.Refinements` and `Reified.Schema` consume the same `Constraint` value a caller checks directly.
 - Constraints have two tiers, and the split is load-bearing. **Interpreted** constraints are a closed algebra: each built-in constructor builds one `ConstraintAtom` and places that same value in both its description and any violation, so execution, export, and future proof cannot drift. The algebra grows only by Reified release — there is no registration API, and no authored code or string may claim inspectable logic. **Opaque** constraints (`custom`, `customWith`, `notWith`, `contramap`) run normally, report author-supplied prose, and are honestly invisible to export and proof.
 - `Violation` is a diagnostic contract, not an application error union. It is plain comparable data: no closure and no `ConstraintDescription` is reachable from one. Never lower a constraint failure into a parse-shaped `SchemaError` case, and never attach a string code to a violation — identity comes from the atom, and message keys are a rendering projection computed at the edge.
@@ -36,7 +37,6 @@ Refer to [`dev-docs/PLAN.md`](dev-docs/PLAN.md) for architectural direction and
 - Before lowering an atom to a wire keyword, check that the *path between them* — parse, round, canonicalize — preserves the relation the atom asserts. Portable in storage is not portable in meaning: a regex dialect, a text length, and a decoded GUID each survive the trip as data while changing what they mean at the other end.
 - Boundary supply stays Schema-owned (`Schema.mustSupply`/`mayOmit`). It is decided before a typed value exists, so it is not a value constraint.
 - Value-preserving guards and extraction helpers belong in `Result`, parsing belongs in `Reified.Parse`, and refined value construction belongs in `Reified.Refinements`.
-- Use `BindError` only at a `flow { }` bind site when a source error must be assigned or mapped immediately before binding.
 - Prefer AOT- and trimming-safe designs. Do not introduce runtime reflection as the foundation for core workflow, validation, schema, or service-access APIs; use explicit definitions first and consider build-time generation only after the API shape stabilizes.
 
 ## Dev Doc Organization
@@ -63,7 +63,7 @@ Refer to [`dev-docs/PLAN.md`](dev-docs/PLAN.md) for architectural direction and
 
 ## Doc Workflow
 
-- Treat `docs/schema/reference/**`, `docs/flow/reference/**`, `docs/examples/README.md`, and versioned docs as generated outputs or generator-backed outputs. The three `llms.txt` files are hand-written product entry points.
+- Treat `docs/*/reference/**`, `docs/examples/README.md`, and versioned docs as generated outputs or generator-backed outputs. The root `llms.txt` and the four product ones (`docs/result/`, `docs/values/`, `docs/data/`, `docs/schema/`) are hand-written entry points.
 - When changing an API, update the source comments and the doc generator inputs first, then regenerate the docs. Do not hand-edit generated reference pages as the primary fix.
 - When a user-facing guide needs to cite a new or renamed API, update the source comments and reference pages in the same pass, then run the generators immediately.
 - For small checkbox tasks, regenerate directly affected docs as needed but defer `bash scripts/validate-docs.sh` until the phase end or a release/deploy checkpoint. `dev-docs/**` idea/planning notes do not require validation. For release/deploy checks, also run `npm run build` in `site`.
@@ -79,6 +79,6 @@ Refer to [`dev-docs/PLAN.md`](dev-docs/PLAN.md) for architectural direction and
 ## Documentation Integrity
 
 - **Validate At Phase Or Release Boundaries:** For small checkbox tasks, defer `bash scripts/validate-docs.sh` until phase end or a release/deploy checkpoint, even after changes to user-facing docs, generated docs, public API signatures, XML comments, doc generator inputs, docs examples, reference docs, `llms.txt`, or site content. Regenerate affected generated docs during the task. `dev-docs/**` idea/planning notes and code-only changes with no public-doc impact do not require validation. Use `bash scripts/preview-docs.sh` only when a live server is needed for browser review or screenshots.
-- **Preview Lifecycle:** `bash scripts/preview-docs.sh` stops cleanly on `SIGHUP`, `TERM`, or `INT`. It can also be stopped by creating `$AXIAL_DOCS_PREVIEW_STOP_FILE`, which defaults to `/tmp/reified-docs-preview.stop`.
+- **Preview Lifecycle:** `bash scripts/preview-docs.sh` stops cleanly on `SIGHUP`, `TERM`, or `INT`. It can also be stopped by creating `$REIFIED_DOCS_PREVIEW_STOP_FILE`, which defaults to `/tmp/reified-docs-preview.stop`.
 - **Link Integrity:** Ensure that all cross-references between guides and reference pages are valid. Broken links degrade the experience for both humans and AI agents.
 - **Code Highlighting:** Ensure all code examples are wrapped in triple-backticks with the `fsharp` language hint for proper syntax highlighting.

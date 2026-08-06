@@ -237,7 +237,7 @@ Deleted `src/Reified.ErrorHandling/`, `src/Reified/`, `docs/error-handling/`,
   (`data/reference/t-data/` rather than `data/reference/data/t-data/`) and could never have passed; corrected while
   splitting the neighbouring branches.
 - **Done.** `scripts/validate-error-handling-docs.sh` → `validate-result-docs.sh` and `validate-values-docs.sh`.
-- **Done.** `scripts/generate-api-docs.sh` and `scripts/docgen/Program.fs` — `AXIAL_DOCS_PRODUCT` takes `result`
+- **Done.** `scripts/generate-api-docs.sh` and `scripts/docgen/Program.fs` — `REIFIED_DOCS_PRODUCT` takes `result`
   and `values` in place of `validation`, each with its own DLL set, page-group filter, and output root.
   (There is no `scripts/generate-api-docs.mjs`; that name was stale.)
 - **Done.** `site/assets/scss/_styles_project.scss` — added `$reified-values`, `.reified-door--values`,

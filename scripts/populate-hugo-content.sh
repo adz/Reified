@@ -42,22 +42,21 @@ upsert_frontmatter() {
   mv "$tmp" "$file"
 }
 
-# Reified has five product documentation areas: /result/, /values/, /data/,
-# /schema/, and /flow/. Generated API reference is distributed under the product
-# that owns each package. Values is a navigation grouping over Constraint,
-# Refined, and Parse — there is no Reified.Values package behind it.
-products=(result values data schema flow)
+# Reified has four product documentation areas: /result/, /values/, /data/, and
+# /schema/. Generated API reference is distributed under the product that owns
+# each package. Values is a navigation grouping over Constraint, Refinements, and
+# Parse — there is no Reified.Values package behind it.
+products=(result values data schema)
 
 result_dir="$root_dir/site/content/result"
 values_dir="$root_dir/site/content/values"
 data_dir="$root_dir/site/content/data"
 schema_dir="$root_dir/site/content/schema"
-flow_dir="$root_dir/site/content/flow"
 
-# error-handling and validation are the retired area names; remove any leftovers
+# error-handling, validation, and flow are retired area names; remove any leftovers
 # so a stale tree cannot keep serving pages after the split.
 rm -rf "$root_dir/site/content/error-handling" "$root_dir/site/content/validation" \
-  "$result_dir" "$values_dir" "$data_dir" "$schema_dir" "$flow_dir" \
+  "$root_dir/site/content/flow" "$result_dir" "$values_dir" "$data_dir" "$schema_dir" \
   "$root_dir/site/content/docs" "$root_dir/site/content/reference" "$root_dir/site/content/parse"
 
 for product in "${products[@]}"; do
@@ -72,27 +71,6 @@ result_ref="$result_dir/reference"
 values_ref="$values_dir/reference"
 data_ref="$data_dir/reference"
 schema_ref="$schema_dir/reference"
-flow_ref="$flow_dir/reference"
-
-upsert_frontmatter "$flow_ref/flow/_index.md" "weight" "10"
-upsert_frontmatter "$flow_ref/flow/runtime/_index.md" "weight" "10"
-upsert_frontmatter "$flow_ref/fiber/_index.md" "weight" "20"
-upsert_frontmatter "$flow_ref/exit/_index.md" "weight" "30"
-upsert_frontmatter "$flow_ref/cause/_index.md" "weight" "40"
-upsert_frontmatter "$flow_ref/concurrency/_index.md" "weight" "50"
-upsert_frontmatter "$flow_ref/schedule/_index.md" "weight" "60"
-upsert_frontmatter "$flow_ref/ref/_index.md" "weight" "70"
-upsert_frontmatter "$flow_ref/stm/_index.md" "weight" "80"
-upsert_frontmatter "$flow_ref/stream/_index.md" "weight" "90"
-upsert_frontmatter "$flow_ref/bind/_index.md" "weight" "100"
-upsert_frontmatter "$flow_ref/service/_index.md" "weight" "110"
-upsert_frontmatter "$flow_ref/layer/_index.md" "weight" "120"
-upsert_frontmatter "$flow_ref/scope/_index.md" "weight" "130"
-upsert_frontmatter "$flow_ref/service/core/_index.md" "weight" "10"
-upsert_frontmatter "$flow_ref/service/console/_index.md" "weight" "20"
-upsert_frontmatter "$flow_ref/service/filesystem/_index.md" "weight" "30"
-upsert_frontmatter "$flow_ref/service/http/_index.md" "weight" "40"
-upsert_frontmatter "$flow_ref/service/process/_index.md" "weight" "50"
 upsert_frontmatter "$result_ref/result/_index.md" "weight" "10"
 upsert_frontmatter "$values_ref/constraint/_index.md" "weight" "10"
 upsert_frontmatter "$values_ref/refined/_index.md" "weight" "20"
@@ -102,7 +80,7 @@ upsert_frontmatter "$schema_ref/codec/_index.md" "weight" "20"
 
 # Hugo's docs layout supplies the page title. Keep generated content uniform
 # with pages whose source already omits a body-level H1.
-find "$result_dir" "$values_dir" "$data_dir" "$schema_dir" "$flow_dir" -type f -name "*.md" -print0 |
+find "$result_dir" "$values_dir" "$data_dir" "$schema_dir" -type f -name "*.md" -print0 |
   node -e '
     const fs = require("node:fs");
     for (const path of fs.readFileSync(0, "utf8").split("\0")) {
@@ -125,7 +103,7 @@ find "$result_dir" "$values_dir" "$data_dir" "$schema_dir" "$flow_dir" -type f -
 
 # Copy root assets
 cp "$root_dir/llms.txt" "$root_dir/site/static/" 2>/dev/null || true
-rm -rf "$root_dir/site/static/error-handling"
+rm -rf "$root_dir/site/static/error-handling" "$root_dir/site/static/flow"
 for product in "${products[@]}"; do
   mkdir -p "$root_dir/site/static/$product"
   cp "$root_dir/docs/$product/llms.txt" "$root_dir/site/static/$product/llms.txt"

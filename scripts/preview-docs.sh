@@ -3,9 +3,9 @@
 set -euo pipefail
 
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-port="${AXIAL_DOCS_PREVIEW_PORT:-3000}"
+port="${REIFIED_DOCS_PREVIEW_PORT:-3000}"
 HUGO_BASEURL="${HUGO_BASEURL:-http://192.168.86.180:$port/}"
-stop_file="${AXIAL_DOCS_PREVIEW_STOP_FILE:-/tmp/reified-docs-preview.stop}"
+stop_file="${REIFIED_DOCS_PREVIEW_STOP_FILE:-/tmp/reified-docs-preview.stop}"
 hugo_pid=""
 generate=true
 force_generate=false

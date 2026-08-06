@@ -145,7 +145,7 @@ module SchemaGenTests =
         | Error error -> test <@ error = SchemaGenerationError.UnsupportedConstraint([ "email" ], "constraint.format.pattern") @>
         | Ok _ -> failwith "Expected pattern generation to require a custom generator."
 
-        let custom = Map.ofList [ "email", Gen.constant (Data.Text "AXIAL") ]
+        let custom = Map.ofList [ "email", Gen.constant (Data.Text "REIFIED") ]
         let generated = SchemaGen.rawWith custom schema |> Result.defaultWith (failwithf "%A") |> Gen.sample 10
         test <@ generated |> Array.forall (fun input -> (Schema.parse schema input |> Result.isOk)) @>
 

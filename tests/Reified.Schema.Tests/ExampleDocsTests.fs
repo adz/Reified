@@ -7,9 +7,8 @@ open System.Threading.Tasks
 open Swensen.Unquote
 open Xunit
 
-// The Schema half of the runnable-example docs check. The Flow half lives in Axial.Flow.Tests and is
-// scoped to the flow product, so each product asserts only its own page and neither project needs the
-// other's examples after the repository split.
+// Asserts that docs/schema/examples.md matches what the example projects actually print. The generator
+// is the source of truth; this test fails when the page and a real run disagree.
 
 let private runGenerator (scriptPath: string) (product: string) (environment: (string * string) list) =
     use childProcess =

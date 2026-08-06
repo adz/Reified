@@ -3,7 +3,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-for product in Result Constraint Refined Schema Flow; do
+for product in Result Constraint Refinements Schema; do
   project="$ROOT_DIR/examples/Reified.$product.AotProbe/Reified.$product.AotProbe.fsproj"
   publish_dir="$ROOT_DIR/artifacts/publish/Reified.$product.AotProbe/linux-x64"
 

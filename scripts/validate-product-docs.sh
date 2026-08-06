@@ -11,7 +11,7 @@ case "$product" in
 esac
 
 HUGO_BASEURL="${HUGO_BASEURL:-http://localhost:3000/}"
-validate_dir="${AXIAL_DOCS_VALIDATE_DIR:-$root_dir/.fsdocs/validate-$product}"
+validate_dir="${REIFIED_DOCS_VALIDATE_DIR:-$root_dir/.fsdocs/validate-$product}"
 
 if [[ "$product" == "schema" || "$product" == "flow" ]]; then
   "$root_dir/scripts/generate-example-docs.sh" "$product"

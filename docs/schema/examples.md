@@ -20,7 +20,7 @@ This example shows a request boundary that parses strings, builds refined numeri
 Run it:
 
 ```bash
-AXIAL_EXAMPLE=refined-catalog dotnet run --project examples/Reified.Schema.Examples/Reified.Schema.Examples.fsproj --nologo
+REIFIED_EXAMPLE=refined-catalog dotnet run --project examples/Reified.Schema.Examples/Reified.Schema.Examples.fsproj --nologo
 ```
 
 Source:
@@ -190,7 +190,7 @@ This example shows total domain conversions built with Schema.convert, composed 
 Run it:
 
 ```bash
-AXIAL_EXAMPLE=refined-value-schema dotnet run --project examples/Reified.Schema.Examples/Reified.Schema.Examples.fsproj --nologo
+REIFIED_EXAMPLE=refined-value-schema dotnet run --project examples/Reified.Schema.Examples/Reified.Schema.Examples.fsproj --nologo
 ```
 
 Source:

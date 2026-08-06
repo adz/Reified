@@ -1,6 +1,6 @@
 ---
 title: Reified
-description: Independent Data, Error Handling, Schema, and Flow libraries for F# on .NET and Fable JavaScript.
+description: Independent Data, Result, Values, and Schema libraries for F# on .NET and Fable JavaScript.
 body_class: reified-home
 ---
 
@@ -25,7 +25,7 @@ body_class: reified-home
     "Types that prove it, not comments that promise it.",
     "Stop trusting that the check ran. Make the type carry it.",
     "Untrusted in, proven out.",
-    "Dependencies and failures belong in the signature, not in your head.",
+    "Untrusted data stops at the boundary, not three layers in.",
     "Make illegal states unrepresentable — for values, boundaries, and effects."
   ];
   var el = document.getElementById("reified-tagline");
@@ -38,7 +38,7 @@ body_class: reified-home
 <div class="lede">
 <p>Reified's goal is to replace repetitive, error-prone code with APIs that are ergonomic for humans and predictable for LLMs, reducing the context both need to produce reliable software.</p>
 </div>
-<p>F# already provides strong foundations: discriminated unions and records for modelling, immutability by default, and explicit handling of missing values. We build on those foundations to enforce project-wide rules across values, boundaries, failures, dependencies, and concurrent work.</p>
+<p>F# already provides strong foundations: discriminated unions and records for modelling, immutability by default, and explicit handling of missing values. We build on those foundations to enforce project-wide rules across values, boundaries, and models.</p>
 
 <p id="reified-tagline" class="reified-tagline">If it compiles, the invariant already held.</p>
 </div>
@@ -65,7 +65,7 @@ fail-fast sequencing and accumulating builders for collecting every error at onc
 <a class="reified-door reified-door--values" href="{{< relref "/values/" >}}">
 <span class="reified-door-kicker">Admitting values</span>
 <h2>Values</h2>
-<p>Three independently installable packages — Constraint, Refined, and Parse. Reuse value checks, parse
+<p>Three independently installable packages — Constraint, Refinements, and Parse. Reuse value checks, parse
 serialized primitives, and construct refined values, so an invalid value can't reach your domain types in
 the first place.</p>
 <span class="reified-door-cta">Values documentation &rarr;</span>
@@ -79,16 +79,12 @@ definition, so parsers, docs, forms, and tests can't drift out of sync with each
 <span class="reified-door-cta">Schema documentation &rarr;</span>
 </a>
 
-<a class="reified-door reified-door--flow" href="{{< relref "/flow/" >}}">
-<span class="reified-door-kicker">Effects and execution</span>
-<h2>Axial.Flow</h2>
-<p>Describe async work with its required environment and expected failure type in the signature, so missing
-dependencies and unhandled failures show up at compile time instead of in production. 
-</p>
-<span class="reified-door-cta">Flow documentation &rarr;</span>
-</a>
-
 </div>
+
+<p style="max-width: 78ch; margin: 0 auto 2rem;">Install <code>Reified</code> for all of the above at once, or a
+focused package when you need one capability. Effects and execution are not here: <a
+href="https://github.com/adz/Axial">Axial</a> describes async work with its dependencies and failures in the
+signature, and its optional server adapters execute Reified HTTP contracts.</p>
 
 <div class="docs-home-meta" style="margin-bottom: 4rem;">
 <a class="docs-chip" href="https://github.com/adz/Reified">GitHub</a>

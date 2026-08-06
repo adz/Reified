@@ -10,12 +10,10 @@ for project in \
   "src/Reified.Constraint/Reified.Constraint.fsproj" \
   "src/Reified.Refinements/Reified.Refinements.fsproj" \
   "src/Reified.Parse/Reified.Parse.fsproj" \
-  "src/Axial.Flow.PlatformService/Axial.Flow.PlatformService.fsproj" \
-  "src/Axial.Flow.Console/Axial.Flow.Console.fsproj" \
-  "src/Axial.Flow.FileSystem/Axial.Flow.FileSystem.fsproj" \
-  "src/Axial.Flow.HttpClient/Axial.Flow.HttpClient.fsproj" \
-  "src/Axial.Flow.Process/Axial.Flow.Process.fsproj" \
-  "src/Reified.Schema/Reified.Schema.fsproj"
+  "src/Reified.Data/Reified.Data.fsproj" \
+  "src/Reified.Schema/Reified.Schema.fsproj" \
+  "src/Reified.Schema.Json/Reified.Schema.Json.fsproj" \
+  "src/Reified.Schema.Http/Reified.Schema.Http.fsproj"
 do
   dotnet build "$root_dir/$project" --nologo -v minimal
 done
