@@ -10,7 +10,7 @@ open System.Reflection
 [<assembly: System.Reflection.AssemblyCompanyAttribute("Consumer.FsToolkit")>]
 [<assembly: System.Reflection.AssemblyConfigurationAttribute("Release")>]
 [<assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")>]
-[<assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4873ca5d51adc435141132fdd37e973d4160941c")>]
+[<assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e84d430a77cb7fa70e1513cd5cf56970fd29180d")>]
 [<assembly: System.Reflection.AssemblyProductAttribute("Consumer.FsToolkit")>]
 [<assembly: System.Reflection.AssemblyTitleAttribute("Consumer.FsToolkit")>]
 [<assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")>]

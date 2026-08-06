@@ -303,7 +303,7 @@
       ]
     },
     "Reified.Constraint/0.7.0": {
-      "sha512": "pUtHtOHXQPn65tGOFAdZ3kEgLZc8yGu30MJMPnmx93xiGlCdQSZpuUEN4V5PpxLNW1GRK554AjfUVsvTYhVr+w==",
+      "sha512": "Wq7kyU3/FhwRfpAzBDOhycUt8jViB3NjVLyYEosJo2frV46QOSrielsbOM3GmLlXlqaIe3sDH83XaS/33+msDw==",
       "type": "package",
       "path": "reified.constraint/0.7.0",
       "files": [
@@ -318,7 +318,7 @@
       ]
     },
     "Reified.Data/0.7.0": {
-      "sha512": "O08yBa2TM5LpRDWtjKPC5rsilm12maoIsFWqkASQdjfWLFaTYDG6fgNk3OeDdwfWyK1xhNwUpeQENOSfVZISJA==",
+      "sha512": "DU2h/ZzH8VST2nzRWKun9MeFUJqDxZ8hxlcIQ1IAMN8MD5b7nCeRL7PVVTzxr6mILFzAsnE0kNDoUOZ9ueRugQ==",
       "type": "package",
       "path": "reified.data/0.7.0",
       "files": [
@@ -334,7 +334,7 @@
       ]
     },
     "Reified.Parse/0.7.0": {
-      "sha512": "VObCCB9xefZxODX2FUm614vxrtgkSk6TYILSJI0fdgOWBOQuY2gXlhjI15N80biMSu7QoZJ9r/4V01CcbVyn/Q==",
+      "sha512": "zT00Z3hCpzFS/Ar0/9a9aoKrBIp3m94gc/yZOyxnwu+cb5/LjNh3Q/Ao1ib5LdYgwVq6p4nzc7h2XkWiB2n54A==",
       "type": "package",
       "path": "reified.parse/0.7.0",
       "files": [
@@ -349,7 +349,7 @@
       ]
     },
     "Reified.Refinements/0.7.0": {
-      "sha512": "/Q3AJCwI7s+Ia93/r5bpKHbC4Jz4LgalYLrT5ok92udL3dpN2J/3bc3fF9/dzYsyXEyzbFTkPQdPWBxcawAvaQ==",
+      "sha512": "tmR8cTEsybLV1BcpFTgAQqjGIue1RYhwJR3F4cghXBIDugWZg0fu9ddLBflNv1D+sF6kizX2cd/gfE3FmGVzEQ==",
       "type": "package",
       "path": "reified.refinements/0.7.0",
       "files": [
@@ -364,7 +364,7 @@
       ]
     },
     "Reified.Schema/0.7.0": {
-      "sha512": "morCc8cdrhCGsAy7v6uBgeh2Sm3GEAKElGoUloEUgqBJKa4a1EEN1K3bs3R+lDkkbCElHsGL6I97leaFhxyYag==",
+      "sha512": "278I6mOUXDx9AUjPE9B/Nc4ZAC7WJbLmwtalxknkdg0wd3gqx8SeIEhzEudbm1H4vRAMWqKHFTyRb0R2wJ/kzw==",
       "type": "package",
       "path": "reified.schema/0.7.0",
       "files": [

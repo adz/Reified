@@ -57,8 +57,10 @@ From the same ZIO comparison; these belong *with* the remote-config milestone, n
   did not come across. `Reified.Schema.Json` is still a supported Fable target
   (`dev-docs/decisions/README.md`, 2026-07-24), so rebuild a Reified-only Fable compile-and-run check and restore
   the CI job that ran it.
-- **`dev-docs/API_BASELINE.md`** needs a fresh validated-command pass: its project lists, recorded run, test
-  counts, and baseline commit all predate the split and the rename.
+- **API-shape tests.** `Axial.ApiShape.Tests` covered the combined product and stayed with Axial, so no test here
+  pins the public module and member surface. `Reified.Package.Tests` and the package-consumer fixtures cover the
+  package graph and the installed surface, not member signatures. Rebuild a Reified-scoped shape suite; the
+  intended coverage is listed in `dev-docs/API_BASELINE.md`.
 
 ## Acceptance Checks
 
