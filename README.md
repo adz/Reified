@@ -35,6 +35,7 @@ A schema describes how structured input becomes a model. It returns the typed va
 
 ```fsharp
 open Reified.Constraint
+open Reified.Constraint.ConstraintDSL
 open Reified.Schema
 open Reified.Schema.Syntax
 
@@ -45,10 +46,10 @@ type Signup =
 let signupSchema =
     schema<Signup> {
         field "email" _.Email {
-            constraints [ Constraint.present; Constraint.email ]
+            constraints [ present; email ]
         }
         field "age" _.Age {
-            constrain (Constraint.atLeast 13)
+            constrain (atLeast 13)
         }
         construct (fun email age -> { Email = email; Age = age })
     }
