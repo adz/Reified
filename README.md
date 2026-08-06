@@ -1,150 +1,98 @@
-# Axial
+# Reified
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/content/img/axial-readme-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="docs/content/img/axial-readme-light.svg">
-  <img alt="Axial" src="docs/content/img/axial-readme-light.svg" width="160">
-</picture>
+Declare value and model invariants once. Derive validation, parsing, diagnostics, codecs, contracts, and test data from the same declarations.
 
-Axial is a set of F# libraries with three entry points:
-
-- Error Handling — four focused packages: `Axial.Result` (Result composition and `result { }`),
-  `Axial.Constraint` (reusable value checks), `Axial.Parse` (serialized primitive decoding), and `Axial.Refined`
-  (invariant-carrying domain values);
-- Schema for turning structured input into domain values, with path-aware accumulated diagnostics;
-- Flow for async work with explicit dependencies and expected failures.
-
-Every install is a focused package: there is no meta-package and no umbrella. Install exactly the packages you
-use.
-
-[![ci](https://github.com/adz/Axial/actions/workflows/ci.yml/badge.svg)](https://github.com/adz/Axial/actions/workflows/ci.yml)
-[![NuGet](https://img.shields.io/nuget/v/Axial.Schema.svg)](https://www.nuget.org/packages/Axial.Schema)
+[![ci](https://github.com/adz/Reified/actions/workflows/ci.yml/badge.svg)](https://github.com/adz/Reified/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 > [!WARNING]
-> Axial 0.7.0 is the first planned release under the Axial name. It replaces the former monolithic FsFlow package with
-> smaller packages. The public surface is still pre-1.0 and may change.
+> Reified is pre-1.0. Package and namespace renaming from `Axial.*` to `Reified.*` is in progress before the first release.
 
-## Handle expected errors and refine values
+## Declare the rule once
 
-Error Handling is four focused packages that keep ordinary `Result<'value, 'error>` in your interfaces: `Axial.Result`
-for Result composition, `Axial.Constraint` for reusable value checks, `Axial.Parse` for serialized primitive decoding, and
-`Axial.Refined` for invariant-carrying domain values. Install any focused package independently; none requires
-`Axial.Result`.
+Most validation stacks keep the rule and its message in separate places. Reified makes a constraint inspectable data, so checking, diagnostics, export, and generation read the same declaration.
 
 ```fsharp
-open Axial.Constraint
-open Axial.Constraint.ConstraintDSL
+open Reified.Constraint
 
-let requireName value =
-    value
-    |> Result.guard present
-    |> Result.mapError (fun _ -> NameMissing)
+let retryCount : Constraint<int> =
+    Constraint.between 0 10
+
+3 |> Constraint.check retryCount
+// Ok ()
+
+42
+|> Constraint.check retryCount
+|> Result.mapError Violation.render
+// Error "expected a value between 0 and 10, but was 42"
 ```
 
-- [Result](docs/result/_index.md)
-- [Values overview](docs/values/_index.md)
-- [Checks and constraints](docs/values/getting-started.md)
-- [Refined domain values](docs/values/refined/domain-values.md)
+Nobody wrote the failure sentence separately. Change the bounds and every interpreter observes the new rule.
 
-```bash
-dotnet add package Axial.Result    # Result composition and result { }
-dotnet add package Axial.Constraint     # reusable checks and portable constraints
-dotnet add package Axial.Parse     # serialized primitive parsing
-dotnet add package Axial.Refined   # invariant-carrying domain values
-```
+## Declare a whole model
 
-## Parse input into domain values
-
-A schema describes fields, parsing, constraints, and construction in one value:
+A schema describes how structured input becomes a model. It returns the typed value only after every field and constructor invariant succeeds.
 
 ```fsharp
-open Axial.Schema
-open Axial.Schema.Syntax
+open Reified.Constraint
+open Reified.Schema
+open Reified.Schema.Syntax
 
 type Signup =
     { Email: string
       Age: int }
 
 let signupSchema =
-    Schema.define<Signup>
-    |> field "email" _.Email
-    |> constrain emailFormat
-    |> field "age" _.Age
-    |> constrain (atLeast 13)
-    |> construct (fun email age -> { Email = email; Age = age })
-
-match (Schema.parse signupSchema dataInput) with
-| Ok signup -> register signup
-| Error diagnostics -> display diagnostics
-```
-
-`Schema.parse` either returns the model or path-aware diagnostics. The same declaration can drive checking, JSON
-Schema, compiled codecs, form redisplay, test-data generation, and versioned wire contracts.
-
-A schema only controls values produced through the schema. When every value of a type must satisfy an invariant, use a
-private representation and expose a fallible constructor or named domain operations.
-
-Start here:
-
-- [Schema overview](docs/landing/schema.md)
-- [Getting started with Schema](docs/schema/getting-started.md)
-- [Construction guarantees](docs/schema/trusted-construction.md)
-- [Recommended Schema patterns](docs/schema/patterns/_index.md)
-- [Versioned wire contracts](docs/schema/contracts.md)
-
-Install the core package:
-
-```bash
-dotnet add package Axial.Schema
-```
-
-## Keep workflow dependencies visible
-
-`Flow<'env, 'error, 'value>` describes async work, its dependencies, and its expected failure type:
-
-```fsharp
-open Axial.Flow
-
-type RegistrationError =
-    | UserNotFound
-    | SaveFailed of string
-
-type RegistrationEnv =
-    { LoadUser: int -> Task<Result<User, RegistrationError>>
-      SaveUser: User -> Task<Result<unit, RegistrationError>> }
-
-let register userId : Flow<RegistrationEnv, RegistrationError, unit> =
-    flow {
-        let! loadUser = Flow.read _.LoadUser
-        let! saveUser = Flow.read _.SaveUser
-        let! user = loadUser userId
-        return! saveUser user
+    schema<Signup> {
+        field "email" _.Email {
+            constraints [ Constraint.present; Constraint.email ]
+        }
+        field "age" _.Age {
+            constrain (Constraint.atLeast 13)
+        }
+        construct (fun email age -> { Email = email; Age = age })
     }
+
+match Schema.parse signupSchema input with
+| Ok signup -> register signup
+| Error errors -> display errors
 ```
 
-Tests supply a small record of fakes. The application host supplies live implementations. Cancellation, resource
-scopes, retries, and child fibers stay within the workflow runtime.
+The same `signupSchema` can drive a compiled JSON codec, JSON Schema, form metadata, HTTP contracts, versioned migrations, and matching test data.
 
-Start here:
+## Packages
 
-- [Flow overview](docs/landing/flow.md)
-- [Getting started with Flow](docs/flow/getting-started.md)
-- [Dependencies](docs/flow/services-and-runtimes/dependencies.md)
-- [Service-provider boundaries](docs/flow/services-and-runtimes/service-provider-boundaries.md)
+Install only the capability you need. There is no umbrella or meta-package.
 
-Install Flow:
+- `Reified.Constraint` — reusable, inspectable value rules and structured violations
+- `Reified.Refinements` — types that carry an invariant after construction
+- `Reified.Parse` — serialized primitive decoding
+- `Reified.Result` — composition over the standard F# `Result` type
+- `Reified.Data` — portable structured input and test data
+- `Reified.Schema` — structured model admission, diagnostics, inspection, and JSON Schema
+- `Reified.Schema.Json` — compiled JSON codecs
+- `Reified.Schema.Http` — host-neutral endpoint contracts, problem details, and OpenAPI
+- `Reified.Schema.Contracts.Build` — MSBuild integration for derived record and wire contracts
 
-```bash
-dotnet add package Axial.Flow
-```
+The contract compiler and schema-derived testing adapter are repository tooling, not runtime packages. The source tree retains the `Axial.*` names until the post-extraction rename commit.
 
-## Platforms and examples
+## Install
 
-The authored schema and workflow paths avoid runtime reflection. The core packages support NativeAOT, trimming, and
-Fable; individual host and service packages document their supported targets.
+Reified packages have not been published. The first prerelease will use the `Reified.*` IDs above; current local projects retain their transitional `Axial.*` IDs until the rename commit.
 
-- [Documentation](docs/index.md)
-- [Runnable examples](examples/README.md)
-- [Reference application](examples/Axial.ReferenceApp/README.md)
-- [Packages and generated reference](docs/reference-indexes/)
+## Documentation and examples
+
+- [Constraint](docs/values/constraint/_index.md)
+- [Getting started with values](docs/values/getting-started.md)
+- [Refined domain values](docs/values/refined/domain-values.md)
+- [Getting started with Schema](docs/schema/getting-started.md)
+- [JSON codecs](docs/schema/json-codec.md)
+- [HTTP contracts](docs/schema/http-servers.md)
+- [Versioned contracts](docs/schema/contracts.md)
+- [Runnable Schema examples](docs/schema/examples.md)
+
+## Axial integration
+
+[Axial](https://github.com/adz/Axial) describes asynchronous workflows with explicit failures and dependencies. Its optional server adapters execute Reified HTTP contracts; neither core depends on the other.
+
+Declare a contract with Reified. Serve it with Axial.
