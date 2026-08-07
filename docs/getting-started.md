@@ -218,6 +218,37 @@ match on, group by path, translate, or serialize into a problem-details response
 [`Reified.Result`](/result/) adds the composition — `result { }` for fail-fast sequencing, accumulating
 builders for collecting every error at once — over the standard `Result` type rather than replacing it.
 
+## The words this documentation uses
+
+Four operations sound similar and are not. The rest of the documentation uses these words precisely:
+
+| Word | Operation | Example |
+| --- | --- | --- |
+| **parse** | Change one representation into another. Text becomes a typed value. | `Parse.int "42"` |
+| **check** | Test a value you already hold against a rule. The value does not change. | `Constraint.check (atLeast 13) age` |
+| **refine** | Admit a checked value into a type that carries the invariant from then on. | `ContactEmail.create raw` |
+| **parse (structured)** | Take a whole tree of untrusted input to a domain model, accumulating every failure with its path. | `Schema.parse signupSchema input` |
+
+"Validation" is the familiar broad name for the whole area, and this documentation uses it that way — and for
+`validate`, Schema's specifically named operation. When the distinction matters, the word will be one of the four
+above instead.
+
+## Which failure type, and what to do with it
+
+Each layer fails in its own shape. What you do with the failure is the same decision every time: map it into your
+own error, keep it for its facts, accumulate it, or render it.
+
+| Layer | Failure | Map it | Keep it | Accumulate it | Render it |
+| --- | --- | --- | --- | --- | --- |
+| `Parse` | `ParseError` | `Result.mapError`, `Result.orError` | when missing, malformed, and out-of-range need different handling | not on its own — use `Result.traverseAll` or Schema | `$"..."`; it has no renderer |
+| `Constraint` | `Violation` | `Result.orError` for your own case | when you need the failing rule, the actual value, or another language | `result.list { }` over independent checks | `Violation.render`, or a `Renderer` |
+| `Refinements` | `Violation` | as above, at the construction site | as above | as above | as above |
+| `Result` | your own error type | it already is your type | always — it is yours | `result.list { }`, `Result.traverseAll` | your own function |
+| `Schema` | `SchemaErrors` | `RetainedParseResult.mapErrors` at the boundary | when you need paths, raw input, or metadata | it already did, with paths | `SchemaErrors.messages` / `fullMessages` |
+
+Two rules of thumb. Map early when the failure is leaving a small function whose caller should not learn Reified's
+vocabulary. Keep it when something downstream — a form, an API payload, a translator — still needs the facts.
+
 ## Where to go next
 
 | What you are doing | Start at |
