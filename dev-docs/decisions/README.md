@@ -10,6 +10,24 @@ alternative looks obviously better than it is, or when something was tried and r
 Flow decisions are not kept here. The effect system, its service and hosting satellites, and the host HTTP
 adapters live in the [Axial repository](https://github.com/adz/Axial) along with the reasoning behind them.
 
+## 2026-08-08: Data patterns stay separate from Constraint, and Result gained an accumulating traversal
+
+- **`Data`'s match patterns do not accept `Constraint<'value>`.** They look like a second rule catalogue and are
+  not one: a pattern asks whether a `Data` node has a shape, a constraint asks whether an extracted typed value
+  obeys a rule. Wiring them together would also make `Reified.Data` — currently a dependency-free leaf that test
+  projects can take on its own — depend on `Reified.Constraint` for a convenience only test code wants. `satisfying`
+  covers the local structural rule; anything typed belongs to a schema, which already reports paths.
+- **`Result.traverseAll` / `Result.sequenceAll` were added** as the accumulating counterparts to `traverse` and
+  `sequence`, returning `Result<'output list, 'error list>`. Every mapping runs, in input order, and errors come
+  back in input order. Nothing is flattened — a mapping that already returns `'error list` produces a list of
+  lists — which is what keeps them different from `NonEmptyList.traverseResult` rather than a second spelling of it.
+  `traverse` was not overloaded with the new semantics; a silent change from fail-fast to run-everything would
+  break side-effecting mappings without a compile error.
+- **The unsupported-operand default messages lost their internal vocabulary.** "failed an equality rule whose
+  operand has no portable representation" was a sentence about Reified's data model shown to a user. They now read
+  "must equal the required value" and so on: the relation, without the operand Reified cannot print. The technical
+  detail is still available through inspection.
+
 ## 2026-08-07: Reified is the description side, with one umbrella package
 
 - **The repository split on description versus execution.** Constraint, Refinements, Parse, Result, Data, Schema,

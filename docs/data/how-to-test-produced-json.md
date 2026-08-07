@@ -185,3 +185,21 @@ Data.tryMatch [
 
 `matching expectations actual` returns `unit` or raises `DataMatchException`. `Data.tryMatch expectations actual`
 returns `Result<unit, DataMismatch list>` and accumulates mismatches from every expectation.
+
+## Why patterns are not constraints
+
+`anyText`, `anyNumber`, and `satisfying` look like a second, smaller copy of `Constraint`. They are not, and they
+deliberately do not reuse it.
+
+A pattern asks a question about a `Data` node: is this branch text at all, is it present, does this list contain that
+item. A constraint asks a question about a typed value that has already been extracted: is this string a valid email,
+is this int at least 13. Those are different questions at different stages, and the one that a test of produced JSON
+needs is the first.
+
+The package graph makes the same point. `Reified.Data` depends on nothing, which is what lets a test project take it
+without taking a validation library. Teaching `at` to accept a `Constraint<'value>` would mean `Reified.Data`
+depending on `Reified.Constraint` for a convenience that only test code wants.
+
+When you do want a typed rule over a value inside a `Data` tree, parse the tree with a schema and check the model —
+which is the thing the schema already does, with paths and accumulated errors. Reach for `satisfying` for the
+in-between case: one local, structural rule that no schema owns.
