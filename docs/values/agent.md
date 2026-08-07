@@ -15,7 +15,8 @@ Values is a navigation grouping over three packages that admit values: `Reified.
 - Use `Constraint.guard` to keep the original value after a successful check.
 - Use `Parse.*` only to decode serialized primitive input.
 - Use `Refinement<'underlying,'refined>` only for invariant-carrying destination types with a total reverse projection.
-- Map `ParseError` and `Violation` into the application's error type at composition boundaries.
+- Map `ParseError` and `Violation` into the application's error type at composition boundaries: `Result.mapError` to
+  keep the facts, `Result.orError` to discard them for a plain error case.
 - Use `Schema.refine` for a refinement, `Schema.convert` for total mappings, `Schema.tryConvert` for fallible
   mappings, and `Schema.admit` for structured draft-to-domain construction.
 

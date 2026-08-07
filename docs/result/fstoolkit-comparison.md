@@ -28,6 +28,7 @@ Existing FsToolkit Result helpers can remain in an application. Both libraries u
 | `Result.requireSome` | `Result.someOr` |
 | `result { }` | `result { }` |
 | `asyncResult { }`, `taskResult { }` | no equivalent; Reified does not model effects |
+| `List.traverseResultA`, `List.sequenceResultA` | `Result.traverseAll`, `Result.sequenceAll` |
 | accumulating validation over boundary fields | a record `schema<'model> { }` interpreted by `Schema.parse` or `Schema.check` |
 
 Schema adds one property that Result combinators do not provide: the declaration is inspectable. The same field and
