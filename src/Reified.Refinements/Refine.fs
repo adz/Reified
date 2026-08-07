@@ -220,6 +220,54 @@ module DistinctList =
     let map mapping (input: DistinctList<'value>) =
         DistinctList(input.ToList() |> List.map mapping |> List.distinct)
 
+    /// <summary>
+    /// Keeps the chosen items, removing any duplicates the chooser introduces. Total.
+    /// </summary>
+    let choose chooser (input: DistinctList<'value>) =
+        DistinctList(input.ToList() |> List.choose chooser |> List.distinct)
+
+    /// <summary>Reorders the items. Total — reordering cannot introduce duplicates.</summary>
+    let sort (input: DistinctList<'value>) = DistinctList(input.ToList() |> List.sort)
+
+    /// <summary>Reorders the items by a projected key. Total.</summary>
+    let sortBy projection (input: DistinctList<'value>) = DistinctList(input.ToList() |> List.sortBy projection)
+
+    /// <summary>Reverses the order of the items. Total.</summary>
+    let rev (input: DistinctList<'value>) = DistinctList(input.ToList() |> List.rev)
+
+    /// <summary>Keeps at most the first <c>count</c> items. Total.</summary>
+    let truncate count (input: DistinctList<'value>) = DistinctList(input.ToList() |> List.truncate count)
+
+    /// <summary>Returns whether the list has no items.</summary>
+    let isEmpty (input: DistinctList<'value>) = input.ToList() |> List.isEmpty
+
+    /// <summary>Returns the first item, if any. Distinctness says nothing about emptiness.</summary>
+    let tryHead (input: DistinctList<'value>) = input.ToList() |> List.tryHead
+
+    /// <summary>Returns whether any item satisfies the predicate.</summary>
+    let exists predicate (input: DistinctList<'value>) = input.ToList() |> List.exists predicate
+
+    /// <summary>Returns whether every item satisfies the predicate.</summary>
+    let forall predicate (input: DistinctList<'value>) = input.ToList() |> List.forall predicate
+
+    /// <summary>Returns the first matching item, if any.</summary>
+    let tryFind predicate (input: DistinctList<'value>) = input.ToList() |> List.tryFind predicate
+
+    /// <summary>Returns the first item the chooser accepts, if any.</summary>
+    let tryPick chooser (input: DistinctList<'value>) = input.ToList() |> List.tryPick chooser
+
+    /// <summary>Applies an action to every item.</summary>
+    let iter action (input: DistinctList<'value>) = input.ToList() |> List.iter action
+
+    /// <summary>Folds over the items from an explicit seed.</summary>
+    let fold folder state (input: DistinctList<'value>) = input.ToList() |> List.fold folder state
+
+    /// <summary>Adds every item, matching <c>List.sum</c>.</summary>
+    let inline sum (input: DistinctList< ^value >) = input.ToList() |> List.sum
+
+    /// <summary>Adds a projection of every item, matching <c>List.sumBy</c>.</summary>
+    let inline sumBy projection (input: DistinctList<'value>) = input.ToList() |> List.sumBy projection
+
 /// Choice combinators for ordinary fallible conversion functions.
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Choice =

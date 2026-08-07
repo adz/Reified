@@ -20,13 +20,13 @@ open Reified.Refinements
 
 | Type | Closed under | Made total |
 |---|---|---|
-| `NonEmptyList<'T>`, `NonEmptyArray<'T>` | `map`, `append`, `rev`, `sort`, `distinct` | `head`, `last`, `reduce`, `min`, `max` |
+| `NonEmptyList<'T>`, `NonEmptyArray<'T>` | `map`, `append`, `rev`, `sort`, `distinct`, `scan`, `truncate` | `head`, `last`, `reduce`, `min`, `max`, `average`, `item` |
 | `Interval<'T>` | `between`, `span`, `clamp`, `mapMonotonic` | `contains`, `clamp` |
 | `Bounded<'T>` | `clamp`, `map` (re-clamps) | `clamp` |
 | `NonBlankString` | `append`, `trim`, `toUpper`, `toLower` | `split` |
 | `UnitInterval` | `*`, `complement`, `lerp`, `min`, `max` | `clamp` |
 | `FiniteFloat`, `FiniteFloat32` | `negate`, `abs` | aggregates that cannot be silently poisoned |
-| `DistinctList<'T>` | `add`, `remove`, `union`, `intersect` | `toSet` |
+| `DistinctList<'T>` | `add`, `remove`, `union`, `intersect`, `sort`, `filter`, `map` | `toSet` |
 
 ## Collections
 
@@ -59,6 +59,41 @@ where `Set.ofList` on an ordinary list silently collapses duplicates.
 rather than over keys — `[ 1, "a"; 1, "b" ]` is a legitimate `DistinctList` whose entries
 would collide. They report the collision instead of dropping an entry the way `Map.ofList`
 does.
+
+### Everyday operations
+
+A refined collection is still a collection. Alongside the operations the invariant makes
+total, each module carries the everyday list vocabulary, so a pipeline never has to drop
+back to `List` and re-admit the result:
+
+```fsharp
+let total   = NonEmptyList.sumBy _.Total lines        // not List.sumBy on a converted list
+let mean    = NonEmptyList.average prices             // total: the divisor is never zero
+let biggest = NonEmptyList.maxBy _.Quantity lines     // total: no option
+```
+
+The two tiers are worth telling apart, because only the second is a reason to reach for
+the type:
+
+| Tier | Operations | What the invariant does |
+|---|---|---|
+| Parity | `sum`, `sumBy`, `choose`, `countBy`, `tryPick`, `tryFind`, `tryFindBack`, `tryFindIndex`, `pairwise`, `iter`, `iteri`, `fold`, `exists`, `forall` | nothing — these exist so the type is usable without a round trip |
+| Earned | `average`, `averageBy`, `item`, `truncate`, `skip`, `map2`, `init`, `replicate`, `scan`, `chunkBySize` | removes the partiality: no raise, no option, no empty case |
+
+`average` is the clearest of the earned ones: `List.average []` raises, while the divisor
+here is the length, which is at least one. `item`, `truncate`, `init`, and `chunkBySize`
+clamp their count into range instead of raising or emptying the list, so non-emptiness
+survives; `skip` and `map2` are total where `List.skip` and `List.map2` raise. Operations
+that can genuinely destroy the invariant stay honest: `filter`, `choose`, and `skip`
+return an ordinary list, and `tryFilter`/`tryChoose` return an option.
+
+`scan` is non-empty by construction rather than by inheritance — a scan always emits its
+seed.
+
+`NonEmptyArray` mirrors the whole set, and `DistinctList` carries the operations that
+cannot introduce a duplicate (`sort`, `sortBy`, `rev`, `truncate`, `filter`, `fold`,
+`sum`, `sumBy`); `map` and `choose` deduplicate, because neither a mapping nor a chooser
+need be injective.
 
 ## Intervals and bounds
 

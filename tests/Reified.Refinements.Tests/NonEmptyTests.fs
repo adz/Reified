@@ -186,3 +186,85 @@ module NonEmptyTests =
         let admitted = Refinement.create (NonEmptyArray.refinement ()) source |> Result.defaultWith (failwithf "%A")
         source[0] <- 99
         test <@ NonEmptyArray.head admitted = 1 @>
+
+    [<Fact>]
+    let ``sum, sumBy, average, and averageBy match the List versions without the empty branch`` () =
+        let input = NonEmpty(1m, [ 2m; 3m; 4m ])
+        test <@ NonEmptyList.sum input = 10m @>
+        test <@ NonEmptyList.sumBy (fun value -> value * 2m) input = 20m @>
+        test <@ NonEmptyList.average input = 2.5m @>
+        test <@ NonEmptyList.averageBy (fun value -> value * 2m) input = 5m @>
+
+        // List.average raises on the empty list; there is no such input here.
+        raises<System.ArgumentException> <@ List.average ([]: decimal list) @>
+        test <@ NonEmptyList.average (NonEmptyList.singleton 7m) = 7m @>
+
+    [<Fact>]
+    let ``choose narrows to a standard list, and tryChoose reports the empty case`` () =
+        let input = sample ()
+        let even value = if value % 2 = 0 then Some value else None
+        test <@ NonEmptyList.choose even input = [ 2; 4 ] @>
+        test <@ NonEmptyList.tryChoose even input |> Option.map NonEmptyList.toList = Some [ 2; 4 ] @>
+        test <@ NonEmptyList.tryChoose (fun _ -> None: int option) input = None @>
+        test <@ NonEmptyList.tryPick even input = Some 2 @>
+
+    [<Fact>]
+    let ``countBy gives a map whose every count is at least one`` () =
+        let counts = NonEmpty(1, [ 2; 3; 4; 5 ]) |> NonEmptyList.countBy (fun value -> value % 2)
+        test <@ counts[1] = 3 @>
+        test <@ counts[0] = 2 @>
+        test <@ counts |> Map.forall (fun _ count -> count >= 1) @>
+
+    [<Fact>]
+    let ``scan is non-empty by construction, because it always emits the seed`` () =
+        test <@ sample () |> NonEmptyList.scan (+) 0 |> NonEmptyList.toList = [ 0; 1; 3; 6; 10 ] @>
+        test <@ NonEmptyList.scanBack (+) (sample ()) 0 |> NonEmptyList.toList = [ 10; 9; 7; 4; 0 ] @>
+
+    [<Fact>]
+    let ``item, truncate, skip, init, and replicate are total where the List versions raise`` () =
+        let input = sample ()
+        test <@ NonEmptyList.item 2 input = 3 @>
+        test <@ NonEmptyList.item 99 input = 4 @> // clamped, because there is always a last item
+        test <@ NonEmptyList.tryItem 99 input = None @>
+
+        raises<System.ArgumentException> <@ List.skip 99 [ 1 ] @>
+        test <@ NonEmptyList.skip 99 input = [] @>
+
+        // List.truncate 0 empties; the refined version keeps the head.
+        test <@ List.truncate 0 [ 1 ] = [] @>
+        test <@ NonEmptyList.truncate 0 input |> NonEmptyList.toList = [ 1 ] @>
+        test <@ NonEmptyList.truncate 2 input |> NonEmptyList.toList = [ 1; 2 ] @>
+
+        test <@ NonEmptyList.init 0 id |> NonEmptyList.toList = [ 0 ] @>
+        test <@ NonEmptyList.replicate 3 'a' |> NonEmptyList.toList = [ 'a'; 'a'; 'a' ] @>
+
+    [<Fact>]
+    let ``map2 truncates rather than raising on a length mismatch`` () =
+        raises<System.ArgumentException> <@ List.map2 (+) [ 1; 2 ] [ 1 ] @>
+        test <@ NonEmptyList.map2 (+) (sample ()) (NonEmpty(10, [ 20 ])) |> NonEmptyList.toList = [ 11; 22 ] @>
+        test <@ NonEmptyList.allPairs (NonEmpty(1, [ 2 ])) (NonEmpty('a', [])) |> NonEmptyList.toList = [ 1, 'a'; 2, 'a' ] @>
+
+    [<Fact>]
+    let ``distinctBy and sortByDescending stay closed over non-emptiness`` () =
+        let input = NonEmpty(1, [ 2; 3; 4 ])
+        test <@ NonEmptyList.distinctBy (fun value -> value % 2) input |> NonEmptyList.toList = [ 1; 2 ] @>
+        test <@ NonEmptyList.sortByDescending id input |> NonEmptyList.toList = [ 4; 3; 2; 1 ] @>
+        test <@ NonEmptyList.pairwise input = [ 1, 2; 2, 3; 3, 4 ] @>
+        test <@ NonEmptyList.pairwise (NonEmptyList.singleton 1) = [] @>
+
+    [<Fact>]
+    let ``the array module carries the same operations`` () =
+        let input = NonEmptyArray.ofList [ 1m; 2m; 3m; 4m ] |> Option.get
+        test <@ NonEmptyArray.sum input = 10m @>
+        test <@ NonEmptyArray.sumBy (fun value -> value * 2m) input = 20m @>
+        test <@ NonEmptyArray.average input = 2.5m @>
+        test <@ NonEmptyArray.averageBy (fun value -> value * 2m) input = 5m @>
+        test <@ NonEmptyArray.item 99 input = 4m @>
+        test <@ NonEmptyArray.truncate 0 input |> NonEmptyArray.toList = [ 1m ] @>
+        test <@ NonEmptyArray.skip 99 input = [||] @>
+        test <@ NonEmptyArray.scan (+) 0m input |> NonEmptyArray.toList = [ 0m; 1m; 3m; 6m; 10m ] @>
+        test <@ NonEmptyArray.choose (fun value -> if value > 2m then Some value else None) input = [| 3m; 4m |] @>
+        test <@ NonEmptyArray.countBy (fun value -> value > 2m) input |> Map.find true = 2 @>
+        test <@ NonEmptyArray.replicate 3 'a' |> NonEmptyArray.toList = [ 'a'; 'a'; 'a' ] @>
+        test <@ NonEmptyArray.map2 (+) input (NonEmptyArray.singleton 10m) |> NonEmptyArray.toList = [ 11m ] @>
+        test <@ NonEmptyArray.sortByDescending id input |> NonEmptyArray.head = 4m @>

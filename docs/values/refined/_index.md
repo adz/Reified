@@ -78,8 +78,15 @@ let averageLine (lines: OrderLine list) =
 
 // refined: the empty case cannot arise, so there is nothing to return an option for
 let averageLine (lines: NonEmptyList<OrderLine>) =
-    NonEmptyList.reduce (+) (NonEmptyList.map _.Total lines) / decimal (NonEmptyList.length lines)
+    NonEmptyList.averageBy _.Total lines
 ```
+
+The refined version is shorter, not just safer. That is deliberate: the collection types
+carry the ordinary list vocabulary — `sum`, `sumBy`, `average`, `choose`, `countBy`,
+`item` — as well as the operations the invariant makes total. A refined type that only
+offered the clever operations would push you back through `toList` for everyday work, and
+the invariant would be lost halfway down the pipeline. See
+[the catalogue](./catalog/#everyday-operations).
 
 [Order Totals](./tutorials/order-totals/) works this through on a realistic domain.
 

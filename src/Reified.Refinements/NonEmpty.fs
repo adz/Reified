@@ -90,6 +90,16 @@ module NonEmptyList =
     /// <summary>Builds a list of exactly one item.</summary>
     let singleton value = NonEmpty(value, [])
 
+    /// <summary>
+    /// Builds a list of <c>count</c> items from their indices, treating a count below one
+    /// as one. Total, where <c>List.init 0</c> yields an empty list.
+    /// </summary>
+    let init count initialiser =
+        List.init (Operators.max 1 count) initialiser |> ofCheckedList
+
+    /// <summary>Builds a list of <c>count</c> copies, treating a count below one as one.</summary>
+    let replicate count value = init count (fun _ -> value)
+
     /// <summary>Prepends an item to a standard list.</summary>
     let cons head tail = NonEmpty(head, tail)
 
@@ -206,11 +216,27 @@ module NonEmptyList =
         | head :: tail -> NonEmpty(head, tail)
         | [] -> input
 
+    /// <summary>Sorts the items by a projected key, descending.</summary>
+    let sortByDescending projection (input: NonEmptyList<'value>) =
+        match input.ToList() |> List.sortByDescending projection with
+        | head :: tail -> NonEmpty(head, tail)
+        | [] -> input
+
     /// <summary>Removes duplicate items, preserving first-seen order. Non-emptiness is preserved.</summary>
     let distinct (input: NonEmptyList<'value>) =
         match input.ToList() |> List.distinct with
         | head :: tail -> NonEmpty(head, tail)
         | [] -> input
+
+    /// <summary>Removes items sharing a projected key, keeping the first of each. Non-emptiness is preserved.</summary>
+    let distinctBy projection (input: NonEmptyList<'value>) =
+        match input.ToList() |> List.distinctBy projection with
+        | head :: tail -> NonEmpty(head, tail)
+        | [] -> input
+
+    /// <summary>Every pairing of an item from each list. Non-emptiness is preserved.</summary>
+    let allPairs (first: NonEmptyList<'first>) (second: NonEmptyList<'second>) =
+        List.allPairs (first.ToList()) (second.ToList()) |> ofCheckedList
 
     /// <summary>
     /// Pairs items positionally, truncating to the shorter input. Total — unlike
@@ -224,6 +250,13 @@ module NonEmptyList =
             | _ -> List.rev accumulated
 
         NonEmpty((first.Head, second.Head), loop first.Tail second.Tail [])
+
+    /// <summary>
+    /// Combines items positionally, truncating to the shorter input. Total — unlike
+    /// <c>List.map2</c>, which raises when the lengths differ.
+    /// </summary>
+    let map2 mapping (first: NonEmptyList<'first>) (second: NonEmptyList<'second>) =
+        zip first second |> map (fun (left, right) -> mapping left right)
 
     /// <summary>Splits a non-empty list of pairs into a pair of non-empty lists.</summary>
     let unzip (input: NonEmptyList<'first * 'second>) =
@@ -265,6 +298,39 @@ module NonEmptyList =
     let maxBy projection (input: NonEmptyList<'value>) =
         reduce (fun left right -> if projection right > projection left then right else left) input
 
+    // Aggregates -----------------------------------------------------------------------
+
+    /// <summary>Adds every item, matching <c>List.sum</c>.</summary>
+    let inline sum (input: NonEmptyList< ^value >) = input.ToList() |> List.sum
+
+    /// <summary>Adds a projection of every item, matching <c>List.sumBy</c>.</summary>
+    let inline sumBy projection (input: NonEmptyList<'value>) = input.ToList() |> List.sumBy projection
+
+    /// <summary>
+    /// Averages the items. Total — the divisor is the length, which is always at least
+    /// one, so unlike <c>List.average</c> this cannot raise.
+    /// </summary>
+    let inline average (input: NonEmptyList< ^value >) = input.ToList() |> List.average
+
+    /// <summary>Averages a projection of the items. Total, for the same reason as <c>average</c>.</summary>
+    let inline averageBy projection (input: NonEmptyList<'value>) = input.ToList() |> List.averageBy projection
+
+    /// <summary>Counts the items sharing each key. Every count is at least one.</summary>
+    let countBy projection (input: NonEmptyList<'value>) =
+        input.ToList() |> List.countBy projection |> Map.ofList
+
+    /// <summary>Runs a fold and keeps every intermediate state, including the seed.</summary>
+    /// <remarks>
+    /// Non-empty by construction rather than by inheritance: a scan always emits the seed,
+    /// so the result would be non-empty even over an empty source.
+    /// </remarks>
+    let scan folder state (input: NonEmptyList<'value>) =
+        input.ToList() |> List.scan folder state |> ofCheckedList
+
+    /// <summary>Runs a fold from the right and keeps every intermediate state.</summary>
+    let scanBack folder (input: NonEmptyList<'value>) state =
+        List.scanBack folder (input.ToList()) state |> ofCheckedList
+
     // Narrowing operations -------------------------------------------------------------
 
     /// <summary>Filters the items, returning a standard list because emptiness is possible.</summary>
@@ -288,8 +354,59 @@ module NonEmptyList =
     /// <summary>Returns the first matching item, if any.</summary>
     let tryFind predicate (input: NonEmptyList<'value>) = input.ToList() |> List.tryFind predicate
 
+    /// <summary>Returns the last matching item, if any.</summary>
+    let tryFindBack predicate (input: NonEmptyList<'value>) = input.ToList() |> List.tryFindBack predicate
+
+    /// <summary>Returns the index of the first matching item, if any.</summary>
+    let tryFindIndex predicate (input: NonEmptyList<'value>) = input.ToList() |> List.tryFindIndex predicate
+
+    /// <summary>Returns the first item the chooser accepts, if any.</summary>
+    let tryPick chooser (input: NonEmptyList<'value>) = input.ToList() |> List.tryPick chooser
+
+    /// <summary>
+    /// Keeps the chosen items, returning a standard list because a chooser can reject
+    /// every item.
+    /// </summary>
+    let choose chooser (input: NonEmptyList<'value>) = input.ToList() |> List.choose chooser
+
+    /// <summary>Keeps the chosen items, returning <c>None</c> when nothing survives.</summary>
+    let tryChoose chooser input = input |> choose chooser |> ofList
+
+    /// <summary>Returns the item at an index, or <c>None</c> when the index is out of range.</summary>
+    let tryItem index (input: NonEmptyList<'value>) = input.ToList() |> List.tryItem index
+
+    /// <summary>
+    /// Returns the item at an index, clamping the index into range. Total — index zero is
+    /// always the head, so there is no empty case to report.
+    /// </summary>
+    let item index (input: NonEmptyList<'value>) =
+        let values = input.ToList()
+        values[index |> Operators.max 0 |> Operators.min (List.length values - 1)]
+
+    /// <summary>
+    /// Keeps at most the first <c>count</c> items, treating a count below one as one.
+    /// Total, and non-emptiness is preserved — where <c>List.truncate 0</c> empties.
+    /// </summary>
+    let truncate count (input: NonEmptyList<'value>) =
+        input.ToList() |> List.truncate (Operators.max 1 count) |> ofCheckedList
+
+    /// <summary>
+    /// Drops the first <c>count</c> items, returning a standard list because skipping can
+    /// consume everything. Total — a count past the end yields the empty list rather than
+    /// raising the way <c>List.skip</c> does.
+    /// </summary>
+    let skip count (input: NonEmptyList<'value>) =
+        let values = input.ToList()
+        values |> List.skip (count |> Operators.max 0 |> Operators.min (List.length values))
+
+    /// <summary>Pairs each item with its successor, returning a standard list — a single item yields none.</summary>
+    let pairwise (input: NonEmptyList<'value>) = input.ToList() |> List.pairwise
+
     /// <summary>Applies an action to every item.</summary>
     let iter action (input: NonEmptyList<'value>) = input.ToList() |> List.iter action
+
+    /// <summary>Applies an index-aware action to every item.</summary>
+    let iteri action (input: NonEmptyList<'value>) = input.ToList() |> List.iteri action
 
     /// <summary>
     /// Groups items by a key. Every group is non-empty by construction — a group only
@@ -583,3 +700,116 @@ module NonEmptyArray =
         |> Array.chunkBySize (Operators.max 1 size)
         |> Array.map NonEmptyArray
         |> NonEmptyArray
+
+    // Aggregates -----------------------------------------------------------------------
+
+    /// <summary>Adds every item, matching <c>Array.sum</c>.</summary>
+    let inline sum (input: NonEmptyArray< ^value >) = input.ToArray() |> Array.sum
+
+    /// <summary>Adds a projection of every item, matching <c>Array.sumBy</c>.</summary>
+    let inline sumBy projection (input: NonEmptyArray<'value>) = input.ToArray() |> Array.sumBy projection
+
+    /// <summary>
+    /// Averages the items. Total — the divisor is the length, which is always at least
+    /// one, so unlike <c>Array.average</c> this cannot raise.
+    /// </summary>
+    let inline average (input: NonEmptyArray< ^value >) = input.ToArray() |> Array.average
+
+    /// <summary>Averages a projection of the items. Total, for the same reason as <c>average</c>.</summary>
+    let inline averageBy projection (input: NonEmptyArray<'value>) = input.ToArray() |> Array.averageBy projection
+
+    /// <summary>Counts the items sharing each key. Every count is at least one.</summary>
+    let countBy projection (input: NonEmptyArray<'value>) =
+        input.ToArray() |> Array.countBy projection |> Map.ofArray
+
+    /// <summary>Runs a fold and keeps every intermediate state, including the seed.</summary>
+    let scan folder state (input: NonEmptyArray<'value>) =
+        input.ToArray() |> Array.scan folder state |> NonEmptyArray
+
+    /// <summary>Runs a fold from the right and keeps every intermediate state.</summary>
+    let scanBack folder (input: NonEmptyArray<'value>) state =
+        Array.scanBack folder (input.ToArray()) state |> NonEmptyArray
+
+    // Selection ------------------------------------------------------------------------
+
+    /// <summary>Returns the last matching item, if any.</summary>
+    let tryFindBack predicate (input: NonEmptyArray<'value>) = input.ToArray() |> Array.tryFindBack predicate
+
+    /// <summary>Returns the index of the first matching item, if any.</summary>
+    let tryFindIndex predicate (input: NonEmptyArray<'value>) = input.ToArray() |> Array.tryFindIndex predicate
+
+    /// <summary>Returns the first item the chooser accepts, if any.</summary>
+    let tryPick chooser (input: NonEmptyArray<'value>) = input.ToArray() |> Array.tryPick chooser
+
+    /// <summary>
+    /// Keeps the chosen items, returning a standard array because a chooser can reject
+    /// every item.
+    /// </summary>
+    let choose chooser (input: NonEmptyArray<'value>) = input.ToArray() |> Array.choose chooser
+
+    /// <summary>Keeps the chosen items, returning <c>None</c> when nothing survives.</summary>
+    let tryChoose chooser input = input |> choose chooser |> ofArray
+
+    /// <summary>Returns the item at an index, or <c>None</c> when the index is out of range.</summary>
+    let tryItem index (input: NonEmptyArray<'value>) = input.ToArray() |> Array.tryItem index
+
+    /// <summary>
+    /// Returns the item at an index, clamping the index into range. Total — index zero is
+    /// always the head, so there is no empty case to report.
+    /// </summary>
+    let item index (input: NonEmptyArray<'value>) =
+        let values = input.ToArray()
+        values[index |> Operators.max 0 |> Operators.min (values.Length - 1)]
+
+    /// <summary>
+    /// Keeps at most the first <c>count</c> items, treating a count below one as one.
+    /// Total, and non-emptiness is preserved — where <c>Array.truncate 0</c> empties.
+    /// </summary>
+    let truncate count (input: NonEmptyArray<'value>) =
+        input.ToArray() |> Array.truncate (Operators.max 1 count) |> NonEmptyArray
+
+    /// <summary>
+    /// Drops the first <c>count</c> items, returning a standard array because skipping can
+    /// consume everything. Total — a count past the end yields the empty array rather than
+    /// raising the way <c>Array.skip</c> does.
+    /// </summary>
+    let skip count (input: NonEmptyArray<'value>) =
+        let values = input.ToArray()
+        values |> Array.skip (count |> Operators.max 0 |> Operators.min values.Length)
+
+    /// <summary>Pairs each item with its successor, returning a standard array — a single item yields none.</summary>
+    let pairwise (input: NonEmptyArray<'value>) = input.ToArray() |> Array.pairwise
+
+    /// <summary>Applies an index-aware action to every item.</summary>
+    let iteri action (input: NonEmptyArray<'value>) = input.ToArray() |> Array.iteri action
+
+    // Invariant-preserving operations --------------------------------------------------
+
+    /// <summary>
+    /// Builds an array of <c>count</c> items from their indices, treating a count below
+    /// one as one. Total, where <c>Array.init 0</c> yields an empty array.
+    /// </summary>
+    let init count initialiser =
+        Array.init (Operators.max 1 count) initialiser |> NonEmptyArray
+
+    /// <summary>Builds an array of <c>count</c> copies, treating a count below one as one.</summary>
+    let replicate count value = init count (fun _ -> value)
+
+    /// <summary>Sorts the items by a projected key, descending.</summary>
+    let sortByDescending projection (input: NonEmptyArray<'value>) =
+        NonEmptyArray(input.ToArray() |> Array.sortByDescending projection)
+
+    /// <summary>Removes items sharing a projected key, keeping the first of each. Non-emptiness is preserved.</summary>
+    let distinctBy projection (input: NonEmptyArray<'value>) =
+        NonEmptyArray(input.ToArray() |> Array.distinctBy projection)
+
+    /// <summary>Every pairing of an item from each array. Non-emptiness is preserved.</summary>
+    let allPairs (first: NonEmptyArray<'first>) (second: NonEmptyArray<'second>) =
+        NonEmptyArray(Array.allPairs (first.ToArray()) (second.ToArray()))
+
+    /// <summary>
+    /// Combines items positionally, truncating to the shorter input. Total — unlike
+    /// <c>Array.map2</c>, which raises when the lengths differ.
+    /// </summary>
+    let map2 mapping (first: NonEmptyArray<'first>) (second: NonEmptyArray<'second>) =
+        zip first second |> map (fun (left, right) -> mapping left right)

@@ -124,3 +124,27 @@ module DistinctAndTextTests =
     let ``join is the inverse of split for separator-free segments`` () =
         let value = nonBlank "a,b,c"
         test <@ NonBlankString.split "," value |> NonBlankString.join "," |> NonBlankString.value = "a,b,c" @>
+
+    [<Fact>]
+    let ``the everyday list operations stay closed over distinctness`` () =
+        let input = DistinctList.ofSeq [ 3; 1; 2 ]
+
+        test <@ DistinctList.sum input = 6 @>
+        test <@ DistinctList.sumBy (fun value -> value * 2) input = 12 @>
+        test <@ DistinctList.fold (+) 0 input = 6 @>
+        test <@ DistinctList.exists (fun value -> value = 2) input @>
+        test <@ DistinctList.forall (fun value -> value > 0) input @>
+        test <@ DistinctList.tryFind (fun value -> value > 2) input = Some 3 @>
+        test <@ DistinctList.tryPick (fun value -> if value > 2 then Some(value * 10) else None) input = Some 30 @>
+        test <@ DistinctList.tryHead input = Some 3 @>
+        test <@ DistinctList.isEmpty DistinctList.empty @>
+
+        test <@ DistinctList.sort input |> DistinctList.toList = [ 1; 2; 3 ] @>
+        test <@ DistinctList.sortBy (fun value -> -value) input |> DistinctList.toList = [ 3; 2; 1 ] @>
+        test <@ DistinctList.rev input |> DistinctList.toList = [ 2; 1; 3 ] @>
+        test <@ DistinctList.truncate 2 input |> DistinctList.toList = [ 3; 1 ] @>
+
+        // A chooser need not be injective, so choose removes any collision it introduces.
+        let collapsed = input |> DistinctList.choose (fun value -> Some(value % 2))
+        test <@ DistinctList.toList collapsed = [ 1; 0 ] @>
+        test <@ DistinctList.toSet collapsed |> Set.count = DistinctList.length collapsed @>

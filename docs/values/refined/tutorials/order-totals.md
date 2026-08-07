@@ -116,13 +116,12 @@ let lineCount (order: Order) =
     NonEmptyList.length order.Lines
 
 let averageUnitPrice (order: Order) =
-    let prices = order.Lines |> NonEmptyList.map (fun line -> line.UnitPrice)
-    NonEmptyList.reduce (+) prices / decimal (NonEmptyList.length prices)
+    order.Lines |> NonEmptyList.averageBy (fun line -> line.UnitPrice)
 ```
 
-`maxBy` returns an `OrderLine`, not an option. `reduce` needs no seed. Dividing by
-`length` cannot divide by zero. Each of those is a branch the plain-list version would
-have had to write:
+`maxBy` returns an `OrderLine`, not an option. `averageBy` returns a `decimal`, not an
+option, because the divisor is the length and the length is at least one. Each of those is
+a branch the plain-list version would have had to write:
 
 ```fsharp
 // what the same three functions cost over an ordinary list
@@ -131,6 +130,10 @@ let averageUnitPrice lines =
     if List.isEmpty lines then None
     else Some (List.sumBy _.UnitPrice lines / decimal (List.length lines))
 ```
+
+The refined side is the shorter of the two, which is the point: the collection modules
+carry the everyday operations (`sum`, `sumBy`, `average`, `choose`, `countBy`) as well as
+the total ones, so nothing here converts back to a list to do ordinary work.
 
 ### Delivery window
 
