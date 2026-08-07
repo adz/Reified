@@ -6,6 +6,9 @@ description: Derive accepted values from a schema and test transitions, codecs, 
 
 # Test schema guarantees
 
+> `Reified.Schema.Testing` is repository tooling, not a published package. There is nothing to install. Copy or adapt
+> the pattern shown here into your own test project.
+
 The compiler checks type shape and visibility. It cannot prove that a constructor contains the right business rule or
 that a total transition preserves it.
 

@@ -247,7 +247,6 @@ independently installable and depends only on what it needs.
 | `Reified.Schema` | model admission, diagnostics, inspection, JSON Schema |
 | `Reified.Schema.Json` | compiled JSON codecs |
 | `Reified.Schema.Http` | endpoint declarations and OpenAPI output |
-| `Reified.Schema.Testing` | values generated from a schema |
 | `Reified.Schema.Contracts.Build` | MSBuild integration for derived record contracts |
 
 Reified is pre-1.0 and has not been published to NuGet yet, so the `dotnet add package` lines above do not

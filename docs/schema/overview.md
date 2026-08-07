@@ -77,12 +77,10 @@ Schema metadata, input parsing, checking, accumulated errors, and executable val
 and refined values arrive through its focused package dependencies, so Schema users do not need a second install.
 
 `Reified.Schema.Json` is separate and optional: add it only if you want a compiled, runtime-reflection-free JSON codec generated from
-your schema (`Json.compile`). `Reified.Schema.JsonSchema` is also separate and optional; it supplies
-`JsonSchema.generate` in the `Reified.Schema` namespace. Parsing, checking, rules, redisplay, and metadata inspection need
-neither optional package.
+your schema (`Json.compile`). Parsing, checking, rules, redisplay, and metadata inspection do not need it.
+
+JSON Schema generation is not a separate package: `JsonSchema.generate` is a module in `Reified.Schema` itself.
 
 `Reified.Schema.Json` also installs as part of `Reified`, or individually with `dotnet add package Reified.Schema.Json`.
-
-JSON Schema generation ships in `Reified.Schema`; no extra package is needed.
 
 See [JSON Codec](../json-codec/) for what that package buys you.

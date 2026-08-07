@@ -83,16 +83,22 @@ and test-data generation interpret the same field names, value shapes, and const
 
 ## Packages
 
-The Schema documentation covers the core package and its focused codec, contract, HTTP, and testing packages.
+The Schema documentation covers the core package and its focused codec, derivation, and HTTP packages.
 
 | Package | Use it for | Documentation |
 | --- | --- | --- |
-| `Reified.Schema` | Model schemas, parsing, checking, accumulated errors, and inspection | [Reified.Schema](./overview/) |
+| `Reified.Schema` | Model schemas, parsing, checking, accumulated errors, inspection, and JSON Schema generation through its `JsonSchema` module | [Reified.Schema](./overview/) |
 | `Reified.Schema.Json` | Compiled JSON codecs | [JSON Codec](./json-codec/) |
-| `Reified.Schema.JsonSchema` | JSON Schema generation | [JSON Schema reference]({{< relref "/schema/reference/schema/m-schema-jsonschema-generate" >}}) |
 | `Reified.Schema.Contracts.Build` | Build-time schema derivation from F# records | [Derived Schemas](./derivation/) |
 | `Reified.Schema.Http` | HTTP-neutral request and response contracts | [HTTP Servers](./http-servers/) |
-| `Reified.Schema.Testing` | Test helpers for schema guarantees | [Testing patterns](./patterns/testing-schema-guarantees/) |
+
+`JsonSchema` is a module inside `Reified.Schema`, not a package of its own — see the
+[JSON Schema reference]({{< relref "/schema/reference/schema/m-schema-jsonschema-generate" >}}).
+
+One piece of Schema tooling is not published at all. `Reified.Schema.Testing` is an FsCheck adapter that lives in this
+repository and is deliberately not packable, because a published library should not carry a test-framework dependency.
+Copy or adapt the pattern rather than installing it — see
+[Testing patterns](./patterns/testing-schema-guarantees/).
 
 Schema controls values produced through Schema. A public F# record can still be constructed directly. Use refined fields,
 a private aggregate, or an opaque `.fsi` interface when the rest of the application must rely on an invariant
