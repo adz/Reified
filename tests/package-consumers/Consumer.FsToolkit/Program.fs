@@ -18,8 +18,8 @@ module private Order =
 
 let private orderSchema =
     schema<Order> {
-        field "sku" _.Sku
-        field "quantity" _.Quantity
+        field _.Sku
+        field _.Quantity
         construct Order.create
     }
 

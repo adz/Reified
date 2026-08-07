@@ -42,10 +42,10 @@ module SchemaErrorTests =
     let ``parsed input renders failed parse diagnostics with paths`` () =
         let schema =
             schema<Signup> {
-                field "email" _.Email {
+                field _.Email {
                     withSchema (Schema.text |> Schema.constrain Constraint.present)
                 }
-                field "age" _.Age
+                field _.Age
                 construct (fun email age -> { Email = email; Age = age })
             }
 
@@ -64,10 +64,10 @@ module SchemaErrorTests =
     let ``schema issues can be mapped into application errors after parsing`` () =
         let schema =
             schema<Signup> {
-                field "email" _.Email {
+                field _.Email {
                     withSchema (Schema.text |> Schema.constrain Constraint.present)
                 }
-                field "age" _.Age
+                field _.Age
                 construct (fun email age -> { Email = email; Age = age })
             }
 

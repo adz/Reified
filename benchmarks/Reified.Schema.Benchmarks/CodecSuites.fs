@@ -29,34 +29,34 @@ module CodecModel =
 
     let addressSchema =
         schema<Address> {
-            field "street" _.Street
-            field "city" _.City
+            field _.Street
+            field _.City
             construct (fun street city -> { Street = street; City = city })
         }
 
     let contactSchema =
         schema<Contact> {
-            field "label" _.Label
-            field "value" _.Value
+            field _.Label
+            field _.Value
             construct (fun label value -> { Label = label; Value = value })
         }
 
     let customerSchema =
         schema<Customer> {
-            field "id" _.Id
-            field "name" _.Name
-            field "age" _.Age
-            field "balance" _.Balance
-            field "newsletter" _.Newsletter
-            field "joined" _.Joined
-            field "lastSeen" _.LastSeen
-            field "address" _.Address {
+            field _.Id
+            field _.Name
+            field _.Age
+            field _.Balance
+            field _.Newsletter
+            field _.Joined
+            field _.LastSeen
+            field _.Address {
                 withSchema addressSchema
             }
-            field "contacts" _.Contacts {
+            field _.Contacts {
                 withSchema (Schema.listWith contactSchema)
             }
-            field "scores" _.Scores {
+            field _.Scores {
                 withSchema (Schema.listWith Schema.int)
             }
             construct (fun id name age balance newsletter joined lastSeen address contacts scores ->

@@ -75,13 +75,13 @@ module RefinedCatalogSchemaTests =
 
     let private productSchema () =
         schema<Product> {
-            field "name" _.Name {
+            field _.Name {
                 withSchema RefinedSchemas.nonBlankString
             }
-            field "slug" _.Slug {
+            field _.Slug {
                 withSchema (slugSchema ())
             }
-            field "quantity" _.Quantity {
+            field _.Quantity {
                 withSchema (Schema.int |> Schema.constrain (Constraint.greaterThan 0))
             }
             construct (fun name slug quantity ->
@@ -154,10 +154,10 @@ module RefinedCatalogSchemaTests =
     let ``remaining scalar catalog schemas report the same failures as standalone refinement`` () =
         let schema =
             schema<Scalars> {
-                field "command" _.Command {
+                field _.Command {
                     withSchema (trimmedSchema ())
                 }
-                field "offset" _.Offset {
+                field _.Offset {
                     withSchema (Schema.int |> Schema.constrain (Constraint.notEqualTo 0))
                 }
                 construct (fun command offset -> { Command = command; Offset = offset })
@@ -176,10 +176,10 @@ module RefinedCatalogSchemaTests =
     let ``refined collection catalog schemas parse trusted values`` () =
         let schema =
             schema<Tagged> {
-                field "tags" _.Tags {
+                field _.Tags {
                     withSchema (RefinedSchemas.nonEmptyList RefinedSchemas.nonBlankString)
                 }
-                field "codes" _.Codes {
+                field _.Codes {
                     withSchema (RefinedSchemas.distinctList Schema.text)
                 }
                 construct (fun tags codes -> { Tags = tags; Codes = codes })
@@ -202,10 +202,10 @@ module RefinedCatalogSchemaTests =
     let ``refined collection catalog schemas report collection and item failures`` () =
         let schema =
             schema<Tagged> {
-                field "tags" _.Tags {
+                field _.Tags {
                     withSchema (RefinedSchemas.nonEmptyList RefinedSchemas.nonBlankString)
                 }
-                field "codes" _.Codes {
+                field _.Codes {
                     withSchema (RefinedSchemas.distinctList Schema.text)
                 }
                 construct (fun tags codes -> { Tags = tags; Codes = codes })

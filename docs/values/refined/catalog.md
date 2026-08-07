@@ -115,7 +115,7 @@ than to catch one.
 Numeric ranges are therefore constraints:
 
 ```fsharp
-field "quantity" _.Quantity { constrain (Constraint.greaterThan 0) }
+field _.Quantity { constrain (Constraint.greaterThan 0) }
 ```
 
 If you want a nominal type for a numeric identifier — where the point is identity rather
@@ -193,9 +193,9 @@ Express them as constraints on a primitive instead — the metadata reaching int
 identical:
 
 ```fsharp
-field "displayName" _.DisplayName { constrain Constraint.trimmed }
+field _.DisplayName { constrain Constraint.trimmed }
 
-field "slug" _.Slug {
+field _.Slug {
     constrain Constraint.present
     constrain (Constraint.pattern slugPattern)
 }

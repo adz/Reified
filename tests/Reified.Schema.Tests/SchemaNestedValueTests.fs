@@ -23,10 +23,10 @@ module SchemaNestedValueTests =
 
     let private buildAddressSchema () =
         schema<Address> {
-            field "street" _.Street {
+            field _.Street {
                 withSchema (Schema.text |> Schema.constrain Constraint.present)
             }
-            field "city" _.City {
+            field _.City {
                 withSchema (Schema.text |> Schema.constrain Constraint.present)
             }
             construct (fun street city -> { Street = street; City = city })
@@ -38,10 +38,10 @@ module SchemaNestedValueTests =
 
         let schema =
             schema<Customer> {
-                field "name" _.Name {
+                field _.Name {
                     withSchema (Schema.text |> Schema.constrain Constraint.present)
                 }
-                field "address" _.Address {
+                field _.Address {
                     withSchema addressSchema
                 }
                 construct (fun name address -> { Name = name; Address = address })
@@ -63,10 +63,10 @@ module SchemaNestedValueTests =
 
         let schema =
             schema<Customer> {
-                field "name" _.Name {
+                field _.Name {
                     withSchema (Schema.text |> Schema.constrain Constraint.present)
                 }
-                field "address" _.Address {
+                field _.Address {
                     withSchema (addressSchema |> Schema.mustSupply)
                 }
                 construct (fun name address -> { Name = name; Address = address })
@@ -93,10 +93,10 @@ module SchemaNestedValueTests =
 
         let schema =
             schema<Customer> {
-                field "name" _.Name {
+                field _.Name {
                     withSchema (Schema.text |> Schema.constrain Constraint.present)
                 }
-                field "address" _.Address {
+                field _.Address {
                     withSchema addressSchema
                 }
                 construct (fun name address -> { Name = name; Address = address })

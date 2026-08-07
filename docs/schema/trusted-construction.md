@@ -41,8 +41,8 @@ type Booking =
 
 let bookingSchema =
     schema<Booking> {
-        field "start" _.Start
-        field "end" _.End
+        field _.Start
+        field _.End
         constructResult (fun start finish ->
             if start <= finish then Ok { Start = start; End = finish }
             else Error "Start must not be after end.")
@@ -106,8 +106,8 @@ module Booking =
 
     let schema =
         schema<Booking> {
-            field "start" start
-            field "end" finish
+            fieldAs "start" start
+            fieldAs "end" finish
             constructResult create
         }
 ```
@@ -145,8 +145,8 @@ module Booking =
 
     let schema =
         schema<Booking> {
-            field "start" (fun b -> b.Start)
-            field "end" (fun b -> b.End)
+            fieldAs "start" (fun b -> b.Start)
+            fieldAs "end" (fun b -> b.End)
             constructResult (fun start finish -> create { Start = start; End = finish })
         }
 ```

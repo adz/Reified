@@ -117,13 +117,13 @@ module SchemaValidationTests =
 
     let private signupSchema =
         schema<Signup> {
-            field "email" _.Email {
+            field _.Email {
                 withSchema (
                     Schema.text
                     |> Schema.constrainAll [ Constraint.present; Constraint.email; Constraint.maxLength 254 ]
                 )
             }
-            field "age" _.Age {
+            field _.Age {
                 withSchema (Schema.int |> Schema.constrain (Constraint.atLeast 18))
             }
             construct (fun email age -> { Email = email; Age = age })
@@ -131,10 +131,10 @@ module SchemaValidationTests =
 
     let private contactMethodSchema =
         schema<ContactMethod> {
-            field "kind" _.Kind {
+            field _.Kind {
                 withSchema (Schema.text |> Schema.constrain Constraint.present)
             }
-            field "value" _.Value {
+            field _.Value {
                 withSchema (Schema.text |> Schema.constrain Constraint.present)
             }
             construct (fun kind value -> { Kind = kind; Value = value })
@@ -142,10 +142,10 @@ module SchemaValidationTests =
 
     let private contactBookSchema =
         schema<ContactBook> {
-            field "name" _.Name {
+            field _.Name {
                 withSchema (Schema.text |> Schema.constrain Constraint.present)
             }
-            field "contacts" _.Contacts {
+            field _.Contacts {
                 withSchema (
                     Schema.listWith contactMethodSchema
                     |> Schema.constrainAll [ Constraint.minLength 1; Constraint.maxLength 2 ]
@@ -211,13 +211,13 @@ module SchemaValidationTests =
     let ``check surfaces an opaque constraint's authored prose`` () =
         let messageSchema =
             schema<Signup> {
-                field "email" _.Email {
+                field _.Email {
                     withSchema (
                         Schema.text
                         |> Schema.constrain (Constraint.custom "Email is required." (Constraint.test Constraint.present))
                     )
                 }
-                field "age" _.Age {
+                field _.Age {
                     withSchema (
                         Schema.int
                         |> Schema.constrain (Constraint.custom "Must be an adult." (fun value -> value >= 18))
@@ -243,10 +243,10 @@ module SchemaValidationTests =
     let ``validate reads existing model values through schema getters`` () =
         let swappedSchema =
             schema<SwappedFields> {
-                field "secondary-on-wire" _.Primary {
+                fieldAs "secondary-on-wire" _.Primary {
                     withSchema (Schema.text |> Schema.constrain (Constraint.oneOf [ "primary-value" ]))
                 }
-                field "primary-on-wire" _.Secondary {
+                fieldAs "primary-on-wire" _.Secondary {
                     withSchema (Schema.text |> Schema.constrain (Constraint.oneOf [ "secondary-value" ]))
                 }
                 construct (fun primary secondary ->
@@ -272,10 +272,10 @@ module SchemaValidationTests =
     let ``validate checks nested model values through their nested schema`` () =
         let addressSchema =
             schema<Address> {
-                field "street" _.Street {
+                field _.Street {
                     withSchema (Schema.text |> Schema.constrain Constraint.present)
                 }
-                field "city" _.City {
+                field _.City {
                     withSchema (Schema.text |> Schema.constrain Constraint.present)
                 }
                 construct (fun street city -> { Street = street; City = city })
@@ -283,10 +283,10 @@ module SchemaValidationTests =
 
         let customerSchema =
             schema<Customer> {
-                field "name" (fun (value: Customer) -> value.Name) {
+                fieldAs "name" (fun (value: Customer) -> value.Name) {
                     withSchema (Schema.text |> Schema.constrain Constraint.present)
                 }
-                field "address" _.Address {
+                field _.Address {
                     withSchema addressSchema
                 }
                 construct (fun name address -> { Name = name; Address = address })
@@ -359,7 +359,7 @@ module SchemaValidationTests =
     let ``validate reports primitive collection item constraints at index paths`` () =
         let tagsSchema =
             schema<Tags> {
-                field "values" _.Values {
+                field _.Values {
                     withSchema (Schema.listWith (Schema.text |> Schema.constrain Constraint.present))
                 }
                 construct (fun values -> { Values = values })
@@ -429,8 +429,8 @@ module SchemaValidationTests =
     let ``values produced by input parsing with constructor invariants validate through the same schema`` () =
         let rangeSchema =
             schema<DateRange> {
-                field "start" _.Start
-                field "end" _.End
+                field _.Start
+                field _.End
                 constructResult DateRange.Create
             }
 

@@ -35,8 +35,8 @@ module RefinedSchemas =
     /// </summary>
     let interval (itemSchema: Schema<'value>) : Schema<Interval<'value>> =
         schema<Interval<'value>> {
-            field "lower" (fun (value: Interval<'value>) -> value.Lower) { withSchema itemSchema }
-            field "upper" (fun (value: Interval<'value>) -> value.Upper) { withSchema itemSchema }
+            fieldAs "lower" (fun (value: Interval<'value>) -> value.Lower) { withSchema itemSchema }
+            fieldAs "upper" (fun (value: Interval<'value>) -> value.Upper) { withSchema itemSchema }
             constructResult (fun lower upper -> Interval.create lower upper |> Result.mapError describe)
         }
 
@@ -55,7 +55,7 @@ module RefinedSchemas =
     /// </summary>
     let dateRange : Schema<DateRange> =
         schema<DateRange> {
-            field "start" (fun (value: DateRange) -> value.Lower) { withSchema Schema.dateTime }
-            field "end" (fun (value: DateRange) -> value.Upper) { withSchema Schema.dateTime }
+            fieldAs "start" (fun (value: DateRange) -> value.Lower) { withSchema Schema.dateTime }
+            fieldAs "end" (fun (value: DateRange) -> value.Upper) { withSchema Schema.dateTime }
             constructResult (fun start finish -> Interval.create start finish |> Result.mapError describe)
         }

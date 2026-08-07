@@ -24,11 +24,11 @@ type Customer =
 
 let customerSchema =
     schema<Customer> {
-        field "name" _.Name
-        field "address" _.Address {
+        field _.Name
+        field _.Address {
             withSchema addressSchema
         }
-        field "contacts" _.Contacts {
+        field _.Contacts {
             withSchema (Schema.listWith contactSchema)
             constrain (minLength 1)
         }

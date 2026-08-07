@@ -18,7 +18,7 @@ module SchemaUnionValueTests =
 
     let private cardSchema () =
         schema<CardDetails> {
-            field "number" _.Number {
+            field _.Number {
                 withSchema (Schema.text |> Schema.constrain Constraint.present)
             }
             construct (fun number -> { Number = number })
@@ -35,7 +35,7 @@ module SchemaUnionValueTests =
     let ``union value schema exposes discriminator payload and case descriptions`` () =
         let schema =
             schema<Checkout> {
-                field "payment" _.Payment {
+                field _.Payment {
                     withSchema (paymentSchema ())
                 }
                 construct (fun payment -> { Payment = payment })
@@ -65,7 +65,7 @@ module SchemaUnionValueTests =
     let ``union value schemas lower to json schema oneOf with const discriminators`` () =
         let schema =
             schema<Checkout> {
-                field "payment" _.Payment {
+                field _.Payment {
                     withSchema (paymentSchema ())
                 }
                 construct (fun payment -> { Payment = payment })

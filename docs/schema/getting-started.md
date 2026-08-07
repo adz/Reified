@@ -22,7 +22,6 @@ dotnet add package Reified.Schema
 open Reified.Data
 open Reified.Schema
 open Reified.Schema.Syntax
-open type Reified.Schema.Syntax
 ```
 
 ## 1. Plain fields
@@ -50,11 +49,11 @@ let signupSchema =
 property name. `construct` receives the fields in declaration order; the compiler checks its argument types and its
 result.
 
-Pass a wire name explicitly when it differs from the property: `field "email_address" _.Email`.
+Pass a wire name explicitly when it differs from the property: `fieldAs "email_address" _.Email`.
 
-Deriving the name from `_.Email` uses a quotation, which Fable cannot compile. Write the wire name explicitly in code
-that targets both .NET and Fable JavaScript — everything else on this page is unchanged. See
-[Schema Syntax](../syntax/).
+Deriving the name from `_.Email` uses a quotation. That compiles on .NET and on the Fable targets that support
+quotations, including JavaScript; reach for `fieldAs` on Fable's Rust and PHP targets. See
+[Schema Syntax](../syntax/) and [Compiler-Directed, AOT, and Fable](../aot-trimming-fable/).
 
 ### Parse
 
@@ -187,7 +186,7 @@ let registrationSchema =
 
 The fields stay bare. Every refined type has exactly one schema, so the field resolves it from the type the same way
 `string` resolved `Schema.text`. Rules that need a parameter — a length range, a pattern — are constraints rather
-than types, and go on the field as their own line: `field "name" _.Name { constrain (Constraint.lengthBetween 2 80) }`.
+than types, and go on the field as their own line: `field _.Name { constrain (Constraint.lengthBetween 2 80) }`.
 
 `NonEmptyList<NonBlankString>` composes: the outer refinement resolves, and so does the item.
 
@@ -308,9 +307,9 @@ module Booking =
 
     let schema =
         schema<Booking> {
-            field "guest" guest
-            field "start" start
-            field "end" finish
+            fieldAs "guest" guest
+            fieldAs "start" start
+            fieldAs "end" finish
             constructResult (fun guest start finish ->
                 create { Guest = guest; Start = start; End = finish })
         }

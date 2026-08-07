@@ -15,21 +15,15 @@ open Reified.Schema
 open Reified.Schema.Syntax
 ```
 
-The same shape applies to `Reified.Data.Syntax`, `Reified.Constraint.Syntax`, and `Reified.Result.Syntax`.
-
-Schema adds one optional third line. `open type` brings in an overloaded `field` that also accepts a bare property
-getter, covered under [Fields without blocks](#fields-without-blocks). It is only needed for that shorter form:
-
-```fsharp
-open type Reified.Schema.Syntax
-```
+The same shape applies to `Reified.Data.Syntax`, `Reified.Constraint.Syntax`, and `Reified.Result.Syntax` — two
+lines, every package.
 
 A record schema is one constructor-last computation expression:
 
 ```fsharp
 schema<Signup> {
-    field "email" _.Email
-    field "age" _.Age
+    field _.Email
+    field _.Age
     construct Signup.create
 }
 ```
@@ -38,42 +32,38 @@ schema<Signup> {
 
 ## Fields without blocks
 
-The getter fixes the field type. Schema resolves that type's canonical schema:
+`field` takes the getter and nothing else. The getter fixes the field type, Schema resolves that type's canonical
+schema, and the wire name is the property name, camelCased:
 
 ```fsharp
-field "name" _.Name
-field "age" _.Age
-field "tags" _.Tags
+field _.Name        // wire name "name"
+field _.Age         // wire name "age"
+field _.Tags        // wire name "tags"
 ```
 
 This works for built-in primitives and composites, built-in refined values, and application types that contribute a
 static `Schema` member.
 
-On .NET, with `open type Reified.Schema.Syntax` added, a quotation can supply the default wire name:
+## Naming a field explicitly
+
+`fieldAs` sets the wire name when it is not the camelCased property name. Explicit names are never transformed:
 
 ```fsharp
-field _.Name
+fieldAs "email_address" _.Email
+fieldAs "type" _.Number
 ```
 
-The `open type` is what supplies this overload. F# allows overloading and quotation capture on type members only,
-so this spelling cannot be a plain module function; `field "name" getter` is repeated on the same overload set so
-that it keeps working once `open type` shadows the module's `field`.
-
-Use the explicit form in portable code:
-
-```fsharp
-field "name" _.Name
-```
-
-Fable cannot perform the quotation operation that derives the member name. Explicit wire names compile on .NET and
-Fable.
+`field` derives its name by reading a quotation of the getter, once, while the schema value is built. That runs on
+.NET and on the Fable targets with quotation support, so both forms are available almost everywhere — see
+[Compiler-Directed, AOT, and Fable](../aot-trimming-fable/) for the version and target requirements. `fieldAs` is
+the portable spelling for Fable's Rust and PHP targets, which have no quotation support.
 
 ## Field blocks
 
 A block groups transformations for one field:
 
 ```fsharp
-field "email" _.Email {
+field _.Email {
     withSchema Schema.text
     constrain present
     refine
@@ -93,7 +83,7 @@ Operations run from top to bottom:
 The block must finish with the getter type. A plain `int` field does not need refinement:
 
 ```fsharp
-field "age" _.Age {
+field _.Age {
     withSchema Schema.int
     constrain (atLeast 18)
 }
@@ -102,7 +92,7 @@ field "age" _.Age {
 Group adjacent rules with `constraints`:
 
 ```fsharp
-field "email" _.Email {
+field _.Email {
     constraints [ present; email; maxLength 254 ]
 }
 ```
@@ -133,7 +123,7 @@ See [Derivation Attributes](../derivation/attributes/) for the complete attribut
 ## Refinement changes the stage
 
 ```fsharp
-field "email" _.Email {
+field _.Email {
     withSchema Schema.text
     constrain present       // operates on string
     refine                              // string -> ContactEmail
@@ -171,8 +161,8 @@ Use `Schema.defer` where a field refers back to the schema being defined:
 let rec schema : Lazy<Schema<Category>> =
     lazy (
         Syntax.schema<Category> {
-            field "name" _.Name
-            field "children" _.Children {
+            field _.Name
+            field _.Children {
                 withSchema (Schema.listWith (Schema.defer schema))
             }
             construct Category.create

@@ -20,8 +20,8 @@ type Address =
 
     static member Schema(_: Address) : Schema<Address> =
         schema<Address> {
-            field "street" _.Street
-            field "city" _.City
+            field _.Street
+            field _.City
             construct (fun street city -> { Street = street; City = city })
         }
 
@@ -30,8 +30,8 @@ type Item =
 
     static member Schema(_: Item) : Schema<Item> =
         schema<Item> {
-            field "sku" _.Sku
-            field "quantity" _.Quantity {
+            field _.Sku
+            field _.Quantity {
                 constrain (greaterThan 0)
             }
             construct (fun sku quantity -> { Sku = sku; Quantity = quantity })
@@ -43,8 +43,8 @@ type Order =
 
 let orderSchema =
     schema<Order> {
-        field "address" _.Address
-        field "items" _.Items {
+        field _.Address
+        field _.Items {
             constrain (minLength 1)
         }
         construct (fun address items -> { Address = address; Items = items })

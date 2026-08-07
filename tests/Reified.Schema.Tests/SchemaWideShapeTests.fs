@@ -8,7 +8,6 @@ open Swensen.Unquote
 open Xunit
 
 open Reified.Schema.Syntax
-open type Reified.Schema.Syntax
 
 /// Specs for the unbounded constructor-last chain: field counts beyond the old twelve-field arity cap,
 /// and the bare-getter field form (`field _.Name`) with derived camelCase wire names.
@@ -50,21 +49,21 @@ module SchemaWideShapeTests =
 
     let private wideSchema =
         schema<Wide> {
-            field "f01" _.F01
-            field "f02" _.F02
-            field "f03" _.F03
-            field "f04" _.F04
-            field "f05" _.F05
-            field "f06" _.F06
-            field "f07" _.F07
-            field "f08" _.F08
-            field "f09" _.F09
-            field "f10" _.F10
-            field "f11" _.F11
-            field "f12" _.F12
-            field "f13" _.F13
-            field "f14" _.F14
-            field "f15" _.F15
+            field _.F01
+            field _.F02
+            field _.F03
+            field _.F04
+            field _.F05
+            field _.F06
+            field _.F07
+            field _.F08
+            field _.F09
+            field _.F10
+            field _.F11
+            field _.F12
+            field _.F13
+            field _.F14
+            field _.F15
             construct Wide.Create
         }
 
@@ -134,7 +133,7 @@ module SchemaWideShapeTests =
         test <@ Schema.parse wideSchema input = Ok expected @>
         test <@ Schema.check wideSchema expected = Ok expected @>
 
-    // ---- bare-getter fields: `open type Reified.Schema.Syntax` adds the overloaded `field` ----
+    // ---- derived-name fields: `field _.Name` camelCases the property ----
 
     type private Contact =
         { Name: string
@@ -194,11 +193,11 @@ module SchemaWideShapeTests =
             test <@ flattened |> List.exists (fun diagnostic -> diagnostic.Path = TestPath.fromLegacy [ PathSegment.Name "name" ]) @>
 
     [<Fact>]
-    let ``the named field form still works under open type`` () =
-        // `open type` must not shadow away the named spelling: both live on the same overloaded member.
+    let ``the derived and explicit forms mix in one schema`` () =
+        // `field` is a type and `fieldAs` a function, so a schema can derive some names and declare others.
         let schema =
             schema<Contact> {
-                field "fullName" _.Name
+                fieldAs "fullName" _.Name
                 field _.Age
                 field _.Tags {
                     withSchema (Schema.listWith Schema.text)

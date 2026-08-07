@@ -478,9 +478,9 @@ module Emitter =
                 let supplies = declaresSupply field
 
                 if canInferField field && List.isEmpty constraints && not supplies then
-                    line $"            field \"{escapeString wire}\" {getter}"
+                    line $"            fieldAs \"{escapeString wire}\" {getter}"
                 else
-                    line $"            field \"{escapeString wire}\" {getter} {{"
+                    line $"            fieldAs \"{escapeString wire}\" {getter} {{"
 
                     if not (canInferField field) then
                         let value = valueExpr refTypeName (contract.ContractName, contract.Version, contractTypeName) field

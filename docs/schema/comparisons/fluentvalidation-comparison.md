@@ -38,10 +38,10 @@ intermediate invalid object:
 open Reified.Schema.Syntax
 let customerSchema =
     schema<Customer> {
-        field "name" _.Name {
+        field _.Name {
             constrain (maxLength 80)
         }
-        field "age" _.Age {
+        field _.Age {
             constrain (between 13 120)
         }
         construct (fun name age -> { Name = name; Age = age })

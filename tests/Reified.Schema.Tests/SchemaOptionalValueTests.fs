@@ -19,8 +19,8 @@ module SchemaOptionalValueTests =
 
     let private profileSchema () =
         schema<Profile> {
-            field "name" _.Name
-            field "nickname" _.Nickname {
+            field _.Name
+            field _.Nickname {
                 withSchema (Schema.option (Schema.text |> Schema.constrain (Constraint.minLength 2)))
             }
             construct (fun name nickname -> { Name = name; Nickname = nickname })
@@ -78,8 +78,8 @@ module SchemaOptionalValueTests =
         let presentOption: Constraint<string option> = Constraint.present
         let constrained =
             schema<Profile> {
-                field "name" _.Name
-                field "nickname" _.Nickname {
+                field _.Name
+                field _.Nickname {
                     withSchema (Schema.option Schema.text |> Schema.constrain presentOption)
                 }
                 construct (fun name nickname -> { Name = name; Nickname = nickname })
@@ -92,8 +92,8 @@ module SchemaOptionalValueTests =
     let ``supplied option rejects omission independently of its content`` () =
         let constrained =
             schema<Profile> {
-                field "name" _.Name
-                field "nickname" _.Nickname {
+                field _.Name
+                field _.Nickname {
                     withSchema (Schema.option Schema.text |> Schema.mustSupply)
                 }
                 construct (fun name nickname -> { Name = name; Nickname = nickname })

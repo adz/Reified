@@ -173,10 +173,10 @@ module SchemaVerticalSliceProofTests =
         // follows declared argument position, not the record's source order or external field name.
         let schema =
             schema<Signup> {
-                field "displayName" _.DisplayName {
+                field _.DisplayName {
                     withSchema displayNameValue
                 }
-                field "email" _.Email {
+                field _.Email {
                     withSchema emailValue
                 }
                 construct (fun displayName email -> { Email = email; DisplayName = displayName })

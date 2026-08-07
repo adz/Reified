@@ -106,9 +106,9 @@ let describe (renderer: Renderer) error =
 
     match error with
     | TermsNotAccepted -> "The terms must be accepted."
-    | InvalidName violation -> field "name" violation
-    | InvalidEmail violation -> field "email" violation
-    | InvalidAge violation -> field "age" violation
+    | InvalidName violation -> fieldAs "name" violation
+    | InvalidEmail violation -> fieldAs "email" violation
+    | InvalidAge violation -> fieldAs "age" violation
 ```
 
 See [Using constraints](../../constraint/overview/), [Working with violations](../../constraint/violations/),

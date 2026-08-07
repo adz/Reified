@@ -19,14 +19,14 @@ module WorkspaceCardV1 =
     /// The schema declared by workspace.fs (WorkspaceCard.v1).
     let schema : Schema<WorkspaceCardV1> =
         schema<WorkspaceCardV1> {
-            field "name" (fun (value: WorkspaceCardV1) -> value.Name) {
+            fieldAs "name" (fun (value: WorkspaceCardV1) -> value.Name) {
                 withSchema (Schema.text |> Schema.describe "Display name of the workspace.")
                 constraints [
                     minLength 1
                     maxLength 60
                 ]
             }
-            field "owner" (fun (value: WorkspaceCardV1) -> value.Owner)
+            fieldAs "owner" (fun (value: WorkspaceCardV1) -> value.Owner)
             construct (fun name owner ->
                 { Name = name
                   Owner = owner })
@@ -57,20 +57,20 @@ module WorkspaceCard =
     /// The schema declared by workspace.fs (WorkspaceCard.v2).
     let schema : Schema<WorkspaceCard> =
         schema<WorkspaceCard> {
-            field "name" (fun (value: WorkspaceCard) -> value.Name) {
+            fieldAs "name" (fun (value: WorkspaceCard) -> value.Name) {
                 withSchema (Schema.text |> Schema.describe "Display name of the workspace.")
                 constraints [
                     minLength 1
                     maxLength 60
                 ]
             }
-            field "owner_email" (fun (value: WorkspaceCard) -> value.OwnerEmail) {
+            fieldAs "owner_email" (fun (value: WorkspaceCard) -> value.OwnerEmail) {
                 constrain email
             }
-            field "visibility" (fun (value: WorkspaceCard) -> value.Visibility) {
+            fieldAs "visibility" (fun (value: WorkspaceCard) -> value.Visibility) {
                 withSchema (Schema.enum visibilityCases |> Schema.withDefault Visibility.Private)
             }
-            field "members" (fun (value: WorkspaceCard) -> value.Members) {
+            fieldAs "members" (fun (value: WorkspaceCard) -> value.Members) {
                 withSchema (Schema.listWith Schema.text)
                 constrain Constraint.distinct
             }

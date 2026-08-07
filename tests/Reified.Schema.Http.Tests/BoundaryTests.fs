@@ -59,8 +59,8 @@ let ``indexed form names become ordered collections`` () =
 let ``query pairs parse flat models`` () =
     let schema =
         schema<{| Page: int; Terms: string list |}> {
-            field "page" (fun (value: {| Page: int; Terms: string list |}) -> value.Page)
-            field "terms" (fun (value: {| Page: int; Terms: string list |}) -> value.Terms) {
+            fieldAs "page" (fun (value: {| Page: int; Terms: string list |}) -> value.Page)
+            fieldAs "terms" (fun (value: {| Page: int; Terms: string list |}) -> value.Terms) {
                 withSchema (Schema.listWith Schema.text)
             }
             construct (fun page terms -> {| Page = page; Terms = terms |})

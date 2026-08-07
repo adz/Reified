@@ -50,10 +50,10 @@ module InputParseTests =
 
     let private signupSchema =
         schema<Signup> {
-            field "email" _.Email {
+            field _.Email {
                 withSchema (Schema.text |> Schema.constrain Constraint.present)
             }
-            field "age" (fun (value: Signup) -> value.Age)
+            fieldAs "age" (fun (value: Signup) -> value.Age)
             construct (fun email age -> { Email = email; Age = age })
         }
 
@@ -113,13 +113,13 @@ module InputParseTests =
         // violation, and a rule that needs its own wording is authored as an opaque constraint.
         let messageSchema =
             schema<Signup> {
-                field "email" _.Email {
+                field _.Email {
                     withSchema (
                         Schema.text
                         |> Schema.constrain (Constraint.custom "Email is required." (fun value -> Constraint.test Constraint.present value))
                     )
                 }
-                field "age" (fun (value: Signup) -> value.Age) {
+                fieldAs "age" (fun (value: Signup) -> value.Age) {
                     withSchema (Schema.int |> Schema.constrain (Constraint.custom "Must be an adult." (fun value -> value >= 18)))
                 }
                 construct (fun email age -> { Email = email; Age = age })
@@ -170,8 +170,8 @@ module InputParseTests =
     let ``default supplies an omitted non-option field`` () =
         let defaultedSchema =
             schema<Signup> {
-                field "email" _.Email
-                field "age" (fun (value: Signup) -> value.Age) {
+                field _.Email
+                fieldAs "age" (fun (value: Signup) -> value.Age) {
                     defaultValue 18
                 }
                 construct (fun email age -> { Email = email; Age = age })
@@ -228,10 +228,10 @@ module InputParseTests =
 
         let countingSchema =
             schema<Signup> {
-                field "email" _.Email {
+                field _.Email {
                     withSchema (Schema.text |> Schema.constrain Constraint.present)
                 }
-                field "age" (fun (value: Signup) -> value.Age)
+                fieldAs "age" (fun (value: Signup) -> value.Age)
                 construct (fun email age ->
                     constructorCalls <- constructorCalls + 1
                     { Email = email; Age = age })
@@ -254,10 +254,10 @@ module InputParseTests =
 
         let countingSchema =
             schema<Signup> {
-                field "email" _.Email {
+                field _.Email {
                     withSchema (Schema.text |> Schema.constrain Constraint.present)
                 }
-                field "age" (fun (value: Signup) -> value.Age)
+                fieldAs "age" (fun (value: Signup) -> value.Age)
                 construct (fun email age ->
                     constructorCalls <- constructorCalls + 1
                     { Email = email; Age = age })
@@ -278,7 +278,7 @@ module InputParseTests =
     let ``parse builds a model from a constructor returning Ok`` () =
         let ageSchema =
             schema<AdultAge> {
-                field "age" (fun (value: AdultAge) -> value.Age)
+                fieldAs "age" (fun (value: AdultAge) -> value.Age)
                 constructResult AdultAge.Create
             }
 
@@ -296,7 +296,7 @@ module InputParseTests =
     let ``parse reports a constructor error from a constructor returning Error`` () =
         let ageSchema =
             schema<AdultAge> {
-                field "age" (fun (value: AdultAge) -> value.Age)
+                fieldAs "age" (fun (value: AdultAge) -> value.Age)
                 constructResult AdultAge.Create
             }
 
@@ -315,7 +315,7 @@ module InputParseTests =
     let ``parse can attach a constructor error to a field path`` () =
         let ageSchema =
             schema<AdultAge> {
-                field "age" (fun (value: AdultAge) -> value.Age)
+                fieldAs "age" (fun (value: AdultAge) -> value.Age)
                 constructResult AdultAge.Create
             }
 
@@ -340,7 +340,7 @@ module InputParseTests =
 
         let gatedSchema =
             schema<AdultAge> {
-                field "age" (fun (value: AdultAge) -> value.Age) {
+                fieldAs "age" (fun (value: AdultAge) -> value.Age) {
                     withSchema (Schema.int |> Schema.constrain (Constraint.atLeast 0))
                 }
                 constructResult (fun age ->
@@ -367,7 +367,7 @@ module InputParseTests =
     let ``parse maps domain constructor errors before closing the shape`` () =
         let ageSchema =
             schema<MappedAdultAge> {
-                field "age" (fun (value: MappedAdultAge) -> value.Age)
+                fieldAs "age" (fun (value: MappedAdultAge) -> value.Age)
                 constructResult (fun age ->
                     MappedAdultAge.Create age
                     |> Result.mapError (function Underage -> "Adult age is required."))
@@ -386,8 +386,8 @@ module InputParseTests =
     let ``parse builds a DateRange when cross-field constructor invariant passes`` () =
         let rangeSchema =
             schema<DateRange> {
-                field "start" _.Start
-                field "end" _.End
+                field _.Start
+                field _.End
                 constructResult DateRange.Create
             }
 
@@ -407,8 +407,8 @@ module InputParseTests =
     let ``parse reports DateRange constructor invariant errors at root by default`` () =
         let rangeSchema =
             schema<DateRange> {
-                field "start" _.Start
-                field "end" _.End
+                field _.Start
+                field _.End
                 constructResult DateRange.Create
             }
 
@@ -428,8 +428,8 @@ module InputParseTests =
     let ``parse can attach DateRange constructor invariant errors to the end field`` () =
         let rangeSchema =
             schema<DateRange> {
-                field "start" _.Start
-                field "end" _.End
+                field _.Start
+                field _.End
                 constructResult DateRange.Create
             }
 
@@ -455,8 +455,8 @@ module InputParseTests =
 
         let rangeSchema =
             schema<DateRange> {
-                field "start" _.Start
-                field "end" _.End
+                field _.Start
+                field _.End
                 constructResult (fun start endDate ->
                     constructorCalls <- constructorCalls + 1
                     DateRange.Create start endDate)
@@ -492,10 +492,10 @@ module InputParseTests =
     let ``parse maps a check failure from a value constraint to a schema error`` () =
         let minLengthSchema =
             schema<Signup> {
-                field "email" _.Email {
+                field _.Email {
                     withSchema (Schema.text |> Schema.constrain (Constraint.minLength 5))
                 }
-                field "age" (fun (value: Signup) -> value.Age)
+                fieldAs "age" (fun (value: Signup) -> value.Age)
                 construct (fun email age -> { Email = email; Age = age })
             }
 
@@ -514,10 +514,10 @@ module InputParseTests =
     let ``schema errors are identical across differently named fields, only the diagnostics path differs`` () =
         let makeSchema fieldName =
             schema<Signup> {
-                field fieldName _.Email {
+                fieldAs fieldName _.Email {
                     withSchema (Schema.text |> Schema.constrain Constraint.present)
                 }
-                field "age" (fun (value: Signup) -> value.Age)
+                fieldAs "age" (fun (value: Signup) -> value.Age)
                 construct (fun email age -> { Email = email; Age = age })
             }
 
@@ -534,8 +534,8 @@ module InputParseTests =
     let ``required reports blank non-text scalar as required`` () =
         let requiredAgeSchema =
             schema<Signup> {
-                field "email" _.Email
-                field "age" (fun (value: Signup) -> value.Age) {
+                field _.Email
+                fieldAs "age" (fun (value: Signup) -> value.Age) {
                     withSchema (Schema.int |> Schema.mustSupply)
                 }
                 construct (fun email age -> { Email = email; Age = age })

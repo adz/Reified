@@ -24,10 +24,10 @@ module SchemaManyValueTests =
 
     let private buildContactMethodSchema () =
         schema<ContactMethod> {
-            field "kind" _.Kind {
+            field _.Kind {
                 withSchema (Schema.text |> Schema.constrain Constraint.present)
             }
-            field "value" _.Value {
+            field _.Value {
                 withSchema (Schema.text |> Schema.constrain Constraint.present)
             }
             construct (fun kind value -> { Kind = kind; Value = value })
@@ -39,10 +39,10 @@ module SchemaManyValueTests =
 
         let schema =
             schema<Customer> {
-                field "name" _.Name {
+                field _.Name {
                     withSchema (Schema.text |> Schema.constrain Constraint.present)
                 }
-                field "contacts" _.Contacts {
+                field _.Contacts {
                     withSchema (Schema.listWith contactMethodSchema)
                 }
                 construct (fun name contacts -> { Name = name; Contacts = contacts })
@@ -66,10 +66,10 @@ module SchemaManyValueTests =
 
         let schema =
             schema<Customer> {
-                field "name" _.Name {
+                field _.Name {
                     withSchema (Schema.text |> Schema.constrain Constraint.present)
                 }
-                field "contacts" _.Contacts {
+                field _.Contacts {
                     withSchema (
                         Schema.listWith contactMethodSchema
                         |> Schema.constrainAll [ Constraint.minLength 1 ]
@@ -116,10 +116,10 @@ module SchemaManyValueTests =
 
         let schema =
             schema<Customer> {
-                field "name" _.Name {
+                field _.Name {
                     withSchema (Schema.text |> Schema.constrain Constraint.present)
                 }
-                field "contacts" _.Contacts {
+                field _.Contacts {
                     withSchema (Schema.listWith contactMethodSchema)
                 }
                 construct (fun name contacts -> { Name = name; Contacts = contacts })

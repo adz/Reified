@@ -42,33 +42,33 @@ module Signup =
     /// The schema declared by signup.contract (Signup.v1).
     let schema : Schema<Signup> =
         schema<Signup> {
-            field "email" (fun (value: Signup) -> value.Email) {
+            fieldAs "email" (fun (value: Signup) -> value.Email) {
                 withSchema (Schema.text |> Schema.describe "Primary contact address.")
                 constraints [
                     email
                     maxLength 254
                 ]
             }
-            field "display_name" (fun (value: Signup) -> value.DisplayName) {
+            fieldAs "display_name" (fun (value: Signup) -> value.DisplayName) {
                 withSchema (Schema.option (Schema.text |> Schema.constrainAll [ Constraint.minLength (1); Constraint.maxLength (64) ]))
             }
-            field "age" (fun (value: Signup) -> value.Age) {
+            fieldAs "age" (fun (value: Signup) -> value.Age) {
                 constrain (atLeast 13)
             }
-            field "plan" (fun (value: Signup) -> value.Plan) {
+            fieldAs "plan" (fun (value: Signup) -> value.Plan) {
                 withSchema (Schema.enum planCases |> Schema.withDefault SignupPlan.Free)
             }
-            field "tags" (fun (value: Signup) -> value.Tags) {
+            fieldAs "tags" (fun (value: Signup) -> value.Tags) {
                 withSchema (Schema.listWith Schema.text)
                 constraints [
                     maxLength 8
                     Constraint.distinct
                 ]
             }
-            field "limits" (fun (value: Signup) -> value.Limits) {
+            fieldAs "limits" (fun (value: Signup) -> value.Limits) {
                 withSchema (Schema.mapWith Schema.int)
             }
-            field "location" (fun (value: Signup) -> value.Location) {
+            fieldAs "location" (fun (value: Signup) -> value.Location) {
                 withSchema (Schema.option Geo.schema)
             }
             construct (fun email displayName age plan tags limits location ->

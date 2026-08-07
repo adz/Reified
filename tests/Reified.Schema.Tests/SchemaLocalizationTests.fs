@@ -21,7 +21,7 @@ module SchemaLocalizationTests =
 
     let private addressSchema () =
         schema<Address> {
-            field "postcode" _.Postcode {
+            field _.Postcode {
                 withSchema (Schema.text |> Schema.constrain (Constraint.lengthBetween 2 40))
             }
 
@@ -30,12 +30,12 @@ module SchemaLocalizationTests =
 
     let private signupSchema () =
         schema<Signup> {
-            field "name" _.Name {
+            field _.Name {
                 withSchema (Schema.text |> Schema.constrain Constraint.present)
             }
 
-            field "age" _.Age
-            field "addresses" _.Addresses { withSchema (Schema.listWith (addressSchema ())) }
+            field _.Age
+            field _.Addresses { withSchema (Schema.listWith (addressSchema ())) }
             construct (fun name age addresses -> { Name = name; Age = age; Addresses = addresses })
         }
 

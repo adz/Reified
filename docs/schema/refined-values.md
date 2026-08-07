@@ -12,7 +12,7 @@ A field can be short when its type contributes a canonical schema:
 ```fsharp
 let contactSchema =
     schema<Contact> {
-        field "email" _.Email
+        field _.Email
         construct Contact.create
     }
 ```
@@ -26,7 +26,7 @@ Rules that need a parameter, such as a length range or a pattern, are constraint
 the field, because the bounds are a property of *this* field rather than of the value:
 
 ```fsharp
-field "name" _.Name {
+field _.Name {
     constrain Constraint.present
     constrain (Constraint.lengthBetween 2 80)
 }
@@ -73,7 +73,7 @@ Expand the field to expose its wire schema:
 open Reified.Schema
 open Reified.Schema.Syntax
 
-field "email" _.Email {
+field _.Email {
     withSchema Schema.text
     constraints [ present; maxLength 80 ]
 }
@@ -93,7 +93,7 @@ Add `refine` after the raw-text constraints to perform that type transition:
 ```fsharp
 let contactSchema =
     schema<Contact> {
-        field "email" _.Email {
+        field _.Email {
             withSchema Schema.text
             constraints [ present; maxLength 80 ]
             refine Email.refinement
@@ -116,7 +116,7 @@ A raw-text constraint must appear before refinement because it cannot be applied
 Suppose only the billing form imposes an 80-character transport limit:
 
 ```fsharp
-field "billingEmail" _.BillingEmail {
+field _.BillingEmail {
     withSchema Schema.text
     constraints [ present; maxLength 80 ]
     refine Email.refinement
@@ -137,7 +137,7 @@ There is no adapter step: Schema takes the same `Constraint` value you would che
 let even : Constraint<int> =
     Constraint.custom "must be an even quantity" (fun value -> value % 2 = 0)
 
-field "quantity" _.Quantity {
+field _.Quantity {
     constrain even
 }
 ```
@@ -188,7 +188,7 @@ Fields return to the compressed form:
 
 ```fsharp
 schema<Contact> {
-    field "email" _.Email
+    field _.Email
     construct Contact.create
 }
 ```
@@ -208,7 +208,7 @@ type ContactEmail with
 Then an explicitly selected raw schema can use bare `refine`:
 
 ```fsharp
-field "email" _.Email {
+field _.Email {
     withSchema Schema.text
     refine
 }

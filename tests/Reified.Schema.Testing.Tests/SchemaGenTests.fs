@@ -20,7 +20,7 @@ module SchemaGenTests =
 
     let private contactSchema () =
         schema<Contact> {
-            field "email" _.Email {
+            field _.Email {
                 withSchema (Schema.text |> Schema.constrainAll [ Constraint.email ])
             }
             construct (fun email -> { Email = email })
@@ -29,29 +29,29 @@ module SchemaGenTests =
     let private profileSchema () =
         let kinds = [ EnumCase.create "personal" Personal; EnumCase.create "work" Work ]
         schema<Profile> {
-            field "age" _.Age {
+            field _.Age {
                 withSchema (Schema.int |> Schema.constrainAll [ Constraint.between 18 90; Constraint.multipleOf 2 ])
             }
-            field "score" _.Score {
+            field _.Score {
                 withSchema (Schema.decimal |> Schema.constrainAll [ Constraint.between 0m 10m ])
             }
-            field "active" _.Active
-            field "contact" _.Contact {
+            field _.Active
+            field _.Contact {
                 withSchema (contactSchema ())
             }
-            field "aliases" _.Aliases {
+            field _.Aliases {
                 withSchema (
                     Schema.listWith (Schema.text |> Schema.constrain (Constraint.minLength 2))
                     |> Schema.constrainAll [ Constraint.lengthBetween 1 3 ]
                 )
             }
-            field "labels" _.Labels {
+            field _.Labels {
                 withSchema ((Schema.mapWith Schema.text) |> Schema.constrainAll [ Constraint.maxLength 2 ])
             }
-            field "kind" _.Kind {
+            field _.Kind {
                 withSchema (Schema.enum kinds)
             }
-            field "note" _.Note {
+            field _.Note {
                 withSchema (Schema.option Schema.text)
             }
             construct (fun age score active contact aliases labels kind note ->
@@ -89,7 +89,7 @@ module SchemaGenTests =
         // ignoring the rule and drawing at random.
         let textEquality =
             schema<Contact> {
-                field "email" _.Email { withSchema (Schema.text |> Schema.constrain (Constraint.equalTo "exact")) }
+                field _.Email { withSchema (Schema.text |> Schema.constrain (Constraint.equalTo "exact")) }
                 construct (fun email -> { Email = email })
             }
 
@@ -111,7 +111,7 @@ module SchemaGenTests =
         // notion of sort order, so claiming support here would emit strings that violate the rule.
         let textOrdering =
             schema<Contact> {
-                field "email" _.Email { withSchema (Schema.text |> Schema.constrain (Constraint.atLeast "m")) }
+                field _.Email { withSchema (Schema.text |> Schema.constrain (Constraint.atLeast "m")) }
                 construct (fun email -> { Email = email })
             }
 
@@ -123,7 +123,7 @@ module SchemaGenTests =
         let numericBound =
             schema<Bounded> {
                 // Annotated because `Profile` also has an `Age: int` label.
-                field "age" (fun (value: Bounded) -> value.Age) {
+                fieldAs "age" (fun (value: Bounded) -> value.Age) {
                     withSchema (Schema.``int`` |> Schema.constrain (Constraint.atLeast 18))
                 }
                 construct (fun age -> { Bounded.Age = age })
@@ -135,7 +135,7 @@ module SchemaGenTests =
     let ``pattern constraints require a caller-owned generator`` () =
         let schema =
             schema<Contact> {
-                field "email" _.Email {
+                field _.Email {
                     withSchema (Schema.text |> Schema.constrain (Constraint.pattern "^[A-Z]+$"))
                 }
                 construct (fun email -> { Email = email })
@@ -154,8 +154,8 @@ module SchemaGenTests =
         let rec holder: Lazy<Schema<Category>> =
             lazy
                 (schema<Category> {
-                    field "name" _.Name
-                    field "children" _.Children {
+                    field _.Name
+                    field _.Children {
                         withSchema (Schema.listWith (Schema.defer (fun () -> holder.Value)))
                     }
                     construct (fun name children -> { Name = name; Children = children })

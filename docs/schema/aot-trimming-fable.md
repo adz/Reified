@@ -50,19 +50,30 @@ constraint behaviour, operand descriptions, localized rendering, a codec round-t
 .NET-only conveniences — such as `Data.ofJsonDocument` and the
 `DateOnly` field type — are compile-time gated so the Fable surface never references them.
 
-The quotation-based bare field form is also .NET-only:
+### Derived wire names under Fable
+
+The `field _.Email` form reads a quotation of the getter to recover the property name. It works on .NET and on the
+Fable targets that support quotations:
+
+| Fable target | Derived `field _.Email` | Minimum Fable |
+| --- | --- | --- |
+| JavaScript, TypeScript, Python, BEAM | Yes | 5.10 |
+| Dart | Yes | 5.13 |
+| Rust, PHP | No — use `fieldAs` | — |
+
+No compiler flag or define is needed, and a schema means the same thing on every target:
 
 ```fsharp
-// .NET: derives the wire name "email" from the property quotation
+// Derives the wire name "email" from the property
 field _.Email
 
-// .NET and Fable: declares the wire name directly
-field "email" _.Email
+// Declares it, and works everywhere including Rust and PHP
+fieldAs "email_address" _.Email
 ```
 
-Fable does not support the quotation operation that extracts a property name from `_.Email`. This affects only wire-name
-inference; explicit field names, typed getters, schema inference, constraints, constructors, parsing, checking, and
-compiled JavaScript codecs remain available.
+Reading the name happens **once, while the schema value is built** — never per parsed or encoded value, so the
+guarantee at the top of this page holds on both targets. The Fable probe declares its schema with `field _.Name`
+and asserts the derived wire names from the compiled JavaScript, so this stays proven rather than claimed.
 
 ## What This Buys You
 

@@ -20,7 +20,7 @@ module EnumSchemaParseTests =
 
     let private swatchSchema () =
         schema<Swatch> {
-            field "color" _.Color {
+            field _.Color {
                 withSchema (colorSchema ())
             }
             construct (fun color -> { Color = color })

@@ -24,13 +24,13 @@ module ShapeSyntaxTests =
 
     let private personSchema =
         schema<Person> {
-            field "firstName" _.FirstName {
+            field _.FirstName {
                 constrain (Constraint.minLength 1)
             }
-            field "lastName" _.LastName {
+            field _.LastName {
                 constrain (Constraint.minLength 1)
             }
-            field "birthDate" _.BirthDate
+            field _.BirthDate
             construct Person.Create
         }
 
@@ -93,8 +93,8 @@ module ShapeSyntaxTests =
 
     let private rangeSchema =
         schema<Range> {
-            field "low" (fun (range: Range) -> fst range.Bounds)
-            field "high" (fun (range: Range) -> snd range.Bounds)
+            fieldAs "low" (fun (range: Range) -> fst range.Bounds)
+            fieldAs "high" (fun (range: Range) -> snd range.Bounds)
             constructResult Range.Create
         }
 
@@ -127,11 +127,11 @@ module ShapeSyntaxTests =
 
     let private taggedSchema =
         schema<Tagged> {
-            field "name" _.Name
-            field "tags" _.Tags {
+            field _.Name
+            field _.Tags {
                 constrain (Constraint.minLength 1)
             }
-            field "note" _.Note
+            field _.Note
             construct Tagged.Create
         }
 
@@ -172,9 +172,9 @@ module ShapeSyntaxTests =
     let ``field recursively infers domain schemas through collections and options`` () =
         let schema =
             schema<ContactBook> {
-                field "emails" _.Emails
-                field "contacts" _.Contacts
-                field "preferred" _.Preferred
+                field _.Emails
+                field _.Contacts
+                field _.Preferred
                 construct ContactBook.Create
             }
 
@@ -236,8 +236,8 @@ module ShapeSyntaxTests =
 
     let private bookingDraftSchema =
         schema<BookingDraft> {
-            field "start" (fun (value: BookingDraft) -> value.Start)
-            field "end" (fun (value: BookingDraft) -> value.End)
+            fieldAs "start" (fun (value: BookingDraft) -> value.Start)
+            fieldAs "end" (fun (value: BookingDraft) -> value.End)
             construct BookingDraft.Create
         }
 

@@ -22,10 +22,10 @@ module SchemaGenerationTargetProofTests =
     //   [<Schema>] type Signup = { [<Blank; MaxLength 254; Email>] Email: string; [<AtLeast 13>] Age: int }
     let private generatedSignupSchema () : Schema<Signup> =
         schema<Signup> {
-            field "email" _.Email {
+            field _.Email {
                 withSchema (Schema.text |> Schema.constrainAll [ Constraint.present; Constraint.maxLength 254; Constraint.email ])
             }
-            field "age" _.Age {
+            field _.Age {
                 withSchema (Schema.int |> Schema.constrainAll [ Constraint.atLeast 13 ])
             }
             construct (fun email age -> { Email = email; Age = age })

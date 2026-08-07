@@ -13,7 +13,7 @@ module RetainedParseResultTests =
 
     let private schema () =
         schema<Signup> {
-            field "email" _.Email {
+            field _.Email {
                 withSchema (Schema.text |> Schema.constrain Constraint.present)
             }
 

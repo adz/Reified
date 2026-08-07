@@ -14,12 +14,12 @@ module private Signup =
 
 let private signupSchema =
     schema<Signup> {
-        field "email" _.Email {
+        field _.Email {
             withSchema Schema.text
             constrain (Constraint.minLength 3)
         }
 
-        field "age" _.Age {
+        field _.Age {
             withSchema Schema.int
             constrain (Constraint.atLeast 0)
         }

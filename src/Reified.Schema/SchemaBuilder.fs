@@ -9,9 +9,7 @@ open Reified.Constraint
 open System.ComponentModel
 open Reified.Refinements
 
-#if !FABLE_COMPILER
 open Microsoft.FSharp.Quotations
-#endif
 
 [<EditorBrowsable(EditorBrowsableState.Never)>]
 type FieldInitial<'model, 'target> internal (name: string, getter: 'model -> 'target) =
@@ -88,12 +86,40 @@ type RefinementDefaults =
             Unchecked.defaultof<^refined>
         )
 
-/// <summary>Configures one field inside <c>schema&lt;'model&gt; { }</c>.</summary>
-/// <exclude />
-[<EditorBrowsable(EditorBrowsableState.Never)>]
-type FieldBuilder<'model, 'target> internal (name: string, getter: 'model -> 'target) =
+/// <summary>
+/// Declares one field inside <c>schema&lt;'model&gt; { }</c>, and configures it when followed by a block.
+/// </summary>
+/// <remarks>
+/// <para>
+/// <c>field _.Email</c> derives the wire name from the property, camelCased. Use <c>fieldAs</c> when the wire
+/// name differs from the property.
+/// </para>
+/// <para>
+/// Deriving the name reads a quotation of the getter, once, while the schema value is built. That works on .NET
+/// and on the Fable targets with quotation support — JavaScript, TypeScript, Python, and BEAM need Fable 5.10 or
+/// later, Dart needs 5.13. Fable's Rust and PHP targets have no quotation support, so those use <c>fieldAs</c>.
+/// </para>
+/// <para>
+/// This is a type rather than a function in <c>Syntax</c> so that <c>field</c> stays unqualified under an
+/// ordinary <c>open</c>. See <c>dev-docs/derived-field-names.md</c>.
+/// </para>
+/// </remarks>
+type field<'model, 'target> internal (name: string, getter: 'model -> 'target) =
     member internal _.Name = name
     member internal _.Getter = getter
+
+    /// <summary>Declares a field, deriving its camel-cased wire name from the property getter.</summary>
+    /// <example><code>field _.Email  // wire name "email"</code></example>
+#if FABLE_COMPILER
+    // Fable does not implement Expr.WithValue, so it takes the plain attribute and recompiles the getter.
+    new([<ReflectedDefinition>] getter: Expr<'model -> 'target>) =
+        let name, get = GetterName.split getter
+        field<'model, 'target>(name, get)
+#else
+    new([<ReflectedDefinition(includeValue = true)>] getter: Expr<'model -> 'target>) =
+        let name, get = GetterName.split getter
+        field<'model, 'target>(name, get)
+#endif
 
     member _.Yield(()) : FieldInitial<'model, 'target> =
         FieldInitial(name, getter)
@@ -136,19 +162,19 @@ type FieldBuilder<'model, 'target> internal (name: string, getter: 'model -> 'ta
     [<CustomOperation("defaultValue")>]
     member _.DefaultValue
         (
-            field: FieldConfigured<'model, 'target>,
+            source: FieldConfigured<'model, 'target>,
             value: 'target
         ) : FieldConfigured<'model, 'target> =
-        FieldConfigured(field.Initial, field.Configure >> SchemaCore.withDefault value)
+        FieldConfigured(source.Initial, source.Configure >> SchemaCore.withDefault value)
 
     /// <summary>Supplies the field value when the input omits it.</summary>
     [<CustomOperation("defaultValue")>]
     member _.DefaultValue
         (
-            field: FieldWorking<'model, 'target, 'current>,
+            source: FieldWorking<'model, 'target, 'current>,
             value: 'current
         ) : FieldWorking<'model, 'target, 'current> =
-        FieldWorking(field.Initial, field.Schema |> SchemaCore.withDefault value)
+        FieldWorking(source.Initial, source.Schema |> SchemaCore.withDefault value)
 
     /// <summary>Adds human-readable description metadata to the field's schema.</summary>
     [<CustomOperation("describe")>]
@@ -163,19 +189,19 @@ type FieldBuilder<'model, 'target> internal (name: string, getter: 'model -> 'ta
     [<CustomOperation("describe")>]
     member _.Describe
         (
-            field: FieldConfigured<'model, 'target>,
+            source: FieldConfigured<'model, 'target>,
             text: string
         ) : FieldConfigured<'model, 'target> =
-        FieldConfigured(field.Initial, field.Configure >> SchemaCore.describe text)
+        FieldConfigured(source.Initial, source.Configure >> SchemaCore.describe text)
 
     /// <summary>Adds human-readable description metadata to the field's current schema.</summary>
     [<CustomOperation("describe")>]
     member _.Describe
         (
-            field: FieldWorking<'model, 'target, 'current>,
+            source: FieldWorking<'model, 'target, 'current>,
             text: string
         ) : FieldWorking<'model, 'target, 'current> =
-        FieldWorking(field.Initial, field.Schema |> SchemaCore.describe text)
+        FieldWorking(source.Initial, source.Schema |> SchemaCore.describe text)
 
     /// <summary>Adds format metadata to the field's schema.</summary>
     [<CustomOperation("format")>]
@@ -190,19 +216,19 @@ type FieldBuilder<'model, 'target> internal (name: string, getter: 'model -> 'ta
     [<CustomOperation("format")>]
     member _.Format
         (
-            field: FieldConfigured<'model, 'target>,
+            source: FieldConfigured<'model, 'target>,
             format: SchemaFormat
         ) : FieldConfigured<'model, 'target> =
-        FieldConfigured(field.Initial, field.Configure >> SchemaCore.withFormat format)
+        FieldConfigured(source.Initial, source.Configure >> SchemaCore.withFormat format)
 
     /// <summary>Adds format metadata to the field's current schema.</summary>
     [<CustomOperation("format")>]
     member _.Format
         (
-            field: FieldWorking<'model, 'target, 'current>,
+            source: FieldWorking<'model, 'target, 'current>,
             format: SchemaFormat
         ) : FieldWorking<'model, 'target, 'current> =
-        FieldWorking(field.Initial, field.Schema |> SchemaCore.withFormat format)
+        FieldWorking(source.Initial, source.Schema |> SchemaCore.withFormat format)
 
     /// <summary>Adds a portable constraint to the field's current schema value.</summary>
     [<CustomOperation("constrain")>]
@@ -218,46 +244,46 @@ type FieldBuilder<'model, 'target> internal (name: string, getter: 'model -> 'ta
     [<CustomOperation("constrain")>]
     member _.Constrain
         (
-            field: FieldConfigured<'model, 'target>,
+            source: FieldConfigured<'model, 'target>,
             constraint': Constraint<'target>
         ) : FieldConfigured<'model, 'target> =
         if isNull (box constraint') then nullArg (nameof constraint')
         FieldConfigured(
-            field.Initial,
-            field.Configure >> SchemaCore.constrain constraint'
+            source.Initial,
+            source.Configure >> SchemaCore.constrain constraint'
         )
 
     /// <summary>Adds a portable constraint to the field's current schema value.</summary>
     [<CustomOperation("constrain")>]
     member _.Constrain
         (
-            field: FieldWorking<'model, 'target, 'current>,
+            source: FieldWorking<'model, 'target, 'current>,
             constraint': Constraint<'current>
         ) : FieldWorking<'model, 'target, 'current> =
         if isNull (box constraint') then nullArg (nameof constraint')
-        FieldWorking(field.Initial, field.Schema |> SchemaCore.constrain constraint')
+        FieldWorking(source.Initial, source.Schema |> SchemaCore.constrain constraint')
 
     /// <summary>Requires this field's boundary input to be supplied.</summary>
-    /// <example><code>field "name" _.Name { mustSupply }</code></example>
+    /// <example><code>field _.Name { mustSupply }</code></example>
     [<CustomOperation("mustSupply")>]
     member _.MustSupply(initial: FieldInitial<'model, 'target>) : FieldConfigured<'model, 'target> =
         FieldConfigured(initial, ValueSchema.mustSupply)
 
     /// <summary>Requires this field's boundary input to be supplied.</summary>
     [<CustomOperation("mustSupply")>]
-    member _.MustSupply(field: FieldConfigured<'model, 'target>) : FieldConfigured<'model, 'target> =
-        FieldConfigured(field.Initial, field.Configure >> ValueSchema.mustSupply)
+    member _.MustSupply(source: FieldConfigured<'model, 'target>) : FieldConfigured<'model, 'target> =
+        FieldConfigured(source.Initial, source.Configure >> ValueSchema.mustSupply)
 
     /// <summary>Requires this field's boundary input to be supplied.</summary>
     [<CustomOperation("mustSupply")>]
-    member _.MustSupply(field: FieldWorking<'model, 'target, 'current>) : FieldWorking<'model, 'target, 'current> =
-        FieldWorking(field.Initial, field.Schema |> ValueSchema.mustSupply)
+    member _.MustSupply(source: FieldWorking<'model, 'target, 'current>) : FieldWorking<'model, 'target, 'current> =
+        FieldWorking(source.Initial, source.Schema |> ValueSchema.mustSupply)
 
     /// <summary>Allows this option-typed field's boundary input to be omitted.</summary>
-    /// <example><code>field "nickname" _.Nickname { mayOmit }</code></example>
+    /// <example><code>field _.Nickname { mayOmit }</code></example>
     [<CustomOperation("mayOmit")>]
-    member _.MayOmit(field: FieldWorking<'model, 'target, 'current option>) : FieldWorking<'model, 'target, 'current option> =
-        FieldWorking(field.Initial, field.Schema |> ValueSchema.mayOmit)
+    member _.MayOmit(source: FieldWorking<'model, 'target, 'current option>) : FieldWorking<'model, 'target, 'current option> =
+        FieldWorking(source.Initial, source.Schema |> ValueSchema.mayOmit)
 
     /// <summary>Adds portable constraints to the field's inferred schema in declaration order.</summary>
     [<CustomOperation("constraints")>]
@@ -266,48 +292,48 @@ type FieldBuilder<'model, 'target> internal (name: string, getter: 'model -> 'ta
             initial: FieldInitial<'model, 'target>,
             constraints: Constraint<'target> list
         ) : FieldConfigured<'model, 'target> =
-        FieldConfigured(initial, fun schema -> FieldBuilder<'model, 'target>.ConstrainAll(constraints, schema))
+        FieldConfigured(initial, fun schema -> field<'model, 'target>.ConstrainAll(constraints, schema))
 
     /// <summary>Adds portable constraints to the field's inferred schema in declaration order.</summary>
     [<CustomOperation("constraints")>]
     member _.Constraints
         (
-            field: FieldConfigured<'model, 'target>,
+            source: FieldConfigured<'model, 'target>,
             constraints: Constraint<'target> list
         ) : FieldConfigured<'model, 'target> =
         FieldConfigured(
-            field.Initial,
-            field.Configure
-            >> fun schema -> FieldBuilder<'model, 'target>.ConstrainAll(constraints, schema)
+            source.Initial,
+            source.Configure
+            >> fun schema -> field<'model, 'target>.ConstrainAll(constraints, schema)
         )
 
     /// <summary>Adds portable constraints to the field's current schema value in declaration order.</summary>
     [<CustomOperation("constraints")>]
     member _.Constraints
         (
-            field: FieldWorking<'model, 'target, 'current>,
+            source: FieldWorking<'model, 'target, 'current>,
             constraints: Constraint<'current> list
         ) : FieldWorking<'model, 'target, 'current> =
         FieldWorking(
-            field.Initial,
-            FieldBuilder<'model, 'target>.ConstrainAll(constraints, field.Schema)
+            source.Initial,
+            field<'model, 'target>.ConstrainAll(constraints, source.Schema)
         )
 
     /// <summary>Refines the current raw schema with an explicit refinement.</summary>
     [<CustomOperation("refine")>]
     member _.Refine
         (
-            field: FieldWorking<'model, 'target, 'raw>,
+            source: FieldWorking<'model, 'target, 'raw>,
             refinement: Refinement<'raw, 'target>
         ) : FieldWorking<'model, 'target, 'target> =
-        FieldWorking(field.Initial, field.Schema |> SchemaCore.refine refinement)
+        FieldWorking(source.Initial, source.Schema |> SchemaCore.refine refinement)
 
     /// <summary>Refines the current raw schema with the destination type's canonical refinement.</summary>
     [<CustomOperation("refine")>]
     member _.Refine
-        (field: FieldWorking<'model, 'target, 'raw>)
+        (source: FieldWorking<'model, 'target, 'raw>)
         : FieldRefining<'model, 'target, 'raw> =
-        FieldRefining(field.Initial, field.Schema, [])
+        FieldRefining(source.Initial, source.Schema, [])
 
     /// <summary>Adds executable validation to the field's current schema value.</summary>
     [<CustomOperation("validate")>]
@@ -322,49 +348,49 @@ type FieldBuilder<'model, 'target> internal (name: string, getter: 'model -> 'ta
     [<CustomOperation("validate")>]
     member _.Validate
         (
-            field: FieldConfigured<'model, 'target>,
+            source: FieldConfigured<'model, 'target>,
             validation: 'target -> Result<unit, SchemaError>
         ) : FieldConfigured<'model, 'target> =
-        FieldConfigured(field.Initial, field.Configure >> SchemaCore.validate validation)
+        FieldConfigured(source.Initial, source.Configure >> SchemaCore.validate validation)
 
     /// <summary>Adds executable validation to the field's current schema value.</summary>
     [<CustomOperation("validate")>]
     member _.Validate
         (
-            field: FieldWorking<'model, 'target, 'current>,
+            source: FieldWorking<'model, 'target, 'current>,
             validation: 'current -> Result<unit, SchemaError>
         ) : FieldWorking<'model, 'target, 'current> =
-        FieldWorking(field.Initial, field.Schema |> SchemaCore.validate validation)
+        FieldWorking(source.Initial, source.Schema |> SchemaCore.validate validation)
 
     /// <summary>Adds executable validation after the pending refinement.</summary>
     [<CustomOperation("validate")>]
     member _.Validate
         (
-            field: FieldRefining<'model, 'target, 'raw>,
+            source: FieldRefining<'model, 'target, 'raw>,
             validation: 'target -> Result<unit, SchemaError>
         ) : FieldRefining<'model, 'target, 'raw> =
-        FieldRefining(field.Initial, field.RawSchema, field.Validations @ [ validation ])
+        FieldRefining(source.Initial, source.RawSchema, source.Validations @ [ validation ])
 
     member _.Run
-        (field: FieldWorking<'model, 'target, 'target>)
+        (source: FieldWorking<'model, 'target, 'target>)
         : FieldDeclaration<'model, 'target> =
         FieldDeclaration(
-            { ExternalName = ExternalFieldName.create field.Initial.Name
+            { ExternalName = ExternalFieldName.create source.Initial.Name
               Order = FieldOrder.create 0
-              Getter = field.Initial.Getter
-              ValueSchema = field.Schema.ValueDefinition
+              Getter = source.Initial.Getter
+              ValueSchema = source.Schema.ValueDefinition
               Rules = [] }
         )
 
     member _.Run
-        (field: FieldConfigured<'model, 'target>)
+        (source: FieldConfigured<'model, 'target>)
         : ConfiguredFieldDeclaration<'model, 'target> =
-        ConfiguredFieldDeclaration(field.Initial, field.Configure)
+        ConfiguredFieldDeclaration(source.Initial, source.Configure)
 
     member _.Run
-        (field: FieldRefining<'model, 'target, 'raw>)
+        (source: FieldRefining<'model, 'target, 'raw>)
         : RefiningFieldDeclaration<'model, 'raw, 'target> =
-        RefiningFieldDeclaration(field.Initial, field.RawSchema, field.Validations)
+        RefiningFieldDeclaration(source.Initial, source.RawSchema, source.Validations)
 
     [<CompilerMessage(
         "A field block must finish with the getter type. Add `refine` after raw-schema operations.",
@@ -372,9 +398,9 @@ type FieldBuilder<'model, 'target> internal (name: string, getter: 'model -> 'ta
         IsError = true
     )>]
     member _.Run
-        (field: FieldWorking<'model, 'target, 'current>)
+        (source: FieldWorking<'model, 'target, 'current>)
         : FieldDeclaration<'model, 'target> =
-        invalidOp $"Field '{field.Initial.Name}' has an unfinished raw schema."
+        invalidOp $"Field '{source.Initial.Name}' has an unfinished raw schema."
 
 [<EditorBrowsable(EditorBrowsableState.Never)>]
 type FieldStep<'model, 'value> internal (definition: FieldDefinition<'model, 'value>) =
@@ -494,52 +520,52 @@ module internal SchemaBuilderInternals =
 type SchemaBuilder<'model>() =
     static member DefaultField
         (
-            field: FieldBuilder<'model, 'value>,
+            source: field<'model, 'value>,
             schema: Schema<'value>
         ) : FieldStep<'model, 'value> =
         FieldStep(
-            { ExternalName = ExternalFieldName.create field.Name
+            { ExternalName = ExternalFieldName.create source.Name
               Order = FieldOrder.create 0
-              Getter = field.Getter
+              Getter = source.Getter
               ValueSchema = schema.ValueDefinition
               Rules = [] }
         )
 
     static member RefinedField
         (
-            field: RefiningFieldDeclaration<'model, 'raw, 'target>,
+            source: RefiningFieldDeclaration<'model, 'raw, 'target>,
             refinement: Refinement<'raw, 'target>
         ) : FieldStep<'model, 'target> =
         let schema =
-            field.Validations
+            source.Validations
             |> List.fold
                 (fun current validation -> SchemaCore.validate validation current)
-                (field.RawSchema |> SchemaCore.refine refinement)
+                (source.RawSchema |> SchemaCore.refine refinement)
 
         FieldStep(
-            { ExternalName = ExternalFieldName.create field.Initial.Name
+            { ExternalName = ExternalFieldName.create source.Initial.Name
               Order = FieldOrder.create 0
-              Getter = field.Initial.Getter
+              Getter = source.Initial.Getter
               ValueSchema = schema.ValueDefinition
               Rules = [] }
         )
 
     static member ConfiguredField
         (
-            field: ConfiguredFieldDeclaration<'model, 'target>,
+            source: ConfiguredFieldDeclaration<'model, 'target>,
             schema: Schema<'target>
         ) : FieldStep<'model, 'target> =
         SchemaBuilder<'model>.DefaultField(
-            FieldBuilder(field.Initial.Name, field.Initial.Getter),
-            field.Configure schema
+            field<'model, 'target>(source.Initial.Name, source.Initial.Getter),
+            source.Configure schema
         )
 
-    member inline _.Yield(field: FieldBuilder<'model, ^value>) : FieldStep<'model, ^value> =
+    member inline _.Yield(field: field<'model, ^value>) : FieldStep<'model, ^value> =
         let schema: Schema< ^value> = SchemaDefaults.Resolve()
         SchemaBuilder<'model>.DefaultField(field, schema)
 
-    member _.Yield(field: FieldDeclaration<'model, 'value>) =
-        FieldStep(field.Definition)
+    member _.Yield(source: FieldDeclaration<'model, 'value>) =
+        FieldStep(source.Definition)
 
     member inline _.Yield
         (field: RefiningFieldDeclaration<'model, ^raw, ^target>)
@@ -572,14 +598,14 @@ type SchemaBuilder<'model>() =
 
     member _.Combine
         (
-            field: FieldStep<'model, 'value>,
+            source: FieldStep<'model, 'value>,
             plan: SchemaPlan<'model, 'tail, 'constructed, 'constructor>
         ) =
         let tail =
             unbox<ICeFields<'model, 'tail, 'constructed>> plan.Fields
 
         let fields =
-            CeFieldsCons<'model, 'value, 'tail, 'constructed>(field.Definition, tail)
+            CeFieldsCons<'model, 'value, 'tail, 'constructed>(source.Definition, tail)
             :> ICeFields<'model, 'value -> 'tail, 'constructed>
 
         SchemaPlan<'model, 'value -> 'tail, 'constructed, 'constructor>(
@@ -619,12 +645,20 @@ module Syntax =
     /// <summary>Record-schema computation expression.</summary>
     let schema<'model> = SchemaBuilder<'model>()
 
-    /// <summary>Declares a field with an explicit wire name.</summary>
-    /// <example><code>field "emailAddress" _.Email</code></example>
-    let field (name: string) (getter: 'model -> 'value) =
+    /// <summary>
+    /// Declares a field under an explicit wire name, for when the name differs from the property and for
+    /// portable code.
+    /// </summary>
+    /// <remarks>
+    /// <c>field _.Email</c> derives the wire name from the property; reach for <c>fieldAs</c> when the wire name
+    /// is not the camelCased property name, or when the code must also compile under Fable, which cannot run the
+    /// quotation the derived form reads. Explicit names are never transformed.
+    /// </remarks>
+    /// <example><code>fieldAs "email_address" _.Email</code></example>
+    let fieldAs (name: string) (getter: 'model -> 'value) =
         if isNull name then nullArg (nameof name)
         if isNull (box getter) then nullArg (nameof getter)
-        FieldBuilder<'model, 'value>(name, getter)
+        field<'model, 'value>(name, getter)
 
     /// <summary>Closes a record schema with a total constructor.</summary>
     let construct<'model, 'constructor> (constructor: 'constructor) =
@@ -647,44 +681,3 @@ module Syntax =
     let constrainValues (constraint': Constraint<'item>) (schema: Schema<Map<string, 'item>>) : Schema<Map<string, 'item>> =
         if isNull constraint' then nullArg (nameof constraint')
         SchemaCore.constrainValues constraint' schema
-
-#if !FABLE_COMPILER
-/// <summary>
-/// The overloaded <c>field</c> form. Adding <c>open type Reified.Schema.Syntax</c> alongside
-/// <c>open Reified.Schema.Syntax</c> brings a <c>field</c> that accepts either an explicit wire name and a
-/// getter, exactly like the module function, or a bare property getter such as <c>field _.Email</c>, deriving
-/// the wire name from the property (camelCased).
-/// </summary>
-/// <remarks>
-/// <para>
-/// These live on a type rather than in the module above because F# gives both features they need to members
-/// only: module <c>let</c> bindings cannot be overloaded, and <c>ReflectedDefinition</c> auto-quotation — which
-/// is what turns <c>_.Email</c> into the <c>Expr</c> the derived name is read from — applies to method
-/// parameters only. Static members reach an unqualified call site only through <c>open type</c>.
-/// </para>
-/// <para>
-/// The named overload is repeated here deliberately. <c>open type</c> shadows the module's <c>field</c>, so both
-/// spellings have to live on the same overload set for <c>field "wireName" getter</c> to keep working.
-/// </para>
-/// <para>
-/// Explicit names are never transformed; the camelCase policy applies only to derived names. Fable cannot run
-/// the quotation, so portable code uses the explicit form and needs no <c>open type</c>.
-/// </para>
-/// </remarks>
-[<Sealed; AbstractClass>]
-type Syntax =
-
-    /// <summary>Declares a field from a property getter and derives its camel-cased wire name.</summary>
-    /// <example><code>field _.Email  // wire name "email"</code></example>
-    static member field
-        ([<ReflectedDefinition(includeValue = true)>] getter: Expr<'model -> 'value>)
-        : FieldBuilder<'model, 'value> =
-        let name, get = GetterName.split getter
-        FieldBuilder(name, get)
-
-    /// <summary>Declares a field with an explicit wire name.</summary>
-    /// <example><code>field "emailAddress" _.Email</code></example>
-    static member field(name: string) : (('model -> 'value) -> FieldBuilder<'model, 'value>) =
-        if isNull name then nullArg (nameof name)
-        fun getter -> FieldBuilder(name, getter)
-#endif

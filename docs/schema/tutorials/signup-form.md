@@ -24,10 +24,10 @@ type Signup = { Email: string; Age: int }
 
 let signupSchema =
     schema<Signup> {
-        field "email" _.Email {
+        field _.Email {
             constraints [ email; maxLength 254 ]
         }
-        field "age" _.Age {
+        field _.Age {
             constrain (atLeast 13)
         }
         construct (fun email age -> { Email = email; Age = age })

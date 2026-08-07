@@ -10,7 +10,7 @@ The inner field block is syntax for transforming one `Schema<_>` value. It preve
 from joining into one pipeline.
 
 ```fsharp
-field "email" _.Email {
+field _.Email {
     withSchema Schema.text
     refine ContactEmail.refinement
     validate validateCompanyEmail
@@ -32,7 +32,7 @@ The outer declaration then attaches that `Schema<ContactEmail>` to the `"email"`
 `withSchema` replaces canonical type resolution for this field:
 
 ```fsharp
-field "children" _.Children {
+field _.Children {
     withSchema (Schema.listWith childSchema)
 }
 ```
@@ -44,7 +44,7 @@ There is no separate `fieldWith` declaration. Explicit schema selection is alway
 Portable constraints can be inspected by JSON Schema, documentation, and UI interpreters:
 
 ```fsharp
-field "name" _.Name {
+field _.Name {
     constraints [ present; maxLength 80 ]
 }
 ```
@@ -64,7 +64,7 @@ let contactEmailSchema =
 Inside the field block, either supply the same value or use the destination type's canonical contribution:
 
 ```fsharp
-field "email" _.Email {
+field _.Email {
     withSchema Schema.text
     refine ContactEmail.refinement
 }
@@ -74,7 +74,7 @@ field "email" _.Email {
 type ContactEmail with
     static member Refinement(_: string, _: ContactEmail) = ContactEmail.refinement
 
-field "email" _.Email {
+field _.Email {
     withSchema Schema.text
     refine
 }
@@ -95,7 +95,7 @@ let companyEmailSchema =
 Inside the block:
 
 ```fsharp
-field "email" _.Email {
+field _.Email {
     validate validateCompanyEmail
 }
 ```

@@ -530,19 +530,24 @@ module ApiShapeTests =
         // There is still exactly one value-rule vocabulary. Schema publishes no constraint catalogue of its own:
         // the field-block syntax carries only collection adapters, and supply, which is Schema's concern.
         let syntaxMembers =
-            moduleTypeFromAssembly "Reified.Schema" "Reified.Schema.SyntaxModule"
+            moduleTypeFromAssembly "Reified.Schema" "Reified.Schema.Syntax"
             |> publicStaticMemberNames
             |> Set.filter (fun name -> not (name.Contains "$"))
 
         test
             <@
                 syntaxMembers = set [ "schema"
-                                      "field"
+                                      "fieldAs"
                                       "construct"
                                       "constructResult"
                                       "constrainItems"
                                       "constrainValues" ]
             @>
+
+        // `field` is the type Reified.Schema.field, so the same `open Reified.Schema.Syntax` that supplies the
+        // vocabulary above also reaches it, and one open is all a consumer needs.
+        assertTypeAbsentFromAssembly "Reified.Schema" "Reified.Schema.Syntax+field"
+        assertTypePresentInAssembly "Reified.Schema" "Reified.Schema.field`2" |> ignore
 
         let schemaAssemblyTypeNames =
             schemaAssembly.GetTypes()
@@ -899,28 +904,28 @@ module ApiShapeTests =
     [<Fact>]
     let ``schema fields reject invalid construction arguments`` () =
         Assert.Throws<ArgumentNullException>(fun () ->
-            field null (fun (value: Customer) -> value.Name) |> ignore)
+            fieldAs null (fun (value: Customer) -> value.Name) |> ignore)
         |> ignore
 
         Assert.Throws<ArgumentException>(fun () ->
             schema<Customer> {
-                field " " (fun (value: Customer) -> value.Name)
-                field "age" (fun (value: Customer) -> value.Age)
+                fieldAs " " (fun (value: Customer) -> value.Name)
+                fieldAs "age" (fun (value: Customer) -> value.Age)
                 construct (fun name age -> { Name = name; Age = age })
             }
             |> ignore)
         |> ignore
 
         Assert.Throws<ArgumentNullException>(fun () ->
-            field "name" Unchecked.defaultof<Customer -> string> |> ignore)
+            fieldAs "name" Unchecked.defaultof<Customer -> string> |> ignore)
         |> ignore
 
         Assert.Throws<ArgumentNullException>(fun () ->
             schema<Customer> {
-                field "name" (fun (value: Customer) -> value.Name) {
+                fieldAs "name" (fun (value: Customer) -> value.Name) {
                     withSchema Unchecked.defaultof<Schema<string>>
                 }
-                field "age" (fun (value: Customer) -> value.Age)
+                fieldAs "age" (fun (value: Customer) -> value.Age)
                 construct (fun name age -> { Name = name; Age = age })
             }
             |> ignore)
@@ -933,10 +938,10 @@ module ApiShapeTests =
 
         let schema =
             schema<Customer> {
-                field "name" (fun (value: Customer) -> value.Name) {
+                fieldAs "name" (fun (value: Customer) -> value.Name) {
                     withSchema (requiredText |> Schema.constrainAll [ Constraint.present ])
                 }
-                field "age" (fun (value: Customer) -> value.Age)
+                fieldAs "age" (fun (value: Customer) -> value.Age)
                 construct (fun name age -> { Name = name; Age = age })
             }
 
@@ -963,9 +968,9 @@ module ApiShapeTests =
         let create name age active = { Name = name; Age = age; Active = active }
         let schema =
             schema<CustomerProfile> {
-                field "name" (fun (value: CustomerProfile) -> value.Name)
-                field "age" (fun (value: CustomerProfile) -> value.Age)
-                field "active" (fun (value: CustomerProfile) -> value.Active)
+                fieldAs "name" (fun (value: CustomerProfile) -> value.Name)
+                fieldAs "age" (fun (value: CustomerProfile) -> value.Age)
+                fieldAs "active" (fun (value: CustomerProfile) -> value.Active)
                 construct create
             }
 
@@ -987,9 +992,9 @@ module ApiShapeTests =
         let create name age active = { Name = name; Age = age; Active = active }
         let schema =
             schema<CustomerProfile> {
-                field "name" (fun (value: CustomerProfile) -> value.Name)
-                field "age" (fun (value: CustomerProfile) -> value.Age)
-                field "active" (fun (value: CustomerProfile) -> value.Active)
+                fieldAs "name" (fun (value: CustomerProfile) -> value.Name)
+                fieldAs "age" (fun (value: CustomerProfile) -> value.Age)
+                fieldAs "active" (fun (value: CustomerProfile) -> value.Active)
                 construct create
             }
 
@@ -1018,13 +1023,13 @@ module ApiShapeTests =
 
         let schema =
             schema<PrimitiveProfile> {
-                field "name" (fun (value: PrimitiveProfile) -> value.Name)
-                field "age" (fun (value: PrimitiveProfile) -> value.Age)
-                field "balance" (fun (value: PrimitiveProfile) -> value.Balance)
-                field "active" (fun (value: PrimitiveProfile) -> value.Active)
-                field "birthDate" (fun (value: PrimitiveProfile) -> value.BirthDate)
-                field "lastSeen" (fun (value: PrimitiveProfile) -> value.LastSeen)
-                field "id" (fun (value: PrimitiveProfile) -> value.Id)
+                fieldAs "name" (fun (value: PrimitiveProfile) -> value.Name)
+                fieldAs "age" (fun (value: PrimitiveProfile) -> value.Age)
+                fieldAs "balance" (fun (value: PrimitiveProfile) -> value.Balance)
+                fieldAs "active" (fun (value: PrimitiveProfile) -> value.Active)
+                fieldAs "birthDate" (fun (value: PrimitiveProfile) -> value.BirthDate)
+                fieldAs "lastSeen" (fun (value: PrimitiveProfile) -> value.LastSeen)
+                fieldAs "id" (fun (value: PrimitiveProfile) -> value.Id)
                 construct create
             }
 

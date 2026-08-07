@@ -30,10 +30,10 @@ module NestedSchemaParseTests =
 
     let private addressSchema =
         schema<Address> {
-            field "street" (fun (address: Address) -> address.Street) {
+            fieldAs "street" (fun (address: Address) -> address.Street) {
                 withSchema (Schema.text |> Schema.constrain Constraint.present)
             }
-            field "city" (fun (address: Address) -> address.City) {
+            fieldAs "city" (fun (address: Address) -> address.City) {
                 withSchema (Schema.text |> Schema.constrain Constraint.present)
             }
             construct (fun street city -> ({ Street = street; City = city }: Address))
@@ -41,10 +41,10 @@ module NestedSchemaParseTests =
 
     let private customerSchema =
         schema<Customer> {
-            field "name" (fun (customer: Customer) -> customer.Name) {
+            fieldAs "name" (fun (customer: Customer) -> customer.Name) {
                 withSchema (Schema.text |> Schema.constrain Constraint.present)
             }
-            field "address" (fun (customer: Customer) -> customer.Address) {
+            fieldAs "address" (fun (customer: Customer) -> customer.Address) {
                 withSchema (addressSchema |> Schema.mustSupply)
             }
             construct (fun name address -> ({ Name = name; Address = address }: Customer))
@@ -52,10 +52,10 @@ module NestedSchemaParseTests =
 
     let private verifiedAddressSchema =
         schema<VerifiedAddress> {
-            field "street" (fun (address: VerifiedAddress) -> address.Street) {
+            fieldAs "street" (fun (address: VerifiedAddress) -> address.Street) {
                 withSchema (Schema.text |> Schema.constrain Constraint.present)
             }
-            field "city" (fun (address: VerifiedAddress) -> address.City) {
+            fieldAs "city" (fun (address: VerifiedAddress) -> address.City) {
                 withSchema (Schema.text |> Schema.constrain Constraint.present)
             }
             constructResult VerifiedAddress.Create
@@ -63,10 +63,10 @@ module NestedSchemaParseTests =
 
     let private verifiedCustomerSchema =
         schema<VerifiedCustomer> {
-            field "name" (fun (customer: VerifiedCustomer) -> customer.Name) {
+            fieldAs "name" (fun (customer: VerifiedCustomer) -> customer.Name) {
                 withSchema (Schema.text |> Schema.constrain Constraint.present)
             }
-            field "address" (fun (customer: VerifiedCustomer) -> customer.Address) {
+            fieldAs "address" (fun (customer: VerifiedCustomer) -> customer.Address) {
                 withSchema (verifiedAddressSchema |> Schema.mustSupply)
             }
             construct (fun name address -> ({ Name = name; Address = address }: VerifiedCustomer))

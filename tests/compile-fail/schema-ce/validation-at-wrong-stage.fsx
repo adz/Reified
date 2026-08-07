@@ -25,7 +25,7 @@ let validateText (value: string) =
         Error(SchemaError.Custom("short", Some "Too short."))
 
 schema<Signup> {
-    field "email" _.Email {
+    field _.Email {
         withSchema Schema.text
         refine
         validate validateText

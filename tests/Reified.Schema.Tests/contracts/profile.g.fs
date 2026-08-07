@@ -26,13 +26,13 @@ module ProfileV1 =
     /// The schema declared by profile.contract (Profile.v1).
     let schema : Schema<ProfileV1> =
         schema<ProfileV1> {
-            field "name" (fun (value: ProfileV1) -> value.Name) {
+            fieldAs "name" (fun (value: ProfileV1) -> value.Name) {
                 constraints [
                     minLength 1
                     maxLength 100
                 ]
             }
-            field "email" (fun (value: ProfileV1) -> value.Email) {
+            fieldAs "email" (fun (value: ProfileV1) -> value.Email) {
                 constrain email
             }
             construct (fun name email ->
@@ -68,16 +68,16 @@ module Profile =
     /// The schema declared by profile.contract (Profile.v2).
     let schema : Schema<Profile> =
         schema<Profile> {
-            field "name" (fun (value: Profile) -> value.Name) {
+            fieldAs "name" (fun (value: Profile) -> value.Name) {
                 constraints [
                     minLength 1
                     maxLength 100
                 ]
             }
-            field "email" (fun (value: Profile) -> value.Email) {
+            fieldAs "email" (fun (value: Profile) -> value.Email) {
                 constrain email
             }
-            field "marketing_opt_in" (fun (value: Profile) -> value.MarketingOptIn) {
+            fieldAs "marketing_opt_in" (fun (value: Profile) -> value.MarketingOptIn) {
                 withSchema (Schema.bool |> Schema.withDefault false)
             }
             construct (fun name email marketingOptIn ->

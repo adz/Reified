@@ -19,7 +19,7 @@ module PickupPoint =
     /// The schema declared by shipment.fs (PickupPoint.v1).
     let schema : Schema<PickupPoint> =
         schema<PickupPoint> {
-            field "code" (fun (value: PickupPoint) -> value.Code)
+            fieldAs "code" (fun (value: PickupPoint) -> value.Code)
             construct (fun code ->
                 { Code = code })
         }
@@ -44,7 +44,7 @@ module CourierDelivery =
     /// The schema declared by shipment.fs (CourierDelivery.v1).
     let schema : Schema<CourierDelivery> =
         schema<CourierDelivery> {
-            field "trackingUrl" (fun (value: CourierDelivery) -> value.TrackingUrl)
+            fieldAs "trackingUrl" (fun (value: CourierDelivery) -> value.TrackingUrl)
             construct (fun trackingUrl ->
                 { TrackingUrl = trackingUrl })
         }
@@ -69,14 +69,14 @@ module ShipmentV1 =
     /// The schema declared by shipment.fs (Shipment.v1).
     let schema : Schema<ShipmentV1> =
         schema<ShipmentV1> {
-            field "reference" (fun (value: ShipmentV1) -> value.Reference) {
+            fieldAs "reference" (fun (value: ShipmentV1) -> value.Reference) {
                 withSchema (Schema.text |> Schema.describe "Public shipment reference.")
                 constrain (pattern "^SH-[0-9]+$")
             }
-            field "notifyEmail" (fun (value: ShipmentV1) -> value.NotifyEmail) {
+            fieldAs "notifyEmail" (fun (value: ShipmentV1) -> value.NotifyEmail) {
                 constrain email
             }
-            field "items" (fun (value: ShipmentV1) -> value.Items) {
+            fieldAs "items" (fun (value: ShipmentV1) -> value.Items) {
                 withSchema (Schema.mapWith Schema.int)
             }
             construct (fun reference notifyEmail items ->
@@ -114,36 +114,36 @@ module Shipment =
     /// The schema declared by shipment.fs (Shipment.v2).
     let schema : Schema<Shipment> =
         schema<Shipment> {
-            field "reference" (fun (value: Shipment) -> value.Reference) {
+            fieldAs "reference" (fun (value: Shipment) -> value.Reference) {
                 withSchema (Schema.text |> Schema.describe "Public shipment reference.")
                 constrain (pattern "^SH-[0-9]+$")
             }
-            field "notify_email" (fun (value: Shipment) -> value.NotifyEmail) {
+            fieldAs "notify_email" (fun (value: Shipment) -> value.NotifyEmail) {
                 constrain email
             }
-            field "items" (fun (value: Shipment) -> value.Items) {
+            fieldAs "items" (fun (value: Shipment) -> value.Items) {
                 withSchema (Schema.mapWith Schema.int)
             }
-            field "tags" (fun (value: Shipment) -> value.Tags) {
+            fieldAs "tags" (fun (value: Shipment) -> value.Tags) {
                 withSchema (Schema.listWith Schema.text)
                 constraints [
                     minLength 1
                     Constraint.distinct
                 ]
             }
-            field "weightKg" (fun (value: Shipment) -> value.WeightKg) {
+            fieldAs "weightKg" (fun (value: Shipment) -> value.WeightKg) {
                 constrain (atLeast 0.5m)
             }
-            field "priority" (fun (value: Shipment) -> value.Priority) {
+            fieldAs "priority" (fun (value: Shipment) -> value.Priority) {
                 withSchema (Schema.enum priorityCases |> Schema.withDefault ShipmentPriority.Express)
             }
-            field "delivery" (fun (value: Shipment) -> value.Delivery) {
+            fieldAs "delivery" (fun (value: Shipment) -> value.Delivery) {
                 withSchema (Schema.inlineUnion "kind" deliveryCases)
             }
-            field "origin" (fun (value: Shipment) -> value.Origin) {
+            fieldAs "origin" (fun (value: Shipment) -> value.Origin) {
                 withSchema (Schema.option PickupPoint.schema)
             }
-            field "boxes" (fun (value: Shipment) -> value.Boxes) {
+            fieldAs "boxes" (fun (value: Shipment) -> value.Boxes) {
                 withSchema (Schema.int |> Schema.withDefault 1)
                 constrain (atLeast 1)
             }

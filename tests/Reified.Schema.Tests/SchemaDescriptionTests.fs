@@ -77,10 +77,10 @@ module SchemaDescriptionTests =
     let ``generate pins schema to json schema draft 2020-12`` () =
         let schema =
             schema<Contact> {
-                field "email" _.Email {
+                field _.Email {
                     withSchema (Email.schema ())
                 }
-                field "name" _.Name
+                field _.Name
                 construct (fun email name -> { Email = email; Name = name })
             }
 
@@ -100,10 +100,10 @@ module SchemaDescriptionTests =
     let ``describe lowers to the json schema description keyword on a field`` () =
         let schema =
             schema<Contact> {
-                field "email" _.Email {
+                field _.Email {
                     withSchema (Email.schema ())
                 }
-                field "name" _.Name {
+                field _.Name {
                     withSchema (Schema.text |> Schema.describe "The contact's full name.")
                 }
                 construct (fun email name -> { Email = email; Name = name })
@@ -117,10 +117,10 @@ module SchemaDescriptionTests =
     let ``Schema.describe lowers to the json schema root title keyword`` () =
         let schema =
             schema<Contact> {
-                field "email" _.Email {
+                field _.Email {
                     withSchema (Email.schema ())
                 }
-                field "name" _.Name
+                field _.Name
                 construct (fun email name -> { Email = email; Name = name })
             }
             |> Schema.describe "A contact record."
@@ -133,10 +133,10 @@ module SchemaDescriptionTests =
     let ``Schema.describe rejects empty descriptions`` () =
         let schema =
             schema<Contact> {
-                field "email" _.Email {
+                field _.Email {
                     withSchema (Email.schema ())
                 }
-                field "name" _.Name
+                field _.Name
                 construct (fun email name -> { Email = email; Name = name })
             }
 

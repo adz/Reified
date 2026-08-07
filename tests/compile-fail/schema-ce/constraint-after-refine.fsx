@@ -20,7 +20,7 @@ type Email with
 type Signup = { Email: Email }
 
 schema<Signup> {
-    field "email" _.Email {
+    field _.Email {
         withSchema Schema.text
         refine
         constrain (minLength 3)

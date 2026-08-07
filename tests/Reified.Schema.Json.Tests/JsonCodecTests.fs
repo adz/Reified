@@ -74,36 +74,36 @@ module JsonCodecTests =
 
     let private addressSchema () =
         schema<Address> {
-            field "street" _.Street
-            field "city" _.City
+            field _.Street
+            field _.City
             construct (fun street city -> { Street = street; City = city })
         }
 
     let private tagSchema () =
         schema<Tag> {
-            field "label" _.Label
+            field _.Label
             construct (fun label -> { Label = label })
         }
 
     let private customerSchema () =
         schema<Customer> {
-            field "id" _.Id
-            field "name" _.Name
-            field "email" _.Email {
+            field _.Id
+            field _.Name
+            field _.Email {
                 withSchema (emailSchema ())
             }
-            field "age" _.Age
-            field "balance" _.Balance
-            field "newsletter" _.Newsletter
-            field "joined" _.Joined
-            field "lastSeen" _.LastSeen
-            field "address" _.Address {
+            field _.Age
+            field _.Balance
+            field _.Newsletter
+            field _.Joined
+            field _.LastSeen
+            field _.Address {
                 withSchema (addressSchema ())
             }
-            field "tags" _.Tags {
+            field _.Tags {
                 withSchema (Schema.listWith (tagSchema ()))
             }
-            field "scores" _.Scores {
+            field _.Scores {
                 withSchema (Schema.listWith Schema.int)
             }
             construct (fun id name email age balance newsletter joined lastSeen address tags scores ->
@@ -136,14 +136,14 @@ module JsonCodecTests =
     let private paymentSchema () =
         let cardSchema =
             schema<CardDetails> {
-                field "number" _.Number
-                field "expiry" _.Expiry
+                field _.Number
+                field _.Expiry
                 construct (fun number expiry -> { Number = number; Expiry = expiry })
             }
 
         let invoiceSchema =
             schema<InvoiceDetails> {
-                field "reference" (fun (value: InvoiceDetails) -> value.Reference)
+                fieldAs "reference" (fun (value: InvoiceDetails) -> value.Reference)
                 construct (fun reference -> { Reference = reference })
             }
 
@@ -171,8 +171,8 @@ module JsonCodecTests =
 
     let private orderSchema () =
         schema<Order> {
-            field "reference" (fun (value: Order) -> value.Reference)
-            field "payment" _.Payment {
+            fieldAs "reference" (fun (value: Order) -> value.Reference)
+            field _.Payment {
                 withSchema (paymentSchema ())
             }
             construct (fun reference payment -> { Order.Reference = reference; Payment = payment })
@@ -181,14 +181,14 @@ module JsonCodecTests =
     let private paymentInlineSchema () =
         let cardSchema =
             schema<CardDetails> {
-                field "number" _.Number
-                field "expiry" _.Expiry
+                field _.Number
+                field _.Expiry
                 construct (fun number expiry -> { Number = number; Expiry = expiry })
             }
 
         let invoiceSchema =
             schema<InvoiceDetails> {
-                field "reference" (fun (value: InvoiceDetails) -> value.Reference)
+                fieldAs "reference" (fun (value: InvoiceDetails) -> value.Reference)
                 construct (fun reference -> { Reference = reference })
             }
 
@@ -215,8 +215,8 @@ module JsonCodecTests =
 
     let private inlineOrderSchema () =
         schema<InlineOrder> {
-            field "reference" (fun (value: InlineOrder) -> value.Reference)
-            field "payment" _.Payment {
+            fieldAs "reference" (fun (value: InlineOrder) -> value.Reference)
+            field _.Payment {
                 withSchema (paymentInlineSchema ())
             }
             construct (fun reference payment ->
@@ -232,7 +232,7 @@ module JsonCodecTests =
 
     let private swatchSchema () =
         schema<Swatch> {
-            field "color" _.Color {
+            field _.Color {
                 withSchema (Schema.enum [ EnumCase.create "red" Red; EnumCase.create "green" Green; EnumCase.create "blue" Blue ])
             }
             construct (fun color -> { Color = color })
@@ -264,8 +264,8 @@ module JsonCodecTests =
     let ``decoding tolerates whitespace unknown fields reordering and escaped keys`` () =
         let schema =
             schema<Address> {
-                field "street" _.Street
-                field "city" _.City
+                field _.Street
+                field _.City
                 construct (fun street city -> { Street = street; City = city })
             }
 
@@ -356,8 +356,8 @@ module JsonCodecTests =
     let ``constructor results from buildResult schemas surface as decode failures`` () =
         let schema =
             schema<Address> {
-                field "street" _.Street
-                field "city" _.City
+                field _.Street
+                field _.City
                 constructResult (fun (street: string) (city: string) ->
                     if street = "" then
                         Error "street must not be blank"
@@ -435,14 +435,14 @@ module JsonCodecTests =
 
     let private optionalProfileSchema () =
         schema<OptionalProfile> {
-            field "nickname" _.Nickname {
+            field _.Nickname {
                 withSchema (Schema.option Schema.text)
             }
-            field "name" _.Name
-            field "age" _.Age {
+            field _.Name
+            field _.Age {
                 withSchema (Schema.option Schema.int)
             }
-            field "ratings" _.Ratings {
+            field _.Ratings {
                 withSchema (Schema.listWith (Schema.option Schema.int))
             }
             construct (fun nickname name age ratings ->
@@ -458,8 +458,8 @@ module JsonCodecTests =
     let ``decodes an omitted non-option field from its schema default`` () =
         let schema =
             schema<DefaultedProfile> {
-                field "name" _.Name
-                field "age" (fun (value: DefaultedProfile) -> value.Age) {
+                field _.Name
+                fieldAs "age" (fun (value: DefaultedProfile) -> value.Age) {
                     withSchema (Schema.int |> Schema.withDefault 18)
                 }
                 construct (fun name age -> { Name = name; Age = age })

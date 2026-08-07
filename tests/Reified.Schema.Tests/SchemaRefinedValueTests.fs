@@ -121,10 +121,10 @@ module SchemaRefinedValueTests =
 
         let schema =
             schema<Contact> {
-                field "email" _.Email {
+                field _.Email {
                     withSchema (Email.schema |> Schema.mustSupply)
                 }
-                field "name" _.Name
+                field _.Name
                 construct (fun email name -> { Email = email; Name = name })
             }
 
@@ -140,15 +140,15 @@ module SchemaRefinedValueTests =
         | PendingDefinition -> failwith "Expected public schema API to create a model definition."
 
     [<Fact>]
-    let ``model schemas can attach required to a refined field's value schema, matching field "email" _.Email Email.schema { required }`` () =
+    let ``model schemas can attach required to a refined field's value schema, matching field _.Email Email.schema { required }`` () =
         let requiredEmail = Email.schema |> Schema.mustSupply
 
         let schema =
             schema<Contact> {
-                field "email" _.Email {
+                field _.Email {
                     withSchema requiredEmail
                 }
-                field "name" _.Name
+                field _.Name
                 construct (fun email name -> { Email = email; Name = name })
             }
 

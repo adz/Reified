@@ -77,10 +77,10 @@ type Contact =
 
 let contactSchema =
     schema<Contact> {
-        field "email" _.Email
-        field "name" _.Name
-        field "quantity" _.Quantity
-        field "balance" _.Balance
+        field _.Email
+        field _.Name
+        field _.Quantity
+        field _.Balance
         construct (fun email name quantity balance ->
             { Email = email
               Name = name

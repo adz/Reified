@@ -200,30 +200,30 @@ module SchemaInterpreterPrototypeTests =
 
     let private addressSchema () =
         schema<Address> {
-            field "street" _.Street
-            field "city" _.City
+            field _.Street
+            field _.City
             construct (fun street city -> { Street = street; City = city })
         }
 
     let private tagSchema () =
         schema<Tag> {
-            field "label" _.Label
+            field _.Label
             construct (fun label -> { Label = label })
         }
 
     let private signupSchemaWith constructions getterReads =
         schema<Signup> {
-            field "email" _.Email {
+            field _.Email {
                 withSchema (emailSchemaWith constructions getterReads)
             }
-            field "age" _.Age {
+            field _.Age {
                 withSchema (Schema.int |> Schema.constrain (Constraint.between 13 120))
             }
-            field "newsletter" _.Newsletter
-            field "address" _.Address {
+            field _.Newsletter
+            field _.Address {
                 withSchema ((addressSchema ()) |> Schema.mustSupply)
             }
-            field "tags" _.Tags {
+            field _.Tags {
                 withSchema (
                     Schema.listWith (tagSchema ())
                     |> Schema.constrainAll [ Constraint.minLength 1; Constraint.distinct ]
@@ -259,7 +259,7 @@ module SchemaInterpreterPrototypeTests =
     let ``json schema generation lowers pattern one-of and length range metadata`` () =
         let generated =
             schema<Tag> {
-                field "label" _.Label {
+                field _.Label {
                     withSchema (
                         Schema.text
                         |> Schema.constrainAll

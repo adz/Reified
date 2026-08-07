@@ -15,10 +15,10 @@ type Signup =
 
 let addressSchema () =
     schema<Address> {
-        field "street" _.Street {
+        field _.Street {
             withSchema (Schema.text |> Schema.constrainAll [ Constraint.present; Constraint.maxLength 120 ])
         }
-        field "city" _.City {
+        field _.City {
             withSchema (Schema.text |> Schema.constrainAll [ Constraint.present; Constraint.maxLength 80 ])
         }
         construct (fun street city -> { Street = street; City = city })
@@ -26,16 +26,16 @@ let addressSchema () =
 
 let signupSchema () =
     schema<Signup> {
-        field "name" _.Name {
+        field _.Name {
             withSchema (Schema.text |> Schema.constrainAll [ Constraint.present; Constraint.maxLength 80 ])
         }
-        field "age" _.Age {
+        field _.Age {
             withSchema (Schema.int |> Schema.constrainAll [ Constraint.between 13 120 ])
         }
-        field "address" _.Address {
+        field _.Address {
             withSchema (addressSchema () |> Schema.mustSupply)
         }
-        field "tags" _.Tags {
+        field _.Tags {
             withSchema (Schema.listWith Schema.text |> Schema.constrainAll [ Constraint.maxLength 5 ])
         }
         construct (fun name age address tags ->

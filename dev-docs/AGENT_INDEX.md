@@ -60,6 +60,10 @@ Working on `src/Reified.Schema`? Read `dev-docs/schema/internals.md` first (impl
 - Fable JavaScript support: `examples/Reified.FableProbe/**` and `scripts/check-fable-js-surface.sh`. The probe
   runs the same assertions on both targets, so put a new cross-runtime claim in `Checks.fs` rather than in a
   .NET-only test.
+- Derived field names (`field _.Email`): `dev-docs/derived-field-names.md`. Read it before touching
+  `GetterName.split` in `src/Reified.Schema/Shape.fs` or the `field` constructor in
+  `src/Reified.Schema/SchemaBuilder.fs` — the .NET and Fable paths use different quotation attributes for reasons
+  that are not obvious from the code, and the Fable tool version in `.config/dotnet-tools.json` is load-bearing.
 - Parsing and refined values: `src/Reified.Parse/{Errors,Parse}.fs`, and in `src/Reified.Refinements/` (compile order)
   `Refinement.fs` -> `NonEmpty.fs` -> `Interval.fs` -> `Bounded.fs` -> `Finite.fs` -> `UnitInterval.fs` ->
   `Refine.fs`. Tests are one file per area under `tests/Reified.Refinements.Tests/`. Adding or removing a refined type

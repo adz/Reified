@@ -21,7 +21,7 @@ module SchemaEnumValueTests =
     let ``enum value schema exposes case tags`` () =
         let schema =
             schema<Swatch> {
-                field "color" _.Color {
+                field _.Color {
                     withSchema (colorSchema ())
                 }
                 construct (fun color -> { Color = color })
@@ -40,7 +40,7 @@ module SchemaEnumValueTests =
     let ``enum value schemas lower to json schema string enum`` () =
         let schema =
             schema<Swatch> {
-                field "color" _.Color {
+                field _.Color {
                     withSchema (colorSchema ())
                 }
                 construct (fun color -> { Color = color })

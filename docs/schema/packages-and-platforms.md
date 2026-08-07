@@ -28,12 +28,14 @@ that provide the JavaScript primitives they use.
 The Fable JavaScript build is a separate compilation of the same F# sources. A `netstandard2.1` target by itself does
 not imply JavaScript support; the table records packages with an intentional Fable surface and repository coverage.
 
-Schema declarations compiled with Fable use explicit field names:
+Schema declarations compile with Fable in both field forms:
 
 ```fsharp
-field "email" _.Email
+field _.Email                     // derives the wire name "email"
+fieldAs "email_address" _.Email   // declares it
 ```
 
-The shorter `field _.Email` form is .NET-only because it reads an F# quotation to derive the wire name. All field
-typing, schema inference, constraints, constructors, parsing, checking, and codecs remain supported when the explicit
-name is supplied.
+`field` reads an F# quotation to derive the wire name, so it needs a Fable target that supports quotations:
+JavaScript, TypeScript, Python and BEAM from Fable 5.10, Dart from 5.13. Fable's Rust and PHP targets have no
+quotation support, so those declare names with `fieldAs`. All field typing, schema inference, constraints,
+constructors, parsing, checking, and codecs are available on every target either way.

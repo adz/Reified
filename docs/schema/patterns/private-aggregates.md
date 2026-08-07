@@ -77,8 +77,8 @@ module Booking =
 
     let schema : Schema<Booking> =
         schema<Booking> {
-            field "start" start
-            field "end" finish
+            fieldAs "start" start
+            fieldAs "end" finish
             constructResult (fun start finish ->
                 create { Start = start; End = finish }
                 |> Result.mapError (function

@@ -55,8 +55,8 @@ module Checks =
 
     let private contactSchema =
         schema<SchemaContact> {
-            field "name" _.Name
-            field "age" _.Age
+            field _.Name
+            field _.Age
             construct (fun name age -> { Name = name; Age = age })
         }
 

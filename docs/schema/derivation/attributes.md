@@ -22,7 +22,7 @@ the table has the same meaning as its linked handwritten [Schema DSL](../syntax/
 | --- | --- | --- | --- |
 | `[<DeriveSchema>]` | record | Generate a schema and companion operations for a public wire record. `Chain` and `Version` optionally identify a version series. | [`schema<'model> { ... }`](../syntax/#fields-without-blocks) |
 | `[<DeriveUnion "kind">]` | union | Derive an internally tagged union; every case carries one marked record payload. | [`Schema.union`](../union-schemas/#define-cases) |
-| `[<SchemaName "wire_name">]` | record field or nullary union case | Override the configured wire name or case tag. | [`field "wire_name" _.Field`](../syntax/#fields-without-blocks) |
+| `[<SchemaName "wire_name">]` | record field or nullary union case | Override the configured wire name or case tag. | [`fieldAs "wire_name" _.Field`](../syntax/#fields-without-blocks) |
 | `[<SchemaConstructor>]` | static member | Call this member with fields in declaration order instead of constructing a record literal. | [`construct`](../syntax/#constructors) |
 
 ## Field attributes

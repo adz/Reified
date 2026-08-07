@@ -108,10 +108,10 @@ module SchemaFormatTests =
     let ``formatted value schemas compose with an object shape like any other value schema`` () =
         let schema =
             schema<Contact> {
-                field "email" _.Email {
+                field _.Email {
                     withSchema ((Email.schema ()) |> Schema.mustSupply)
                 }
-                field "name" _.Name
+                field _.Name
                 construct (fun email name -> { Email = email; Name = name })
             }
 

@@ -36,7 +36,7 @@ and checking project through `NonBlankString.Value`.
 A numeric range is a constraint rather than a refined type, so it goes on the primitive:
 
 ```fsharp
-field "quantity" _.Quantity { constrain (Constraint.greaterThan 0) }
+field _.Quantity { constrain (Constraint.greaterThan 0) }
 ```
 
 `Schema.constrain` is available for a standalone value schema too, but inside a field block
@@ -55,12 +55,12 @@ A field block receives the refinement explicitly:
 ```fsharp
 let signupSchema =
     schema<Signup> {
-        field "email" _.Email {
+        field _.Email {
             withSchema Schema.text
             refine ContactEmail.refinement
         }
 
-        field "age" _.Age
+        field _.Age
         construct Signup.create
     }
 ```

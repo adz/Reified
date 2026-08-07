@@ -16,26 +16,26 @@ module ContractTests =
 
     let private v1Schema () =
         schema<ConfigV1> {
-            field "version" (fun (value: ConfigV1) -> value.Version)
-            field "name" (fun (value: ConfigV1) -> value.Name)
+            fieldAs "version" (fun (value: ConfigV1) -> value.Version)
+            fieldAs "name" (fun (value: ConfigV1) -> value.Name)
             construct (fun version name -> { Version = version; Name = name })
         }
 
     let private v2Schema () =
         schema<ConfigV2> {
-            field "version" (fun (value: ConfigV2) -> value.Version)
-            field "name" (fun (value: ConfigV2) -> value.Name)
-            field "port" (fun (value: ConfigV2) -> value.Port)
+            fieldAs "version" (fun (value: ConfigV2) -> value.Version)
+            fieldAs "name" (fun (value: ConfigV2) -> value.Name)
+            fieldAs "port" (fun (value: ConfigV2) -> value.Port)
             construct (fun version name port -> { Version = version; Name = name; Port = port })
         }
 
     let private currentSchema () =
         schema<Config> {
-            field "version" (fun (value: Config) -> value.Version)
-            field "label" _.Label {
+            fieldAs "version" (fun (value: Config) -> value.Version)
+            field _.Label {
                 withSchema (Schema.text |> Schema.constrainAll [ Constraint.minLength 3 ])
             }
-            field "port" (fun (value: Config) -> value.Port) {
+            fieldAs "port" (fun (value: Config) -> value.Port) {
                 withSchema (Schema.int |> Schema.constrainAll [ Constraint.between 1 65535 ])
             }
             construct (fun version label port -> { Version = version; Label = label; Port = port })

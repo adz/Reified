@@ -15,10 +15,10 @@ module SchemaDiagnosticsRenderingTests =
 
     let private signupSchema =
         schema<Signup> {
-            field "email" _.Email {
+            field _.Email {
                 withSchema (Schema.text |> Schema.constrain Constraint.present)
             }
-            field "age" _.Age
+            field _.Age
             construct (fun email age -> { Email = email; Age = age })
         }
 

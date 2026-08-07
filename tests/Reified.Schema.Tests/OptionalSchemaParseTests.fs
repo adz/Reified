@@ -22,11 +22,11 @@ module OptionalSchemaParseTests =
 
     let private profileSchema () =
         schema<Profile> {
-            field "name" _.Name
-            field "nickname" _.Nickname {
+            field _.Name
+            field _.Nickname {
                 withSchema (Schema.option (Schema.text |> Schema.constrain (Constraint.minLength 2)))
             }
-            field "age" _.Age {
+            field _.Age {
                 withSchema (Schema.option Schema.int)
             }
             construct (fun name nickname age ->

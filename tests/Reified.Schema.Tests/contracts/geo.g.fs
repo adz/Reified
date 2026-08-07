@@ -26,13 +26,13 @@ module Geo =
     /// The schema declared by geo.contract (Geo.v1).
     let schema : Schema<Geo> =
         schema<Geo> {
-            field "lat" (fun (value: Geo) -> value.Lat) {
+            fieldAs "lat" (fun (value: Geo) -> value.Lat) {
                 constraints [
                     atLeast (-90m)
                     atMost 90m
                 ]
             }
-            field "lon" (fun (value: Geo) -> value.Lon) {
+            fieldAs "lon" (fun (value: Geo) -> value.Lon) {
                 constraints [
                     atLeast (-180m)
                     atMost 180m

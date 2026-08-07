@@ -37,7 +37,7 @@ type Payment =
 
 let cardSchema =
     schema<CardDetails> {
-        field "number" _.Number
+        field _.Number
         construct (fun number -> { Number = number })
     }
 
@@ -63,7 +63,7 @@ type Checkout =
 
 let checkoutSchema =
     schema<Checkout> {
-        field "payment" _.Payment {
+        field _.Payment {
             withSchema paymentValue
         }
         construct (fun payment -> { Payment = payment })

@@ -32,7 +32,7 @@ downstream consequence; the third is validation that arithmetic immediately undo
 stay constraints on the underlying value:
 
 ```fsharp
-field "email" _.Email {
+field _.Email {
     constrain Constraint.present
     constrain Constraint.email
 }

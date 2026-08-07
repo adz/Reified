@@ -11,7 +11,7 @@ type Email =
 type Signup = { Email: Email }
 
 schema<Signup> {
-    field "email" _.Email {
+    field _.Email {
         withSchema Schema.text
         refine
     }

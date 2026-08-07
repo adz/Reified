@@ -9,7 +9,7 @@ open Reified.Schema.Syntax
 type Contact = { Name: string }
 
 schema<Contact> {
-    field "name" _.Name {
+    field _.Name {
         withSchema Schema.text
         mayOmit
     }

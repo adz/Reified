@@ -8,9 +8,11 @@ open Reified.Constraint
 
 #nowarn "64"
 
-#if !FABLE_COMPILER
 open Microsoft.FSharp.Quotations
 open Microsoft.FSharp.Quotations.Patterns
+
+#if FABLE_COMPILER
+open Microsoft.FSharp.Linq.RuntimeHelpers
 #endif
 
 [<RequireQualifiedAccess>]
@@ -166,19 +168,39 @@ module internal ShapeOps =
             invalidArg (nameof draft) "Schema.admit expects a model schema; refine value schemas with Schema.refine."
         | PendingDefinition -> invalidArg (nameof draft) "Expected a completed schema definition."
 
-#if !FABLE_COMPILER
+/// <summary>
+/// Reads the wire name of a <c>field _.Property</c> declaration from a quotation of its getter.
+/// </summary>
+/// <remarks>
+/// Both targets recover the same pair, by different routes, because Fable does not implement
+/// <c>Expr.WithValue</c>. Either way this runs once while the schema value is built, never per parsed or encoded
+/// value. See <c>dev-docs/derived-field-names.md</c> before changing either branch.
+/// </remarks>
 [<RequireQualifiedAccess>]
 module internal GetterName =
 
+    let private malformed (name: string) =
+        invalidArg
+            name
+            "The derived field form requires a property getter such as `_.Name`; use `fieldAs \"name\" getter` for anything else."
+
     /// <summary>Splits a property-access getter quotation into a derived (camelCased) wire name and the
-    /// compiled getter. Infrastructure for the <c>derivedField</c> form.</summary>
+    /// compiled getter. Infrastructure for the <c>field</c> form.</summary>
     let split (getter: Expr<'model -> 'value>) : string * ('model -> 'value) =
+#if FABLE_COMPILER
+        match getter :> Expr with
+        | Lambda(_, PropertyGet(Some(Var _), property, [])) ->
+            // Fable surfaces the PropertyInfo slot as the property-name string.
+            let propertyName = unbox<string> property
+
+            let compiledGetter =
+                LeafExpressionConverter.EvaluateQuotation getter :?> ('model -> 'value)
+
+            ShapeInternals.camelCase propertyName, compiledGetter
+        | _ -> malformed (nameof getter)
+#else
         match getter :> Expr with
         | WithValue(value, _, Lambda(_, PropertyGet(Some(Var _), property, []))) ->
             ShapeInternals.camelCase property.Name, (value :?> ('model -> 'value))
-        | _ ->
-            invalidArg
-                (nameof getter)
-                "The derived field form requires a property getter such as `_.Name`; use `field \"name\" getter` for anything else."
-
+        | _ -> malformed (nameof getter)
 #endif

@@ -27,8 +27,8 @@ module SchemaConstructorGetterAlignmentTests =
     let ``shape aligns each field's getter with its constructor argument position`` () =
         let schema =
             schema<FullName> {
-                field "first" _.First
-                field "last" _.Last
+                field _.First
+                field _.Last
                 construct (fun first last -> { First = first; Last = last })
             }
         let source = { First = "Ada"; Last = "Lovelace" }
@@ -45,8 +45,8 @@ module SchemaConstructorGetterAlignmentTests =
     let ``shape binds argument position to declaration order, not external field name`` () =
         let swapped =
             schema<FullName> {
-                field "last" _.Last
-                field "first" _.First
+                field _.Last
+                field _.First
                 construct (fun a b -> { First = a; Last = b })
             }
         let source = { First = "Ada"; Last = "Lovelace" }
@@ -63,9 +63,9 @@ module SchemaConstructorGetterAlignmentTests =
     let ``shape aligns each of three same-typed fields with its constructor argument position`` () =
         let schema =
             schema<Address> {
-                field "line1" _.Line1
-                field "line2" _.Line2
-                field "city" _.City
+                field _.Line1
+                field _.Line2
+                field _.City
                 construct (fun line1 line2 city -> { Line1 = line1; Line2 = line2; City = city })
             }
 
@@ -88,9 +88,9 @@ module SchemaConstructorGetterAlignmentTests =
         // matching its declared position rather than the record's source order or external field name.
         let reordered =
             schema<Address> {
-                field "city" _.City
-                field "line1" _.Line1
-                field "line2" _.Line2
+                field _.City
+                field _.Line1
+                field _.Line2
                 construct (fun city line1 line2 -> { Line1 = line1; Line2 = line2; City = city })
             }
 

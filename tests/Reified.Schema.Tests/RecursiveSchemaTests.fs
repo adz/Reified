@@ -15,8 +15,8 @@ module RecursiveSchemaTests =
         let rec schema: Lazy<Schema<Category>> =
             lazy
                 (Syntax.schema<Category> {
-                    field "name" _.Name
-                    field "children" _.Children {
+                    field _.Name
+                    field _.Children {
                         withSchema (Schema.listWith (Schema.defer (fun () -> schema.Value)))
                     }
                     construct (fun name children -> { Name = name; Children = children })

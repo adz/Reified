@@ -25,7 +25,7 @@ module Card =
     /// The schema declared by payment.contract (Card.v1).
     let schema : Schema<Card> =
         schema<Card> {
-            field "number" (fun (value: Card) -> value.Number) {
+            fieldAs "number" (fun (value: Card) -> value.Number) {
                 constraints [
                     minLength 12
                     maxLength 19
@@ -61,7 +61,7 @@ module Invoice =
     /// The schema declared by payment.contract (Invoice.v1).
     let schema : Schema<Invoice> =
         schema<Invoice> {
-            field "reference" (fun (value: Invoice) -> value.Reference) {
+            fieldAs "reference" (fun (value: Invoice) -> value.Reference) {
                 constrain (minLength 1)
             }
             construct (fun reference ->
@@ -104,7 +104,7 @@ module Payment =
     /// The schema declared by payment.contract (Payment.v1).
     let schema : Schema<Payment> =
         schema<Payment> {
-            field "source" (fun (value: Payment) -> value.Source) {
+            fieldAs "source" (fun (value: Payment) -> value.Source) {
                 withSchema (Schema.inlineUnion "kind" sourceCases)
             }
             construct (fun source ->

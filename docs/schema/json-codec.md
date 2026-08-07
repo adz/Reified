@@ -30,8 +30,8 @@ type Address =
 
     static member Schema(_: Address) : Schema<Address> =
         schema<Address> {
-            field "street" _.Street
-            field "city" _.City
+            field _.Street
+            field _.City
             construct (fun street city -> { Street = street; City = city })
         }
 
@@ -42,9 +42,9 @@ type Customer =
 
 let customerSchema =
     schema<Customer> {
-        field "name" _.Name
-        field "age" _.Age
-        field "address" _.Address
+        field _.Name
+        field _.Age
+        field _.Address
         construct (fun name age address -> { Name = name; Age = age; Address = address })
     }
 

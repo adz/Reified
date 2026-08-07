@@ -28,11 +28,11 @@ module Category =
     /// The schema declared by category.contract (Category.v1).
     let rec schema : Schema<Category> =
         Syntax.schema<Category> {
-            field "name" (fun (value: Category) -> value.Name) {
+            fieldAs "name" (fun (value: Category) -> value.Name) {
                 withSchema (Schema.text |> Schema.describe "Stable display name.")
                 constrain (minLength 1)
             }
-            field "children" (fun (value: Category) -> value.Children) {
+            fieldAs "children" (fun (value: Category) -> value.Children) {
                 withSchema (Schema.listWith (Schema.defer (fun () -> schema)) |> Schema.describe "Child categories use the same wire contract.")
             }
             construct (fun name children ->

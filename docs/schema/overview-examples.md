@@ -20,7 +20,7 @@ type Address =
 
     static member Schema(_: Address) : Schema<Address> =
         schema<Address> {
-            field "city" _.City {
+            field _.City {
                 constrain (minLength 1)
             }
             construct (fun city -> { City = city })
@@ -32,10 +32,10 @@ Canonical schemas resolve through nested records, options, lists, and string-key
 ```fsharp
 let customerSchema =
     schema<Customer> {
-        field "id" _.Id
-        field "address" _.Address
-        field "labels" _.Labels
-        field "note" _.Note
+        field _.Id
+        field _.Address
+        field _.Labels
+        field _.Note
         construct Customer.create
     }
 ```
@@ -45,8 +45,8 @@ let customerSchema =
 ```fsharp
 let rangeSchema =
     schema<DateRange> {
-        field "start" _.Start
-        field "end" _.End
+        field _.Start
+        field _.End
         constructResult DateRange.create
     }
 ```
@@ -60,7 +60,7 @@ Built-in refined values have canonical schemas, so the field remains plain:
 ```fsharp
 let accountSchema =
     schema<Account> {
-        field "name" _.Name
+        field _.Name
         construct (fun name -> { Name = name })
     }
 ```
@@ -68,7 +68,7 @@ let accountSchema =
 A local raw schema can instead transition to the getter type:
 
 ```fsharp
-field "email" _.Email {
+field _.Email {
     withSchema Schema.text
     constrain present
     refine
@@ -81,8 +81,8 @@ field "email" _.Email {
 let rec schema : Lazy<Schema<Category>> =
     lazy (
         Syntax.schema<Category> {
-            field "name" _.Name
-            field "children" _.Children {
+            field _.Name
+            field _.Children {
                 withSchema (Schema.listWith (Schema.defer schema))
             }
             construct Category.create

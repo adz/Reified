@@ -27,7 +27,7 @@ module UnionSchemaParseTests =
 
     let private cardSchema () =
         schema<CardDetails> {
-            field "number" _.Number {
+            field _.Number {
                 withSchema RefinedSchemas.nonBlankString
             }
             construct (fun number -> { Number = number })
@@ -42,7 +42,7 @@ module UnionSchemaParseTests =
 
     let private checkoutSchema () =
         schema<Checkout> {
-            field "payment" _.Payment {
+            field _.Payment {
                 withSchema (paymentValue ())
             }
             construct (fun payment -> { Payment = payment })

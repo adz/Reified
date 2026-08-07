@@ -50,25 +50,25 @@ module SchemaCeTests =
 
     let private signupSchema =
         schema<CeSignup> {
-            field "email" _.Email {
+            field _.Email {
                 withSchema Schema.text
                 constrain (Constraint.minLength 3)
                 refine CeEmail.refinement
                 validate validateCompanyEmail
             }
 
-            field "age" _.Age
+            field _.Age
             construct CeSignup.create
         }
 
     let private checkedSignupSchema =
         schema<CeSignup> {
-            field "email" _.Email {
+            field _.Email {
                 withSchema Schema.text
                 refine
             }
 
-            field "age" _.Age {
+            field _.Age {
                 withSchema Schema.int
                 constrain (Constraint.atLeast 0)
             }
@@ -96,12 +96,12 @@ module SchemaCeTests =
     let ``defaultValue composes after an explicit field schema`` () =
         let schema =
             schema<CeSignup> {
-                field "email" _.Email {
+                field _.Email {
                     withSchema Schema.text
                     refine
                 }
 
-                field "age" _.Age {
+                field _.Age {
                     withSchema Schema.int
                     defaultValue 18
                 }
@@ -117,14 +117,14 @@ module SchemaCeTests =
     let ``field metadata operations compose with inferred and explicit schemas`` () =
         let schema =
             schema<CeSignup> {
-                field "email" _.Email {
+                field _.Email {
                     withSchema Schema.text
                     describe "Primary contact email."
                     format SchemaFormat.email
                     refine
                 }
 
-                field "age" _.Age {
+                field _.Age {
                     describe "Age in years."
                     defaultValue 18
                 }

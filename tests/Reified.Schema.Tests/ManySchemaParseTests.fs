@@ -32,10 +32,10 @@ module ManySchemaParseTests =
 
     let private contactMethodSchema =
         schema<ContactMethod> {
-            field "kind" (fun (contact: ContactMethod) -> contact.Kind) {
+            fieldAs "kind" (fun (contact: ContactMethod) -> contact.Kind) {
                 withSchema (Schema.text |> Schema.constrain Constraint.present)
             }
-            field "value" (fun (contact: ContactMethod) -> contact.Value) {
+            fieldAs "value" (fun (contact: ContactMethod) -> contact.Value) {
                 withSchema (Schema.text |> Schema.constrain Constraint.present)
             }
             construct (fun kind value -> ({ Kind = kind; Value = value }: ContactMethod))
@@ -43,10 +43,10 @@ module ManySchemaParseTests =
 
     let private verifiedContactMethodSchema =
         schema<VerifiedContactMethod> {
-            field "kind" (fun (contact: VerifiedContactMethod) -> contact.Kind) {
+            fieldAs "kind" (fun (contact: VerifiedContactMethod) -> contact.Kind) {
                 withSchema (Schema.text |> Schema.constrain Constraint.present)
             }
-            field "value" (fun (contact: VerifiedContactMethod) -> contact.Value) {
+            fieldAs "value" (fun (contact: VerifiedContactMethod) -> contact.Value) {
                 withSchema (Schema.text |> Schema.constrain Constraint.present)
             }
             constructResult VerifiedContactMethod.Create
@@ -54,10 +54,10 @@ module ManySchemaParseTests =
 
     let private customerSchema =
         schema<Customer> {
-            field "name" (fun (customer: Customer) -> customer.Name) {
+            fieldAs "name" (fun (customer: Customer) -> customer.Name) {
                 withSchema (Schema.text |> Schema.constrain Constraint.present)
             }
-            field "contacts" (fun (customer: Customer) -> customer.Contacts) {
+            fieldAs "contacts" (fun (customer: Customer) -> customer.Contacts) {
                 withSchema (Schema.listWith contactMethodSchema)
             }
             construct (fun name contacts -> ({ Name = name; Contacts = contacts }: Customer))
@@ -65,10 +65,10 @@ module ManySchemaParseTests =
 
     let private verifiedCustomerSchema =
         schema<VerifiedCustomer> {
-            field "name" (fun (customer: VerifiedCustomer) -> customer.Name) {
+            fieldAs "name" (fun (customer: VerifiedCustomer) -> customer.Name) {
                 withSchema (Schema.text |> Schema.constrain Constraint.present)
             }
-            field "contacts" (fun (customer: VerifiedCustomer) -> customer.Contacts) {
+            fieldAs "contacts" (fun (customer: VerifiedCustomer) -> customer.Contacts) {
                 withSchema (Schema.listWith verifiedContactMethodSchema)
             }
             construct (fun name contacts -> ({ Name = name; Contacts = contacts }: VerifiedCustomer))
@@ -76,10 +76,10 @@ module ManySchemaParseTests =
 
     let private constrainedCustomerSchema =
         schema<Customer> {
-            field "name" (fun (customer: Customer) -> customer.Name) {
+            fieldAs "name" (fun (customer: Customer) -> customer.Name) {
                 withSchema (Schema.text |> Schema.constrain Constraint.present)
             }
-            field "contacts" (fun (customer: Customer) -> customer.Contacts) {
+            fieldAs "contacts" (fun (customer: Customer) -> customer.Contacts) {
                 withSchema (
                     Schema.listWith contactMethodSchema
                     |> Schema.constrainAll [ Constraint.minLength 1; Constraint.maxLength 2 ]
@@ -210,7 +210,7 @@ module ManySchemaParseTests =
     let ``parse builds a collection from primitive item schemas`` () =
         let schema =
             schema<Tags> {
-                field "values" _.Values {
+                field _.Values {
                     withSchema (Schema.listWith (Schema.text |> Schema.constrain Constraint.present))
                 }
                 construct (fun values -> { Values = values })
@@ -227,7 +227,7 @@ module ManySchemaParseTests =
     let ``parse reports primitive item failures at collection index paths`` () =
         let schema =
             schema<Tags> {
-                field "values" _.Values {
+                field _.Values {
                     withSchema (Schema.listWith (Schema.text |> Schema.constrain Constraint.present))
                 }
                 construct (fun values -> { Values = values })

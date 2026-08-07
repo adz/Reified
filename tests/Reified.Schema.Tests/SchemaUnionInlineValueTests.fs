@@ -18,13 +18,13 @@ module SchemaUnionInlineValueTests =
 
     let private cardSchema () =
         schema<CardDetails> {
-            field "number" _.Number
+            field _.Number
             construct (fun number -> { Number = number })
         }
 
     let private invoiceSchema () =
         schema<InvoiceDetails> {
-            field "reference" _.Reference
+            field _.Reference
             construct (fun reference -> { Reference = reference })
         }
 
@@ -42,7 +42,7 @@ module SchemaUnionInlineValueTests =
     let ``union-inline value schema exposes discriminator and spliced case fields`` () =
         let schema =
             schema<Checkout> {
-                field "payment" _.Payment {
+                field _.Payment {
                     withSchema (paymentSchema ())
                 }
                 construct (fun payment -> { Payment = payment })
@@ -65,7 +65,7 @@ module SchemaUnionInlineValueTests =
     let ``union-inline value schemas lower to json schema oneOf with spliced properties`` () =
         let schema =
             schema<Checkout> {
-                field "payment" _.Payment {
+                field _.Payment {
                     withSchema (paymentSchema ())
                 }
                 construct (fun payment -> { Payment = payment })
@@ -87,7 +87,7 @@ module SchemaUnionInlineValueTests =
     let ``unionInline rejects payload field names that collide with the discriminator`` () =
         let colliding =
             schema<CardDetails> {
-                field "type" _.Number
+                fieldAs "type" _.Number
                 construct (fun number -> { Number = number })
             }
 

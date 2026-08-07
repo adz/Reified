@@ -104,11 +104,11 @@ a boxed `FieldDefinition<'model,'last>` — the cursor.
 - `field`/`fieldWith` are inline and dispatch on the shape via an SRTP static member (`Field`) present
   on both `DefineShape` and `ObjectShape` — that is how `define` stays single-type-parameter (F# has
   no partial explicit type application) while the first field fixes `'constructor`.
-- `open type Reified.Schema.Syntax` adds the overloaded `field` member: the same named form, plus a
-  bare-getter form (`field _.Name`) that reads the property name from the getter quotation
-  (`ReflectedDefinition(includeValue = true)`) once at schema build, camelCases it, and keeps the
-  compiled getter for the hot path. Explicit names are never transformed; the camelCase policy applies
-  only to derived names. Verified under NativeAOT by the AOT probe.
+- `field _.Name` reads the property name from the getter quotation once at schema build, camelCases
+  it, and keeps the compiled getter for the hot path; `fieldAs "wire" getter` declares the name
+  instead. Explicit names are never transformed; the camelCase policy applies only to derived names.
+  Verified under NativeAOT by the AOT probe and on Node by the Fable probe. The .NET and Fable
+  quotation paths differ — see `dev-docs/derived-field-names.md`.
 - `field` (no explicit schema) resolves the value schema from the getter's result type via
   `SchemaDefaults.Resolve()` — an overload set, extendable by giving a type a
   `static member Schema: T -> Schema<T>`. Its generic option/list/map overloads resolve member schemas recursively. Optional

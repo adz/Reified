@@ -21,7 +21,7 @@ module UnionInlineSchemaParseTests =
 
     let private cardSchema () =
         schema<CardDetails> {
-            field "number" _.Number {
+            field _.Number {
                 withSchema (Schema.text |> Schema.constrain Constraint.present)
             }
             construct (fun number -> { Number = number })
@@ -29,7 +29,7 @@ module UnionInlineSchemaParseTests =
 
     let private invoiceSchema () =
         schema<InvoiceDetails> {
-            field "reference" _.Reference
+            field _.Reference
             construct (fun reference -> { Reference = reference })
         }
 
@@ -45,7 +45,7 @@ module UnionInlineSchemaParseTests =
 
     let private checkoutSchema () =
         schema<Checkout> {
-            field "payment" _.Payment {
+            field _.Payment {
                 withSchema (paymentValue ())
             }
             construct (fun payment -> { Payment = payment })

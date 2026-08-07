@@ -63,8 +63,8 @@ module internal ValueSchema =
     /// <code>
     /// let rec categorySchema () =
     ///     schema&lt;Category&gt; {
-    ///         field "name" _.Name
-    ///         field "children" _.Children {
+    ///         field _.Name
+    ///         field _.Children {
     ///             withSchema (Schema.listWith (Schema.defer categorySchema))
     ///         }
     ///         construct (fun name children -&gt; { Name = name; Children = children })

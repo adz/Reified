@@ -32,13 +32,13 @@ module ConstraintInspectionTests =
     let ``the field DSL attaches singular and plural constraints in declaration order`` () =
         let schema =
             schema<Signup> {
-                field "email" _.Email {
+                field _.Email {
                     withSchema Schema.text
                     mustSupply
                     constraints [ present; email; minLength 3; maxLength 254 ]
                     constrain trimmed
                 }
-                field "age" _.Age {
+                field _.Age {
                     constrain (atLeast 13)
                     constraints [ atMost 120; notEqualTo 99 ]
                 }
@@ -67,12 +67,12 @@ module ConstraintInspectionTests =
     let ``supply is inspectable separately from the value constraints`` () =
         let schema =
             schema<Signup> {
-                field "email" _.Email {
+                field _.Email {
                     withSchema Schema.text
                     mustSupply
                     constrain present
                 }
-                field "age" _.Age
+                field _.Age
                 construct (fun email age -> { Email = email; Age = age })
             }
 
@@ -96,8 +96,8 @@ module ConstraintInspectionTests =
 
         let schema =
             schema<Signup> {
-                field "email" _.Email { withSchema (emailValue |> Schema.constrain trimmed) }
-                field "age" _.Age { withSchema (Schema.int |> Schema.constrain (Constraint.between 13 120)) }
+                field _.Email { withSchema (emailValue |> Schema.constrain trimmed) }
+                field _.Age { withSchema (Schema.int |> Schema.constrain (Constraint.between 13 120)) }
                 construct (fun email age -> { Email = email; Age = age })
             }
 
@@ -119,9 +119,9 @@ module ConstraintInspectionTests =
     let ``per-field metadata is inspectable without constructing a model`` () =
         let schema =
             schema<Address> {
-                field "street" _.Street { withSchema (Schema.text |> Schema.constrain present) }
-                field "city" _.City { withSchema (Schema.text |> Schema.constrain (lengthBetween 1 100)) }
-                field "postalCode" _.PostalCode {
+                field _.Street { withSchema (Schema.text |> Schema.constrain present) }
+                field _.City { withSchema (Schema.text |> Schema.constrain (lengthBetween 1 100)) }
+                field _.PostalCode {
                     withSchema (Schema.text |> Schema.constrainAll [ present; pattern "^[0-9]{5}$" ])
                 }
                 construct (fun street city postalCode ->

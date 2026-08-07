@@ -94,7 +94,7 @@ rather than catching them.
 Numeric ranges are constraints instead:
 
 ```fsharp
-field "quantity" _.Quantity { constrain (Constraint.greaterThan 0) }
+field _.Quantity { constrain (Constraint.greaterThan 0) }
 ```
 
 `FiniteFloat` is the exception that proves the rule: it is worth having because `NaN` and
