@@ -1312,7 +1312,9 @@ module ApiShapeTests =
               "tap"
               "tapError"
               "traverse"
-              "sequence" ]
+              "sequence"
+              "traverseAll"
+              "sequenceAll" ]
 
         // Traversal lives on the Result module itself; the former Collection module is retired.
         assertModuleAbsentFromAssembly "Reified.Result" "Reified.Result.Collection"

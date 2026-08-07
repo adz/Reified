@@ -10,8 +10,9 @@
 - Recover: `Result.orElse`, `Result.orElseWith`. There is no `recoverWith` — it was specified but not implemented,
   because no call site wanted it.
 - Extract: `Result.defaultValue`, `Result.headOr`.
-- Collections: `Result.traverse` and `Result.sequence` (fail-fast, seq in / list out). The old `Collection` module
-  and `Collection.traverseResult`/`sequenceResult` are removed.
+- Collections: `Result.traverse` and `Result.sequence` (fail-fast, seq in / list out), and `Result.traverseAll` /
+  `Result.sequenceAll`, which run every mapping and return `Result<'output list, 'error list>` with errors in input
+  order. The old `Collection` module and `Collection.traverseResult`/`sequenceResult` are removed.
 - Observe: `Result.tap` and `Result.tapError` — synchronous, return the input unchanged.
 - `result { }` is fail-fast, with `Return`, `ReturnFrom`, `Zero`, `Bind`, `BindReturn`, `Delay`, `Run`, `Combine`,
   `TryWith`, `TryFinally`, `Using`, `While`, and `For`.

@@ -1,7 +1,7 @@
 ---
 weight: 50
 title: Working with collections
-description: Apply a fallible operation across a sequence with traverse and sequence.
+description: Apply a fallible operation across a sequence, stopping at the first error or collecting every one.
 ---
 
 # Working with collections
@@ -70,7 +70,30 @@ List.rev visited
 ```
 
 `"3"` was never visited. Only the first failure is reported, and later items are not examined at all — so this cannot
-tell a user everything wrong with their input. To report every failure, see
+tell a user everything wrong with their input.
+
+## traverseAll and sequenceAll
+
+Use these when every item should be tried and every failure reported:
+
+```fsharp
+[ "1"; "abc"; "500" ] |> Result.traverseAll parseAge
+// Error [AgeNotANumber "abc"; AgeOutOfRange 500]
+
+[ Ok 1; Error AgeMissing; Error (AgeNotANumber "x") ] |> Result.sequenceAll
+// Error [AgeMissing; AgeNotANumber "x"]
+```
+
+The rules:
+
+- Every mapping runs, in input order, even after one has failed. If the mapping does real work, it does that work for
+  every item.
+- Errors come back in input order, one per failing item. Nothing is flattened: a mapping that itself returns
+  `Result<_, 'error list>` produces a list of lists, so map it down first if you want one flat list.
+- The input sequence is enumerated once, up front, so a lazy sequence is fully forced and an infinite one will not
+  terminate.
+
+To accumulate across differently-typed independent steps rather than across one collection, see
 [collecting every error](../collecting-errors/).
 
 ## Shape in and shape out
@@ -78,8 +101,10 @@ tell a user everything wrong with their input. To report every failure, see
 Both take any `seq<_>` and produce a **list**:
 
 ```fsharp
-Result.traverse : ('a -> Result<'b, 'e>) -> seq<'a> -> Result<'b list, 'e>
-Result.sequence : seq<Result<'a, 'e>> -> Result<'a list, 'e>
+Result.traverse    : ('a -> Result<'b, 'e>) -> seq<'a> -> Result<'b list, 'e>
+Result.sequence    : seq<Result<'a, 'e>> -> Result<'a list, 'e>
+Result.traverseAll : ('a -> Result<'b, 'e>) -> seq<'a> -> Result<'b list, 'e list>
+Result.sequenceAll : seq<Result<'a, 'e>> -> Result<'a list, 'e list>
 ```
 
 An array or a `seq` goes in; a list comes out. Convert afterwards with `Result.map` when you need a different shape:
@@ -89,4 +114,5 @@ An array or a `seq` goes in; a list comes out. Convert afterwards with `Result.m
 // Ok [|1; 2|]
 ```
 
-Both fully enumerate the input up to the failure point, so an infinite sequence will not terminate.
+`traverse` and `sequence` enumerate the input up to the failure point; `traverseAll` and `sequenceAll` enumerate all
+of it. An infinite sequence will not terminate through any of them.

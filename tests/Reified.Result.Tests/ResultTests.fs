@@ -54,6 +54,29 @@ module ResultTests =
         test <@ workflow = Ok 10 @>
 
     [<Fact>]
+    let ``traverseAll and sequenceAll run every mapping and collect every error in input order`` () =
+        let double value =
+            if value < 3 then Ok(value * 2) else Error value
+
+        test <@ Result.traverseAll double [ 1; 2 ] = Ok [ 2; 4 ] @>
+        test <@ Result.traverseAll double [ 1; 4; 3 ] = Error [ 4; 3 ] @>
+        test <@ Result.sequenceAll [ Ok 1; Error "missing"; Error "invalid" ] = Error [ "missing"; "invalid" ] @>
+        test <@ Result.sequenceAll [ Ok 1; Ok 3 ] = Ok [ 1; 3 ] @>
+
+    [<Fact>]
+    let ``traverseAll evaluates every item even after a failure`` () =
+        let seen = ResizeArray<int>()
+
+        let mapping value =
+            seen.Add value
+            if value % 2 = 0 then Ok value else Error value
+
+        let collected = Result.traverseAll mapping (Seq.ofList [ 1; 2; 3 ])
+
+        test <@ collected = Error [ 1; 3 ] @>
+        test <@ List.ofSeq seen = [ 1; 2; 3 ] @>
+
+    [<Fact>]
     let ``tap and tapError observe without changing the result`` () =
         let observed = ResizeArray<string>()
 

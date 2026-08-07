@@ -222,3 +222,41 @@ module Result =
     /// </example>
     let sequence (values: seq<Result<'value, 'error>>) : Result<'value list, 'error> =
         traverse id values
+
+    /// <summary>Maps each value with a result-returning function, running every mapping and collecting every error.</summary>
+    /// <remarks>Takes any sequence and always produces a list. The sequence is enumerated once, in order, and every
+    /// mapping runs even after one fails, so a mapping with side effects runs for every item. Errors appear in input
+    /// order. Each mapping contributes one error; nothing is flattened. Use <c>traverse</c> when the first failure
+    /// should stop the work.</remarks>
+    /// <example>
+    /// <code>
+    /// [ "1"; "x"; "y" ] |> Result.traverseAll parseInt // Error [ NotANumber "x"; NotANumber "y" ]
+    /// </code>
+    /// </example>
+    let traverseAll (mapping: 'input -> Result<'output, 'error>) (values: seq<'input>) : Result<'output list, 'error list> =
+        let mapped = values |> Seq.toList |> List.map mapping
+
+        let failures =
+            mapped
+            |> List.choose (function
+                | Error failure -> Some failure
+                | Ok _ -> None)
+
+        match failures with
+        | [] ->
+            mapped
+            |> List.choose (function
+                | Ok value -> Some value
+                | Error _ -> None)
+            |> Ok
+        | failures -> Error failures
+
+    /// <summary>Turns a sequence of results into one result containing all successes, or every error.</summary>
+    /// <remarks>Takes any sequence and always produces a list. Errors appear in input order.</remarks>
+    /// <example>
+    /// <code>
+    /// [ Ok 1; Error "missing"; Error "invalid" ] |> Result.sequenceAll // Error [ "missing"; "invalid" ]
+    /// </code>
+    /// </example>
+    let sequenceAll (values: seq<Result<'value, 'error>>) : Result<'value list, 'error list> =
+        traverseAll id values

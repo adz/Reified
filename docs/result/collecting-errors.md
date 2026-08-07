@@ -143,3 +143,7 @@ yourself, by mapping each step's error to a pair of field name and reason before
 
 The line between the two: `result.list { ... and! ... }` accumulates one group of independent bindings.
 `Schema.parse` owns accumulation at a structured boundary, with paths.
+
+For the third case — the same operation applied across a collection — use
+[`Result.traverseAll` and `Result.sequenceAll`](../collections/#traverseall-and-sequenceall), which run every mapping
+and return `Result<'output list, 'error list>`.

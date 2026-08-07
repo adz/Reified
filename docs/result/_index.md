@@ -70,7 +70,7 @@ Every page below builds on this same `parseName`/`parseAge` pair, so the example
 - [Handling errors](./handling-errors/) — change the error type, replace one error with another, and recover.
 - [Extracting values](./extracting/) — get back to a plain value, an option, or a default.
 - [Working with collections](./collections/) — apply a fallible operation across a sequence with `traverse` and
-  `sequence`.
+  `sequence`, or collect every failure with `traverseAll` and `sequenceAll`.
 - [Observing a Result](./observing/) — log or measure mid-pipeline with `tap` and `tapError`.
 - [The result computation expression](./result-ce/) — write dependent steps as straight-line code with `result { }`.
 - [Collecting every error](./collecting-errors/) — report all independent failures at once with `result.list { }`
