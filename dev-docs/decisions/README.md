@@ -1,703 +1,313 @@
 # Decision Summary
 
-This folder keeps only high-level durable decisions. Detailed historical specs are deleted once their useful rules have
-been folded into `AGENTS.md`, `dev-docs/PLAN.md`, or this summary.
+High-level durable decisions only: what was decided, and the reason that would otherwise be re-litigated.
+Detailed specs are deleted once their rules land in `AGENTS.md`, `dev-docs/PLAN.md`, or here.
 
-Entries dated before 2026-08-07 were written while Flow and the description side shared one repository. Where they
-decide something about `Axial.Flow*` or the host HTTP adapters, that decision now belongs to the
-[Axial repository](https://github.com/adz/Axial); the names are left as written rather than rewritten into
-something that was never decided.
+Nothing here restates what the code already says. If a rule is visible in a signature, a project file, or a test
+name, it does not belong on this page — a decision earns a place only when the reasoning is invisible, when the
+alternative looks obviously better than it is, or when something was tried and rejected.
+
+Flow decisions are not kept here. The effect system, its service and hosting satellites, and the host HTTP
+adapters live in the [Axial repository](https://github.com/adz/Axial) along with the reasoning behind them.
 
 ## 2026-08-07: Reified is the description side, with one umbrella package
 
-- **The repository split on description versus execution, and this side is `Reified`.** Constraint, Refinements,
-  Parse, Result, Data, Schema, the JSON codec, the host-neutral HTTP contracts, contract generation, and
-  schema-derived testing are here. Flow, its service and hosting satellites, the two host HTTP adapters, and the
-  integration reference application are in Axial. The dependency runs one way — Axial's adapters execute Reified
-  contracts — and it runs through published packages, never a project reference.
+- **The repository split on description versus execution.** Constraint, Refinements, Parse, Result, Data, Schema,
+  the JSON codec, the host-neutral HTTP contracts, contract generation, and schema-derived testing are here. The
+  dependency runs one way — Axial's adapters execute Reified contracts — and only through published packages.
 - **No execution concept enters this repository to close that gap.** No workflow type, no service contract, no
-  ambient runtime. A caller that needs one either uses Axial or uses an ordinary function. `Reified.Schema.Http`
-  assembles boundary input, problem details, and OpenAPI documents as *values*; it never opens a socket.
-- **`Axial.Refined` became `Reified.Refinements`, and only at the package and namespace level.** The internal
-  `Refined` type and module vocabulary reads correctly in the singular and was left alone. Mechanically
-  pluralizing it would have renamed a domain concept to match a package id.
-- **`Reified` is an umbrella package, and `Reified.ErrorHandling` is not coming back.** The distinction that
-  killed the old meta-packages still holds: a grouping that is not a capability does not earn a package id.
-  `Reified` earns one because "install the whole library" is a real thing a reader wants and cannot otherwise
-  express. It carries no sources and no assembly — only dependencies — so a type never gains a second place it
-  could come from, and `tests/Reified.Package.Tests` fails if a packable runtime package is missing from it.
+  ambient runtime. A caller that needs one uses Axial or an ordinary function. `Reified.Schema.Http` assembles
+  boundary input, problem details, and OpenAPI documents as *values*; it never opens a socket.
+- **`Axial.Refined` became `Reified.Refinements` at the package and namespace level only.** The internal `Refined`
+  type and module vocabulary reads correctly in the singular. Pluralizing it would have renamed a domain concept to
+  match a package id.
+- **`Reified` is an umbrella package, and `Reified.ErrorHandling` is not coming back.** The distinction that killed
+  the old meta-packages still holds: a grouping that is not a capability does not earn a package id. `Reified` earns
+  one because "install the whole library" is a real thing a reader wants and cannot otherwise express. It carries no
+  sources and no assembly, so a type never gains a second place it could come from.
 - **`Reified.Schema.Contracts.Build` stays outside the umbrella.** This is a NuGet fact, not a preference: MSBuild
   `build/` assets do not flow through a transitive package reference, so an umbrella dependency would install the
-  targets without ever running them — worse than not shipping it, because the failure is silent. Packing them to
-  `buildTransitive/` would work and was rejected: it would run schemagen on every build of every consumer that
+  targets without running them — worse than not shipping it, because the failure is silent. Packing to
+  `buildTransitive/` would work and was rejected: it would run schemagen on every build of every consumer who
   wanted only a JSON codec.
 - **`Reified.Schema.Http` is .NET-only, so the umbrella multi-targets.** It joins the `net8.0` dependency group
   only; netstandard2.1 consumers (Fable, older hosts) get the rest of the umbrella rather than no umbrella at all.
-- **Docs, generators, and CI describe four products, not five.** The docgen Flow page specs, the Flow DLL inputs,
-  the `flow` product, the flow sidebar, and the CI jobs for examples that were never extracted are deleted rather
-  than left pointing at absent code.
-- **The three checks the extraction dropped are rebuilt, not waived.** The Schema CE compile-fail fixtures, the
-  API-shape suite, and the Fable surface check were recovered from Axial's history and rewritten Reified-only:
-  the Flow halves of the shape suite and the Fable project were dropped rather than ported, and the Fable
-  benchmarks stayed with Flow because a benchmark comparing `Flow` to manual composition is not this
-  repository's claim. `examples/Reified.FableProbe` multi-targets so the *same* assertions run on .NET and on
-  Node, which is the only way a divergence is visible.
-- **Folding JsonSchema into Reified.Schema had put a Fable-hostile call on the Fable path, and nobody could see
-  it.** `JsonSchema.generate` used `Type.GetTypeCode`, which Fable does not support. It was invisible while
-  `Axial.Schema.JsonSchema` was a separate package the Fable project did not reference. Restoring the surface
-  check surfaced it immediately; it is now a type test, and the rule stands: a package on the Fable list must be
-  compiled by the probe, or the list is a claim nothing checks.
+- **The three checks the extraction dropped were rebuilt, not waived.** The Schema CE compile-fail fixtures, the
+  API-shape suite, and the Fable surface check were recovered from Axial's history and rewritten Reified-only. The
+  Fable benchmarks stayed with Flow: a benchmark comparing `Flow` to manual composition is not this repository's
+  claim. `examples/Reified.FableProbe` multi-targets so the *same* assertions run on .NET and on Node, which is the
+  only arrangement in which a divergence between the two is visible.
+- **A package on the Fable list must be compiled by the probe, or the list is a claim nothing checks.**
+  `JsonSchema.generate` used `Type.GetTypeCode`, which Fable does not support. It was invisible while
+  `Axial.Schema.JsonSchema` was a separate package the Fable project did not reference, and stayed broken from the
+  day that package was folded into `Reified.Schema` until the surface check was restored.
 
-## 2026-08-03: Result and Values are separate top-level documentation areas
+## 2026-08-03: Result and Values are separate documentation areas
 
-- The top navigation is **Result | Values | Data | Schema | Flow**. Each is its own documentation area with its own
-  landing page, sidebar file, generated reference tree, `agent.md`, and `llms.txt`. `/error-handling/` no longer
-  exists at any level — not as a URL, a directory, a sidebar, or a validate script.
-- `docs/error-handling/` split into `docs/result/` and `docs/values/`. Result took its guide pages,
-  `fstoolkit-comparison.md`, and `reference/result/`. Values took Constraint, Refined, Parse, the tutorials, the
-  introductory reference app, and `reference/{constraint,refined,parse}/`.
 - **Result is a peer product, not a member of Values.** They answer different questions: Result composes failures,
-  the Values packages admit values. Result's sidebar is a single primary group; Values' sidebar is a primary group
-  with Constraint, Refined, and Parse subgroups. Presenting Result inside Values was tried and rejected — it
-  reproduced the meta-package framing the split removes.
-- **Values is navigation only.** No `Reified.Values` package, namespace, or meta-package will be created. Every nav
-  caption and both landing pages say the packages install independently, and `validate-values-docs.sh` fails if any
-  rendered page tells a reader to install `Reified.Values`.
-- The shared prose pages were split rather than duplicated: `getting-started.md` became a Result-composition page
-  and a value-admission page; `overview.md` was folded into the two landing pages and deleted.
-- The docs pipeline is now five areas, not four. `REIFIED_DOCS_PRODUCT` accepts `result` and `values` in place of
-  `validation`; `scripts/docgen/Program.fs` routes the `result` page group to `docs/result/reference/` and
-  `constraint`/`refined`/`parse` to `docs/values/reference/`; `populate-hugo-content.sh` iterates a product list
-  instead of four hardcoded pairs, and deletes any leftover `error-handling` tree so a stale area cannot keep
-  serving pages.
-- `Reified.Constraint.Violation` was dropped from the Result reference page. Result is a standalone leaf with no
-  Constraint dependency, so advertising a type from another product there was wrong, and it duplicated the page
-  Values owns.
+  the Values packages admit values. Presenting Result inside Values was tried and rejected — it reproduced the
+  meta-package framing the split removed.
+- **Values is navigation only.** No `Reified.Values` package or namespace will be created.
+  `validate-values-docs.sh` fails if any rendered page tells a reader to install one.
+- `Reified.Constraint.Violation` is not advertised on the Result reference page. Result is a standalone leaf with
+  no Constraint dependency, so naming a type from another product there was simply wrong.
 - Search vocabulary is unaffected: package tags and descriptions keep "error-handling" and "validation" where they
-  name a user problem. Only the navigation category is retired.
+  name a user problem. Only the navigation category was retired.
 
-## 2026-08-03: Both meta-packages are retired
+## 2026-08-02: Constraint unification
 
-- `Reified.ErrorHandling` and the `Reified` umbrella are deleted: projects, package ids, solution and pack entries,
-  docs-build entries, and the API-shape assertions asserting they exist. This is project-split Phase 1B(a), the
-  package half of `dev-docs/current-ideas/retire-errorhandling.md`, and a hard precondition for extracting Flow —
-  every project that straddled the Schema/Flow seam did so through a meta-package.
-- The umbrella's only source was `Builders.fs`, one re-export of `Reified.Result.Builders.result`. Consumers open
-  `Reified.Result` instead. `open Reified` remains valid where it means `Reified.Data`'s namespace.
-- Seven projects were rewritten onto focused package references: `examples/Reified.{Hosting.DotNet,
-  MaintenanceExamples,ReadmeExample,Playground,Examples,ReferenceApp,ReferenceApp.Intro}` and
-  `tests/Reified.ApiShape.Tests`.
-- The graph is pinned by `Reified.ApiShape.Tests`' `no meta-package remains in the graph`: no package assembly may
-  reference `Reified` or `Reified.ErrorHandling`, and neither DLL may appear in the test output directory.
-- **Values** — Constraint, Refined, Parse — is navigation and search vocabulary only. No `Reified.Values` package
-  will be created. The `docs/error-handling/` → `docs/result/` + `docs/values/` move followed immediately; see the
-  entry above.
-- This supersedes the entries below that describe `Reified.ErrorHandling` as a current dependency-only meta-package
-  and the `Reified` umbrella as kept: the "required role" that kept the umbrella was example convenience, and
-  focused references cost nothing.
+- **One public value-rule concept, `Constraint<'value>`:** a reusable description of valid values that `check`
+  executes. `Check<'value>`, `CheckFailure`, `CheckDSL`, the public `Predicate` catalogue, `SchemaConstraint`,
+  `ConstraintDescriptor`, and the `Schema.Constraint` facade were removed outright, with no aliases.
+- **A constraint retains both `Test` and `Check` deliberately.** `test` over a conjunction may fail fast, while
+  `check` must run every child to accumulate. Interpreted atoms and `custom` predicates keep a Boolean path that
+  does no violation work; `customWith` derives `test` from its callback and pays that cost, which is inherent in
+  the information the author chose to supply.
+- **Two tiers, and the split is load-bearing.** **Interpreted** constructors build one `ConstraintAtom` and place
+  that same value in both the description and any violation, so identity and failure cannot drift; the algebra is
+  closed and grows only by release. **Opaque** constraints (`custom`, `customWith`, `notWith`, `contramap`) run
+  normally and are honestly invisible to export and proof.
+- **There is no interpreted `not`.** Several families have no complement, and float comparisons are not
+  complementable under NaN. An operation that is *sometimes* interpreted is worse than one that is honestly opaque.
+- **`Violation` is plain comparable data** with no closure or description reachable from it, so a failure survives
+  its constraint going out of scope. A leaf carries the failing atom itself. That removed a string round-trip which
+  reconstructed constraint identity by code — and returned the wrong message when two constraints on one field
+  shared a code. There is no `Violation.code`; keys exist only through `Violation.toMessageTree`, computed at the edge.
+- **Removed with reasons:** per-constraint message overrides (`withMessage`) and diagnostic rewriting
+  (`mapViolation`/`withViolation`), because they let the reported failure diverge from the published description;
+  `Refinement.defineAll`/`defineWithCheck`, because `Constraint.all` and `Constraint.custom` already compose;
+  `Constraint.supplied`/`omittable`, because supply is decided before a typed value exists and is Schema's concern.
+- **Interpreters divide by what they *claim*, not by whether they produce a value.** The earlier "value producers
+  fail closed" rule contradicted the trusted codec's documented contract. Admission and constraint-satisfying
+  generation fail closed; trusted structural codecs make no constraint claim; documentation and export degrade
+  honestly via `x-reified-runtime-constraints`.
+- **Semantics were corrected wherever runtime and export disagreed.** Text cardinality counts code points, not
+  UTF-16 units. `Constraint.numeric` is ASCII `^[0-9]+$` rather than `\d`, so the runtime rule and its lowering
+  agree by construction. Text `present` emits only `minLength: 1` and keeps the non-blank rule as runtime metadata,
+  because .NET whitespace and ECMA-262 `\s` differ in both directions (U+0085, U+FEFF).
+- **Operand conversion happens at construction and never throws.** The old projection sent every `float` through
+  `decimal`, so `Constraint.lessThan infinity` raised `OverflowException`. Floats keep their own case, with
+  equality that treats NaN as self-equal and separates signed zero, using only arithmetic proven on Fable and
+  NativeAOT rather than `BitConverter`.
+- **Constructors taking an operand are `inline` so the operand resolves on its static type.** A boxed type test
+  cannot do this: Fable erases a `Guid` to a plain string and a `TimeSpan` to a number, so `:? Guid` there labels
+  the operand `Text` while .NET labels it `Guid` — one constraint meaning two different things per platform. The
+  Fable surface check asserts both platforms describe the same constraint identically.
+- The term language, `FieldReference`, and `Origin` are **out of scope** and are not present as placeholder cases.
+  They become additive when a real consumer establishes field identity, nesting, and proof semantics.
 
 ## 2026-08-03: Localization lives at the rendering edge, in a Renderer
 
-- `Violation` stays path-free, context-free, closure-free comparable data. A violation never carries a Schema
-  `Path`, a culture, a resource manager, or an application context; a `Renderer` supplies all of that at the
-  moment a message is produced. This is what keeps a violation retainable, comparable, and portable across a
-  package or a wire boundary.
-- Interpreted identity still comes from `ConstraintAtom`. A message key is a rendering projection computed from
-  the atom at the edge, never a string code attached to a violation.
-- The public surface is `Renderer.ofLookup` (portable), `Renderer.ofResourceManager` /
-  `ofResourceManagerWithCultures` / `ofCurrentCulture` (.NET only, conditionally absent under Fable rather than
-  compiled as a silent no-op), `Renderer.context` (appends), `Renderer.attribute` (replaces), and
-  `Violation.message` / `Violation.fullMessage`.
-- `attribute` replaces rather than appends so a form-scoped renderer is reusable across sibling fields. A demonstrated
-  nested-attribute use case gets an explicitly named API — `Renderer.Advanced.attributePath` — not implicit append.
-- Catalogue entries are bare predicates. The attribute noun, the actual-value clause, and group/list joining are
-  separate composition entries (`constraint.fullMessage`, `constraint.actual`, `constraint.group.*`,
-  `constraint.list.*`). That keeps `{actual}` optional without an optional-placeholder rule and lets a locale
-  reorder the sentence without touching the twenty-five predicates.
-- `MessageDescriptor` is validated runtime identity plus arguments; `MessageFormatSpec` adds the owning
-  catalogue's neutral fallback and optional plural operand. The split is what lets `Reified.Schema` push its own
-  `schema.*` entries through every renderer mechanic without `Reified.Constraint` learning a Schema identity or
-  acquiring a reverse dependency.
-- Ordinary plural support is `.one`/`.other` on entries that declare exactly one operand, tried before the bare key
-  *at the same contextual level*. Full CLDR selection, and any language whose group joining cannot be expressed as
-  pair/start/middle/end, belong to `Renderer.Advanced.ofResolver` and `Violation.toMessageTree` respectively — a
-  stated limit, not a gap.
-- Custom constraints declare no plural operand and Reified never invents a message key for `Constraint.custom` prose.
-  An invented key names a catalogue entry that does not exist and fails in the language nobody tested.
-- `Violation.render` remains the resource-free, culture-free compatibility path with its existing English exactly.
-  Localized English is allowed to read better because it composes.
+- **A `Violation` never carries a culture, resource manager, renderer, Schema `Path`, or application context.** A
+  `Renderer` supplies all of that when a message is produced. That is what keeps a violation retainable,
+  comparable, and portable across a package or a wire boundary.
+- `Renderer.attribute` **replaces** rather than appends, so a form-scoped renderer is reusable across sibling
+  fields. A demonstrated nested-attribute case gets an explicitly named API (`Renderer.Advanced.attributePath`),
+  not implicit append.
+- **Catalogue entries are bare predicates.** The attribute noun, the actual-value clause, and group/list joining
+  are separate composition entries. That keeps `{actual}` optional without an optional-placeholder rule, and lets a
+  locale reorder the sentence without touching the twenty-five predicates.
+- **`MessageDescriptor` and `MessageFormatSpec` are split** so `Reified.Schema` can push its own `schema.*` entries
+  through every renderer mechanic without `Reified.Constraint` learning a Schema identity or acquiring a reverse
+  dependency.
+- **Plural support is `.one`/`.other` on entries declaring exactly one operand**, tried before the bare key at the
+  same contextual level. Full CLDR selection, and any language whose group joining cannot be expressed as
+  pair/start/middle/end, belong to `Renderer.Advanced.ofResolver` and `Violation.toMessageTree` — a stated limit,
+  not a gap.
+- **Reified never invents a message key for `Constraint.custom` prose.** An invented key names a catalogue entry
+  that does not exist and fails in the language nobody tested.
+- The .NET resource-manager constructors are **conditionally absent** under Fable rather than compiled as a silent
+  no-op.
 
 ## 2026-07-31: Numeric ranges are constraints, because F# cannot carry them through arithmetic
 
-- `PositiveInt`, `NonNegativeInt`, `NonZeroInt` and their `Int64` and `Decimal` variants are
-  removed. A refinement-typed language infers that `a + b` is positive when both operands are;
-  F# cannot, so every arithmetic step has to re-establish the fact by hand. Since integer
-  arithmetic is unchecked, an addition returning `PositiveInt` would be unsound, which leaves
-  returning `Result` — and `((a + b) * c) + d` then costs two binds and a map. Callers will
-  unwrap instead, so the types add bulk at every use site while catching nothing, which is
-  more likely to hide an arithmetic mistake than to surface one.
-- Express the ranges as constraints on the primitive:
-  `Schema.int |> Schema.constrain (Constraint.greaterThan 0)`. Where a nominal type is still
-  wanted for a numeric *identifier* — identity rather than arithmetic — define it over the same
-  constraint with `Refinement.define`, as `AttendeeId` and `ProductId` now do in the examples.
-  The machinery stays public; only the catalogue entries go, exactly as with `Slug`.
-- The same reasoning removes pairwise arithmetic from `FiniteFloat` and `FiniteFloat32`. Those
-  types are kept, because their guarantee is that **aggregation means something**: one `NaN`
-  or infinity silently destroys a whole sum or average. That needs no arithmetic on the type
-  itself, so they keep `sum` and `average`, which fail once at the end rather than per step.
-  They are not needed for sorting or map keys, which already work on plain `float`.
-- `UnitInterval` is unaffected: it is genuinely closed under multiplication, `complement` and
-  `lerp`, so its arithmetic needs no `Result` and no unwrapping.
-- Consequences: `NonEmptyList.count` and the `NonNegative*` interval widths lose their refined
-  return types and go back to plain integers, and `chunkBySize` takes a plain `int`, treating a
-  size below one as one rather than raising.
+- `PositiveInt`, `NonNegativeInt`, `NonZeroInt` and their `Int64`/`Decimal` variants were removed. A
+  refinement-typed language infers that `a + b` is positive when both operands are; F# cannot, so every arithmetic
+  step re-establishes the fact by hand. Integer arithmetic is unchecked, so an addition returning `PositiveInt`
+  would be unsound — which leaves returning `Result`, and `((a + b) * c) + d` then costs two binds and a map.
+  Callers unwrap instead, so the types add bulk at every use site while catching nothing.
+- Express the ranges as constraints on the primitive. Where a nominal type is still wanted for a numeric
+  *identifier* — identity rather than arithmetic — define it over the same constraint with `Refinement.define`.
+- `FiniteFloat`/`FiniteFloat32` are kept, because their guarantee is that **aggregation means something**: one
+  `NaN` or infinity silently destroys a whole sum or average. That needs no arithmetic on the type itself, so they
+  keep `sum` and `average`, failing once at the end rather than per step.
+- `UnitInterval` is unaffected: it is genuinely closed under multiplication, `complement`, and `lerp`.
 
 ## 2026-07-30: Refined types earn their place by removing branches, not by wrapping validation
 
-- `Reified.Refinements` is now a modelling library rather than a catalogue of smart constructors. A type ships only if it
-  makes a partial operation total, guarantees an algebraic property later operations rely on, encodes a relationship
-  between values, preserves an invariant across a useful family of operations, or removes branches from *consumers*
-  rather than only from construction.
-- Concepts failing that test were removed, not reimplemented: `TrimmedString`, `Slug`, `BoundedString`,
-  `BoundedList`, `BoundedArray`, `NegativeInt`, `NonPositiveInt`, `DateTimeOffsetRange`, `DateOnlyRange`,
-  `Collection.exactlyOne`, and `Collection.atMostOne`. Every one maps onto constraints that already shipped
-  (`Constraint.trimmed`, `pattern`, `present`, `lengthBetween`, `lessThan`, `atMost`, `between`), composed with
-  `Schema.constrain`/`Schema.constrainAll`. **No new machinery was added for the removals** — an earlier design that
-  introduced a `ConstraintGroup` type was dropped once it became clear the constraints and their composition already
-  existed. Boundary behaviour is unchanged; `RefinedCatalogSchemaTests` asserts the emitted metadata still matches.
-- `NonEmptyList` is now structurally non-empty with a **public** case (`NonEmpty of head * tail`), so `head`, `last`,
-  `reduce`, `min`, and `max` are total and callers can pattern match. `NonEmptyArray` deliberately stays
-  smart-constructed: a structural head/tail would forfeit contiguous storage and indexed access, which are the reasons
-  to pick an array. This asymmetry is intentional.
-- One generic `Interval<'value>` — always inhabited, inclusive — replaces both hand-rolled range types. Emptiness is
-  `Interval option`, which is what `intersect` returns; a second "possibly empty" type would double every operation
-  and make none of them total. `Bounded<'value>` carries its bounds at run time as an `Interval`, not as phantom type
+- **A type ships only if it makes a partial operation total, guarantees an algebraic property, encodes a
+  relationship between values, preserves an invariant across a family of operations, or removes branches from
+  *consumers*** rather than only from construction. `TrimmedString`, `Slug`, `BoundedString`, `BoundedList`,
+  `BoundedArray`, `NegativeInt`, `NonPositiveInt`, `DateTimeOffsetRange`, `DateOnlyRange`, `Collection.exactlyOne`,
+  and `Collection.atMostOne` failed that test and were removed. Every one maps onto constraints that already
+  shipped, and **no new machinery was added for the removals** — an earlier design introducing a `ConstraintGroup`
+  type was dropped once it became clear the composition already existed.
+- **`NonEmptyList` is structurally non-empty with a public case; `NonEmptyArray` stays smart-constructed.** A
+  structural head/tail would forfeit contiguous storage and indexed access, which are the reasons to pick an array.
+  The asymmetry is intentional.
+- **One generic, always-inhabited, inclusive `Interval<'value>`** replaces both hand-rolled range types. Emptiness
+  is `Interval option`, which is what `intersect` returns; a second "possibly empty" type would double every
+  operation and make none of them total. `Bounded<'value>` carries bounds at run time, not as phantom type
   parameters: F# has no type-level naturals, and Peano encoding has no Fable story.
-- `failwith "unreachable"` went from six occurrences to one clearly-labelled internal helper
-  (`NonEmptyList.ofCheckedList`). `RefinedSchemas.fs` and `Shape.fs` now have none.
-- **Refined numeric types are not closed under arithmetic, and the API says so.** F# integer arithmetic is unchecked:
-  `Int32.MaxValue + 1` is negative and `65536 * 65536` is zero, so a `PositiveInt -> PositiveInt -> PositiveInt`
-  addition would return a value violating its own invariant. Every numeric module therefore ships both forms —
-  `add`/`multiply`/`sum` use checked arithmetic and return `Result`, while `saturatingAdd`/`saturatingMultiply` are
-  total and clamp at the type's maximum. `min`, `max`, and comparison are unconditionally total.
-- `FiniteFloat` is sold on aggregation, not arithmetic and not ordering. **Corrected 2026-07-31:** this entry
-  originally claimed `NaN` corrupts sorting and makes `float` unusable as a `Map` key. That is wrong — F# generic
-  comparison orders `NaN` consistently (`compare nan nan` is `0`, `NaN` sorts first), so `List.sort`, `Map`, `Set`
-  and `Dictionary` all work on plain `float`. What `NaN` and infinity actually do is silently destroy an aggregate
-  (`List.average [ 12.5; 3.0; nan; 8.25 ]` is `NaN`), and `NaN` additionally breaks `List.contains` and
-  `List.distinct`, which use IEEE equality. A comparison hand-written with `<` and `>` is also intransitive under
-  `NaN` and makes `sortWith` return unsorted output without raising.
-- `NonZero` is justified by branch removal rather than a total `divide`: `DivideByZeroException` becomes unreachable,
-  but `Int32.MinValue / -1` still overflows, so `divide` returns `Result` and `saturatingDivide` is total.
-- `UnitInterval` is the only type in the package closed under multiplication. It is not closed under addition, so it
-  offers `saturatingAdd` and `complement` instead — and `complement` is an involution only up to floating-point
-  rounding, which is documented rather than claimed.
-- Numeric genericity uses `inline internal` SRTP with a fully monomorphic public surface. `INumber<'T>` is not an
-  option: netstandard2.1 predates it and Fable does not support static abstract interface members. Any future shared
-  generic-math engine belongs outside `Reified.Refinements` and should reuse the `SchemaDefaults` witness convention.
-- `PrimitiveValueKind` gained `Int64` and `Float`, so every refined numeric type has a wire schema and resolves as a
-  bare field. Mapping 64-bit integers onto `decimal` was rejected: it changes the type's meaning, and a test parses
-  `9007199254740993` (beyond 2^53) to prove the value never round-trips through a float. `Schema.int64` and
-  `Schema.float` are public, and the JSON codecs gained matching decoders and writers. JSON has no literal for `NaN`
-  or the infinities, so schemas needing them must refine to `FiniteFloat`.
-- `ConstraintMetadata` gained a `Finite` case rather than reusing `Custom "finite"`. The ripple through the emitter,
-  parser, validator, and generator is the point: a built-in constraint should be inspectable by every interpreter,
-  and the reserved-code guard now correctly rejects an application redefining `finite` — which is exactly how the
-  first version of this was caught.
-- An audit driven by writing real code against the API found four defects the source review
-  had missed, all of the same shape: a doc comment claiming a guarantee the code did not
-  deliver. `NonEmptyList.zip` documented truncation but called `List.zip`, which raises.
-  `DistinctList.toMap` documented losslessness but called `Map.ofList`, silently dropping
-  an entry when two distinct pairs share a key — the operation used to justify the type.
-  `PositiveDecimal.average` returned `Result` but let the `OverflowException` escape,
-  because only the final construction was wrapped. `Interval.between` assumes a total
-  order, which `float` is not, so a `NaN` argument produces inverted bounds. Each is now
-  fixed or documented and covered by a test naming the defect.
-- `mise.toml` pins `dotnet = "10.0.300"` exactly rather than floating on `"10.0"`. The docs toolchain needs an SDK
-  whose FSharp.Core is at least 10.1.203, because FSharp.Formatting 22.0.1 depends on FSharp.Compiler.Service
-  43.12.203, which requires that version exactly. An older SDK downgrades it (NU1605) and docgen then fails at run
-  time with "Could not load file or assembly 'FSharp.Core, Version=10.1.0.0'". This was previously masked on `main`
-  by stale docgen artifacts that happened to be self-consistent, so only fresh worktrees hit it.
+- **Numeric modules ship both forms.** `add`/`multiply`/`sum` use checked arithmetic and return `Result`;
+  `saturatingAdd`/`saturatingMultiply` are total and clamp. `NonZero` is justified by branch removal, not a total
+  `divide`: `DivideByZeroException` becomes unreachable, but `Int32.MinValue / -1` still overflows.
+- **What `NaN` actually breaks is aggregation, not ordering.** F# generic comparison orders `NaN` consistently, so
+  `List.sort`, `Map`, and `Set` all work on plain `float`. `NaN` silently destroys an average, and breaks
+  `List.contains`/`List.distinct`, which use IEEE equality. A comparison hand-written with `<` and `>` is also
+  intransitive under `NaN` and makes `sortWith` return unsorted output without raising.
+- **Numeric genericity uses `inline internal` SRTP with a monomorphic public surface.** `INumber<'T>` is not an
+  option: netstandard2.1 predates it and Fable does not support static abstract interface members.
+- **64-bit integers are not mapped onto `decimal`.** It changes the type's meaning; a test parses
+  `9007199254740993` (beyond 2^53) to prove the value never round-trips through a float. JSON has no literal for
+  `NaN` or the infinities, so schemas needing them must refine to `FiniteFloat`.
+- **A built-in constraint gets its own case, not `Custom "finite"`.** The ripple through emitter, parser,
+  validator, and generator is the point: a built-in should be inspectable by every interpreter, and the
+  reserved-code guard then correctly rejects an application redefining `finite`.
+- **Writing real code against the API found four defects a source review had missed, all the same shape:** a doc
+  comment claiming a guarantee the code did not deliver (`NonEmptyList.zip` documented truncation but called
+  `List.zip`, which raises; `DistinctList.toMap` documented losslessness but silently dropped entries;
+  `PositiveDecimal.average` let an `OverflowException` escape; `Interval.between` assumes a total order, which
+  `float` is not). Reviewing the source is not a substitute for using the API.
 
-## 2026-07-24: Error Handling splits into Result, Check, and Refined (supersedes the 2026-07-22 and prior 2026-07-24 package details)
+## 2026-07-17: Two schema tiers — permissive wire, strict hand-written domain
 
-- Pre-repository-split reorganization completed in the combined repository. `Reified.Result` (`src/Reified.Result/`,
-  namespace `Reified.Result`) now owns only generic Result combinators, conversions/extraction helpers, and
-  `result { }`. `Check<'value>`, `CheckFailure`, `Predicate`, `CheckDSL`, and their collection helpers moved out of
-  `Reified.Result` into a new `Reified.Check` package (`src/Reified.Check/`, namespace `Reified.Check`,
-  `Reified.Check.CheckDSL`). `Reified.Check` does not depend on `Reified.Result`; it returns the standard F# `Result` type
-  directly, so a project can add `Reified.Check` and/or `Reified.Refinements` without opening `Reified.Result` and without
-  builder/module ambiguity when FsToolkit.ErrorHandling is also open.
-- `Reified.Refinements` now depends on `Reified.Check` only, not `Reified.Result`. Its own code used only `Check.*` and plain
-  FSharp.Core `Result.bind`/`Result.map`/`Result.mapError`, so dropping `open Reified.ErrorHandling` in favor of
-  `open Reified.Check` removed the `Reified.Result` project reference with no functional change.
-- `Reified.Schema` now depends directly on `Reified.Check` and `Reified.Refinements`, not `Reified.Result`. Schema's source used
-  only `Check.*` and plain FSharp.Core `Result` functions, never an `Reified.Result`-specific helper (`orError`,
-  `okIf`, `Collection.*`, etc.), so the same swap applied there.
-- `Reified.ErrorHandling` is now a true dependency-only meta-package: `IncludeBuildOutput=false` keeps its `.nupkg` free
-  of a `lib/` assembly (verified: the packed `.nupkg` contains only `README.md` and metadata), while its nuspec
-  declares direct dependencies on `Reified.Result`, `Reified.Check`, and `Reified.Refinements` (verified in the packed nuspec).
-  It exposes no public API and no `Reified.ErrorHandling` namespace.
-- Final dependency edges (verified by `dotnet pack` nuspec inspection and `Reified.ApiShape.Tests`):
-  `Reified.ErrorHandling` → `Reified.Result` + `Reified.Check` + `Reified.Refinements`; `Reified.Refinements` → `Reified.Check`;
-  `Reified.Schema` → `Reified.Check` + `Reified.Refinements` (+ `Reified.Data`); `Axial.Flow` depends on none of the above.
-  `Reified.Result` and `Reified.Check` are independent leaves.
-- The broad `Reified` umbrella package is kept for now: several example projects (`Reified.Examples`,
-  `Reified.MaintenanceExamples`, `Reified.Playground`, `Reified.ReadmeExample`, `Reified.ReferenceApp`,
-  `Reified.ApiShape.Tests`) still reference it for one-package convenience across Error Handling + Schema. Removing it
-  and rewriting every example's dependency list to the narrowest focused set was judged out of scope for this pass;
-  revisit before 1.0 per the standing "remove the umbrella unless a required role remains" rule.
-- Tests reorganized into focused projects: `tests/Reified.Result.Tests`, `tests/Reified.Check.Tests`,
-  `tests/Reified.Refinements.Tests` replace the combined `tests/Reified.ErrorHandling.Tests`. `Reified.ApiShape.Tests` gained
-  package-layout assertions for the new graph, including that `Reified.ErrorHandling`'s assembly exports no public
-  types. A dedicated `Reified.Check.AotProbe` example was split out of `Reified.Result.AotProbe`.
-  Package-consumer proof of items 1-3, 5, and 6 from the spec (Result/Check/Refined working independently, Schema's
-  direct dependencies, FsToolkit + Check + Refined + Schema coexistence) is currently covered indirectly through the
-  focused test projects' own project references and `Reified.ApiShape.Tests`, not as separate standalone consumer
-  fixture projects; adding literal minimal consumer-fixture projects for all six items remains open follow-up work.
-- Doc generator inputs (`scripts/docgen/Program.fs`) and `scripts/generate-api-docs.sh` were updated to the new
-  namespaces/assemblies and re-run; `bash scripts/validate-docs.sh` (including the Hugo build) and `cd site &&
-  npm run build` both passed against the regenerated reference pages. Deeper site-navigation and reference-page
-  reshaping (e.g. distinct Check/Refined landing sub-pages under Error Handling, redirects) beyond what the existing
-  generator/content-mirror pipeline already produced from the new source tree is deferred; see
-  `dev-docs/current-ideas/project-split.md`.
+- A **wire schema** is shaped per format and permissive, and its result is a plain public DTO record. A **domain
+  schema** is strict hand-written F# — invariants, smart constructors, DUs. The wire result maps to the domain
+  through an ordinary function returning `Result`; that mapping function is where strictness lives.
+- **Versioning applies to the wire tier only.** When stored payloads must keep parsing after the wire changes, the
+  `Contract` engine chains frozen wire versions with typed migrations, and the domain map runs after the chain.
+- **Contracts are never the domain authoring surface.** Making them universal was explored and rejected: IDL-first
+  domain modeling is a pattern .NET has consistently abandoned in favour of IDL-at-the-edge (protobuf, TypeSpec),
+  F# adopters chose F#'s type language, and universal scope turns every F# type feature and every format's
+  semantics into a grammar feature request. Multi-format serialization would enter as additional Schema
+  interpreters, never as grammar features.
 
-## 2026-08-02: Data is an independent documentation entry point (navigation superseded 2026-08-03)
+## 2026-07-17: Records are the primary wire declaration; `.contract` is parked
 
-- `/data/`, `/error-handling/`, `/schema/`, and `/flow/` are peer product homes in that navigation order.
-  (`/error-handling/` split into `/result/` and `/values/` on 2026-08-03; the order is now Result, Values, Data,
-  Schema, Flow.)
-- Data guides, generated API reference, `llms.txt`, and agent context live under `docs/data/`; Schema links to Data where
-  it consumes the package but does not own Data's documentation.
-
-## 2026-07-22: Error Handling, Schema, and Flow are separate public identities (superseded 2026-08-02; package details superseded 2026-07-24)
-
-- `/error-handling/`, `/schema/`, and `/flow/` each have their own homepage, guides, generated reference, `llms.txt`, and
-  agent context. Validation and Schema can remain in one repository initially; Flow can move independently.
-- `Reified.Result`, `Reified.Diagnostics`, and `Reified.Refinements` are focused implementation packages.
-  `Reified.ErrorHandling` is their meta-package; the public namespaces remain `Reified.ErrorHandling`,
-  `Reified.Validation`, and `Reified.Refinements`.
-- The `Reified` umbrella installs Validation, Schema, and the core Schema interpreters. `Axial.Flow` remains an
-  independent package and is not re-exported by the umbrella.
-
-## 2026-07-24: Schema owns accumulated path-aware validation
-
-- `Reified.Diagnostics`, `Validation<'value,'error>`, `Diagnostics<'error>`, `PathSegment`, and `validate { }` are
-  removed. Schema owns opaque `Path`, `SchemaIssue`, and `SchemaErrors`.
-- `Reified.ErrorHandling` installs Result and Refined. `Reified.Schema` depends on Data, Result, and Refined.
-- One `Refinement<'raw,'value>` contains fallible construction and total inspection. `Refine.from`, `refine { }`, and
-  `Schema.refine` use the same definition.
-- Record schemas use `schema<Model> { }`. Field blocks contain `withSchema`, `constrain`, type-directed `refine`, and
-  `validate`; the old pipe record builder and `fieldWith` are removed.
-
-## 2026-07-21: Documentation had two product homes (superseded 2026-07-22)
-
-- `/schema/` is the complete input-to-domain documentation home. It owns the guides and generated reference for
-  `Reified.Data`, `Reified.ErrorHandling`, Schema, codecs, contracts, and Schema HTTP adapters while continuing to state
-  their individual NuGet package boundaries.
-- `/flow/` is the complete workflow documentation home. The Reified root is a short index linking the two products;
-  ErrorHandling and Data are no longer peer top-level documentation areas.
-- Hand-written guides, generated API reference, AI-agent guidance, and `llms.txt` context are product-local. API and
-  example generation plus Hugo validation can run through `validate-schema-docs.sh` or `validate-flow-docs.sh`.
-- Platform matrices distinguish .NET, host-neutral Fable JavaScript, Node-only, browser-only, and portable APIs whose
-  first-party live implementation remains .NET-only.
-
-## 2026-07-16: HTTP hosts lower schema-trusted endpoint Flows without owning routing
-
-- `Axial.Schema.Http.AspNetCore` and `.GenHttp` depend on both `Reified.Schema.Http` and `Axial.Flow`. Their default
-  endpoint API is an ordinary `flow { }`: `Request.json`/`form`/`query` establish trusted input,
-  `EndpointFlow.run` embeds an HTTP-independent application workflow by projecting the explicit application
-  environment, and `Response` constructs the successful native response plan.
-- `flowEndpoint` is the host execution boundary. It constructs `HttpEndpointEnv<'app>` per request, propagates host
-  cancellation where available, renders invalid schema input as RFC 9457 problem details, maps expected application
-  failures through a supplied renderer, and preserves interruption and defects. ASP.NET request-scoped DI may be
-  used only inside the environment factory; application workflows continue to receive typed environments.
-- The server still owns route registration, middleware, authorization, and endpoint metadata. Reified produces the
-  native handler passed to `MapPost` or GenHTTP `Post`; it does not introduce a cross-host router. The lower-level
-  `SchemaRequest`/`SchemaResult` and `SchemaResponse` primitives remain for endpoints that need `RetainedParseResult` or
-  other host-specific boundary control.
-
-## 2026-07-17: Records are the primary wire-tier declaration; .contract is parked
-
-- `[<DeriveSchema>]`-marked plain F# records are the primary way to declare the wire tier. The generator derives
-  the permissive schema from the record through an FCS syntax-only frontend into the same AST, resolver, and
-  emitter as `.contract` files, emitting a schema module only — the F# compiler catches record/schema drift.
-- `.contract` files stay shipped and compiling but receive no further investment: no LSP, no new grammar
-  features, docs lead with records. The bespoke-LSP plan is superseded — records get the entire F# IDE experience
-  (highlighting, rename, find-references, hover) for free, which was most of what the LSP would have built.
-- Whether `.contract` is removed from the public surface before 1.0 is decided by the config-system dogfood: if
-  records cover it, the grammar goes, and the pipeline it funded remains as the record frontend's machinery.
-
-## 2026-07-17: Two schema tiers — permissive wire DTOs, strict hand-written domain
-
-- The boundary story has two schemas. A **wire schema** is shaped per format and permissive: it accepts what the
-  format allows with light constraints, and its result is a plain public DTO record. A **domain schema** is strict
-  hand-written F# — invariants, smart constructors, DUs. The wire result maps to the domain through an ordinary
-  function returning `Result`; that mapping function is where strictness lives.
-- Versioning applies to the wire tier. When stored payloads must keep parsing after the wire changes (events,
-  messages, config files), the `Contract` engine chains frozen wire versions with typed migrations; the domain map
-  runs after the chain.
-- Contracts (`.contract` + schemagen) generate the wire tier concisely — record, schema, version-chain wiring.
-  They are never the domain authoring surface. Making contracts universal (generated types blended with user code,
-  domain-tier declarations) was explored and rejected: IDL-first domain modeling is a pattern the .NET ecosystem
-  has consistently abandoned in favor of IDL-at-the-edge (protobuf, TypeSpec), F# adopters chose F#'s type
-  language, and universal scope turns every F# type feature and every serialization format's semantics into a
-  grammar feature request. Multi-format serialization (MessagePack, protobuf) would enter as additional Schema
-  interpreters beside `Json.compile`, never as grammar features.
-- Record → schema generation (deriving a permissive wire schema from a hand-written DTO record) is under
-  consideration as the low-ceremony wire-tier entry point; `.contract` remains the at-scale entry point. Both
-  produce the same kind of wire schema. The record frontend and contract frontend share the same resolver and emitter.
-- User docs teach this order: wire/domain split and the mapping function first, versioning when compatibility
-  enters, then contracts as the concise way to generate what was just set up by hand.
+- `[<DeriveSchema>]`-marked plain F# records are the primary way to declare the wire tier, through an FCS
+  syntax-only frontend into the same AST, resolver, and emitter as `.contract` files. A schema module only is
+  emitted, so the F# compiler catches record/schema drift.
+- `.contract` files stay shipped and compiling but receive no further investment. **The bespoke-LSP plan is
+  superseded**: records get the entire F# IDE experience — highlighting, rename, find-references, hover — for free,
+  which was most of what the LSP would have built.
+- Whether `.contract` is removed before 1.0 is decided by the config-system dogfood. If records cover it, the
+  grammar goes and the pipeline it funded remains as the record frontend's machinery.
 
 ## 2026-07-16: schemagen generates version chains; migrations are builder parameters
 
-- A `.contract` file may declare several versions of one contract, oldest first with no gaps, all in one file.
-  The resolver enforces contiguity, single-file chains, and that superseded generated names (`ConfigV1`) do not
-  collide with declared contracts.
-- The latest version keeps the bare generated type and module name; superseded versions emit version-suffixed
-  frozen types, schemas, parse/validate, and field references. References pin any declared version and lower to
-  the corresponding generated name.
-- The latest module gains a generated `contract` builder whose parameters are each typed n-1 → n migration plus
-  the `VersionSource`, wiring `Contract.create`/`supersedes`/`build`. The grammar never names F# symbols for
-  migrations; they stay hand-written functions the compiler checks against the generated version types, and
-  cutting a new version breaks every construction site until its migration exists.
-- The earlier gate ("multi-version schemagen only after dogfooding a hand-written chain") was resolved by keeping
-  the engine unchanged and the generated surface minimal: the builder function is the only new emission, and the
-  golden corpus (`profile.contract`) plus behavior tests exercise the wired chain end to end.
-- User-facing documentation is `docs/schema/contracts.md`: the versioning model, hand-written `Contract`
-  declaration, grammar by example, `schemagen` with `--check`, multi-version generation, and the wire-tier-only
-  non-goals. Contracts stay positioned as the at-scale tier, never the entry point.
-
-## 2026-07-15: App owns portable root lifetime; hosts adapt native lifecycle
-
-- `App` in `Axial.Flow` is the portable application launcher. `App.run` runs a finite root Flow;
-  `App.start` returns one `AppHandle<'error,'value>` with `Status`, shared `Completion`, and idempotent `Stop()`.
-  Completion is published only after the root Flow scope has closed. Direct `ToTask`/`ToAsync` execution remains the
-  interface for individual operations and interop boundaries.
-- An application is still an ordinary Flow value. Its live `Layer` is composed with `Flow.provide` before launch;
-  there is no `IApp` inheritance model, hidden environment, universal error renderer, or ambient application registry.
-- Host adapters translate only native lifecycle and outcomes. `Axial.Flow.Hosting` supplies standalone .NET Ctrl+C /
-  exit-code integration, Microsoft Generic Host lifetime, the MEL `ILog` adapter, and fiber logging.
-  `Axial.Flow.Hosting.Node` supplies Node arguments, `process.env`, SIGINT/SIGTERM, and `process.exitCode`.
-  `Axial.Flow.Hosting.Browser` supplies explicit UI ownership and structural `AbortSignal` integration; it does not
-  treat visibility or unload events as dependable shutdown.
-- Node and browser packages are JavaScript-only Fable bindings. Their .NET target asset exists because Fable consumes
-  F# projects through MSBuild; entry points touch a native runtime guard immediately and fail loudly on .NET or the
-  wrong JavaScript runtime rather than providing inert implementations.
-- The earlier `LiveClock`, partial `Hosting.createBaseRuntime`, and environment-only `Startup.validateEnvironment`
-  helpers were deleted. `Clock.live` and `BaseRuntime.fromServiceProvider` remain the single clock and provider-backed
-  provisioning paths; application startup failures retain their typed cause until the host edge.
-
-## 2026-07-14: Telemetry is runtime instrumentation, not a service contract
-
-- There is no telemetry service package and no `IHas<...>` telemetry contract. Tracing, annotations, and fiber
-  observability stay runtime instrumentation in `Axial.Flow.Telemetry`: `Activity.trace`/`Activity.traceWith` over
-  the static `ActivitySource("Axial.Flow")`, annotation sinks via `Flow.addAnnotationSink`, and
-  `FiberTelemetry.observe`/`observeWithSpans` installed through `Flow.withFiberObserver`.
-- The rule "operational services are explicit services, not runtime slots" does not extend to telemetry, for two
-  structural reasons. `ActivitySource`/`ActivityListener` is .NET's own ambient instrumentation model — hosts and
-  test code subscribe with listeners, so a service indirection would add ceremony without adding substitutability.
-  And fiber observers deliberately never see the environment (a forked fiber's observer outlives any one
-  environment), so a service-shaped telemetry contract could not be applied where much of the instrumentation runs.
-- Environment still participates declaratively, not as a service: `Activity.trace` reads the
-  `IHasRequestId`/`IHasCorrelationId`/`IHasTenantId` trio and the extensible `IHasTelemetryTags` trait from `'env`
-  and stamps them as span tags.
-- Logging is the opposite case and stays an explicit service: `ILog` (with the MEL bridge in `Axial.Flow.Hosting`
-  and `FiberLogging.observe`) is a substitutable application dependency, not host instrumentation.
-- On Fable JavaScript targets the same decision holds with OpenTelemetry JS in the `ActivitySource` role:
-  `Axial.Flow.Telemetry.JavaScript` ships `Otel.trace`/`Otel.traceWith` and `FiberTelemetry`
-  observers with the .NET tag vocabulary, emitting through a host-supplied `@opentelemetry/api` object
-  (`Otel.install`) via structural bindings — the package has no npm dependency, and the SDK, exporter, and
-  context manager stay the application's concern. The .NET build of that package is inert (`install` throws,
-  `trace` passes through). Two structural consequences are accepted and documented: environment traits are
-  read structurally (interface type tests are erased in JS), and runtime-context fidelity under Fable is
-  construction-time, so the trace combinator captures fiber id, annotations, and the composed annotation sink
-  at invoke time rather than reading them inside the running async.
+- One `.contract` file may declare several versions, oldest first with no gaps. The resolver enforces contiguity,
+  single-file chains, and that superseded generated names do not collide with declared contracts.
+- The latest version keeps the bare generated name; superseded versions emit version-suffixed frozen types.
+- **The grammar never names F# symbols for migrations.** The latest module gains a generated `contract` builder
+  whose parameters are each typed n-1 → n migration; migrations stay hand-written functions the compiler checks
+  against the generated version types, so cutting a new version breaks every construction site until its migration
+  exists.
+- The earlier gate ("multi-version generation only after dogfooding a hand-written chain") was resolved by keeping
+  the engine unchanged and the generated surface minimal: the builder function is the only new emission.
 
 ## 2026-07-13: Contract parsing preserves trust and diagnostics
 
-- `Contract<'model>` is the wire-version engine: it selects an explicitly declared version, parses against that
-  frozen schema, composes typed contiguous n-1 → n migrations, and reconstructs against the head schema.
-- `Contract.parse` and `Contract.parseVersion` return the ordinary `'model` in `Result<'model, ContractError>`.
-  A successful contract parse has passed the head schema's field and constructor gates.
-- `ContractError.ParseFailed` and `MigrationError.RevalidationFailed` carry `SchemaErrors`. The earlier
-  sketch used one `SchemaError`, but `Schema.parse` and `Schema.check` can report several path-bearing failures;
-  selecting one would discard boundary information.
-- Version labels are positive and contiguous. `supersedes` registers only the immediately preceding version, matching
-  the promised n-1 → n migration model and preventing accidental gaps in a chain.
-- Multi-version `schemagen` output is not part of the engine. It follows only after a real hand-written version chain
-  has been dogfooded.
+- `Contract.parse`/`parseVersion` return the ordinary `'model`. A successful contract parse has passed the head
+  schema's field and constructor gates.
+- Errors carry `SchemaErrors`, not a single `SchemaError`. An earlier sketch used one; parsing can report several
+  path-bearing failures, and selecting one would discard boundary information.
+- Version labels are positive and contiguous, and `supersedes` registers only the immediately preceding version.
+  That matches the promised n-1 → n migration model and prevents accidental gaps.
 
-## 2026-07-13: Recursive schemas use one memoized deferred model node
+## 2026-07-13: Recursive schemas use one memoized deferred node
 
-- `Schema.defer : (unit -> Schema<'model>) -> Schema<'model>` is the recursion primitive. Its thunk is memoized;
-  parsing and reconstruction force it at each finite data node, while codec compilation installs a delayed plan so
-  compiling a cyclic schema graph terminates.
-- Inspection assigns traversal-local integer identities. The first occurrence is `SchemaShape.Deferred(id, value)`;
-  an edge back to a value currently being expanded is `SchemaShape.Recursive id`. The public inspection tree therefore
-  remains finite without runtime reflection or global identity state.
-- JSON Schema lowers deferred identities to deterministic `recursiveN` entries in `$defs` and every recursive edge to
-  `$ref`. Non-recursive schemas retain their previous inlined output.
-- `schemagen` permits a contract to reference its own pinned version and emits `Schema.defer`; references to later,
-  different contracts still violate declaration order. Internally-tagged union payloads remain immediate nested model
-  schemas because their fields must be known while validating discriminator collisions; recursive models can contain
-  unions, but an inline-union case cannot itself be the deferred edge.
-- Recursive authoring uses a delayed schema holder so the thunk returns the same built schema. Calling a schema
-  factory afresh from the thunk would create an endless sequence of distinct deferred nodes and defeat cycle identity.
+- `Schema.defer`'s thunk is memoized. Parsing forces it at each finite data node, while codec compilation installs
+  a delayed plan so compiling a cyclic schema graph terminates.
+- **Inspection assigns traversal-local integer identities**, so the public inspection tree stays finite without
+  runtime reflection or global identity state.
+- **Recursive authoring must use a delayed schema holder** so the thunk returns the same built schema. Calling a
+  schema factory afresh from the thunk creates an endless sequence of distinct deferred nodes and defeats cycle
+  identity.
+- Internally-tagged union payloads stay immediate nested model schemas, because their fields must be known while
+  validating discriminator collisions. A recursive model can contain unions, but an inline-union case cannot itself
+  be the deferred edge.
 
-## 2026-07-13: Schema test data is a non-packable FsCheck adapter over Data
+## 2026-07-13: Schema test data is a non-packable FsCheck adapter
 
-- The repository contains no property-test dependency from the adoption target, so there was no evidence for its
-  actual choice. The first adapter uses FsCheck 3.3.3 because this repository already uses xUnit and FsCheck has the
-  established F# generator API and xUnit integration. This is not a core dependency or a commitment against a later
-  Hedgehog adapter.
-- `Reified.Schema.Testing` is non-packable and references `Reified.Schema` plus FsCheck. `Reified.Schema` remains
-  dependency-free from test frameworks.
-- Generation produces constraint-satisfying `Data` from `Inspect` metadata. `SchemaGen.model` then parses it and
-  filters constructor rejections, so successful samples are schema-checked `'model` values and constructor
-  invariants are not duplicated in the generator.
-- Built-in lowering covers primitives, refined representations, nested models, collections and maps with count
-  bounds, options, all three union forms, recursive references, email/length/choice constraints, ordered numeric
-  bounds, and numeric multiples. FsCheck's size controls recursive depth; a zero-size collection becomes empty when
-  its minimum count permits that finite base case.
-- Pattern reversal, custom constraints, `notEqualTo`, `contains`, and `distinct` are not guessed. Derivation returns
-  `UnsupportedConstraint(path, code)` unless `SchemaGen.rawWith` supplies a generator for that exact field path.
-
-## 2026-07-13: FieldRef is an immutable-record lens
-
-- `FieldRef<'model,'value>` carries the external `Name`, typed `Get`, and typed `Set` functions. `Set model value`
-  returns a model copy with only that field replaced; it does not validate or mutate the input.
-- Generated field references use F# record-copy expressions. This keeps updates reflection-free, preserves unrelated
-  fields, and makes the same reference useful for diagnostics, forms, draft editing, and future patch application.
-- Setters operate on draft model values. Code that requires schema trust must pass the updated draft through
-  `Schema.check`; a field setter does not imply that cross-field constructor invariants still hold.
-
-Superseded 2026-07-20: no Reified interpreter or reference application consumed the generated references. The generator
-and `Reified.Schema` no longer expose `Fields`/`FieldRef`; a future diff/patch or UI consumer should establish the
-required update abstraction before it becomes public API again.
+- FsCheck was chosen because this repository already uses xUnit and FsCheck has the established F# generator API.
+  There was no evidence for the adoption target's actual choice. This is not a commitment against a later Hedgehog
+  adapter, and the test-framework dependency never moves into a public package.
+- **Generation produces constraint-satisfying `Data`, and `SchemaGen.model` then parses it** and filters
+  constructor rejections — so constructor invariants are not duplicated in the generator.
+- **Pattern reversal, custom constraints, `notEqualTo`, `contains`, and `distinct` are not guessed.** Derivation
+  returns `UnsupportedConstraint(path, code)` unless a generator is supplied for that exact field path.
 
 ## Current Invariants
 
-- `Flow<'env, 'error, 'value>` is the public workflow model. Platform carriers are execution/adaptation boundaries, not
-  user-facing workflow types.
-- `Reified.Result` and `Axial.Flow` are independent leaves. `Reified.Refinements` depends only on `Reified.Result`;
-  `Reified.ErrorHandling` installs both. `Reified.Schema` depends on Data, Result, and Refined. Flow stays independent of
-  the whole group.
-- Explicit dependencies live in `'env`. The ambient runtime is reserved for closed executor mechanics such as
-  cancellation, scope, scheduling, interruption, and trace metadata.
-- Operational services are explicit services provisioned through records, nominal `IHas<'service>` contracts, host-edge
-  `IServiceProvider` resolution, and `Layer`.
-- Operational service contracts do not live in `Axial.Flow`. Clock, log, random, GUID, and environment-variable
-  contracts and operations belong to the optional `Axial.Flow.PlatformService` package. Its internal `Platform` file
-  is the only place target-specific implementations may use `FABLE_COMPILER`; the public operation layer stays
-  portable and host-specific capabilities such as process environment access are injected at the boundary.
-- `Check` and `Result` helpers belong to the `Reified.ErrorHandling` namespace; `Parse`, `Refine`, and the `refine { }`
-  builder belong to `Reified.Refinements`; path-aware accumulated errors belong to `Reified.Schema`; `Policy`, `Bind`, and
-  `BindError` belong to `Axial.Flow`.
-- `Check` is a complete typed value-constraint subsystem:
-  `Check<'value> = 'value -> Result<'value, CheckFailure list>`. Checks are path-free, raw-input-free value programs;
-  value-preserving guards and extraction helpers belong in `Result`, and parsing and refined value construction belong in
-  `Reified.Refinements`. `Result` itself stays generic `Option`/`seq`/nullable → `Result` plumbing (`someOr`, `headOr`, etc.)
-  — it must not grow a predicate- or domain-specific helper when the same rule already is, or should be, a named type
-  in `Reified.Refinements`'s catalog (`NonBlankString`, `Slug`, `PositiveInt`, ...); that catalog is the "reusable named
-  proof" tier, `Result` is the "generic container extraction" tier, and the two must not blur together.
-- Built-in refined schema helpers live in `Reified.Schema.RefinedSchema`, not `Reified.Refinements`, so the refined
-  namespace stays independent of schema metadata even though both now ship in the same package. Standalone refined
-  constructors continue to use executable `Check` programs; the integration catalog mirrors those same constraints as
-  `SchemaConstraint` metadata and tests the lowered boundary failures. Do not move `SchemaConstraint` into
-  `Reified.Refinements` or add an extra shared metadata package unless a second integration package needs that abstraction.
-- `Result` keeps fail-fast adapters around `Check`, not a second accumulating constraint language. The current
-  surface (`src/Reified.Result/Result.fs`) is: generic combinators and conversions (`ok`, `error`, `map`,
-  `mapError`, `bind`, `orElse`, `orElseWith`, `requireTrue`, `okIf`, `failIf`, `orError`, `fromTry`, `fromChoice`,
-  `toOption`, `toValueOption`, `defaultValue`) and extraction helpers for option, value option, nullable, result, and
-  sequence values (`someOr`, `noneOr`, `valueSomeOr`, `valueNoneOr`, `nullableOr`, `notNullOr`, `okOr`, `errorOr`,
-  `headOr`). No value-preserving fail-fast guard family (`keepIf`/`Result.require`/`Result.guard`, string length,
-  ordered range, sequence count) has actually been added — an earlier version of this doc described that family as
-  already retained; it was aspirational, not built. If it's added later, the same don't-duplicate-`Refined` rule
-  above applies: a guard that proves a value satisfies a rule, rather than merely converting a container, belongs in
-  `Reified.Refinements`'s catalog, not `Result`. Do not add new predicate-specific `Result` helpers when the same rule
-  belongs in `Check.*` or `Reified.Refinements` instead.
-- First-pass ordered range checks stay in generic `Check.Number` helpers over comparable values. Do not add separate
-  `Check.Int`, `Check.Decimal`, `Check.Float`, or date/time check modules until a schema, refined value, or diagnostics
-  requirement needs type-specific semantics beyond plain ordering.
-- `Reified.Schema` owns structured input, executable validation, paths, accumulated errors, and schema interpreters.
-- Constructor-last `schema<Customer> { }` declarations are the sole public record-schema authoring surface. Field
-  blocks use `withSchema`, `constrain`, type-directed `refine`, and `validate`. `construct` and `constructResult` check
-  the closing constructor by position and arity. Completed schemas retain a typed record plan beside erased metadata
-  so codecs apply constructors directly without `obj array` dispatch.
-- Primitive value schemas use the primitive names directly: `Schema.text`, `Schema.int`, `Schema.decimal`,
-  `Schema.bool`, `Schema.date`, `Schema.dateTime`, and `Schema.guid`. They are `Schema<'value>` values supplied as
-  the explicit argument to `withSchema Schema.text` inside a field block, alongside composites (`Schema.list`,
-  `Schema.option`, `Schema.map`, `Schema.union`, `Schema.inlineUnion`, `Schema.enum`, `Schema.defer`) and custom
-  refined/domain schemas. Common primitive, option, list, map, and contributed domain schemas use plain `field`;
-  explicit local schemas use `withSchema` inside a field block. Do not add competing aliases such as `string`,
-  `integer`, `boolean`, `uuid`, `dateOnly`, or `Field.text`;
-  the `Value` module is internal and is not public vocabulary.
-- Non-validation interpreters start from the public `Inspect` API (`Inspect.model`, `Inspect.schema`, `Inspect.field`),
-  which describes a built schema as plain metadata trees (`ModelDescription`, `FieldDescription`, `SchemaDescription`,
-  `SchemaShape`). Inspection never parses input, runs checks, or constructs models. JSON Schema, documentation, and UI
-  metadata generators are prototype interpreters over that read model, not core packages, until a consumer demands one.
-- CodecMapper-style codecs consume schema by referencing `Reified.Schema` only, in their own package: metadata comes from
-  `Inspect`, and hot-path plans come from the record-plan compiler protocol that walks typed fields and a typed
-  constructor finalizer. `Reified.Schema` never references a codec
-  package, and codec packages never reference `Reified.Schema`, so no dependency cycle can form.
-- `Reified.Schema.Syntax` contains only the constructor-last shape operations and typed field constraints intended for a
-  local declaration-module `open`. Primitive and composite value-schema functions remain qualified under `Schema`.
-- Build-time generation emits the same constructor-last syntax as handwritten schemas. Reflection remains rejected as
-  a schema foundation.
-- `Bind` is only for assigning or mapping a source error immediately before `flow { }` binds it. In pure code, use
-  `Result.mapError` or `Validation.mapError`.
-- Generated reference docs come from XML comments and generator inputs. Do not hand-edit generated reference pages as the
-  primary source of truth.
-- Compiled JSON codecs live in `Reified.Schema.Json`, a package that references only `Reified.Schema` (through
-  `InternalsVisibleTo` for the type-erased definitions) and mirrors CodecMapper's byte-level runtime. The codec is the
-  trusted hot path: it enforces wire shape and required fields but does not run constraint metadata. Untrusted boundary
-  input keeps going through `Data` + `Schema.parse` for complete path-aware diagnostics. Do not fold codecs into
-  `Reified.Schema`: codecs must not pull diagnostics into the schema package, and the schema core stays free of any
-  wire runtime.
-- A `dotnet new reified-api` template is evaluated and deferred until the public surface stabilizes (at or near 1.0).
-  The seed exists as `examples/Reified.Api`, which CI smoke-runs on every push, so the template would only add packaging
-  around a sample that still changes with the pre-1.0 API. Revisit when (a) the schema/codec/boundary surface has been
-  stable for two consecutive releases, and (b) at least one external user asks for a scaffold; then package the sample
-  as a template repo folder with `dotnet new` metadata rather than a separate NuGet-first workflow.
+Rules that hold across the codebase and are not obvious from any single file.
 
-- Codec decode allocation work (beating STJ the way CodecMapper does) is deferred until performance becomes a pitch
-  line; parity on speed with the 6x boundary-lane gap is the current story. If pursued, the pre-chosen approach is
-  fixed-arity typed decoders for arities 1..8 with the slot decoder as fallback — no reflection, dispatch on field
-  count from the compiled record plan in `Schema.compilePlan` — with a target of ≤ 2.0 µs / ≤ 1.5 KB on the benchmark aggregate.
-- There is no "checked codec" compile option. `Reified.Schema.Json` enforces wire shape only; a consumer who wants constraint
-  enforcement on trusted-lane decode composes `Json.deserialize` then `Schema.check` (one extra model walk). If
-  that composition proves too slow for a real consumer, the pre-chosen answer is a `Json.deserializeValidated` helper
-  in `Reified.Schema` (interpreters may reference Codec, never the reverse). Duplicating constraint lowering
-  inside `Reified.Schema.Json` stays rejected.
-- Unions support three wire shapes: the externally-wrapped `{discriminator, payload}` object (`Schema.union`, the
-  default), internally-tagged objects (`Schema.inlineUnion` — valid only when every payload is an object whose field
-  names don't collide with the discriminator, checked at construction), and bare-string enums (`Schema.enum`) for
-  payload-less cases. All three are implemented across Schema.parse, Codec, JsonSchema, and Inspect; the contract
-  grammar's literal unions (`"a" | "b"`) lower to `Schema.enum`. No untagged unions — discriminators are required.
-- `JsonSchema.generate`/`generateValue` pin `$schema` to draft 2020-12 and carry description metadata
-  (`Schema.describe`) into `description` (field/value level) and `title` (model root). `$defs`
-  hoisting for non-recursive nested reuse is deferred until a sample has real need; recursive schemas
-  (`Schema.defer`) lower to deterministic `recursiveN` entries in `$defs` with `$ref` edges, so inlining terminates.
-- The UI-metadata interpreter stays a prototype. Promotion waits for an external consumer; if promoted, the API sample
-  must consume the shipped module, otherwise the duplication just moves. UI scope stays field list + control kinds —
-  layout, localization, and widget options are application concerns.
-- `Reified.Schema.Json` is part of the supported Fable surface: the package compiles in `check-fable-js-surface.sh` and a Node
-  round-trip test exercises it. The `FABLE_COMPILER` gates are load-bearing, and every future codec optimization must
-  keep the JS branch working. This completes the zod-comparison story — one declaration shared between server and
-  browser covers serialization as well as parsing.
-- No fused fast boundary path for now: the 20 µs boundary-lane cost is not a reported problem, and `Schema.parse` keeps
-  its raw-retaining redisplay contract. If demand appears, the pre-chosen shape is a separate entry point
-  (`Schema.parseUtf8` — diagnostics-on-failure, no redisplay, API bodies), prototyped in the benchmarks project first,
-  exactly how the codec earned promotion. Never an optimization flag on `Schema.parse`.
-- `Data.ofJsonElement`/`ofJsonDocument` stay gated to `net8.0 && !FABLE_COMPILER`. If a netstandard2.1 consumer
-  ever asks, the pre-chosen answer is a TFM-conditional `System.Text.Json` package reference on netstandard2.1 only —
-  not a split adapter package, which would force a different module name.
-- The `schema<'model> { }` computation expression provides fields and closing constructors. `Schema` also hosts the model
-  operations that use a schema as authority: `Schema.parse` / `Schema.parseWith` / `Schema.parseWithOptions`
-  (untyped `Data` → `RetainedParseResult<'model, SchemaError>`) and `Schema.check` (an already-existing model value,
-  re-checked through its field constraints and its constructor so cross-field invariants aren't silently skipped).
-  There is no separate public `Model` module.
-- `Schema.check` replaced the old `Reified.Schema.Validation.validate`, which only re-checked per-field constraints
-  and silently skipped the model's own constructor invariant (a `DateRange` with `Start` after `End` would have
-  passed it). `Schema.check` re-runs field constraints and then re-invokes the constructor over the field getters'
-  outputs specifically so the constructor re-check isn't a bolt-on special case.
-- `RuleSet<'model,'error>`/`Rules` (contextual, workflow-dependent rules over an already-trusted model) is a known
-  unresolved design problem, not a settled API — see the Open Ideas pointer below before extending it.
-- `Model.construct` (typed field values in, schema-checked model out, without going through `Schema.parse`'s
-  untyped `Data`) does not exist as a library function and cannot be added as one without either breaking the
-  zero-reflection/AOT/Fable rule or capping arity with numbered overloads — see the Open Ideas pointer below. Do not
-  attempt to add `Model.construct schema arg1 arg2 ...` as a plain function; the type-erasure wall is structural, not
-  a missing-effort gap.
+- **Reflection is not the foundation for schema construction, constructor binding, validation, or codec
+  execution.** Reflection may be an optional tooling path on .NET, but the authored path stays AOT- and
+  trimming-safe with a Fable fallback. If boilerplate becomes painful, prefer build-time generation over
+  reflection-heavy runtime discovery.
+- **Codecs reference `Reified.Schema`; `Reified.Schema` never references a codec package.** Metadata comes from
+  `Inspect`, and hot-path plans from the record-plan compiler protocol. The direction is what makes a dependency
+  cycle impossible.
+- **The codec is the trusted hot path.** It enforces wire shape and required fields but does not run constraint
+  metadata. Untrusted input keeps going through `Data` + `Schema.parse` for complete path-aware diagnostics.
+  Codecs must not be folded into `Reified.Schema`: that would pull diagnostics into the schema package and a wire
+  runtime into the schema core.
+- **There is no "checked codec" compile option.** A consumer wanting constraint enforcement on trusted-lane decode
+  composes `Json.deserialize` then `Schema.check`. If that proves too slow for a real consumer, the pre-chosen
+  answer is a `Json.deserializeValidated` helper in `Reified.Schema` — never duplicated constraint lowering inside
+  the codec package.
+- **Inspection never parses input, runs checks, or constructs models.** Non-validation interpreters start from
+  `Inspect`, which describes a built schema as plain metadata trees.
+- **Unions require discriminators.** Three wire shapes are supported — externally wrapped, internally tagged
+  (valid only when every payload is an object whose field names do not collide with the discriminator, checked at
+  construction), and bare-string enums for payload-less cases. There are no untagged unions.
+- **Constructor errors are a second stage after field parsing.** If any field has intrinsic diagnostics, the model
+  constructor must not run; constructor errors are reported only when every argument is already trusted.
+- **Boundary supply is Schema-owned** (`Schema.mustSupply`/`mayOmit`). It is decided before a typed value exists,
+  so it is not a value constraint.
+- **`Schema.check` re-runs field constraints and then re-invokes the constructor.** Its predecessor only re-checked
+  per-field constraints and silently skipped the model's own invariant — a `DateRange` with `Start` after `End`
+  passed it. The constructor re-check is the point, not a bolt-on.
+- **`Reified.Schema.Json` is part of the supported Fable surface.** The `FABLE_COMPILER` gates are load-bearing and
+  every codec optimization must keep the JS branch working. This is what completes the zod comparison: one
+  declaration shared between server and browser covers serialization as well as parsing.
+- **`Data.ofJsonElement`/`ofJsonDocument` stay gated to `net8.0 && !FABLE_COMPILER`.** If a netstandard2.1 consumer
+  asks, the pre-chosen answer is a TFM-conditional `System.Text.Json` reference on netstandard2.1 only — not a
+  split adapter package, which would force a different module name.
+- **No fused fast boundary path.** The boundary-lane cost is not a reported problem, and `Schema.parse` keeps its
+  raw-retaining redisplay contract. If demand appears, the pre-chosen shape is a separate entry point
+  (`Schema.parseUtf8`), prototyped in the benchmarks project first — never an optimization flag on `Schema.parse`.
+- **Codec decode allocation work is deferred** until performance becomes a pitch line. If pursued, the pre-chosen
+  approach is fixed-arity typed decoders for arities 1..8 with the slot decoder as fallback, dispatching on field
+  count from the compiled record plan — no reflection.
+- **`$defs` hoisting for non-recursive nested reuse is deferred** until a sample needs it. Recursive schemas lower
+  to deterministic `recursiveN` entries with `$ref` edges, so inlining terminates.
+- **The UI-metadata interpreter stays a prototype.** Promotion waits for an external consumer, and if promoted, a
+  sample must consume the shipped module — otherwise the duplication just moves. Scope stays field list plus
+  control kinds; layout, localization, and widget options are application concerns.
+- **Generated reference docs come from XML comments and generator inputs.** Do not hand-edit a generated page as
+  the primary fix.
 
-## Open Ideas
+## Settled Rejections
 
-Pre-ideas and proposals live in [`../current-ideas/`](../current-ideas/). When accepted, keep only the durable rule here
-or in `AGENTS.md`, then delete the detailed sketch.
+Recorded so they are not casually re-opened. Pre-ideas live in [`../current-ideas/`](../current-ideas/).
 
-- **`Model.construct`.** RESOLVED by reduction: there is no positional construction API or universal trust wrapper.
-  Public wire/draft records use ordinary named-field construction followed by `Schema.check`; private domain types use
-  their own smart constructors. The structural reason: `Schema<'model>` can't carry per-field types, so a typed
-  positional `Model.construct` is impossible without source generation; every
-  runtime shape tried (builder ceremony, tuple-returning `buildWithConstruct`, reflection off a draft record, a
-  `(string * obj) list`) was rejected.
-- **`Trusted<'model>`.** REJECTED after reference-app re-review. A universal wrapper made parse, contract, and ordinary
-  domain construction carry library proof ceremony without establishing durable F# invariants. `Schema.check` returns
-  the ordinary checked value for boundary admission; private representations and smart constructors provide durable
-  guarantees where required. See `docs/schema/trusted-construction.md`.
-- **Context-dependent model rules.** REMOVED (2026-07-20): the schema-specific helper API duplicated application
-  functions while requiring a parallel field-path identity system. Operation-specific admission remains an ordinary
-  result-returning function or an environment-aware `Policy`; intrinsic admission remains in `Schema.parse` and
-  `Schema.check`.
-- **SRTP common names for `Check`.** RESOLVED (2026-07-14): the current hybrid is the decided surface. Top-level
-  type-directed `Check.present`/`Check.empty`/`Check.notEmpty` exist (Check.fs `Present`/`Empty`/`NotEmpty`
-  dispatch types) over `string`/`option`/`voption`/`Nullable`/`list`/`array`, for direct application to a value.
-  The nested modules (`Check.String.present`, `Check.Option.present`, ...) remain the authoritative catalog —
-  the browsable per-type surface and the disambiguation tier. The `inline` type-directed names also work as
-  `Check<'value>` list elements once the element type is concrete (`Check.all [ Check.present; ... ]` is
-  tested in CheckResultTests.fs). Do not
-  extend type-directed dispatch beyond the presence/emptiness trio — other shared names (`some`, `ok`, numeric
-  comparisons) are either container-specific or already generic without SRTP dispatch.
-- **Refined guide docs area.** `Reified.Refinements`'s API reference lives under `/values/reference/refined/` (moved from
-  `/error-handling/reference/refined/` on 2026-08-03), and its guide pages under `/values/refined/`. Some
-  Schema-side refined prose (`docs/schema/refined-values.md`) still lives under `/schema/`, which is correct: it is
-  about refined *fields in a schema*, not about the Refined package.
-
-- Construction has two deliberate strengths. Public wire/draft records may be assembled with named fields and admitted
-  through `Schema.check`; this is a successful-flow guarantee, not a new type-level proof. Domain types that require a
-  durable guarantee use private representations and authoritative smart constructors, with `Schema.refine` or a record
-  schema invoking those same constructors. A separate draft is useful for named assembly/editing of a private
-  cross-field aggregate, not as a universal wrapper pattern. See `docs/schema/trusted-construction.md`.
-- The contract grammar/generator (`src/Reified.Schema.Contracts`, `scripts/schemagen`) is WIRE-tier tooling only.
-  Domain models are hand-written F#; a domain-tier declaration kind was designed and rejected (generated types
-  can't carry methods; DUs don't fit a JSON-shaped grammar). Golden corpus: `tests/Reified.Schema.Tests/contracts/`
-  (compiled + behavior-tested) with byte-for-byte emission tests in `tests/Reified.Schema.Contracts.Tests`.
-
-## 2026-08-02 — Constraint unification
-
-- `Reified.Check` is renamed to `Reified.Constraint` (project, assembly, package, namespace, tests, AOT probe). There is
-  one public value-rule concept, `Constraint<'value>`: a reusable description of valid values that `check` executes.
-  The `Check<'value>` alias, `CheckFailure`, `CheckDSL`, the public `Predicate` catalogue, `Reified.Check.Constraint`'s
-  code/metadata surface, `Reified.Schema.SchemaConstraint`, `ConstraintDescriptor`, and the `Reified.Schema.Constraint`
-  facade are all removed outright, with no aliases. Pre-1.0, no released users.
-- A constraint carries `Test`, `Check`, and a `ConstraintDescription`. Both closures are retained deliberately:
-  `test` over a conjunction may fail fast, while `check` must run every child to accumulate. Interpreted atoms and
-  `custom` predicates keep a Boolean path that does no violation work; `customWith` derives `test` from its callback
-  and carries that cost, which is inherent in the information the author chose to supply.
-- Two tiers. **Interpreted** constructors build one `ConstraintAtom` and place that same value in both the
-  description and any violation, so identity and failure cannot drift. The algebra is closed and grows only by Reified
-  release. **Opaque** constraints (`custom`, `customWith`, `notWith`, `contramap`, unsupported operands) run normally
-  and are honestly invisible to export and proof. There is no interpreted `not`: several families have no complement,
-  float comparisons are not complementable under NaN, and an operation that is sometimes interpreted is worse than
-  one that is honestly opaque.
-- `Violation` replaces `CheckFailure`. It is plain comparable data with no closure or description reachable from it,
-  so a failure survives its constraint going out of scope. A leaf carries the failing atom itself, which removes the
-  string round-trip `SchemaError.constraintCodeFor` + `SchemaValidation` used to reconstruct constraint identity —
-  a lookup that returned the wrong message when two constraints on one field shared a code. There is no
-  `Violation.code`; keys exist only through `Violation.toMessageTree`, computed at the edge.
-- Removed with reasons: per-constraint message overrides (`withMessage`) and arbitrary diagnostic rewriting
-  (`mapViolation`/`withViolation`), because they let the reported failure diverge from the published description;
-  `Refinement.defineAll`/`defineWithCheck`, because `Constraint.all` and `Constraint.custom` already compose;
-  `Constraint.supplied`/`omittable`, because supply is decided before a typed value exists and is Schema's concern
-  (`Schema.mustSupply`/`mayOmit`).
-- Interpreters divide by what they *claim*, not by whether they produce a value — the earlier "value producers fail
-  closed" rule contradicted the trusted JSON codec's documented contract. Admission and constraint-satisfying
-  generation fail closed; trusted structural codecs make no constraint claim; documentation and export degrade
-  honestly via `x-reified-runtime-constraints`.
-- Semantics corrected where runtime and export disagreed: text cardinality counts code points, not UTF-16 units;
-  `Constraint.numeric` is ASCII `^[0-9]+$` rather than `\d`, so the runtime rule and its lowering agree by
-  construction; text `present` emits only `minLength: 1` and keeps the non-blank rule as runtime metadata, because
-  .NET whitespace and ECMA-262 `\s` differ in both directions (U+0085, U+FEFF); `format` annotation and the `Email`
-  atom lower separately, and declaring both emits both.
-- `ConstraintValue` conversion happens at construction and never throws — the old projection sent every `float`
-  through `decimal`, so `Constraint.lessThan infinity` raised `OverflowException`. Floats keep their own case with
-  equality that treats NaN as self-equal and separates signed zero, using only arithmetic proven on Fable and
-  NativeAOT rather than `BitConverter`. `Guid` and `TimeSpan` keep their own cases, reached through
-  `ConstraintValue.ofOperand`, which resolves on the operand's static type at the call site. A boxed type test
-  cannot do this: Fable erases a `Guid` to a plain string and a `TimeSpan` to a number, so `:? Guid` there labels
-  the operand `Text` while .NET labels it `Guid` — one constraint meaning two different things per platform.
-  Constructors that take an operand are therefore `inline`, and the Fable JS surface check asserts both platforms
-  describe the same constraint identically.
-- The term language, `FieldReference`, `Origin`, and `Schema.require` are **out of scope** and not present as
-  placeholder cases. They are additive when a real consumer establishes field identity, nesting, and proof semantics.
+- **`Model.construct`** (typed field values in, schema-checked model out). RESOLVED by reduction: there is no
+  positional construction API. `Schema<'model>` cannot carry per-field types, so a typed positional
+  `Model.construct` is impossible without source generation; every runtime shape tried — builder ceremony,
+  tuple-returning `buildWithConstruct`, reflection off a draft record, a `(string * obj) list` — was rejected. The
+  type-erasure wall is structural, not a missing-effort gap.
+- **`Trusted<'model>`.** REJECTED after reference-app review. A universal wrapper made parse, contract, and
+  ordinary domain construction carry proof ceremony without establishing durable F# invariants. Construction has
+  two deliberate strengths instead: public wire/draft records assembled with named fields and admitted through
+  `Schema.check` (a successful-flow guarantee), and domain types with private representations and authoritative
+  smart constructors (a durable one).
+- **Context-dependent model rules.** REMOVED: the schema-specific helper API duplicated application functions while
+  requiring a parallel field-path identity system. Operation-specific admission stays an ordinary result-returning
+  function; intrinsic admission stays in `Schema.parse` and `Schema.check`.
+- **Automatic structural migrations, advisory validation, and multi-format codecs before a consumer asks.**
+  Rejected from the ZIO comparison; automatic migration in particular is shown silently deleting fields in its own
+  documentation.
+- **A `dotnet new` template.** Deferred until the public surface stabilizes at or near 1.0, and gated on an
+  external user asking for a scaffold. Packaging a sample that still changes with the pre-1.0 API buys nothing.
