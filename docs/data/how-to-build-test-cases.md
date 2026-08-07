@@ -11,6 +11,42 @@ Keep one representative baseline and describe each test case as a strict immutab
 
 The four functions on this page are `variant`, `variants`, `dimension`, and `matrix`.
 
+## The three types
+
+Case generation moves through three small record types.
+
+```fsharp
+type DataVariation = { Name: string; Edits: DataEdit list }
+type DataDimension = { Name: string; Variations: DataVariation list }
+type DataCase = { Name: string; Value: Data }
+```
+
+`variant` builds a `DataVariation`: a name and the edits, with no baseline attached yet. It is a description, so the
+same variation list can be applied to more than one baseline. `dimension` groups variations into one independent axis
+of a matrix.
+
+`variants` and `matrix` apply those descriptions to a baseline and return `DataCase list` — each case is a name and
+the value that resulted. A `DataCase` is what a test iterates over.
+
+### Why not just `Data list`
+
+The name. A bare list of values loses which case a value came from, so a failure reports index `5` instead of
+`plan: pro / region: US / roles: admin`, and reordering the list silently renumbers every test. Carrying the name with
+the value means:
+
+- Test-framework case names and assertion messages come straight from `case.Name`.
+- `matrix` composes names from its dimensions, so a case identifies itself by the choice made on every axis rather
+  than by a position in a Cartesian product.
+- `variants` can reject duplicate names, which catches two cases that were meant to differ but describe the same thing.
+
+The value is a plain `Data`, so anything on the rest of these pages — `Data.patch`, `matching`, `Data.compare`,
+`Data.Json.render` — applies to `case.Value` directly.
+
+```fsharp
+for case in cases do
+    test case.Name (fun () -> case.Value |> submit |> matching [ at "status" "rejected" ])
+```
+
 ```fsharp
 open Reified.Data
 open Data.Syntax

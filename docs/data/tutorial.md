@@ -113,9 +113,10 @@ let nameCases =
     ]
 ```
 
-Each `DataCase` carries its name and materialized value. Declaration order is preserved.
+Each `DataCase` is a record of `Name` and the materialized `Value`, so a failing test can report which case it was.
+Declaration order is preserved. See [Build variations and matrices](../how-to-build-test-cases/) for the case types.
 
-The result contains four cases named `valid`, `missing`, `blank`, and `wrong shape` in that order. Their `name` values
+The result contains four cases named `present`, `missing`, `blank`, and `wrong shape` in that order. Their `name` values
 are respectively `"Ada"`, absent, `""`, and `Data.List [ Data.Text "Ada" ]`.
 
 ```fsharp

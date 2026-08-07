@@ -65,6 +65,49 @@ Data.render customer
 // => "{ city: \"Adelaide\", postcode: 5000, name: \"Ada\" }"
 ```
 
+## Build fields with control flow
+
+The argument to `data` is an ordinary F# list of `DataField`, so every list-expression form works inside it. Mix
+literal fields with `yield!`, `if`, `for`, `match`, and `let` bindings in one declaration.
+
+```fsharp
+let event =
+    data [
+        "kind" => "example"
+        "customerId" => customerId
+        yield! fields common
+
+        if includeDebug then
+            "debug" => true
+
+        for name in names do
+            $"user-{name}" => name
+    ]
+```
+
+With `common = data [ "tenant" => "acme"; "region" => "au" ]`, `customerId = "c-1"`, `includeDebug = true`, and
+`names = [ "ada"; "grace" ]`:
+
+```fsharp
+Data.render event
+// => "{ kind: \"example\", customerId: \"c-1\", tenant: \"acme\", region: \"au\", debug: true, user-ada: \"ada\", user-grace: \"grace\" }"
+```
+
+Points worth knowing:
+
+- Fields keep the order they are yielded. A conditional or generated field appears where it is written, not appended
+  at the end.
+- `yield!` splices a `DataField list`. `fields` produces one from an existing object; `Data.fields` is the explicit
+  name. Splicing raises if the value is not an object.
+- A bare `field` in the list is an implicit `yield`. F# permits mixing implicit yields with `if`, `for`, and `yield!`
+  in the same list, so no `yield` keyword is needed on the plain lines.
+- An `if` without `else` contributes nothing when the condition is false. Use `?=>` instead when the choice is
+  `Some`/`None` on a single field, and `if`/`for` when the shape of the object varies.
+- The same forms build lists: `data [ "ids" => [ for id in ids -> id * 10 ] ]` renders `{ ids: [10, 20, 30] }`.
+
+Control flow decides which fields exist. `Data.patch` changes fields that already exist. Prefer control flow when
+building a value from inputs, and patching when deriving a variation from a value you already have.
+
 ## Render for people
 
 `Data.render` returns a compact display with unquoted ordinary field names and quoted text. `Data.renderIndented`
