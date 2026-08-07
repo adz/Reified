@@ -1,10 +1,6 @@
 artifacts/*
 !artifacts/.gitkeep
 
-# The package-consumer fixtures do not use the repository artifacts layout: they restore and build in
-# place, the way an outside consumer does, so their build output lands beside their sources.
-tests/package-consumers/*/obj/
-tests/package-consumers/*/bin/
 .vs/
 .idea/
 .fake

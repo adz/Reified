@@ -2,9 +2,16 @@
 
   <!-- Deliberately does not import the repository's Directory.Build.props. These fixtures must see the
        packages exactly as an outside consumer does: restored from a feed, with no repository-wide
-       properties, no artifacts layout, and no project references into src/. Inheritance stops here. -->
+       properties and no project references into src/. Inheritance stops here.
+
+       Output location is not part of that isolation — where a build writes its files says nothing about how
+       it resolved its packages — so these projects opt into the same top-level artifacts directory as the
+       rest of the repository rather than scattering bin/ and obj/ through the fixture tree. -->
 
   <PropertyGroup>
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+    <ArtifactsPath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../../artifacts'))</ArtifactsPath>
+
     <TargetFramework>net10.0</TargetFramework>
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
