@@ -9,8 +9,8 @@ body_class: reified-home
 <div class="docs-home-hero">
 
 <div class="docs-home-hero-visual">
-<img class="hero-lockup hero-lockup--light" src="/content/img/hero-lockup-light.png" alt="Reified" width="1560" height="600" />
-<img class="hero-lockup hero-lockup--dark" src="/content/img/hero-lockup-dark.png" alt="Reified" width="1560" height="600" />
+<img class="hero-lockup hero-lockup--light" src="/content/img/reified-logo-light.png" alt="Reified" width="1159" height="332" />
+<img class="hero-lockup hero-lockup--dark" src="/content/img/reified-logo-dark.png" alt="Reified" width="1159" height="332" />
 </div>
 
 <div class="docs-home-copy" style="max-width: 78ch; margin: 0 auto;">

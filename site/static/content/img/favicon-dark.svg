@@ -1,7 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Reified logo">
-  <rect x="42" y="42" width="428" height="428" rx="28" fill="#0D1117" stroke="#6B7280" stroke-width="10"/>
-  <text x="86" y="144" font-family="JetBrains Mono, Cascadia Mono, Fira Code, Consolas, monospace" font-size="68" font-weight="600" fill="#C084FC">flow</text>
-  <text x="342" y="144" font-family="JetBrains Mono, Cascadia Mono, Fira Code, Consolas, monospace" font-size="68" font-weight="500" fill="#B6C2D1">{</text>
-  <text x="172" y="278" font-family="JetBrains Mono, Cascadia Mono, Fira Code, Consolas, monospace" font-size="68" font-weight="500" fill="#9CA3AF">...</text>
-  <text x="86" y="410" font-family="JetBrains Mono, Cascadia Mono, Fira Code, Consolas, monospace" font-size="68" font-weight="500" fill="#B6C2D1">}</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Reified">
+  <g fill="#599bfd">
+    <path d="M32 37 58 45 32 53 6 45Z" opacity="0.24"/>
+    <path d="M32 28 58 36 32 44 6 36Z" opacity="0.46"/>
+    <path d="M32 19 58 27 32 35 6 27Z" opacity="0.72"/>
+    <path d="M32 10 58 18 32 26 6 18Z"/>
+  </g>
 </svg>

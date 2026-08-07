@@ -1,4 +1,9 @@
-# Reified
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/content/img/reified-logo-dark.png">
+    <img src="docs/content/img/reified-logo-light.png" alt="Reified" width="420">
+  </picture>
+</p>
 
 Declare value and model invariants once. Derive validation, parsing, diagnostics, codecs, contracts, and test data from the same declarations.
 
@@ -45,10 +50,10 @@ type Signup =
 
 let signupSchema =
     schema<Signup> {
-        field "email" _.Email {
+        field _.Email {
             constraints [ present; email ]
         }
-        field "age" _.Age {
+        field _.Age {
             constrain (atLeast 13)
         }
         construct (fun email age -> { Email = email; Age = age })
@@ -59,7 +64,52 @@ match Schema.parse signupSchema input with
 | Error errors -> display errors
 ```
 
-The same `signupSchema` can drive a compiled JSON codec, JSON Schema, form metadata, HTTP contracts, versioned migrations, and matching test data.
+The same `signupSchema` can drive a compiled JSON codec, JSON Schema, form metadata, versioned migrations, and matching test data.
+
+## Read and write JSON from that same declaration
+
+You do not write a second description of the wire shape. `Json.compile` turns the schema you already have into a codec that both encodes and decodes.
+
+```fsharp
+open Reified.Schema.Json
+
+let codec = Json.compile signupSchema   // compile once, typically at startup
+
+Json.serialize codec { Email = "ada@example.com"; Age = 36 }
+// {"email":"ada@example.com","age":36}
+
+Json.deserialize codec """{"email":"ada@example.com","age":36}"""
+// { Email = "ada@example.com"; Age = 36 }
+
+match Json.tryDeserialize codec """{"email":"ada@example.com","age":"thirty"}""" with
+| Ok signup -> Some signup
+| Error message -> None   // JSON decode failed at $.age: expected digit
+```
+
+The codec is compiled from the schema's typed field plan, so there is no runtime reflection and it stays AOT-, trimming-, and Fable-safe. It is the trusted-path counterpart to `Schema.parse`: it enforces the wire shape but skips constraint checking, because payloads from producers you trust already passed those checks. Untrusted input still goes through `Schema.parse`, which accumulates every violation with its path.
+
+## Or derive the schema from the record itself
+
+For wire records — DTOs whose whole job is to cross a boundary — declaring the schema by hand is duplication. Mark the record instead:
+
+```fsharp
+open Reified.Schema.Derive
+
+[<DeriveSchema>]
+type Signup =
+    { [<Present; Email>]
+      Email: string
+      [<AtLeast 13>]
+      Age: int }
+
+Signup.schema     // Schema<Signup>
+Signup.parse      // Data -> Result<Signup, SchemaErrors>
+Signup.validate   // Signup -> Result<Signup, SchemaErrors>
+```
+
+This is the same schema as the handwritten one above — not an equivalent one. `Reified.Schema.Contracts.Build` reads the attributes from F# source at build time and generates ordinary constructor-last Schema DSL, which then compiles normally. The attributes are inert metadata; nothing is reflected over at runtime, and everything downstream — parsing, JSON codecs, JSON Schema, test data — works exactly as it does for a schema you wrote by hand.
+
+Derivation is the preferred approach for DTOs. Keep it to public, permissive boundary records, and map the parsed result through a domain constructor so real invariants live in refined values and domain types rather than on the wire record.
 
 ## Packages
 
@@ -73,7 +123,6 @@ Install `Reified` to get the complete library, or install an individual package 
 - `Reified.Data` — portable structured input and test data
 - `Reified.Schema` — structured model admission, diagnostics, inspection, and JSON Schema
 - `Reified.Schema.Json` — compiled JSON codecs
-- `Reified.Schema.Http` — host-neutral endpoint contracts, problem details, and OpenAPI
 - `Reified.Schema.Contracts.Build` — MSBuild integration for derived record and wire contracts
 
 The contract compiler and schema-derived testing adapter are repository tooling, not runtime packages.
@@ -91,12 +140,9 @@ Reified packages have not been published yet.
 - [Refined domain values](docs/values/refined/domain-values.md)
 - [Getting started with Schema](docs/schema/getting-started.md)
 - [JSON codecs](docs/schema/json-codec.md)
-- [HTTP contracts](docs/schema/http-servers.md)
 - [Versioned contracts](docs/schema/contracts.md)
 - [Runnable Schema examples](docs/schema/examples.md)
 
 ## Axial integration
 
-[Axial](https://github.com/adz/Axial) describes asynchronous workflows with explicit failures and dependencies. Its optional server adapters execute Reified HTTP contracts; neither core depends on the other.
-
-Declare a contract with Reified. Serve it with Axial.
+[Axial](https://github.com/adz/Axial) describes asynchronous workflows with explicit failures and dependencies. Reified began as a library inside Axial and was forked out to stand alone; neither core depends on the other.
