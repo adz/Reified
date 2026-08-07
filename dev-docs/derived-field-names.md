@@ -34,17 +34,27 @@ Fable does not implement `Expr.WithValue`. Using `includeValue = true` there fai
 Microsoft.FSharp.Quotations.FSharpExpr.WithValue (static) is not supported by Fable
 ```
 
-So the Fable constructor takes a plain `ReflectedDefinition`, matches the lambda without the `WithValue` wrapper,
-and rebuilds the getter with `LeafExpressionConverter.EvaluateQuotation`.
+So the Fable constructor takes a plain `ReflectedDefinition` and matches the lambda without the `WithValue`
+wrapper. Without `includeValue` the quotation carries no compiled function, so the getter has to be rebuilt — but
+it is built as a direct field read, not by evaluating the quotation.
 
 Two Fable traps worth knowing before editing that branch:
 
 - **The matched `property` is not a `PropertyInfo`.** Fable represents that slot as the property-name string,
   hence the `unbox<string>`. Calling `.Name` on it compiles and yields nonsense.
-- **The getter genuinely has to be rebuilt.** Without `includeValue` the quotation carries no compiled function,
-  so `EvaluateQuotation` is load-bearing rather than a convenience.
+- **Do not reach for `LeafExpressionConverter.EvaluateQuotation`.** It works and it is the obvious thing to write,
+  but it returns an *interpreter closure*: Fable's `evaluate` compiles `ExprLambda` to
+  `(arg) => { const newEnv = new Map(capturedEnv); ...; return evaluate(expr.body, newEnv); }`, so every call
+  allocates a `Map` and re-walks the expression tree. A schema getter runs per parsed and per encoded value, so
+  that would put an interpreter on the hot path — exactly what the guarantee in
+  `docs/schema/aot-trimming-fable.md` rules out.
 
-Like the .NET path, this runs once while the schema value is built, never per parsed value.
+  Instead the property name recovered above is closed over and read directly, through the same
+  `[<Fable.Core.Emit("$0[$1]")>]` pattern `Reified.Data`'s JSON interop uses. The emitted JavaScript is
+  `(model) => (model[propertyName])`, and `evaluate` no longer appears anywhere in Reified's Fable output.
+
+Like the .NET path, the quotation is therefore read once while the schema value is built, and the getter itself is
+a plain field access on both targets.
 
 ## Version and target requirements
 

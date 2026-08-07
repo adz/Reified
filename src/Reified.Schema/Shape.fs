@@ -11,10 +11,6 @@ open Reified.Constraint
 open Microsoft.FSharp.Quotations
 open Microsoft.FSharp.Quotations.Patterns
 
-#if FABLE_COMPILER
-open Microsoft.FSharp.Linq.RuntimeHelpers
-#endif
-
 [<RequireQualifiedAccess>]
 module internal ShapeInternals =
     let camelCase (name: string) =
@@ -184,6 +180,14 @@ module internal GetterName =
             name
             "The derived field form requires a property getter such as `_.Name`; use `fieldAs \"name\" getter` for anything else."
 
+#if FABLE_COMPILER
+    // The one property read the getter performs, as a direct access rather than an interpreted one. Fable's
+    // quotation evaluator would hand back a closure that re-walks the expression tree on every call; a schema
+    // getter runs per parsed and per encoded value, so it has to be a plain field read like the .NET path.
+    [<Fable.Core.Emit("$0[$1]")>]
+    let private jsProperty (value: obj) (name: string) : obj = null
+#endif
+
     /// <summary>Splits a property-access getter quotation into a derived (camelCased) wire name and the
     /// compiled getter. Infrastructure for the <c>field</c> form.</summary>
     let split (getter: Expr<'model -> 'value>) : string * ('model -> 'value) =
@@ -192,9 +196,7 @@ module internal GetterName =
         | Lambda(_, PropertyGet(Some(Var _), property, [])) ->
             // Fable surfaces the PropertyInfo slot as the property-name string.
             let propertyName = unbox<string> property
-
-            let compiledGetter =
-                LeafExpressionConverter.EvaluateQuotation getter :?> ('model -> 'value)
+            let compiledGetter = fun (model: 'model) -> unbox<'value> (jsProperty (box model) propertyName)
 
             ShapeInternals.camelCase propertyName, compiledGetter
         | _ -> malformed (nameof getter)
