@@ -21,7 +21,14 @@
     <DocsProject Include="../examples/Reified.Schema.Examples/Reified.Schema.Examples.fsproj" />
   </ItemGroup>
 
-  <Target Name="Build">
+  <Target Name="Restore">
+    <MSBuild
+      Projects="@(DocsProject)"
+      Targets="Restore"
+      BuildInParallel="true" />
+  </Target>
+
+  <Target Name="Build" DependsOnTargets="Restore">
     <MSBuild
       Projects="@(DocsProject)"
       Targets="Build"
