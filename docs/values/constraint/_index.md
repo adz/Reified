@@ -139,6 +139,9 @@ selects the shape.
 let requiredName : Constraint<string> = Constraint.present
 ```
 
+For how a `Violation` compares with the other failure shapes, and when to map, keep, accumulate, or render each,
+see [Which failure type, and what to do with it]({{< relref "/getting-started" >}}#which-failure-type-and-what-to-do-with-it).
+
 The same value facts appear at three further levels:
 
 - [Refined values](../refined/domain-values/) use a constraint to construct invariant-carrying domain types.
