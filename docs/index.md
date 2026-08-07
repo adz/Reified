@@ -1,6 +1,6 @@
 ---
 title: Reified
-description: Independent Data, Result, Values, and Schema libraries for F# on .NET and Fable JavaScript.
+description: F# libraries for parsing untrusted input into domain models, and for composing failures, on .NET and Fable JavaScript.
 body_class: reified-home
 ---
 
@@ -26,7 +26,7 @@ body_class: reified-home
     "Stop trusting that the check ran. Make the type carry it.",
     "Untrusted in, proven out.",
     "Untrusted data stops at the boundary, not three layers in.",
-    "Make illegal states unrepresentable — for values, boundaries, and effects."
+    "Make illegal states unrepresentable — for values and for boundaries."
   ];
   var el = document.getElementById("reified-tagline");
   if (el) {
@@ -72,11 +72,26 @@ Json.serialize (Json.compile signupSchema) signup
 <p style="max-width: 78ch; margin: 0 auto 0.5rem; text-align: center;">Every failure message, the JSON codec, the
 JSON Schema, and the generated test data come from that one declaration. Nothing above is written twice.</p>
 
-<div class="docs-home-cta-row" style="justify-content: center; margin-bottom: 3.5rem;">
+<div class="docs-home-cta-row" style="justify-content: center; margin-bottom: 2rem;">
 <a class="docs-home-cta" href="/getting-started/">Get started &rarr;</a>
 </div>
 
+<p style="max-width: 78ch; margin: 0 auto 3.5rem; text-align: center;">There are two ways in. Declare a
+<a href="/schema/getting-started/">Schema</a> when structured input has to become a domain model with every field
+failure reported at once. Use plain <a href="/result/">Result</a> with your own error type when the code is small and
+the failures are yours. Everything else below is machinery those two use.</p>
+
 <div class="reified-routes">
+
+<a class="reified-route" href="/schema/getting-started/">
+<span class="reified-route-problem">The same rule is repeated in a parser, a validator, a form, and a test</span>
+<span class="reified-route-target">Schema &rarr;</span>
+</a>
+
+<a class="reified-route" href="/result/">
+<span class="reified-route-problem">Failures are exceptions, or a bespoke result type in every project</span>
+<span class="reified-route-target">Result &rarr;</span>
+</a>
 
 <a class="reified-route" href="/values/constraint/">
 <span class="reified-route-problem">Validation boilerplate is everywhere, and invalid values still get through</span>
@@ -86,11 +101,6 @@ JSON Schema, and the generated test data come from that one declaration. Nothing
 <a class="reified-route" href="/values/refined/">
 <span class="reified-route-problem">A type says <code>string</code> when it means something narrower</span>
 <span class="reified-route-target">Refined values &rarr;</span>
-</a>
-
-<a class="reified-route" href="/schema/getting-started/">
-<span class="reified-route-problem">The same rule is repeated in a parser, a validator, a form, and a test</span>
-<span class="reified-route-target">Schema &rarr;</span>
 </a>
 
 <a class="reified-route" href="/schema/json-codec/">
@@ -106,11 +116,6 @@ JSON Schema, and the generated test data come from that one declaration. Nothing
 <a class="reified-route" href="/data/">
 <span class="reified-route-problem">Constructing test data by hand is slow and repetitive</span>
 <span class="reified-route-target">Data &rarr;</span>
-</a>
-
-<a class="reified-route" href="/result/">
-<span class="reified-route-problem">Failures are exceptions, or a bespoke result type in every project</span>
-<span class="reified-route-target">Result &rarr;</span>
 </a>
 
 <a class="reified-route" href="/getting-started/#installing">
