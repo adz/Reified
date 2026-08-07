@@ -80,7 +80,7 @@ module WorkspaceName =
         Schema.text |> Schema.refine refinement
 ```
 
-`Refinement.defineAll` keeps executable checks, portable metadata, total construction, and projection in one value.
+`Refinement.defineAll` keeps executable checks, readable metadata, total construction, and projection in one value.
 `Schema.refine` applies that definition, so direct construction and Schema interpretation share the invariant.
 
 Any `WorkspaceName` is valid because its representation is private and every exposed constructor returns `Result`.

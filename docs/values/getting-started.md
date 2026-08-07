@@ -9,7 +9,7 @@ description: Check typed values, decode serialized primitives, and construct inv
 Install only the packages an application needs — Values is a grouping, not a package:
 
 ```bash
-dotnet add package Reified.Constraint   # reusable checks and portable constraints
+dotnet add package Reified.Constraint   # reusable, inspectable value rules
 dotnet add package Reified.Refinements      # invariant-carrying domain values
 dotnet add package Reified.Parse        # serialized primitive decoding
 ```

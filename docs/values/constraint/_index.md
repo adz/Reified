@@ -70,7 +70,7 @@ The rest of this page is about that second path. Nothing here forces you onto it
 
 ## The failure carries facts, not prose
 
-A `Violation` holds the failing constraint atom and, where portable, the actual value. It carries no
+A `Violation` holds the failing constraint atom and, where Reified can represent it, the actual value. It carries no
 language and no formatting. That is what keeps it comparable data you can retain, assert on in a test, and
 pass across a boundary without dragging a culture or a `ResourceManager` along with it.
 

@@ -101,4 +101,4 @@ field _.Email {
 ```
 
 Schema attaches the field path if the function fails. Arbitrary executable validation is not emitted as JSON Schema
-metadata; use a portable constraint for facts other interpreters must read.
+metadata; use a built-in constraint for facts other interpreters must read.

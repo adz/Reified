@@ -11,7 +11,7 @@ Values is a navigation grouping over three packages that admit values: `Reified.
 `Reified.Constraint`; `Reified.Parse` depends on neither; none depends on `Reified.Result`.
 
 - Use `Constraint<'value>` to test one typed value without replacing it.
-- Use `Constraint<'value>` when executable checking and portable metadata must stay together.
+- Use `Constraint<'value>` when the executable check and metadata other tools can read must stay together.
 - Use `Constraint.guard` to keep the original value after a successful check.
 - Use `Parse.*` only to decode serialized primitive input.
 - Use `Refinement<'underlying,'refined>` only for invariant-carrying destination types with a total reverse projection.

@@ -23,7 +23,7 @@ its own:
 | [`Reified.Parse`](./parse/) | What does this serialized text decode to? | `Result<'value, ParseError>` |
 
 ```sh
-dotnet add package Reified.Constraint   # reusable checks and portable constraints
+dotnet add package Reified.Constraint   # reusable, inspectable value rules
 dotnet add package Reified.Refinements      # invariant-carrying domain values
 dotnet add package Reified.Parse        # serialized primitive decoding
 ```

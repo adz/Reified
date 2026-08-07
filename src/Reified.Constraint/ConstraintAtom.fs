@@ -252,17 +252,16 @@ module UnsupportedOperation =
         | UnsupportedOperation.MultipleOf -> prefix + "multipleOf"
 
     /// <summary>The default English phrase for an unsupported operation.</summary>
+    /// The rule ran and the value failed it, but the comparison value cannot be printed, so the message names the
+    /// relation and stops there rather than leaking Reified's own vocabulary into a user-facing sentence.
     let render (operation: UnsupportedOperation) : string =
-        let name =
-            match operation with
-            | UnsupportedOperation.Relation Equal -> "equality"
-            | UnsupportedOperation.Relation NotEqual -> "inequality"
-            | UnsupportedOperation.Relation GreaterThan -> "greater-than"
-            | UnsupportedOperation.Relation LessThan -> "less-than"
-            | UnsupportedOperation.Relation AtLeast -> "at-least"
-            | UnsupportedOperation.Relation AtMost -> "at-most"
-            | UnsupportedOperation.Within -> "range"
-            | UnsupportedOperation.Contains -> "containment"
-            | UnsupportedOperation.MultipleOf -> "multiple-of"
-
-        $"failed a {name} rule whose operand has no portable representation"
+        match operation with
+        | UnsupportedOperation.Relation Equal -> "must equal the required value"
+        | UnsupportedOperation.Relation NotEqual -> "must not equal the excluded value"
+        | UnsupportedOperation.Relation GreaterThan -> "must be greater than the required value"
+        | UnsupportedOperation.Relation LessThan -> "must be less than the required value"
+        | UnsupportedOperation.Relation AtLeast -> "must be at least the required value"
+        | UnsupportedOperation.Relation AtMost -> "must be at most the required value"
+        | UnsupportedOperation.Within -> "must be within the required range"
+        | UnsupportedOperation.Contains -> "must contain the required value"
+        | UnsupportedOperation.MultipleOf -> "must be a multiple of the required value"

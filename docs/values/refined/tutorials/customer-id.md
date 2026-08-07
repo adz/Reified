@@ -76,7 +76,7 @@ CustomerId.create 0    // Error [ OutOfRange (GreaterThan "0", Some "0") ]
 ```
 
 Use `Refinement.defineAll` when several constraints describe admission, or
-`Refinement.defineWithCheck` for an invariant with no portable description. See
+`Refinement.defineWithCheck` for an invariant no built-in constraint describes. See
 [Define Refined Types](../../domain-values/) for both.
 
 ## Give it the operations that justify it

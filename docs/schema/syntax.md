@@ -74,7 +74,7 @@ field _.Email {
 Operations run from top to bottom:
 
 1. `withSchema` sets the current raw schema.
-2. `constrain` adds one portable constraint; `constraints` adds a list in declaration order. Both preserve the value type.
+2. `constrain` adds one constraint; `constraints` adds a list in declaration order. Both preserve the value type.
 3. `describe`, `format`, and `defaultValue` add type-preserving metadata. They can use the inferred schema or follow
    `withSchema`; `defaultValue` also supplies the field when input omits it.
 3. `refine` changes the current schema from its raw type to the getter type.
@@ -97,7 +97,8 @@ field _.Email {
 }
 ```
 
-The typed vocabulary in `Reified.Schema.Syntax` covers every portable schema constraint. The field type checks every
+The typed vocabulary in `Reified.Schema.Syntax` covers every [interpreted]({{< relref "/values/constraint/constraints" >}})
+constraint — the built-ins Reified can read as data and lower to JSON Schema. The field type checks every
 entry, so `email` cannot be applied to an `int` field. Lifted constraints such as `minLength` apply to strings,
 lists, arrays, and maps with shape-appropriate interpretation.
 

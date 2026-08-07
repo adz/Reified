@@ -94,7 +94,7 @@ value failed every permitted alternative.
 
 ## Inspect a violation without parsing its message
 
-Built-in failures carry the failing constraint atom and, when portable, the actual value. Use the projections when
+Built-in failures carry the failing constraint atom and, when Reified can represent it, the actual value. Use the projections when
 code needs those facts:
 
 ```fsharp

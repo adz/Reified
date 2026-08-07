@@ -56,7 +56,7 @@ let currency : Constraint<string> =
     Constraint.customWith "must be a supported currency" (Constraint.check (Constraint.oneOf supported))
 ```
 
-The enclosing description stays opaque, so reporting an interpreted leaf this way makes no false portable claim.
+The enclosing description stays opaque, so reporting an interpreted leaf this way claims no inspectability it does not have.
 Construct a `Violation` directly only when no built-in states what you mean.
 
 Descriptions are required and must be non-blank, because they are the only thing a renderer has to work with. They
@@ -65,7 +65,7 @@ attach your own catalogue key.
 
 `Constraint.contramap` is opaque for the same reason: an arbitrary projection changes the proposition in a way no
 description can express. The inner description is retained beneath the boundary so documentation stays readable, and
-an opaque child never erases its portable siblings — the rest of the expression stays inspectable.
+an opaque child never erases its interpreted siblings — the rest of the expression stays inspectable.
 
 ## Negation
 
@@ -105,18 +105,48 @@ operation that is sometimes interpreted, sometimes needs prose, and sometimes ca
 than one that is honestly opaque — so where a complement *is* expressible, it is published under its own name in the
 table above instead.
 
-## Unsupported operands
+## Operands Reified cannot describe
 
-An interpreted constructor can receive an operand with no portable representation — a `Guid`, a custom comparable
-type. The constraint still executes against its typed closure; only its description and its failure decline to name
-the operand:
+Interpreted rules put their comparison value — the *operand* — into their description, so tools downstream can read
+it. That description is a closed data model, `ConstraintValue`: text, integers, decimals, Booleans, null, and lists of
+those. It is deliberately small, because every interpreter has to understand all of it.
+
+A rule can compare values that do not fit. `Constraint.atLeast` works on anything comparable, and plenty of comparable
+types are not in that list:
 
 ```fsharp
-(Constraint.inspect (Constraint.equalTo someGuid)).Expression
-// Opaque (UnsupportedOperand (Relation Equal))
+type Version = { Major: int; Minor: int }   // comparable, but not a ConstraintValue
+
+let supported : Constraint<Version> =
+    Constraint.atLeast { Major = 2; Minor = 0 }
 ```
 
-Nothing is silently approximated and no boxed value escapes through the inspection API.
+The rule runs perfectly well. `Version` compares, so checking a value is exact. What Reified cannot do is convert
+`{ Major = 2; Minor = 0 }` into `ConstraintValue`, so the description declines to name it:
+
+```fsharp
+(Constraint.inspect supported).Expression
+// Opaque (UnsupportedOperand (Relation AtLeast))
+```
+
+Three separate consequences, worth keeping apart:
+
+- **Checking is unaffected.** The constraint accepts and rejects exactly the values it should.
+- **Export cannot name the value.** JSON Schema, generated documentation, and test-data generation see an opaque rule
+  and say nothing about it, rather than inventing a rendering.
+- **A derived message cannot print it.** `Violation.render` produces `"must be at least the required value"` — the
+  relation, without the operand.
+
+Nothing is silently approximated, and no boxed value escapes through the inspection API.
+
+If that message is not good enough for your users, author the rule with prose instead, and keep the typed check:
+
+```fsharp
+let supported : Constraint<Version> =
+    Constraint.custom "must be version 2.0 or later" (fun value -> value >= { Major = 2; Minor = 0 })
+```
+
+That is opaque either way, so you lose nothing by saying what you mean.
 
 ## Prose that is not a rule
 

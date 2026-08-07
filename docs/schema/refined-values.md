@@ -223,6 +223,6 @@ local variant must be selected explicitly. Parsing and ordinary refinement const
 - `Schema.convert` performs a total projected mapping.
 - `Schema.tryConvert` performs a fallible projected mapping returning `SchemaError list`.
 - `Schema.admit` constructs a domain model from a structured draft while preserving its fields.
-- `validate` adds executable Schema behavior that has no portable metadata.
+- `validate` adds executable Schema behavior that no interpreter can read as metadata.
 
 See [Define Refined Types]({{< relref "/values/refined/domain-values/" >}}) for domain-side definitions.

@@ -1,7 +1,7 @@
 ---
 weight: 40
 title: Define Refined Types
-description: Couple a portable constraint to total construction and projection.
+description: Couple an inspectable constraint to total construction and projection.
 ---
 
 # Define Refined Types
@@ -32,7 +32,9 @@ module ContactEmail =
 
 ## Guard construction with a refinement
 
-Use `Refinement.define` when one portable constraint describes admission:
+Use `Refinement.define` when one constraint from the built-in catalogue describes admission. Those constraints are
+[interpreted]({{< relref "/values/constraint/constraints" >}}): Reified can read the rule as data, so the refinement
+carries metadata other tools can use, not only a check.
 
 ```fsharp
 module ContactEmail =
@@ -55,7 +57,7 @@ let email : Result<ContactEmail, Violation> =
     ContactEmail.create rawEmail
 ```
 
-## Combine portable constraints
+## Combine constraints
 
 `defineAll` requires at least one constraint and checks every constraint against the same original value:
 
@@ -78,7 +80,9 @@ The same constraint values provide executable checks and `ConstraintDetails` met
 
 ## Use a metadata-free check
 
-Use `defineWithCheck` for an invariant that has no portable constraint description:
+Use `defineWithCheck` for an invariant no built-in constraint describes. The check runs, but nothing downstream can
+read the rule — the trade-off is
+[interpreted versus opaque]({{< relref "/values/constraint/constraints" >}}):
 
 ```fsharp
 type EvenInt = private EvenInt of int

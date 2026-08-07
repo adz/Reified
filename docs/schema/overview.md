@@ -51,7 +51,7 @@ current domain model.
 - [Input Sources](../input-sources/) — HTTP form-like, CLI, JSON-like, and configuration input.
 - [Redisplay And Field Errors](../redisplay-and-field-errors/) — failed parses that keep the user's input.
 - [Trusted Construction](../trusted-construction/) — checked public records, refined fields, and private aggregates.
-- [Refined Value Schemas](../refined-values/) — domain values like `Email` as portable field schemas.
+- [Refined Value Schemas](../refined-values/) — domain values like `Email` as reusable field schemas.
 - [Union Schemas](../union-schemas/) — tagged discriminated unions as schema fields.
 - [JSON Codec](../json-codec/) — compile the same declaration into a runtime-reflection-free JSON codec for trusted payloads.
 - [HTTP Servers](../http-servers/) — schema-trusted requests, problem details, and generated OpenAPI.

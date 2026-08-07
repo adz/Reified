@@ -70,17 +70,17 @@ module Catalogue =
           constraint' [ "number"; "multipleOf" ] [ "divisor" ] None "must be a multiple of {divisor}"
           constraint' [ "number"; "finite" ] [] None "must be a finite number"
 
-          unsupported [ "relation"; "equal" ] "failed an equality rule whose operand has no portable representation"
-          unsupported [ "relation"; "notEqual" ] "failed an inequality rule whose operand has no portable representation"
+          unsupported [ "relation"; "equal" ] "must equal the required value"
+          unsupported [ "relation"; "notEqual" ] "must not equal the excluded value"
           unsupported
               [ "relation"; "greaterThan" ]
-              "failed a greater-than rule whose operand has no portable representation"
-          unsupported [ "relation"; "lessThan" ] "failed a less-than rule whose operand has no portable representation"
-          unsupported [ "relation"; "atLeast" ] "failed an at-least rule whose operand has no portable representation"
-          unsupported [ "relation"; "atMost" ] "failed an at-most rule whose operand has no portable representation"
-          unsupported [ "within" ] "failed a range rule whose operand has no portable representation"
-          unsupported [ "contains" ] "failed a containment rule whose operand has no portable representation"
-          unsupported [ "multipleOf" ] "failed a multiple-of rule whose operand has no portable representation"
+              "must be greater than the required value"
+          unsupported [ "relation"; "lessThan" ] "must be less than the required value"
+          unsupported [ "relation"; "atLeast" ] "must be at least the required value"
+          unsupported [ "relation"; "atMost" ] "must be at most the required value"
+          unsupported [ "within" ] "must be within the required range"
+          unsupported [ "contains" ] "must contain the required value"
+          unsupported [ "multipleOf" ] "must be a multiple of the required value"
 
           constraint' [ "attribute"; "default" ] [] None "value"
           constraint' [ "actual" ] [ "message"; "actual" ] None "{message}, but was {actual}"

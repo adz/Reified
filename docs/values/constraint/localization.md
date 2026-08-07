@@ -466,20 +466,20 @@ separate `constraint.actual` entry.
 | `constraint.number.multipleOf` | `divisor` | — | must be a multiple of {divisor} |
 | `constraint.number.finite` | — | — | must be a finite number |
 
-A built-in whose operand has no portable representation reports the operation rather than approximating the
+A built-in whose operand Reified cannot describe reports the relation rather than approximating the
 operand. These carry no arguments:
 
 | Key | Arguments | Plural on | Default English |
 | --- | --- | --- | --- |
-| `constraint.unsupportedOperand.relation.equal` | — | — | failed an equality rule whose operand has no portable representation |
-| `constraint.unsupportedOperand.relation.notEqual` | — | — | failed an inequality rule whose operand has no portable representation |
-| `constraint.unsupportedOperand.relation.greaterThan` | — | — | failed a greater-than rule whose operand has no portable representation |
-| `constraint.unsupportedOperand.relation.lessThan` | — | — | failed a less-than rule whose operand has no portable representation |
-| `constraint.unsupportedOperand.relation.atLeast` | — | — | failed an at-least rule whose operand has no portable representation |
-| `constraint.unsupportedOperand.relation.atMost` | — | — | failed an at-most rule whose operand has no portable representation |
-| `constraint.unsupportedOperand.within` | — | — | failed a range rule whose operand has no portable representation |
-| `constraint.unsupportedOperand.contains` | — | — | failed a containment rule whose operand has no portable representation |
-| `constraint.unsupportedOperand.multipleOf` | — | — | failed a multiple-of rule whose operand has no portable representation |
+| `constraint.unsupportedOperand.relation.equal` | — | — | must equal the required value |
+| `constraint.unsupportedOperand.relation.notEqual` | — | — | must not equal the excluded value |
+| `constraint.unsupportedOperand.relation.greaterThan` | — | — | must be greater than the required value |
+| `constraint.unsupportedOperand.relation.lessThan` | — | — | must be less than the required value |
+| `constraint.unsupportedOperand.relation.atLeast` | — | — | must be at least the required value |
+| `constraint.unsupportedOperand.relation.atMost` | — | — | must be at most the required value |
+| `constraint.unsupportedOperand.within` | — | — | must be within the required range |
+| `constraint.unsupportedOperand.contains` | — | — | must contain the required value |
+| `constraint.unsupportedOperand.multipleOf` | — | — | must be a multiple of the required value |
 
 The composition and joining entries:
 
@@ -539,6 +539,6 @@ carrying authored prose have no catalogue entry: Schema does not invent a key fo
 
 ## Argument values
 
-Arguments are `ConstraintValue`, the portable value type: text, char, boolean, integer, decimal, big integer,
+Arguments are `ConstraintValue`, the closed value model every interpreter understands: text, char, boolean, integer, decimal, big integer,
 float, GUID, timespan, date-time, date-time-offset, null, and lists of those. `ConstraintValue.render` gives the
 invariant rendering of one; a renderer formats through its value culture instead.

@@ -17,7 +17,7 @@ Keep those jobs in separate types.
 ## Define a permissive wire record
 
 `[<DeriveSchema>]` marks a public, namespace-level record whose Reified schema is generated from its source declaration. The
-schema describes how input fields parse and which portable constraints apply.
+schema describes how input fields parse and which constraints apply.
 
 ```fsharp
 namespace MyApp.Contracts
