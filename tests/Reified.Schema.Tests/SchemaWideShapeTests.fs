@@ -8,9 +8,10 @@ open Swensen.Unquote
 open Xunit
 
 open Reified.Schema.Syntax
+open type Reified.Schema.Syntax
 
 /// Specs for the unbounded constructor-last chain: field counts beyond the old twelve-field arity cap,
-/// and the bare-getter field form (`Field.derived _.Name`) with derived camelCase wire names.
+/// and the bare-getter field form (`field _.Name`) with derived camelCase wire names.
 module SchemaWideShapeTests =
 
     type private Wide =
@@ -133,7 +134,7 @@ module SchemaWideShapeTests =
         test <@ Schema.parse wideSchema input = Ok expected @>
         test <@ Schema.check wideSchema expected = Ok expected @>
 
-    // ---- derived-name fields: `Field.derived` camelCases the property name ----
+    // ---- bare-getter fields: `open type Reified.Schema.Syntax` adds the overloaded `field` ----
 
     type private Contact =
         { Name: string
@@ -144,11 +145,11 @@ module SchemaWideShapeTests =
 
     let private contactSchema =
         schema<Contact> {
-            Field.derived _.Name {
+            field _.Name {
                 constrain (Constraint.minLength 1)
             }
-            Field.derived _.Age
-            Field.derived _.Tags {
+            field _.Age
+            field _.Tags {
                 withSchema (Schema.listWith Schema.text)
             }
             construct Contact.Create
@@ -193,13 +194,13 @@ module SchemaWideShapeTests =
             test <@ flattened |> List.exists (fun diagnostic -> diagnostic.Path = TestPath.fromLegacy [ PathSegment.Name "name" ]) @>
 
     [<Fact>]
-    let ``the named and derived forms mix in one schema`` () =
-        // `field` and `Field.derived` are separate, so a schema can name some fields and derive others.
+    let ``the named field form still works under open type`` () =
+        // `open type` must not shadow away the named spelling: both live on the same overloaded member.
         let schema =
             schema<Contact> {
                 field "fullName" _.Name
-                Field.derived _.Age
-                Field.derived _.Tags {
+                field _.Age
+                field _.Tags {
                     withSchema (Schema.listWith Schema.text)
                 }
                 construct Contact.Create
@@ -226,14 +227,14 @@ module SchemaWideShapeTests =
 
     let private registrationSchema =
         schema<Registration> {
-            Field.derived _.Owner
-            Field.derived _.Price
-            Field.derived _.Ratio
-            Field.derived _.Seats
-            Field.derived _.Refunds
-            Field.derived _.Aliases
-            Field.derived _.Codes
-            Field.derived _.Rows
+            field _.Owner
+            field _.Price
+            field _.Ratio
+            field _.Seats
+            field _.Refunds
+            field _.Aliases
+            field _.Codes
+            field _.Rows
             construct Registration.Create
         }
 

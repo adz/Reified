@@ -649,22 +649,42 @@ module Syntax =
         SchemaCore.constrainValues constraint' schema
 
 #if !FABLE_COMPILER
-    /// <summary>
-    /// The derived-name field form.
-    /// </summary>
-    /// <remarks>
-    /// This is a type rather than another <c>let</c> in this module because capturing <c>_.Email</c> as a
-    /// quotation needs <c>ReflectedDefinition</c> auto-quotation, which F# applies to method parameters only.
-    /// Opening this module brings <c>Field</c> into scope, so no <c>open type</c> is required.
-    /// </remarks>
-    [<Sealed; AbstractClass>]
-    type Field =
+/// <summary>
+/// The overloaded <c>field</c> form. Adding <c>open type Reified.Schema.Syntax</c> alongside
+/// <c>open Reified.Schema.Syntax</c> brings a <c>field</c> that accepts either an explicit wire name and a
+/// getter, exactly like the module function, or a bare property getter such as <c>field _.Email</c>, deriving
+/// the wire name from the property (camelCased).
+/// </summary>
+/// <remarks>
+/// <para>
+/// These live on a type rather than in the module above because F# gives both features they need to members
+/// only: module <c>let</c> bindings cannot be overloaded, and <c>ReflectedDefinition</c> auto-quotation — which
+/// is what turns <c>_.Email</c> into the <c>Expr</c> the derived name is read from — applies to method
+/// parameters only. Static members reach an unqualified call site only through <c>open type</c>.
+/// </para>
+/// <para>
+/// The named overload is repeated here deliberately. <c>open type</c> shadows the module's <c>field</c>, so both
+/// spellings have to live on the same overload set for <c>field "wireName" getter</c> to keep working.
+/// </para>
+/// <para>
+/// Explicit names are never transformed; the camelCase policy applies only to derived names. Fable cannot run
+/// the quotation, so portable code uses the explicit form and needs no <c>open type</c>.
+/// </para>
+/// </remarks>
+[<Sealed; AbstractClass>]
+type Syntax =
 
-        /// <summary>Declares a field from a bare property getter, deriving its camel-cased wire name from the
-        /// property. Explicit <c>field</c> names are never transformed; the camelCase policy applies only to
-        /// names derived here.</summary>
-        /// <example><code>Field.derived _.Email  // wire name "email"</code></example>
-        static member derived([<ReflectedDefinition(includeValue = true)>] getter: Expr<'model -> 'value>) =
-            let name, get = GetterName.split getter
-            FieldBuilder<'model, 'value>(name, get)
+    /// <summary>Declares a field from a property getter and derives its camel-cased wire name.</summary>
+    /// <example><code>field _.Email  // wire name "email"</code></example>
+    static member field
+        ([<ReflectedDefinition(includeValue = true)>] getter: Expr<'model -> 'value>)
+        : FieldBuilder<'model, 'value> =
+        let name, get = GetterName.split getter
+        FieldBuilder(name, get)
+
+    /// <summary>Declares a field with an explicit wire name.</summary>
+    /// <example><code>field "emailAddress" _.Email</code></example>
+    static member field(name: string) : (('model -> 'value) -> FieldBuilder<'model, 'value>) =
+        if isNull name then nullArg (nameof name)
+        fun getter -> FieldBuilder(name, getter)
 #endif

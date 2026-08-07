@@ -530,7 +530,7 @@ module ApiShapeTests =
         // There is still exactly one value-rule vocabulary. Schema publishes no constraint catalogue of its own:
         // the field-block syntax carries only collection adapters, and supply, which is Schema's concern.
         let syntaxMembers =
-            moduleTypeFromAssembly "Reified.Schema" "Reified.Schema.Syntax"
+            moduleTypeFromAssembly "Reified.Schema" "Reified.Schema.SyntaxModule"
             |> publicStaticMemberNames
             |> Set.filter (fun name -> not (name.Contains "$"))
 

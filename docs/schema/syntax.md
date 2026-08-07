@@ -7,15 +7,22 @@ description: Record fields, field blocks, canonical schemas, and checked constru
 # Schema Syntax
 
 Every Reified package puts its concise vocabulary behind one opt-in module named `Syntax`, so the preamble is always
-the same two lines: the package namespace, then its `Syntax`.
+the package namespace, then its `Syntax`. Nothing is auto-opened; if a name below is not in scope, the second line
+is missing.
 
 ```fsharp
 open Reified.Schema
 open Reified.Schema.Syntax
 ```
 
-The same shape applies to `Reified.Data.Syntax`, `Reified.Constraint.Syntax`, and `Reified.Result.Syntax`. Nothing is
-auto-opened and no `open type` is needed; if a name below is not in scope, the second line is missing.
+The same shape applies to `Reified.Data.Syntax`, `Reified.Constraint.Syntax`, and `Reified.Result.Syntax`.
+
+Schema adds one optional third line. `open type` brings in an overloaded `field` that also accepts a bare property
+getter, covered under [Fields without blocks](#fields-without-blocks). It is only needed for that shorter form:
+
+```fsharp
+open type Reified.Schema.Syntax
+```
 
 A record schema is one constructor-last computation expression:
 
@@ -42,11 +49,15 @@ field "tags" _.Tags
 This works for built-in primitives and composites, built-in refined values, and application types that contribute a
 static `Schema` member.
 
-On .NET, a quotation can supply the default wire name:
+On .NET, with `open type Reified.Schema.Syntax` added, a quotation can supply the default wire name:
 
 ```fsharp
-Field.derived _.Name
+field _.Name
 ```
+
+The `open type` is what supplies this overload. F# allows overloading and quotation capture on type members only,
+so this spelling cannot be a plain module function; `field "name" getter` is repeated on the same overload set so
+that it keeps working once `open type` shadows the module's `field`.
 
 Use the explicit form in portable code:
 

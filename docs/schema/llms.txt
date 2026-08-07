@@ -5,7 +5,7 @@
   and `Reified.Refinements` never claim path-aware accumulation; that is Schema's role.
 - Declare records with `schema<Model> { field ...; construct ... }`.
 - `field "wire-name" _.Member` resolves the member type's canonical schema.
-- `Field.derived _.Member` derives the wire name from a quotation and is .NET-only. Use explicit names for Fable.
+- `field _.Member` derives the wire name from a quotation and is .NET-only. Use explicit names for Fable.
 - Constraints are `Reified.Constraint.Constraint<'value>`; `Schema.constrain` takes the same value you check directly.
 - Open `Reified.Constraint.Syntax` for the unqualified constraint vocabulary; `Reified.Schema.Syntax` holds only collection adapters.
 - A field block may contain `withSchema`, `constrain`, `constraints`, `refine`, and `validate`.

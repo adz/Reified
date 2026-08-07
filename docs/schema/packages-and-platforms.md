@@ -34,6 +34,6 @@ Schema declarations compiled with Fable use explicit field names:
 field "email" _.Email
 ```
 
-The shorter `Field.derived _.Email` form is .NET-only because it reads an F# quotation to derive the wire name. All field
+The shorter `field _.Email` form is .NET-only because it reads an F# quotation to derive the wire name. All field
 typing, schema inference, constraints, constructors, parsing, checking, and codecs remain supported when the explicit
 name is supplied.
