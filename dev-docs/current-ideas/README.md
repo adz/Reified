@@ -19,6 +19,10 @@ Active sketches:
 - `database.md` — direction sketch for a typed relational layer: a generated immutable SQL AST, catalog-driven
   table metadata, reflection-free row codecs, and constraint violations translated into schema diagnostics.
   Constructing and mapping SQL only — executing it is explicitly out of scope.
+- `schemagen-composes-constraints.md` — `SchemaGen` emits data violating a field's own constraints whenever more
+  than one is attached and any of them picks a value. Proposes composing the atoms into one generator, filtering
+  finite candidate sets at construction through `Constraint.test`, and reporting unsatisfiable combinations
+  rather than sampling from them.
 
 Implemented work and settled decisions do not remain in this folder. Constraint unification and contextual
 constraint localization shipped and are recorded in `dev-docs/decisions/README.md` and `AGENTS.md`; the term
