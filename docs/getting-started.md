@@ -233,21 +233,13 @@ builders for collecting every error at once — over the standard `Result` type 
 
 ## Installing
 
-Install `Reified` for everything at once, or a single package when you need one capability. Every package is
-independently installable and depends only on what it needs.
+```sh
+dotnet add package Reified
+```
 
-| Package | For |
-| --- | --- |
-| `Reified` | umbrella; references all runtime packages |
-| `Reified.Constraint` | reusable, inspectable value rules and structured violations |
-| `Reified.Refinements` | types that carry an invariant after construction |
-| `Reified.Parse` | serialized primitive decoding |
-| `Reified.Result` | composition over the standard F# `Result` |
-| `Reified.Data` | portable structured input and test data |
-| `Reified.Schema` | model admission, diagnostics, inspection, JSON Schema |
-| `Reified.Schema.Json` | compiled JSON codecs |
-| `Reified.Schema.Http` | endpoint declarations and OpenAPI output |
-| `Reified.Schema.Contracts.Build` | MSBuild integration for derived record contracts |
+That is the whole set: value rules, refined types, parsing, `Result` composition, data, and Schema with its JSON
+codecs. On .NET 8 it also brings the HTTP contract package; a `netstandard2.1` consumer gets the rest. Every package is also independently installable if you want one capability on its own — see
+[Packages and platforms](/schema/packages-and-platforms/) for the list, what each one gives you, and which run on
+Fable as well as .NET.
 
-Reified is pre-1.0 and has not been published to NuGet yet, so the `dotnet add package` lines above do not
-resolve for now. → [Packages and platforms](/schema/packages-and-platforms/)
+Reified is pre-1.0 and has not been published to NuGet yet, so that line does not resolve for now.
