@@ -105,5 +105,4 @@ all states share the same operations and callers already handle them by pattern 
 A transition belongs to the aggregate when the rule is always true for those related values. Tenant permissions,
 current time, feature flags, and operation-specific approval rules belong outside it.
 
-Apply those requirements with ordinary result-returning functions or a Flow policy after intrinsic construction has
-succeeded.
+Apply those requirements with ordinary result-returning functions after intrinsic construction has succeeded.

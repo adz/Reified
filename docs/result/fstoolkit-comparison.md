@@ -1,7 +1,7 @@
 ---
 weight: 90
 title: FsToolkit.ErrorHandling
-description: How Reified Result, Constraint, Refined, Schema, and Flow relate to FsToolkit.ErrorHandling.
+description: How Reified Result, Constraint, Refined, and Schema relate to FsToolkit.ErrorHandling.
 ---
 
 # FsToolkit.ErrorHandling
@@ -9,7 +9,7 @@ description: How Reified Result, Constraint, Refined, Schema, and Flow relate to
 FsToolkit.ErrorHandling provides a broad set of combinators and computation expressions for `Result`, asynchronous
 results, validation, and related standard F# types.
 
-Reified separates five roles, each installable on its own:
+Reified separates four roles, each installable on its own:
 
 - `Reified.Result` supplies a smaller `Result` surface, `result { }`, and the accumulating builders that
   collect every error rather than stopping at the first.
@@ -27,7 +27,7 @@ Existing FsToolkit Result helpers can remain in an application. Both libraries u
 | `Result.requireTrue` | `Result.requireTrue` |
 | `Result.requireSome` | `Result.someOr` |
 | `result { }` | `result { }` |
-| `asyncResult { }`, `taskResult { }` | `flow { }` |
+| `asyncResult { }`, `taskResult { }` | no equivalent; Reified does not model effects |
 | accumulating validation over boundary fields | a record `schema<'model> { }` interpreted by `Schema.parse` or `Schema.check` |
 
 Schema adds one property that Result combinators do not provide: the declaration is inspectable. The same field and

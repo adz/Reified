@@ -1,6 +1,6 @@
 # Reified Result
 
-- `Reified.Result` is a top-level product about composing failures, a peer of Values, Data, Schema, and Flow.
+- `Reified.Result` is a top-level product about composing failures, a peer of Values, Data, and Schema.
 - It is a standalone leaf: no dependency on any other Reified package, and no other Reified package depends on it.
 - It works with the standard F# `Result<'value,'error>`; it never wraps or replaces that type.
 - Namespace is `Reified.Result`; `Builders` is `[<AutoOpen>]`, so `open Reified.Result` brings `result` into scope.

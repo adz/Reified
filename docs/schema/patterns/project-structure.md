@@ -47,8 +47,8 @@ boundary.
 `Domain` contains refined values, private aggregates, domain errors, and named transitions. It should not know whether a
 value arrived through JSON, a database row, or a message.
 
-`Application` coordinates domain operations and declares required repositories or gateways. Its Flow environment can be
-a record of those dependencies.
+`Application` coordinates domain operations and declares required repositories or gateways. A record of those
+dependencies, passed in, is enough.
 
 `Infrastructure` implements repositories and gateways. It may use filesystem, database, HTTP, clock, and other
 operational libraries that Domain cannot reference.
@@ -70,7 +70,7 @@ let env =
       Clock = provider.GetRequiredService<IClock>() }
 ```
 
-Business workflows now state dependencies in `Flow<AppEnv, _, _>` and tests supply a record of fakes.
+Business workflows now take `AppEnv` as a parameter, and tests supply a record of fakes.
 
 ## Start smaller when appropriate
 

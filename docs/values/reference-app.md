@@ -5,8 +5,7 @@ description: Checks, result {}, parsing, and refinement in one small program.
 
 # Introductory Reference App
 
-The introductory app uses `Reified.Result`, `Reified.Constraint`, `Reified.Refinements`, and `Reified.Parse` without Schema or
-Flow.
+The introductory app uses `Reified.Result`, `Reified.Constraint`, `Reified.Refinements`, and `Reified.Parse` without Schema.
 
 ```bash
 dotnet run --project examples/Reified.ReferenceApp.Intro/Reified.ReferenceApp.Intro.fsproj --nologo
@@ -46,5 +45,5 @@ result {
 }
 ```
 
-The full reference app adds Schema for structured input, path-aware diagnostics, codecs, and contracts, then adds Flow
-for effectful application work.
+The full reference app adds Schema for structured input, path-aware diagnostics, codecs, and contracts. Effectful
+application work sits outside Reified, in the [Axial repository](https://github.com/adz/Axial).

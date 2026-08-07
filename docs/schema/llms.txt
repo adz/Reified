@@ -1,6 +1,5 @@
 # Reified Schema
-- `Reified.Schema` depends on `Reified.Data`, `Reified.Constraint`, and `Reified.Refinements`. It does not depend on `Reified.Result` or
-  Flow.
+- `Reified.Schema` depends on `Reified.Data`, `Reified.Constraint`, and `Reified.Refinements`. It does not depend on `Reified.Result`.
 - Schema owns path-aware accumulated boundary errors through `Path`, `SchemaIssue`, and `SchemaErrors`. `Reified.Constraint`
   and `Reified.Refinements` never claim path-aware accumulation; that is Schema's role.
 - Declare records with `schema<Model> { field ...; construct ... }`.

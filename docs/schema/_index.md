@@ -101,8 +101,8 @@ without checking it again — see [Trusted Construction](./trusted-construction/
 ## Related Products
 
 [Values]({{< relref "/values/" >}}) provides the reusable checks and refined values that Schema
-uses. It can also be installed and used on its own. [Flow]({{< relref "/flow/" >}}) models effects and dependencies;
-Schema does not require it.
+uses. It can also be installed and used on its own. Effects and dependencies are out of scope for Reified; they live
+in the [Axial repository](https://github.com/adz/Axial), and Schema does not require them.
 
 See [Reified.Schema](./overview/) for the core package's mental model, installation, and full guide list.
 

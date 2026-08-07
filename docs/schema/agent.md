@@ -6,7 +6,7 @@ weight: 100
 
 # For AI agents
 
-Use this section for `Reified.Schema`. It does not require Flow. Load the separate [Data agent guidance]({{< relref "/data/agent.md" >}})
+Use this section for `Reified.Schema`. Load the separate [Data agent guidance]({{< relref "/data/agent.md" >}})
 when working with source-neutral fixtures or produced output.
 
 - Start domain models with `Schema<'model>` and constructor-last declarations.
