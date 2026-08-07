@@ -12,7 +12,7 @@ Reified performs no runtime reflection in any hot path — everything is compile
 verification. That is not an optimization applied afterwards; it is an architectural rule: schemas, constructors,
 getters, checks, codecs, and service access are all explicit declarations the compiler can see, so there is nothing
 for the trimmer to remove by mistake and nothing NativeAOT cannot compile ahead of time. Where build-phase metadata
-reading exists (the bare `field _.Name` form reads a property name from the getter expression once, when the schema
+reading exists (the bare `Field.derived _.Name` form reads a property name from the getter expression once, when the schema
 value is built), it runs during schema construction, never per parsed or encoded value — and the AOT probe executes it
 natively to prove it.
 
@@ -54,7 +54,7 @@ The quotation-based bare field form is also .NET-only:
 
 ```fsharp
 // .NET: derives the wire name "email" from the property quotation
-field _.Email
+Field.derived _.Email
 
 // .NET and Fable: declares the wire name directly
 field "email" _.Email

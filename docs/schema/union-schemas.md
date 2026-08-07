@@ -24,7 +24,7 @@ Each case supplies a tag, a constructor, a payload extractor, and a payload sche
 ```fsharp
 open Reified.Refinements
 open Reified.Schema
-open type Reified.Schema.Syntax
+open Reified.Schema.Syntax
 
 type CardDetails =
     {
@@ -56,7 +56,6 @@ The extractor is what lets validation and metadata/codecs inspect an existing tr
 Union value schemas are ordinary `Schema<'value>` values, so select one inside the field block:
 
 ```fsharp
-open type Reified.Schema.Syntax
 type Checkout =
     {
         Payment: Payment

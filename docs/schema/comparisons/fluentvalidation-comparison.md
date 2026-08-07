@@ -36,7 +36,6 @@ intermediate invalid object:
 
 ```fsharp
 open Reified.Schema.Syntax
-open type Reified.Schema.Syntax
 let customerSchema =
     schema<Customer> {
         field "name" _.Name {

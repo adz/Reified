@@ -14,6 +14,7 @@ open Reified.Constraint
 open Reified.Parse
 open Reified.Refinements
 open Reified.Result
+open Reified.Result.Syntax
 
 type QuantityError =
     | InvalidInteger of ParseError

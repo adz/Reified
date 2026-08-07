@@ -376,22 +376,6 @@ type FieldBuilder<'model, 'target> internal (name: string, getter: 'model -> 'ta
         : FieldDeclaration<'model, 'target> =
         invalidOp $"Field '{field.Initial.Name}' has an unfinished raw schema."
 
-#if !FABLE_COMPILER
-[<AutoOpen>]
-module SyntaxExtensions =
-    type Syntax with
-        /// <summary>Declares a field from a property getter and derives its camel-cased wire name.</summary>
-        static member field
-            ([<ReflectedDefinition(includeValue = true)>] getter: Expr<'model -> 'value>)
-            : FieldBuilder<'model, 'value> =
-            let name, get = Syntax.DerivedField getter
-            FieldBuilder(name, get)
-
-        /// <summary>Declares a field with an explicit wire name.</summary>
-        static member field(name: string) : (('model -> 'value) -> FieldBuilder<'model, 'value>) =
-            fun getter -> FieldBuilder(name, getter)
-#endif
-
 [<EditorBrowsable(EditorBrowsableState.Never)>]
 type FieldStep<'model, 'value> internal (definition: FieldDefinition<'model, 'value>) =
     member internal _.Definition = definition
@@ -615,13 +599,28 @@ type SchemaBuilder<'model>() =
 
         SchemaBuilderInternals.close plan.Constructor fields plan.Finish
 
-/// <summary>Record-schema computation-expression vocabulary.</summary>
-[<AutoOpen>]
-module SchemaCE =
+/// <summary>
+/// The concise schema-definition vocabulary: the record computation expression, its field and constructor
+/// forms, and the collection-schema operations.
+/// </summary>
+/// <remarks>
+/// <para>
+/// Optional and opt-in, in the same shape as <c>Reified.Data.Syntax</c> and <c>Reified.Constraint.Syntax</c>:
+/// <c>open Reified.Schema</c> for <c>Schema</c>, then <c>open Reified.Schema.Syntax</c> for this vocabulary.
+/// </para>
+/// <para>
+/// There is no constraint catalogue here. One <c>Constraint</c> vocabulary serves direct checking, refinement,
+/// and Schema, so a field block reaches for <c>Constraint.email</c> or an opened
+/// <c>Reified.Constraint.Syntax</c> exactly as standalone code does. Boundary supply is Schema-owned and stays
+/// here as <c>mustSupply</c> and <c>mayOmit</c>.
+/// </para>
+/// </remarks>
+module Syntax =
     /// <summary>Record-schema computation expression.</summary>
     let schema<'model> = SchemaBuilder<'model>()
 
     /// <summary>Declares a field with an explicit wire name.</summary>
+    /// <example><code>field "emailAddress" _.Email</code></example>
     let field (name: string) (getter: 'model -> 'value) =
         if isNull name then nullArg (nameof name)
         if isNull (box getter) then nullArg (nameof getter)
@@ -637,11 +636,35 @@ module SchemaCE =
         if isNull (box constructor) then nullArg (nameof constructor)
         CheckedConstructorStep<'model, 'constructor>(constructor)
 
+    /// <summary>Adds a constraint to every item described by a list schema.</summary>
+    /// <example><code>Schema.list () |> constrainItems Constraint.present</code></example>
+    let constrainItems (constraint': Constraint<'item>) (schema: Schema<'item list>) : Schema<'item list> =
+        if isNull constraint' then nullArg (nameof constraint')
+        SchemaCore.constrainItems constraint' schema
+
+    /// <summary>Adds a constraint to every value described by a string-keyed map schema.</summary>
+    /// <example><code>Schema.map () |> constrainValues Constraint.present</code></example>
+    let constrainValues (constraint': Constraint<'item>) (schema: Schema<Map<string, 'item>>) : Schema<Map<string, 'item>> =
+        if isNull constraint' then nullArg (nameof constraint')
+        SchemaCore.constrainValues constraint' schema
+
 #if !FABLE_COMPILER
-    /// <summary>Declares a field from a bare property getter and derives its camel-cased wire name.</summary>
-    let fieldFromGetter
-        ([<ReflectedDefinition(includeValue = true)>] getter: Expr<'model -> 'value>)
-        =
-        let name, get = Syntax.DerivedField getter
-        FieldBuilder<'model, 'value>(name, get)
+    /// <summary>
+    /// The derived-name field form.
+    /// </summary>
+    /// <remarks>
+    /// This is a type rather than another <c>let</c> in this module because capturing <c>_.Email</c> as a
+    /// quotation needs <c>ReflectedDefinition</c> auto-quotation, which F# applies to method parameters only.
+    /// Opening this module brings <c>Field</c> into scope, so no <c>open type</c> is required.
+    /// </remarks>
+    [<Sealed; AbstractClass>]
+    type Field =
+
+        /// <summary>Declares a field from a bare property getter, deriving its camel-cased wire name from the
+        /// property. Explicit <c>field</c> names are never transformed; the camelCase policy applies only to
+        /// names derived here.</summary>
+        /// <example><code>Field.derived _.Email  // wire name "email"</code></example>
+        static member derived([<ReflectedDefinition(includeValue = true)>] getter: Expr<'model -> 'value>) =
+            let name, get = GetterName.split getter
+            FieldBuilder<'model, 'value>(name, get)
 #endif

@@ -166,46 +166,19 @@ module internal ShapeOps =
             invalidArg (nameof draft) "Schema.admit expects a model schema; refine value schemas with Schema.refine."
         | PendingDefinition -> invalidArg (nameof draft) "Expected a completed schema definition."
 
-/// <summary>
-/// Collection-schema operations used inside schema definitions.
-/// </summary>
-/// <remarks>
-/// There is no constraint catalogue here. One <c>Constraint</c> vocabulary serves direct checking, refinement,
-/// and Schema, so a field block reaches for <c>Constraint.email</c> or an opened <c>ConstraintDSL</c> exactly as
-/// standalone code does. Boundary supply is Schema-owned and stays here as <c>mustSupply</c> and <c>mayOmit</c>.
-/// </remarks>
-module Syntax =
-    /// <summary>Adds a constraint to every item described by a list schema.</summary>
-    /// <example><code>Schema.list () |> Syntax.constrainItems Constraint.present</code></example>
-    let constrainItems (constraint': Constraint<'item>) (schema: Schema<'item list>) : Schema<'item list> =
-        if isNull constraint' then nullArg (nameof constraint')
-        SchemaCore.constrainItems constraint' schema
-
-    /// <summary>Adds a constraint to every value described by a string-keyed map schema.</summary>
-    /// <example><code>Schema.map () |> Syntax.constrainValues Constraint.present</code></example>
-    let constrainValues (constraint': Constraint<'item>) (schema: Schema<Map<string, 'item>>) : Schema<Map<string, 'item>> =
-        if isNull constraint' then nullArg (nameof constraint')
-        SchemaCore.constrainValues constraint' schema
-
 #if !FABLE_COMPILER
-/// <summary>
-/// The bare-getter field form: <c>open type Reified.Schema.Syntax</c> brings an overloaded <c>field</c>
-/// into scope that accepts either a name and getter (like the module form) or a bare property getter
-/// such as <c>field _.Name</c>, deriving the wire name from the property (camelCased). Explicit names
-/// are never transformed; the camelCase policy applies only to derived names.
-/// </summary>
-[<Sealed; AbstractClass>]
-type Syntax =
+[<RequireQualifiedAccess>]
+module internal GetterName =
 
     /// <summary>Splits a property-access getter quotation into a derived (camelCased) wire name and the
-    /// compiled getter. Infrastructure for the bare <c>field</c> form; not intended for direct use.</summary>
-    static member DerivedField(getter: Expr<'model -> 'value>) : string * ('model -> 'value) =
+    /// compiled getter. Infrastructure for the <c>derivedField</c> form.</summary>
+    let split (getter: Expr<'model -> 'value>) : string * ('model -> 'value) =
         match getter :> Expr with
         | WithValue(value, _, Lambda(_, PropertyGet(Some(Var _), property, []))) ->
             ShapeInternals.camelCase property.Name, (value :?> ('model -> 'value))
         | _ ->
             invalidArg
                 (nameof getter)
-                "The bare field form requires a property getter such as `_.Name`; use `field \"name\" getter` for anything else."
+                "The derived field form requires a property getter such as `_.Name`; use `field \"name\" getter` for anything else."
 
 #endif

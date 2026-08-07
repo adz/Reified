@@ -6,6 +6,17 @@ description: Record fields, field blocks, canonical schemas, and checked constru
 
 # Schema Syntax
 
+Every Reified package puts its concise vocabulary behind one opt-in module named `Syntax`, so the preamble is always
+the same two lines: the package namespace, then its `Syntax`.
+
+```fsharp
+open Reified.Schema
+open Reified.Schema.Syntax
+```
+
+The same shape applies to `Reified.Data.Syntax`, `Reified.Constraint.Syntax`, and `Reified.Result.Syntax`. Nothing is
+auto-opened and no `open type` is needed; if a name below is not in scope, the second line is missing.
+
 A record schema is one constructor-last computation expression:
 
 ```fsharp
@@ -34,7 +45,7 @@ static `Schema` member.
 On .NET, a quotation can supply the default wire name:
 
 ```fsharp
-field _.Name
+Field.derived _.Name
 ```
 
 Use the explicit form in portable code:
@@ -148,7 +159,7 @@ Use `Schema.defer` where a field refers back to the schema being defined:
 ```fsharp
 let rec schema : Lazy<Schema<Category>> =
     lazy (
-        SchemaCE.schema<Category> {
+        Syntax.schema<Category> {
             field "name" _.Name
             field "children" _.Children {
                 withSchema (Schema.listWith (Schema.defer schema))

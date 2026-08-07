@@ -34,7 +34,7 @@ dotnet add package Reified.Data
 
 ```fsharp
 open Reified.Data
-open Data.Syntax
+open Reified.Data.Syntax
 
 let baseline =
     data [
@@ -85,7 +85,7 @@ is an object; a list containing ordinary values is a list.
 
 ```fsharp
 open Reified.Data
-open Data.Syntax
+open Reified.Data.Syntax
 
 let person = data [ "name" => "Ada"; "active" => true ]
 let roles = [ "author"; "admin" ]

@@ -10,11 +10,12 @@ open System.IO
 open System.Reflection
 open System.Threading.Tasks
 open Reified.Result
+open Reified.Result.Syntax
 open Reified.Constraint
 open Reified.Refinements
 open Reified.Schema
 open Reified.Schema.Syntax
-open Reified.Constraint.ConstraintDSL
+open Reified.Constraint.Syntax
 open Swensen.Unquote
 open Microsoft.FSharp.Reflection
 open Xunit
@@ -523,14 +524,25 @@ module ApiShapeTests =
         |> publicStaticMemberNames
         |> assertContainsAll [ "packageName" ]
 
-        // There is exactly one value-rule vocabulary. Schema publishes no constraint catalogue of its own:
+        // One opt-in door per package: Reified.Schema.Syntax carries the whole schema-definition vocabulary,
+        // matching Reified.Data.Syntax, Reified.Constraint.Syntax, and Reified.Result.Syntax.
+        //
+        // There is still exactly one value-rule vocabulary. Schema publishes no constraint catalogue of its own:
         // the field-block syntax carries only collection adapters, and supply, which is Schema's concern.
         let syntaxMembers =
-            moduleTypeFromAssembly "Reified.Schema" "Reified.Schema.SyntaxModule"
+            moduleTypeFromAssembly "Reified.Schema" "Reified.Schema.Syntax"
             |> publicStaticMemberNames
             |> Set.filter (fun name -> not (name.Contains "$"))
 
-        test <@ syntaxMembers = set [ "constrainItems"; "constrainValues" ] @>
+        test
+            <@
+                syntaxMembers = set [ "schema"
+                                      "field"
+                                      "construct"
+                                      "constructResult"
+                                      "constrainItems"
+                                      "constrainValues" ]
+            @>
 
         let schemaAssemblyTypeNames =
             schemaAssembly.GetTypes()
@@ -1249,7 +1261,7 @@ module ApiShapeTests =
 
         // The DSL is optional vocabulary over the same values, with the documented collision omissions.
         let dslMembers =
-            moduleTypeFromAssembly "Reified.Constraint" "Reified.Constraint.ConstraintDSL"
+            moduleTypeFromAssembly "Reified.Constraint" "Reified.Constraint.Syntax"
             |> publicStaticMemberNames
             |> Set.filter (fun name -> not (name.Contains "$"))
 

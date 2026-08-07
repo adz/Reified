@@ -2,6 +2,7 @@
 
 open Reified.Data
 open Reified.Schema
+open Reified.Schema.Syntax
 
 type Person = { Name: string; Age: int }
 

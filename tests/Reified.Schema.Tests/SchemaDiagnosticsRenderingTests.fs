@@ -7,7 +7,7 @@ open Reified.Constraint
 open Reified.Schema
 open Xunit
 open Reified.Schema.Syntax
-open Reified.Constraint.ConstraintDSL
+open Reified.Constraint.Syntax
 open Swensen.Unquote
 
 module SchemaDiagnosticsRenderingTests =

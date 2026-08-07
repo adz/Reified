@@ -1,4 +1,5 @@
 open Reified.Result
+open Reified.Result.Syntax
 
 [<EntryPoint>]
 let main _ =

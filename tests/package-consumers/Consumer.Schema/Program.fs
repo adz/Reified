@@ -5,6 +5,7 @@
 open Reified.Constraint
 open Reified.Data
 open Reified.Schema
+open Reified.Schema.Syntax
 
 type Signup = { Email: string; Age: int }
 

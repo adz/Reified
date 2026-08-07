@@ -11,6 +11,19 @@ Keep one representative baseline and describe each test case as a strict immutab
 
 The four functions on this page are `variant`, `variants`, `dimension`, and `matrix`.
 
+```fsharp
+open Reified.Data
+open Reified.Data.Syntax
+
+let baseline =
+    data [
+        "name" => "Ada"
+        "plan" => "free"
+        "region" => "au"
+        "roles" => [ "author" ]
+    ]
+```
+
 ## The three types
 
 Case generation moves through three small record types.
@@ -45,19 +58,6 @@ The value is a plain `Data`, so anything on the rest of these pages — `Data.pa
 ```fsharp
 for case in cases do
     test case.Name (fun () -> case.Value |> submit |> matching [ at "status" "rejected" ])
-```
-
-```fsharp
-open Reified.Data
-open Data.Syntax
-
-let baseline =
-    data [
-        "name" => "Ada"
-        "plan" => "free"
-        "region" => "au"
-        "roles" => [ "author" ]
-    ]
 ```
 
 ## Build independent cases

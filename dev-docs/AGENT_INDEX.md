@@ -22,7 +22,7 @@ Working on `src/Reified.Schema`? Read `dev-docs/schema/internals.md` first (impl
   transitive, so an umbrella dependency would install the targets without running them.
 - `Reified.Result` (`src/Reified.Result/`): generic Result combinators, conversions/extraction helpers, and `result { }`
   in the `Reified.Result` namespace. Independent leaf.
-- `Reified.Constraint` (`src/Reified.Constraint/`): `Constraint<'value>`, `Violation`, the `ConstraintDescription` read model, and `ConstraintDSL`, all in the `Reified.Constraint` namespace. One value-rule vocabulary; there is no `Check` type and no second catalogue.
+- `Reified.Constraint` (`src/Reified.Constraint/`): `Constraint<'value>`, `Violation`, the `ConstraintDescription` read model, and `Syntax`, all in the `Reified.Constraint` namespace. One value-rule vocabulary; there is no `Check` type and no second catalogue.
   Returns the standard F# `Result` type; does not depend on `Reified.Result`. Independent leaf.
 - `Reified.Parse` (`src/Reified.Parse/`): `ParseError` and primitive `Parse.*` functions. Independent leaf.
 - `Reified.Refinements` (`src/Reified.Refinements/`): invariant-carrying types and the operations that justify them. Depends

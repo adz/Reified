@@ -1,20 +1,20 @@
 ---
 weight: 10
-title: Constraint DSL
+title: Constraint syntax
 type: docs
 description: Write concise constraint modules and adapt results without depending on Reified.Result.
 ---
 
-# Constraint DSL
+# Constraint syntax
 
-`Reified.Constraint.ConstraintDSL` exposes the common constructors without the `Constraint.` prefix. Open it locally
+`Reified.Constraint.Syntax` exposes the common constructors without the `Constraint.` prefix. Open it locally
 where a module's purpose already makes the context clear:
 
 ```fsharp
 open Reified.Constraint
 
 module SignupRules =
-    open Reified.Constraint.ConstraintDSL
+    open Reified.Constraint.Syntax
 
     let name : Constraint<string> =
         Constraint.all [ present; minLength 2; maxLength 80 ]
@@ -115,7 +115,7 @@ live here because `Reified.Constraint` does not depend on `Reified.Result`, so a
 and finish with the application's own error type without adding a package reference:
 
 ```fsharp
-open Reified.Constraint.ConstraintDSL
+open Reified.Constraint.Syntax
 
 let requiredName (value: string) =
     value |> guard present |> orError NameRequired

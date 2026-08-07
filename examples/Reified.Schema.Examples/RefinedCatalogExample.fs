@@ -4,8 +4,9 @@ open Reified.Parse
 
 open System
 open Reified.Result
+open Reified.Result.Syntax
 open Reified.Constraint
-open Reified.Constraint.ConstraintDSL
+open Reified.Constraint.Syntax
 open Reified.Refinements
 
 // Slug is no longer a catalogue entry: it carries no invariant past the boundary, so it

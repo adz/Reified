@@ -21,7 +21,7 @@ type ProfileV1 =
 module ProfileV1 =
 
     open Reified.Schema.Syntax
-    open Reified.Constraint.ConstraintDSL
+    open Reified.Constraint.Syntax
 
     /// The schema declared by profile.contract (Profile.v1).
     let schema : Schema<ProfileV1> =
@@ -63,7 +63,7 @@ type Profile =
 module Profile =
 
     open Reified.Schema.Syntax
-    open Reified.Constraint.ConstraintDSL
+    open Reified.Constraint.Syntax
 
     /// The schema declared by profile.contract (Profile.v2).
     let schema : Schema<Profile> =

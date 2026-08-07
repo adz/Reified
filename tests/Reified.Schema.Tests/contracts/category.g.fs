@@ -23,11 +23,11 @@ type Category =
 module Category =
 
     open Reified.Schema.Syntax
-    open Reified.Constraint.ConstraintDSL
+    open Reified.Constraint.Syntax
 
     /// The schema declared by category.contract (Category.v1).
     let rec schema : Schema<Category> =
-        SchemaCE.schema<Category> {
+        Syntax.schema<Category> {
             field "name" (fun (value: Category) -> value.Name) {
                 withSchema (Schema.text |> Schema.describe "Stable display name.")
                 constrain (minLength 1)

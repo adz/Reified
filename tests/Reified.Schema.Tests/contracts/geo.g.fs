@@ -21,7 +21,7 @@ type Geo =
 module Geo =
 
     open Reified.Schema.Syntax
-    open Reified.Constraint.ConstraintDSL
+    open Reified.Constraint.Syntax
 
     /// The schema declared by geo.contract (Geo.v1).
     let schema : Schema<Geo> =

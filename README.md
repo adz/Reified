@@ -35,7 +35,7 @@ A schema describes how structured input becomes a model. It returns the typed va
 
 ```fsharp
 open Reified.Constraint
-open Reified.Constraint.ConstraintDSL
+open Reified.Constraint.Syntax
 open Reified.Schema
 open Reified.Schema.Syntax
 

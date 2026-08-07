@@ -43,7 +43,7 @@
     <Compile Include="ConstraintDescription.fs" />
     <Compile Include="Predicates.fs" />
     <Compile Include="Constraint.fs" />
-    <Compile Include="ConstraintDSL.fs" />
+    <Compile Include="Syntax.fs" />
   </ItemGroup>
 
 </Project>

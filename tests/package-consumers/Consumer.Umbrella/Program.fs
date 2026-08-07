@@ -8,6 +8,7 @@ open Reified.Parse
 open Reified.Refinements
 open Reified.Result
 open Reified.Schema
+open Reified.Schema.Syntax
 open Reified.Schema.Http
 open Reified.Schema.Json
 

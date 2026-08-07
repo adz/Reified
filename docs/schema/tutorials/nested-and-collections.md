@@ -14,7 +14,6 @@ own their canonical schemas, so `Order` can infer both the nested field and the 
 ```fsharp
 open Reified.Schema
 open Reified.Schema.Syntax
-open type Reified.Schema.Syntax
 
 type Address =
     { Street: string; City: string }

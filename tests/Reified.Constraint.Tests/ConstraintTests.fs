@@ -741,7 +741,7 @@ module ConstraintTests =
         // is exactly the collision the DSL documents; the alias keeps both available.
         let inline assertThat (assertion: Quotations.Expr<bool>) = test assertion
 
-        open Reified.Constraint.ConstraintDSL
+        open Reified.Constraint.Syntax
 
         [<Fact>]
         let ``the DSL yields the same values the qualified names return`` () =

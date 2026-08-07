@@ -14,6 +14,8 @@ branch, an option, or a guard from the code downstream.
 open System
 open Reified.Constraint
 open Reified.Refinements
+open Reified.Result
+open Reified.Result.Syntax
 ```
 
 ## Model the domain

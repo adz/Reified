@@ -14,7 +14,7 @@ open Reified.Schema
 module WorkspaceCardV1 =
 
     open Reified.Schema.Syntax
-    open Reified.Constraint.ConstraintDSL
+    open Reified.Constraint.Syntax
 
     /// The schema declared by workspace.fs (WorkspaceCard.v1).
     let schema : Schema<WorkspaceCardV1> =
@@ -47,7 +47,7 @@ module WorkspaceCardV1 =
 module WorkspaceCard =
 
     open Reified.Schema.Syntax
-    open Reified.Constraint.ConstraintDSL
+    open Reified.Constraint.Syntax
 
     let private visibilityCases =
         [ EnumCase.create "private" Visibility.Private

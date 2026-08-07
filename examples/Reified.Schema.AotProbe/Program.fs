@@ -1,7 +1,7 @@
 open System
 open Reified.Constraint
 open Reified.Schema
-open type Reified.Schema.Syntax
+open Reified.Schema.Syntax
 
 type ProbeFailure(message: string) =
     inherit Exception(message)
@@ -64,10 +64,10 @@ let probeBareGetterFields () =
     // pattern-match and the compiled-getter extraction both survive native AOT.
     let schema =
         schema<SchemaContact> {
-            field _.Name {
+            Field.derived _.Name {
                 constrain (Constraint.minLength 1)
             }
-            field _.Age
+            Field.derived _.Age
             construct (fun name age -> { Name = name; Age = age })
         }
 

@@ -33,7 +33,7 @@ type Signup =
 module Signup =
 
     open Reified.Schema.Syntax
-    open Reified.Constraint.ConstraintDSL
+    open Reified.Constraint.Syntax
 
     let private planCases =
         [ EnumCase.create "free" SignupPlan.Free

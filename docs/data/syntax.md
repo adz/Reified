@@ -2,18 +2,18 @@
 weight: 18
 title: Explicit API and concise syntax
 type: docs
-description: The complete Data.Syntax vocabulary, its explicit equivalents, and a full example without opening it.
+description: The complete Reified.Data.Syntax vocabulary, its explicit equivalents, and a full example without opening it.
 ---
 
 # Explicit API and concise syntax
 
-`Data.Syntax` is optional. It supplies short names and the `=>` and `?=>` operators. The underlying construction and
+`Reified.Data.Syntax` is optional. It supplies short names and the `=>` and `?=>` operators. The underlying construction and
 editing API remains available through `Data` and `DataEdit`.
 
-## Without opening Data.Syntax
+## Without opening Reified.Data.Syntax
 
 This example declares nested data, omits an optional field, applies an atomic patch, and renders the result without
-opening `Data.Syntax`:
+opening `Reified.Data.Syntax`:
 
 ```fsharp
 open Reified.Data
@@ -51,11 +51,11 @@ For a single edit, apply the direct `Data` operation instead:
 customer |> Data.replace "name" "Grace"
 ```
 
-## The same example with Data.Syntax
+## The same example with Reified.Data.Syntax
 
 ```fsharp
 open Reified.Data
-open Data.Syntax
+open Reified.Data.Syntax
 
 let customer =
     data [
@@ -98,10 +98,10 @@ let request =
 `set` makes the final path contain the value, adding a missing final object field when necessary. `replace` requires
 the target to exist, so a misspelled or unexpectedly absent path fails.
 
-The matching and case-generation names also live in `Data.Syntax`. Without opening it, qualify them as
-`Data.Syntax.at`, `Data.Syntax.containing`, `Data.Syntax.variant`, and so on.
+The matching and case-generation names also live in `Reified.Data.Syntax`. Without opening it, qualify them as
+`Reified.Data.Syntax.at`, `Reified.Data.Syntax.containing`, `Reified.Data.Syntax.variant`, and so on.
 
-## Remaining Data.Syntax names
+## Remaining Reified.Data.Syntax names
 
 | Area | Names |
 | --- | --- |

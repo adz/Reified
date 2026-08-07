@@ -4,6 +4,7 @@ open Reified.Constraint
 open Reified.Data
 open Reified.Refinements
 open Reified.Schema
+open Reified.Schema.Syntax
 open Reified.Schema.Json
 open Swensen.Unquote
 open Xunit

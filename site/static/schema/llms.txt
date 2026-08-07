@@ -5,9 +5,9 @@
   and `Reified.Refinements` never claim path-aware accumulation; that is Schema's role.
 - Declare records with `schema<Model> { field ...; construct ... }`.
 - `field "wire-name" _.Member` resolves the member type's canonical schema.
-- `field _.Member` derives the wire name from a quotation and is .NET-only. Use explicit names for Fable.
+- `Field.derived _.Member` derives the wire name from a quotation and is .NET-only. Use explicit names for Fable.
 - Constraints are `Reified.Constraint.Constraint<'value>`; `Schema.constrain` takes the same value you check directly.
-- Open `Reified.Constraint.ConstraintDSL` for the unqualified constraint vocabulary; `Reified.Schema.Syntax` holds only collection adapters.
+- Open `Reified.Constraint.Syntax` for the unqualified constraint vocabulary; `Reified.Schema.Syntax` holds only collection adapters.
 - A field block may contain `withSchema`, `constrain`, `constraints`, `refine`, and `validate`.
 - `withSchema` sets the current field schema.
 - `constrain` adds one portable constraint. `constraints [ ... ]` adds several in declaration order.
@@ -23,7 +23,7 @@
 - `Schema.refine refinement`, `Schema.constrain constraint`, and `Schema.validate function` remain plain functions for
   standalone reusable schemas.
 - A contributed refined type can expose a static canonical `Schema` member, making a plain field declaration enough.
-- `SchemaCE.schema` is only needed when a recursive binding named `schema` shadows the builder. Keep `field` and
+- `Syntax.schema` is only needed when a recursive binding named `schema` shadows the builder. Keep `field` and
   `construct` unqualified.
 
 Golden path:

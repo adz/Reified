@@ -22,7 +22,6 @@ dotnet add package Reified.Schema
 open Reified.Data
 open Reified.Schema
 open Reified.Schema.Syntax
-open type Reified.Schema.Syntax
 ```
 
 ## 1. Plain fields
@@ -37,15 +36,15 @@ type Signup =
 
 let signupSchema =
     schema<Signup> {
-        field _.Email
-        field _.Age
-        field _.Newsletter
+        Field.derived _.Email
+        Field.derived _.Age
+        Field.derived _.Newsletter
         construct (fun email age newsletter ->
             { Email = email; Age = age; Newsletter = newsletter })
     }
 ```
 
-`field _.Email` gives the getter and nothing more. The field's value schema comes from its type — `string` resolves
+`Field.derived _.Email` gives the getter and nothing more. The field's value schema comes from its type — `string` resolves
 `Schema.text`, `int` resolves `Schema.int`, `bool` resolves `Schema.bool` — and the wire name is the camelCased
 property name. `construct` receives the fields in declaration order; the compiler checks its argument types and its
 result.
@@ -177,9 +176,9 @@ type Registration =
 
 let registrationSchema =
     schema<Registration> {
-        field _.Owner
-        field _.Seats
-        field _.Aliases
+        Field.derived _.Owner
+        Field.derived _.Seats
+        Field.derived _.Aliases
         construct (fun owner seats aliases ->
             { Owner = owner; Seats = seats; Aliases = aliases })
     }
@@ -236,11 +235,11 @@ type Profile =
 
 let profileSchema =
     schema<Profile> {
-        field _.DisplayName {
+        Field.derived _.DisplayName {
             constraints [ present; maxLength 40 ]
         }
 
-        field _.Age {
+        Field.derived _.Age {
             constrain (between 13 120)
         }
 
@@ -248,7 +247,7 @@ let profileSchema =
     }
 ```
 
-A field block is the expanded form of `field _.DisplayName`. `constrain` adds one; `constraints` adds a list.
+A field block is the expanded form of `Field.derived _.DisplayName`. `constrain` adds one; `constraints` adds a list.
 
 Constraints reach the interpreters just as refinements do:
 

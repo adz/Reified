@@ -8,7 +8,7 @@ open Reified.Schema.Testing
 open FsCheck.FSharp
 open Xunit
 open Reified.Schema.Syntax
-open Reified.Constraint.ConstraintDSL
+open Reified.Constraint.Syntax
 open Swensen.Unquote
 
 module SchemaGenTests =

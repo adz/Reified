@@ -330,7 +330,7 @@ let pageSpecs = [
         SymbolIds = [
             "Core types", ["T:Reified.Schema.Schema`1"; "T:Reified.Schema.Field`2"; "T:Reified.Schema.UnionCase`1"]
             "Catalog", ["P:Reified.Schema.Schema.text"; "P:Reified.Schema.Schema.int"; "P:Reified.Schema.Schema.decimal"; "P:Reified.Schema.Schema.bool"; "P:Reified.Schema.Schema.dateTime"; "P:Reified.Schema.Schema.guid"; "M:Reified.Schema.Schema.list"; "M:Reified.Schema.Schema.option"; "M:Reified.Schema.Schema.constrain"; "M:Reified.Schema.Schema.constrainAll"; "M:Reified.Schema.Schema.mustSupply"; "M:Reified.Schema.Schema.mayOmit"; "M:Reified.Schema.Schema.refine"; "M:Reified.Schema.Schema.validate"; "M:Reified.Schema.Schema.union"; "M:Reified.Schema.UnionCase.create"; "T:Reified.Schema.Supply"]
-            "Record builder", ["P:Reified.Schema.SchemaCE.schema"; "M:Reified.Schema.SchemaCE.field"; "M:Reified.Schema.SchemaCE.construct"; "M:Reified.Schema.SchemaCE.constructResult"]
+            "Record builder", ["P:Reified.Schema.Syntax.schema"; "M:Reified.Schema.Syntax.field"; "M:Reified.Schema.Syntax.construct"; "M:Reified.Schema.Syntax.constructResult"]
             "Inspection", ["T:Reified.Schema.SchemaShape"; "T:Reified.Schema.SchemaDescription"; "T:Reified.Schema.FieldDescription"; "T:Reified.Schema.ModelDescription"; "T:Reified.Schema.UnionDescription"; "T:Reified.Schema.UnionCaseDescription"; "M:Reified.Schema.Inspect.model"; "M:Reified.Schema.Inspect.schema"; "M:Reified.Schema.Inspect.field"]
             "JSON Schema generation", ["M:Reified.Schema.JsonSchema.generate"; "M:Reified.Schema.JsonSchema.generateValue"]
             "Schema derivation attributes (read by schemagen at generation time)", ["T:Reified.Schema.Derive.DeriveSchemaAttribute"; "T:Reified.Schema.Derive.SchemaNameAttribute"; "T:Reified.Schema.Derive.DeriveUnionAttribute"; "T:Reified.Schema.Derive.SchemaConstructorAttribute"; "T:Reified.Schema.Derive.PatternAttribute"; "T:Reified.Schema.Derive.MinAttribute"; "T:Reified.Schema.Derive.MaxAttribute"; "T:Reified.Schema.Derive.LengthAttribute"; "T:Reified.Schema.Derive.LengthBetweenAttribute"; "T:Reified.Schema.Derive.PresentAttribute"; "T:Reified.Schema.Derive.SuppliedAttribute"; "T:Reified.Schema.Derive.FormatAttribute"; "T:Reified.Schema.Derive.AtLeastAttribute"; "T:Reified.Schema.Derive.GreaterThanAttribute"; "T:Reified.Schema.Derive.AtMostAttribute"; "T:Reified.Schema.Derive.LessThanAttribute"; "T:Reified.Schema.Derive.MultipleOfAttribute"; "T:Reified.Schema.Derive.DistinctAttribute"; "T:Reified.Schema.Derive.EmailAttribute"; "T:Reified.Schema.Derive.DefaultAttribute"]
@@ -426,7 +426,7 @@ let pageSpecs = [
             "Extraction helpers", ["M:Reified.Result.Result.someOr"; "M:Reified.Result.Result.noneOr"; "M:Reified.Result.Result.valueSomeOr"; "M:Reified.Result.Result.valueNoneOr"; "M:Reified.Result.Result.nullableOr"; "M:Reified.Result.Result.notNullOr"; "M:Reified.Result.Result.okOr"; "M:Reified.Result.Result.errorOr"; "M:Reified.Result.Result.headOr"]
             "Traversal", ["M:Reified.Result.Result.traverse"; "M:Reified.Result.Result.sequence"]
             "Side effects", ["M:Reified.Result.Result.tap"; "M:Reified.Result.Result.tapError"]
-            "Builder", ["P:Reified.Result.Builders.result"]
+            "Builder", ["P:Reified.Result.Syntax.result"]
         ]
         Alias = None
     }

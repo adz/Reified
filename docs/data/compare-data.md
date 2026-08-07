@@ -11,7 +11,7 @@ Use exact comparison when every field and item belongs to the expected result.
 
 ```fsharp
 open Reified.Data
-open Data.Syntax
+open Reified.Data.Syntax
 
 let expected = data [ "name" => "Ada"; "plan" => "pro" ]
 let actual = data [ "name" => "Ada"; "plan" => "free"; "extra" => true ]

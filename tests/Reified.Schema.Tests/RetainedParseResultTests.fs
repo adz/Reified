@@ -4,7 +4,7 @@ open Reified.Constraint
 open Reified.Data
 open Reified.Schema
 open Reified.Schema.Syntax
-open Reified.Constraint.ConstraintDSL
+open Reified.Constraint.Syntax
 open Swensen.Unquote
 open Xunit
 

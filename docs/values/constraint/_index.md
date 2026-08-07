@@ -118,7 +118,7 @@ The same value facts appear at three further levels:
 Weighing this against DataAnnotations, FluentValidation, or Validus? Read
 [How it compares](./comparison/).
 
-Otherwise take the [Constraint DSL](./constraint-dsl/) for the vocabulary and how to write a rule module,
+Otherwise take the [Constraint syntax](./syntax/) for the vocabulary and how to write a rule module,
 then [Using constraints](./overview/) for composition and keeping the input, [Working with
 violations](./violations/) for rendering and inspecting failures, [Interpreted and opaque](./constraints/)
 for what makes a rule inspectable and what an escape hatch costs, and [Localization](./localization/) for

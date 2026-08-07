@@ -5,6 +5,7 @@ open Reified.Constraint
 
 open System
 open Reified.Schema
+open Reified.Schema.Syntax
 open Swensen.Unquote
 open Xunit
 

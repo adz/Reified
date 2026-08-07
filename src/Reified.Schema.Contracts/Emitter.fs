@@ -399,7 +399,7 @@ module Emitter =
             line $"module {contractTypeName} ="
             line ""
             line "    open Reified.Schema.Syntax"
-            line "    open Reified.Constraint.ConstraintDSL"
+            line "    open Reified.Constraint.Syntax"
 
             for field in caseFields do
                 line ""
@@ -464,7 +464,7 @@ module Emitter =
 
             let schemaBuilder =
                 if recursion = " rec" then
-                    "SchemaCE.schema"
+                    "Syntax.schema"
                 else
                     "schema"
 

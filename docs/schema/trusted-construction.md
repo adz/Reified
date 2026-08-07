@@ -34,7 +34,7 @@ A library can guarantee the result of its own functions. It cannot prevent a cal
 constructor:
 
 ```fsharp
-open type Reified.Schema.Syntax
+open Reified.Schema.Syntax
 type Booking =
     { Start: DateOnly
       End: DateOnly }
@@ -91,7 +91,6 @@ The schema participates in that construction; it is not the sole guardian.
 Use a private aggregate representation when every value must satisfy a relationship between fields:
 
 ```fsharp
-open Reified.Schema.Syntax
 type Booking =
     private
         { Start: DateOnly
@@ -127,7 +126,6 @@ A draft is a public record whose only job is to be assembled and edited freely b
 aggregate a draft type, and make the schema's constructor the one path from draft fields to the domain type:
 
 ```fsharp
-open Reified.Schema.Syntax
 type BookingDraft =
     { Start: DateOnly
       End: DateOnly }

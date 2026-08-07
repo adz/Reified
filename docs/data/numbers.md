@@ -12,7 +12,7 @@ JSON rendering both write that token without quotes.
 
 ```fsharp
 open Reified.Data
-open Data.Syntax
+open Reified.Data.Syntax
 ```
 
 ## Integers

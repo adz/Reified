@@ -99,6 +99,7 @@ Parsing changes representation; refinement checks an already-typed value and con
 open Reified.Constraint
 open Reified.Refinements
 open Reified.Result
+open Reified.Result.Syntax
 
 type QuantityError =
     | InvalidInteger of ParseError
