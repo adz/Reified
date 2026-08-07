@@ -1,7 +1,6 @@
 # Format Packages And The JSON Platform Runtime
 
-Status: proposed. Extracted from `project-split.md`, which now covers repository structure only. Nothing here
-depends on the repository split, and the split does not depend on any of it.
+Status: proposed and independent of everything else in flight.
 
 This covers two related questions: how representation formats are packaged, and how one JSON package serves both
 .NET and Fable without either platform paying for the other's representation.

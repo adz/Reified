@@ -12,14 +12,10 @@ Active sketches:
   under `prototypes/refined-private-record/`.
 - `architecture-guardrails.md` — proposed adopter-facing architecture guidance and a staged tooling direction for
   schema laws, compile-negative proofs, project roles, and compiled-code/public-surface audits.
-- `docs-information-architecture.md` — the split and documentation plan. The split, the rename, and the umbrella
-  package are done; the per-project documentation shape (section 5) and FsLiveDocs (section 6) are not.
+- `docs-information-architecture.md` — reorganising `./docs` into task folders, the getting-started and landing
+  page that route by symptom, and the FsLiveDocs changes that reorganisation depends on.
 - `format-and-json-runtime.md` — one package per representation format, and a
   shared schema-to-codec compiler over platform-specific .NET and Fable JSON runtimes.
-- `retire-errorhandling.md` — delete the `Reified.ErrorHandling` meta-package, promote `Reified.Result` to a
-  top-level docs entry point next to Data, and collapse Constraint, Refined, and Parse under a docs-only "Values"
-  nav group. Phase 1 (expanding Result) and the package half of Phase 4 are implemented — both meta-packages are
-  gone. The docs-tree move (Phases 2-3) is outstanding.
 - `database.md` — direction sketch for a typed relational layer (generated immutable query AST interpreted through
   Flow, building on `Schema`; its older `FieldRef` references need redesign if the idea is promoted).
 
@@ -29,7 +25,8 @@ language, `FieldReference`, `Origin`, and `ConstraintExpression.Relational` were
 rather than deferred as placeholders, so they return only when a real consumer establishes field identity,
 nesting, and proof semantics. Contract generation, versioning, and record-first
 derivation outcomes are recorded in `dev-docs/decisions/README.md`; remaining consumer-gated schema work is in
-`dev-docs/TASKS.md`.
+`dev-docs/TASKS.md`. Retiring `Reified.ErrorHandling` and promoting Result to a top-level documentation area
+is implemented, and its durable rules are in the decisions summary.
 
 Flow sketches are not kept here. FlowStream proving, transport packages, and the application gate naming
 proposal moved to the [Axial repository](https://github.com/adz/Axial) with Flow itself.
