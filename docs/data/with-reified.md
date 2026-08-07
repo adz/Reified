@@ -26,9 +26,17 @@ let input =
 let parsed = Schema.parse signupSchema input
 ```
 
-The same schema parses the same logical input regardless of source: `Data.ofJsonDocument` for a
-request body, `Data.ofNameValues` for a form post, `Data.ofCliArgs` for a command line,
-`Data.ofConfiguration` for settings. The schema never learns which one it was.
+One schema serves every source: `Data.ofJsonDocument` for a request body, `Data.ofNameValues` for a
+form post, `Data.ofCliArgs` for a command line, `Data.ofConfiguration` for settings. The schema never
+learns which one it was.
+
+What each adapter hands over is not identical, though, because the sources are not. JSON carries typed
+Booleans and numbers, while form, CLI, and configuration leaves are all text that the schema still has
+to parse. Repeated names build a list in `ofNameValues` but overwrite in `ofConfiguration`, where lists
+come from indexed key segments instead. CLI flags arrive as the text `"true"` or `"false"`. So the same
+schema will accept input from any of them, but two sources have to agree on the resulting tree, not just
+on the logical content — see
+[the adapter rules]({{< relref "/data/converting-data" >}}) for what each one produces.
 
 This is also why the builder syntax matters in tests: a fixture written with `data [ ... ]` exercises
 the identical parse path as production JSON, with no serializer in the loop.

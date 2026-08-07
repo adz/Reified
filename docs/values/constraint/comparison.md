@@ -55,7 +55,18 @@ The same declaration lowers to JSON Schema and generates test data. A predicate 
 Reified's own `Constraint.custom` escape hatch — cannot be inspected, and Reified says so rather than
 pretending otherwise.
 
-If you only ever need to answer "is this valid?", this buys you nothing and a predicate is simpler.
+If you only ever need to answer "is this valid?", the inspectability buys you nothing — but it does not cost you
+anything either. A constraint used that way is still one line, and you never have to see a `Violation`:
+
+```fsharp
+raw
+|> Constraint.guard Constraint.email
+|> Result.orError InvalidEmail
+```
+
+That returns `Result<string, SignupError>`, the same shape a hand-written predicate would give you, with the same
+amount of code. Reach for `Result.mapError InvalidEmail` instead when you want to keep the violation's facts. The
+concepts below are the price of the structured path, not of using a constraint at all.
 
 ## DataAnnotations
 
@@ -88,8 +99,16 @@ amount of machinery.
 
 **Where it differs:** validators are functions, so the message is supplied alongside the rule rather than
 derived from it, and nothing can inspect a validator afterwards. Reified's extra concepts — `Violation`,
-`Renderer`, interpreted versus opaque rules — exist to buy inspectability and derived messages. If you do
-not want those, they are cost without return.
+`Renderer`, interpreted versus opaque rules — exist to buy inspectability and derived messages.
+
+They are not, however, an entry fee. A check that ends in your own error case reads the same length in either
+library, and the Reified version leaves you a rule you can reuse in a schema or a refined type later:
+
+```fsharp
+raw
+|> Constraint.guard Constraint.email
+|> Result.orError InvalidEmail
+```
 
 ## What Reified costs you
 

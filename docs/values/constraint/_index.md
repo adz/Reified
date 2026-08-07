@@ -36,6 +36,38 @@ let retryCount : Constraint<int> =
 Nobody wrote `"expected a value between 0 and 10, but was 42"`. Change the bounds and the message changes
 with them, because it was never a separate artefact to keep in step.
 
+## When you only want your own error
+
+Plenty of code does not want a `Violation` at all. It wants a function that returns the application's own error case,
+and nothing else. `Constraint.guard` keeps the checked value, and `Result.orError` throws the violation away in favour
+of your error:
+
+```fsharp
+let validateEmail raw : Result<string, SignupError> =
+    raw
+    |> Constraint.guard Constraint.email
+    |> Result.orError InvalidEmail
+```
+
+That is the whole function. It is no longer, and no more ceremonious, than the equivalent hand-written predicate — and
+unlike the predicate, `Constraint.email` is still the same value you can later put in a refinement, a schema, or a
+JSON Schema document without rewriting the rule.
+
+`Result.orError` comes from `Reified.Result`. Without that package, `Result.mapError (fun _ -> InvalidEmail)` does the
+same thing.
+
+Reach for the structured path when the extra facts earn their keep — when you want to classify failures, render
+messages in more than one language, or report several field failures at once. Then keep the violation and
+`Result.mapError` it into a case that carries it:
+
+```fsharp
+raw
+|> Constraint.guard Constraint.email
+|> Result.mapError InvalidEmail   // InvalidEmail of Violation
+```
+
+The rest of this page is about that second path. Nothing here forces you onto it.
+
 ## The failure carries facts, not prose
 
 A `Violation` holds the failing constraint atom and, where portable, the actual value. It carries no

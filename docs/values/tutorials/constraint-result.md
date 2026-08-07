@@ -73,8 +73,21 @@ let validateAge (request: SignupRequest) =
 `guard` returns `Result<'value, Violation>`. Use `Constraint.check` when `Result<unit, Violation>` is enough, and
 `Constraint.test` when a `bool` is.
 
-Map the whole `Violation` into your own error case rather than rendering it here. It is comparable diagnostic data
-carrying the failing atom, so it survives to the boundary that decides how — and in which language — to say it.
+This tutorial keeps the `Violation` by mapping it into an error case that carries it. Do that when something later
+needs the facts — classifying the failure, rendering it in another language, or showing the value that was rejected.
+The violation is comparable diagnostic data carrying the failing atom, so it survives to the boundary that decides
+how, and in which language, to say it. Rendering it here would settle that question too early.
+
+When the application only wants its own error case, discard the violation instead with `Result.orError`:
+
+```fsharp
+let validateEmail (request: SignupRequest) =
+    request.Email
+    |> Constraint.guard email
+    |> Result.orError EmailNotValid   // a plain case, no Violation payload
+```
+
+Both styles use the same constraint values, so this is a per-call-site choice, not an architecture.
 
 ## Compose dependent results
 
