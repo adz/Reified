@@ -116,6 +116,30 @@ The errors are flattened into one list rather than nested.
 ## What it does not do
 
 The collected errors are a flat container. They carry no field names, no paths, and no indication of which binding
-produced which error — only the order they were bound in. If you are rendering a form and need to put each message
-next to its input, you need to carry that association yourself, for instance by mapping each step's error to a pair of
-field name and reason before the block collects them.
+produced which error — only the order they were bound in.
+
+If the independent bindings are fields of structured input — a form post, a request body, a configuration file — that
+association is `Schema`'s job, and it is the default next step. Declare the model once and `Schema.parse` accumulates
+every field failure with the path that produced it, keeps the raw value for redisplay, renders messages in the
+caller's language, and hands back your domain type:
+
+```fsharp
+let signupSchema =
+    schema<Signup> {
+        field _.Name { constrain Constraint.present }
+        field _.Age { constrain (Constraint.atLeast 18) }
+        construct (fun name age -> { Name = name; Age = age })
+    }
+
+Data.ofNameValues form |> Schema.parse signupSchema
+// Error carries name -> present, age -> atLeast 18
+```
+
+See [Schema getting started]({{< relref "/schema/getting-started" >}}).
+
+Staying at the Result layer is still reasonable when the failures are not really fields — independent checks in
+application code, or a small internal function whose caller just wants a list. In that case carry the association
+yourself, by mapping each step's error to a pair of field name and reason before the block collects them.
+
+The line between the two: `result.list { ... and! ... }` accumulates one group of independent bindings.
+`Schema.parse` owns accumulation at a structured boundary, with paths.
