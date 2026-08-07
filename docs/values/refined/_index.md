@@ -26,9 +26,10 @@ partial operation total, guarantee a property later operations rely on, encode a
 relationship between values, preserve an invariant across a useful family of operations,
 or remove a branch from consumers rather than only from construction.
 
-Validation that fails that test belongs in a constraint instead. Trimmed text and slugs
-carry nothing forward — concatenating two trimmed strings is not trimmed — so they are
-`Constraint.trimmed` and `Constraint.pattern` on an ordinary `string`, not types. See
+Validation that fails that test belongs in a constraint instead. Trimmed text and slugs make
+nothing later total or simpler: no operation on a string needs the ends to be free of
+whitespace, and none needs a particular pattern. So they are `Constraint.trimmed` and
+`Constraint.pattern` on an ordinary `string`, not types. See
 [When not to make a type](./catalog/#when-not-to-make-a-type).
 
 `Reified.Refinements` depends only on `Reified.Constraint`. It does not
@@ -68,7 +69,25 @@ Read the underlying value through the `Value` member or the module's `value` fun
 
 ## Where the invariant pays
 
-Contrast the same calculation over plain types and refined ones:
+Start with the smallest version of the contrast — one partial operation becoming total:
+
+```fsharp
+List.max lines            // throws on an empty list
+NonEmptyList.max lines    // total: returns the value
+```
+
+Avoiding the exception means writing the option version by hand, and then every caller
+unwraps it:
+
+```fsharp
+let tryMax lines =
+    if List.isEmpty lines then None else Some (List.max lines)
+```
+
+That option is the empty case travelling downstream. `NonEmptyList` settles it once, at
+construction, and every later caller reads a value.
+
+The same saving shows up in aggregates:
 
 ```fsharp
 // plain: every caller re-establishes what is already true

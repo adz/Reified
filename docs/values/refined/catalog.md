@@ -223,7 +223,11 @@ NonBlankString.split "," value       // NonEmptyList<NonBlankString>, never empt
 ## When not to make a type
 
 Trimmed text, slugs, email addresses, and length bounds carry no invariant that any later
-operation uses. Concatenating two trimmed strings is not trimmed; you unwrap at first use.
+operation uses. Nothing about a string becomes total or loses a branch once you know its
+ends are free of whitespace, so a wrapper would only be unwrapped at first use. That is the
+test, not closure: trimmedness happens to survive concatenation, and it still earns no type.
+Slug does not even get that far — joining two slugs can break the pattern.
+
 Express them as constraints on a primitive instead — the metadata reaching interpreters is
 identical:
 
