@@ -113,10 +113,31 @@ for field in formFields do
     render field value messages
 ```
 
-Schema's own parse and structural failures have a `schema.*` catalogue (`SchemaMessages.keys`); constraint failures
-use Reified's `constraint.*` catalogue. Both render through the same mechanics. See
-[Localization]({{< relref "/values/constraint/localization/" >}}) for the key catalogue and
+Constraint failures use Reified's `constraint.*` catalogue; Schema's own parse and structural failures have their own,
+below. Both render through the same mechanics, so one renderer covers both. See
+[Localization]({{< relref "/values/constraint/localization/" >}}) for those mechanics and
 [Adding a language]({{< relref "/values/constraint/adding-a-language/" >}}) for generating a translation.
+
+## The Schema catalogue
+
+`Reified.Schema` owns its own keys for parse, boundary-supply, and structural failures. They stay in that package —
+Schema depends on Constraint and never the reverse.
+
+| Key | Arguments | Default English |
+| --- | --- | --- |
+| `schema.omitted` | — | must be supplied |
+| `schema.blank` | — | must be present |
+| `schema.expectedScalar` | — | must be a single value |
+| `schema.expectedObject` | — | must be an object |
+| `schema.expectedMany` | — | must be a collection |
+| `schema.invalidFormat` | `expected` | must be a valid {expected} |
+| `schema.parseOutOfRange` | `target` | must be within the range of {target} |
+| `schema.unknownTag` | `choices` | must be one of {choices} |
+
+`SchemaMessages.keys`, `.arguments`, and `.english` expose the same data. Constructor failures and custom errors
+carrying authored prose have no catalogue entry: Schema does not invent a key for text your application wrote.
+
+At `Path.root`, full rendering uses `constraint.attribute.default` — "value" in English — never the document context.
 
 ## Mapping To Domain Errors
 

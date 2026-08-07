@@ -135,5 +135,7 @@ violation |> Violation.fullMessage (signup |> Renderer.attribute "name")
 attribute noun once around the whole message, for payloads and logs. `Renderer.english` needs no resources at all.
 
 `Violation.toMessageTree` remains available for a localization system that must control word order across a whole
-group. See [Localization](./localization/) for the complete key catalogue, contextual fallback, plurals, and
-advanced resolvers, and [Adding a language](./adding-a-language/) for generating a new translation.
+group. See [Localization](./localization/) for rendering, with [context and fallback](./localization/context-and-fallback/),
+[advanced rendering](./localization/advanced-rendering/) for groups and plurals, and
+[the key catalogue](./localization/catalogue/). [Adding a language](./adding-a-language/) covers generating a new
+translation.

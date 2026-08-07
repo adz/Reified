@@ -1,6 +1,5 @@
 # Reified Schema
-- `Reified.Schema` depends on `Reified.Data`, `Reified.Constraint`, and `Reified.Refinements`. It does not depend on `Reified.Result` or
-  Flow.
+- `Reified.Schema` depends on `Reified.Data`, `Reified.Constraint`, and `Reified.Refinements`. It does not depend on `Reified.Result`.
 - Schema owns path-aware accumulated boundary errors through `Path`, `SchemaIssue`, and `SchemaErrors`. `Reified.Constraint`
   and `Reified.Refinements` never claim path-aware accumulation; that is Schema's role.
 - Declare records with `schema<Model> { field ...; construct ... }`.
@@ -10,9 +9,9 @@
 - Open `Reified.Constraint.Syntax` for the unqualified constraint vocabulary; `Reified.Schema.Syntax` holds `schema`, `fieldAs`, `construct`, and collection adapters; `field` is a type reached by the same `open`.
 - A field block may contain `withSchema`, `constrain`, `constraints`, `refine`, and `validate`.
 - `withSchema` sets the current field schema.
-- `constrain` adds one portable constraint. `constraints [ ... ]` adds several in declaration order.
+- `constrain` adds one constraint. `constraints [ ... ]` adds several in declaration order.
 - `refine SomeType.refinement` is explicit. Bare `refine` resolves one canonical static `Refinement<'raw,'field>` contribution from the known current and getter types.
-- `validate` runs executable value-preserving logic over the current type. It is not portable constraint metadata.
+- `validate` runs executable value-preserving logic over the current type. It leaves no constraint metadata behind.
 - A field does not need `refine` when its schema already returns the getter type, such as `Schema.int` for `int`.
 - `construct` is total. `constructResult` runs only after all fields succeed.
 - `Schema.parse schema data` and `Schema.check schema value` return `Result<_,SchemaErrors>`.

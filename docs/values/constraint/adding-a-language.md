@@ -57,7 +57,7 @@ constraint.relation.atLeast    = doit être au moins {expected}
 constraint.cardinality.between = doit avoir une taille comprise entre {minimum} et {maximum}
 ```
 
-Placeholder names are fixed by the catalogue; the table on the [Localization](../localization/) page lists them per
+Placeholder names are fixed by the catalogue; the table in [the key catalogue](../localization/catalogue/) lists them per
 key. An unknown name renders literally rather than throwing, so a typo shows up in the message.
 
 ## 3. Translate the composition entries

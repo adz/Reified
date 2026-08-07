@@ -60,7 +60,7 @@ The enclosing description stays opaque, so reporting an interpreted leaf this wa
 Construct a `Violation` directly only when no built-in states what you mean.
 
 Descriptions are required and must be non-blank, because they are the only thing a renderer has to work with. They
-are also, by default, untranslatable — see [Localization](./localization/) for `customLocalized`, which lets you
+are also, by default, untranslatable — see [Custom rules](./localization/custom-rules/) for `customLocalized`, which lets you
 attach your own catalogue key.
 
 `Constraint.contramap` is opaque for the same reason: an arbitrary projection changes the proposition in a way no
