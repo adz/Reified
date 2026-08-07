@@ -1,6 +1,7 @@
 # Documentation tidy-up
 
-Status: review notes and repository-wide audit. Decide scope before moving items into `dev-docs/TASKS.md`.
+Status: worked through on 2026-08-08. Each section below is marked **Done** or **Open**; the open ones are the
+items that need a decision or a consumer, not the ones nobody got to.
 
 ## Aim
 
@@ -16,6 +17,9 @@ stand alone, but should point to the domain-model path instead of leaving the re
 ## Notes from the review
 
 ### Data conversion adapters need executable input/output examples
+
+**Done.** `docs/data/converting-data.md` now documents the CLI, configuration, and name/value grammars with worked
+input and output, and ends by handing off to `Schema.parse`.
 
 `docs/data/converting-data.md` lists `Data.ofCliArgs`, `Data.ofConfiguration`, and related adapters, but the table does not
 explain their accepted grammar or resulting `Data` shape.
@@ -42,6 +46,11 @@ own domain mapping, but its guide should not leave the reader wondering how to g
 
 ### Data matching should be checked against the Constraint vocabulary
 
+**Done — settled as "keep them separate".** `Reified.Data` is a dependency-free leaf, and accepting `Constraint<'value>`
+would make it depend on `Reified.Constraint` for something only test code wants. A pattern asks about a `Data` shape;
+a constraint asks about an extracted typed value. Recorded in `dev-docs/decisions/README.md` and explained on
+`docs/data/how-to-test-produced-json.md`. `anyText`, `anyNumber`, and `satisfying` stay.
+
 The matching API has parallel shape predicates (`anyText`, `anyNumber`, `satisfying description predicate`) even though
 Reified already has a reusable `Constraint<'value>` vocabulary. Explore the most ergonomic way to reuse constraints in
 matches without confusing a `Data` shape check with a typed value rule.
@@ -59,6 +68,9 @@ Questions to settle:
 Do not add a second constraint catalogue to Data. Reuse `Constraint<'value>` or keep the APIs deliberately separate.
 
 ### Teach the lightweight Constraint-to-application-error path first
+
+**Done.** The Constraint landing page, the comparison page, and the tutorial all now show `Constraint.guard` +
+`Result.orError` before the structured path, and say the choice is per call site.
 
 Constraint introductions currently lead with `Violation` rendering and the comparison page concedes that a predicate is
 simpler for one-off checks. Show `orError` early so the small-code path is compared fairly:
@@ -79,6 +91,9 @@ Update the Constraint landing page, comparison page, and tutorial together so th
 
 ### Result error accumulation should hand off to Schema
 
+**Done.** `docs/result/collecting-errors.md` names Schema as the default next step for structured input, keeps the
+manual option for callers staying at the Result layer, and states the `result.list` / `Schema.parse` split.
+
 `docs/result/collecting-errors.md` ends by telling readers to carry field-name/error pairs themselves. It should instead
 name `Schema` as the default next step when the independent results are fields of structured input and the caller needs
 paths, raw-value redisplay, localization, or a domain constructor. Retain the manual-pair option for callers intentionally
@@ -91,6 +106,10 @@ The page should preserve the distinction:
 
 ### Decide whether Result needs an accumulating traversal
 
+**Done — added.** `Result.traverseAll` and `Result.sequenceAll` return `Result<'output list, 'error list>`. Every
+mapping runs, in input order; errors come back in input order; the sequence is enumerated once; nothing is flattened;
+`traverse` was not overloaded. Documented in `collections.md` and linked from `collecting-errors.md`.
+
 `Result.traverse` and `Result.sequence` stop at the first error. There is no ordinary-sequence counterpart that runs every
 mapping and collects every failure, although `NonEmptyList.traverseResult` and `NonEmptyArray.traverseResult` already do
 accumulate error lists.
@@ -101,6 +120,9 @@ input mapping that already returns `'error list` is flattened. Avoid overloading
 If the API is added, connect it from both `collections.md` and `collecting-errors.md`.
 
 ### Parse should lead with `ParseError`
+
+**Done.** The page opens on the three cases with a table, then the parser catalogue, then missing/malformed/
+out-of-range examples, then the hand-off to application errors and to Schema.
 
 The Parse page currently starts with four successful examples and only describes its errors in a sentence. Make
 `ParseError` the central contract:
@@ -114,6 +136,10 @@ The Parse page currently starts with four successful examples and only describes
 
 ### Correct the trimmed-concatenation claim
 
+**Done.** The false closure claim is gone from both pages. The real reason is stated: no later operation becomes total
+or loses a branch once a string's ends are known to be clean, so the wrapper would only ever be unwrapped. Slug is
+called out separately.
+
 `docs/values/refined/_index.md` and `docs/values/refined/catalog.md` say that concatenating two trimmed strings is not
 trimmed. That is false: if neither input starts or ends with whitespace, their concatenation also has no leading or
 trailing whitespace.
@@ -124,17 +150,30 @@ a separate case: concatenation can violate its pattern, depending on the grammar
 
 ### Replace the “Where the invariant pays” example
 
+**Done.** The section now opens on `List.max` versus `NonEmptyList.max` and keeps the average as the second, deeper
+example.
+
 The refined landing page's average example is visually heavy because it combines `map`, `reduce`, length conversion, and
 division. Use a smaller partial-to-total contrast first, such as `List.max` returning an option versus
 `NonEmptyList.max` returning a value. Keep order totals as the deeper linked example.
 
 ### Link “portable constraint” at first use
 
+**Done.** "Portable" as an unexplained quality adjective is gone. Pages now say "interpreted" and link to
+`values/constraint/constraints.md`, or say plainly what Reified can and cannot represent. "Portable" survives only
+where it means cross-platform.
+
 Several pages use “portable constraint” without context. At first use, link to the interpreted/opaque explanation and
 state the operational meaning: Reified can inspect the built-in atom, so an interpreter may export or generate only what
 it can enforce honestly. Avoid using “portable” as an unexplained quality adjective.
 
 ### Split localization into a short guide and reference material
+
+**Done.** `docs/values/constraint/localization/` is now a section: a short `_index.md` (English default, a four-key
+map, `message` vs `fullMessage`, and the recipes, including why translating the rendered English string is the worse
+option), plus `context-and-fallback.md`, `custom-rules.md`, `advanced-rendering.md`, and `catalogue.md`. The `schema.*`
+catalogue moved to `docs/schema/redisplay-and-field-errors.md`. No culture or translation state entered `Violation`.
+The existing recipes were judged sufficient; no new edge API was added.
 
 `docs/values/constraint/localization.md` combines the ordinary workflow, Schema-specific rendering, advanced resolver
 internals, group algorithms, the complete Constraint catalogue, and the Schema catalogue. It is too long and makes a
@@ -165,6 +204,11 @@ state into `Violation`.
 
 ### Explain unsupported operands in user language
 
+**Done.** `constraints.md` now has "Operands Reified cannot describe": a worked custom comparable type, and the three
+consequences stated separately. The default messages no longer leak internal vocabulary — "must be at least the
+required value" rather than "failed an at-least rule whose operand has no portable representation". Authored fallback
+prose was not made mandatory; `Constraint.custom` already covers it and the page points there.
+
 The phrase “operand has no portable representation” is undefined at the point it appears, gives no concrete examples,
 and produces technical default messages such as “failed an equality rule whose operand has no portable representation.”
 
@@ -177,6 +221,10 @@ while keeping technical detail available through inspection. Alternatively requi
 operand cannot be represented; evaluate the ergonomic and compatibility cost.
 
 ### Clarify Schema refinement staging
+
+**Done.** `docs/schema/syntax.md` opens the field block with the pipeline diagram and a preserve/change table, says
+why raw constraints precede `refine` and how the getter fixes the final type, fixes the duplicate numbering, and links
+to the refined-schema walkthrough.
 
 `docs/schema/syntax.md` says “refinement changes the stage” but does not establish the stage model before using it, and its
 field-block list has duplicate numbering. Explain a field block as a typed pipeline:
@@ -191,6 +239,9 @@ page focused on syntax.
 
 ### “Values” references are mostly legitimate, but distinguish navigation from a package
 
+**Done.** Audited: no install snippet, namespace example, or prose implies a `Reified.Values` package or namespace, and
+the three places that could be read that way already say so explicitly.
+
 The folder and getting-started references to Values are acceptable when they clearly mean the documentation grouping.
 Continue auditing install snippets, namespace examples, and prose so none implies a `Reified.Values` package or namespace.
 
@@ -199,6 +250,9 @@ Continue auditing install snippets, namespace examples, and prose so none implie
 These are candidates to add to the tidy-up, pending scope agreement.
 
 ### Stale Flow references and broken ownership boundaries
+
+**Done.** Every user-facing Flow reference is either rewritten as an external hand-off to Axial or removed where
+effects were irrelevant. The unreferenced `flow-graphic.png` was deleted.
 
 Several user-facing pages still present Flow as part of Reified or link to the removed `/flow/` documentation:
 
@@ -213,12 +267,19 @@ logo assets under `docs/content/img/` before deleting them; they may now be unre
 
 ### The landing page conflicts with the “two doors” direction
 
+**Done.** The effects tagline is gone, the page now states the two doors above the route list, and the routes lead with
+Schema and Result. Data and Values stay below them as product navigation.
+
 `docs/index.md` presents four equal doors and its rotating taglines still include effects. This conflicts with
 `dev-docs/TASKS.md`, which says the newcomer story has exactly two front doors: plain Result and Schema. Decide whether Data
 and Values remain product navigation below those doors or whether the architecture direction should be revised. Remove the
 effects tagline either way because Reified no longer owns effects.
 
 ### Introductory snippets drift from current APIs
+
+**Done.** `docs/values/reference-app.md` was rewritten from `examples/Reified.ReferenceApp.Intro/Program.fs`, which
+compiles and runs. `Result.guard` is gone in favour of `Constraint.guard`, and the construction example matches the
+source.
 
 `docs/values/reference-app.md` says `Result.guard` keeps the original value after a constraint and shows a pipeline shaped
 as `Constraint.minLength 3 |> Result.guard`; the current public vocabulary and nearby pages teach `Constraint.guard`.
@@ -228,11 +289,17 @@ source rather than preserving a stale hand-written approximation.
 
 ### Schema testing is advertised like a package but is not packable
 
+**Done.** `Reified.Schema.Testing` is out of the package table and labelled repository tooling on the landing page,
+the platforms page, and above the code on the testing-patterns page.
+
 The Schema landing page includes `Reified.Schema.Testing` in a package table, while the guide later calls it a
 repository-only, non-packable adapter. Readers cannot install the advertised package. Label repository tooling separately
 from published packages and make the “copy/adapt this pattern” status visible before code examples.
 
 ### Schema.JsonSchema is presented as a package but is a module
+
+**Done.** The row is gone; `JsonSchema` is identified as a module of `Reified.Schema` on the landing page and in
+`overview.md`. The table now follows the real package graph.
 
 The Schema landing page lists `Reified.Schema.JsonSchema` in its package table, but there is no corresponding project or
 package: `JsonSchema.fs` is compiled into `Reified.Schema`. Change the row to the real package and identify `JsonSchema` as
@@ -241,12 +308,20 @@ its module, or move module capabilities out of a package table. Package tables m
 
 ### Generated and hand-written examples need one source of truth
 
+**Partly done.** The reference-app page was regenerated from its runnable example, and `docs/getting-started.md` was
+checked line by line against `examples/Reified.GettingStarted/Program.fs`. **Open:** there is still no automated check
+that a hand-written snippet compiles. A focused compile-check harness for landing pages, `agent.md`, and `llms.txt`
+would close it properly.
+
 There are places where guide snippets make concrete API claims that appear to have drifted from runnable examples or
 source comments. Audit introductory snippets first and either source them from executable examples or add focused compile
 checks. Prioritize landing pages, getting-started pages, `agent.md`, and `llms.txt`, because readers and coding agents copy
 those before reaching generated reference pages.
 
 ### Terminology alternates between validation and admission without a local explanation
+
+**Done.** `docs/getting-started.md` now carries one shared rule — parse / check / refine / parse-structured — and says
+where "validation" is still the right broad word.
 
 Some pages say validation, some say checking, and Schema says parse-don't-validate. Add a small shared terminology rule to
 the relevant introductions: Parse changes representation; Constraint checks a typed value; Refinement admits it into an
@@ -255,6 +330,9 @@ category or for the specifically named Schema operation.
 
 ### Adapter pages describe sameness too broadly
 
+**Done.** `docs/data/with-reified.md` qualifies the claim and links to the adapter rules, naming the specific
+differences: typed JSON leaves versus text, repetition semantics, CLI flag text, and colon paths.
+
 `docs/data/with-reified.md` says the same schema parses the same logical input regardless of source. That is directionally
 right, but adapter policies differ: repeated name/value pairs become lists, configuration repetition overwrites, CLI flags
 become text booleans, native JSON has typed booleans/numbers, and configuration nesting uses colon paths. Qualify the claim
@@ -262,22 +340,33 @@ and link to the adapter-policy examples so “same logical input” does not imp
 
 ### Error-shape hand-offs are scattered
 
+**Done.** One cross-product table — layer against map / keep / accumulate / render — lives in
+`docs/getting-started.md` and is linked from the Parse and Constraint pages.
+
 Result, Parse, Constraint, Refinement, and Schema pages each explain their own failure type, but the decision about when to
 map, retain, accumulate, or render is repeated unevenly. Add one compact cross-product table to the Values or top-level
 getting-started path and link to it instead of rebuilding partial explanations on every page.
 
 ### Navigation depth hides the common path
 
+**Partly done.** "Next practical step" links were added at the points that came up in this pass: Data → Schema after
+conversion, Result → Schema after accumulation, Parse → Schema for one field, Refined → Schema after the type exists,
+and the localization index → its sub-pages. **Open:** no systematic sweep of every page that leaves a reader holding
+an intermediate value.
+
 Constraint localization, Schema refinement, and Data-to-domain conversion all require hopping between product trees. Add
 “next practical step” links at the point a reader has an intermediate value or error, rather than only in long “read next”
 lists at the bottom.
 
-## Suggested decision order
+## What is left
 
-1. Fix factual and broken-boundary issues: trimmed concatenation, stale Flow links, package-table accuracy, and stale
-   snippets.
-2. Improve existing docs without API changes: adapter grammars, ParseError-first Parse page, Result-to-Schema hand-off,
-   portable-constraint explanation, localization split, and refinement staging.
-3. Decide API questions with small prototypes or signatures: constraint-backed Data patterns, accumulating traversal, and
-   any missing simple localization edge.
-4. Align landing/navigation structure with the two-door direction after the content paths are clear.
+Two items, both narrower than they were:
+
+1. **A compile check for hand-written snippets.** Landing pages, `agent.md`, and `llms.txt` still carry snippets that
+   nothing verifies. The pattern to copy is `examples/Reified.GettingStarted`, which the getting-started page is
+   written from.
+2. **A systematic "next step" sweep.** The obvious hand-offs are linked. Nobody has walked every page asking where a
+   reader is left holding an intermediate value with no onward link.
+
+Everything else in this document was applied. The decisions that came out of it — Data patterns staying separate from
+`Constraint`, and the shape of `Result.traverseAll` — are recorded in `dev-docs/decisions/README.md`.
