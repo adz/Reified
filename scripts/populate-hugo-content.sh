@@ -57,7 +57,8 @@ schema_dir="$root_dir/site/content/schema"
 # so a stale tree cannot keep serving pages after the split.
 rm -rf "$root_dir/site/content/error-handling" "$root_dir/site/content/validation" \
   "$root_dir/site/content/flow" "$result_dir" "$values_dir" "$data_dir" "$schema_dir" \
-  "$root_dir/site/content/docs" "$root_dir/site/content/reference" "$root_dir/site/content/parse"
+  "$root_dir/site/content/docs" "$root_dir/site/content/reference" "$root_dir/site/content/parse" \
+  "$root_dir/site/content/getting-started.md"
 
 for product in "${products[@]}"; do
   mkdir -p "$root_dir/site/content/$product"
@@ -113,3 +114,7 @@ cp -r "$root_dir/docs/content/"* "$root_dir/site/static/content/" 2>/dev/null ||
 
 # Copy root homepage
 cp "$root_dir/docs/index.md" "$root_dir/site/content/_index.md"
+
+# The repository-wide getting started sits above the product areas: it is the single
+# primary route off the landing page, so it is a top-level page rather than a product one.
+cp "$root_dir/docs/getting-started.md" "$root_dir/site/content/getting-started.md"

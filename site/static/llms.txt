@@ -1,5 +1,8 @@
 # Reified documentation
 
+Start at `/getting-started/`: one complete transaction — a model declaration, untrusted input parsed into it,
+accumulated path-aware failures, and a JSON codec derived from the same declaration.
+
 Reified contains four independent documentation entry points. Load only the context for the product being used:
 
 - Result composition, `result { }`, and accumulating builders: `/result/llms.txt`

@@ -57,6 +57,10 @@ Working on `src/Reified.Schema`? Read `dev-docs/schema/internals.md` first (impl
   `tests/Reified.Package.Tests/PackageGraphTests.fs`, `scripts/pack.sh`, and `tests/package-consumers/**`.
 - Public API surface: `tests/Reified.ApiShape.Tests/ApiShapeTests.fs` and `dev-docs/API_BASELINE.md`. Adding or
   renaming a public module means editing that suite in the same change.
+- The public first impression: `docs/getting-started.md` (the repo-wide page, `/getting-started/`) and
+  `docs/index.md` (the landing page). The code on the getting-started page comes from
+  `examples/Reified.GettingStarted/Program.fs`, which CI compiles and runs — change the example and the page
+  together, and paste the program's real output rather than writing expected output by hand.
 - Fable JavaScript support: `examples/Reified.FableProbe/**` and `scripts/check-fable-js-surface.sh`. The probe
   runs the same assertions on both targets, so put a new cross-runtime claim in `Checks.fs` rather than in a
   .NET-only test.

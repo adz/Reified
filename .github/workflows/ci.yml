@@ -47,6 +47,9 @@ jobs:
             REIFIED_EXAMPLE="$example" dotnet run --project examples/Reified.Schema.Examples/Reified.Schema.Examples.fsproj --configuration Release --no-build --nologo
           done
 
+      - name: Run getting-started example
+        run: dotnet run --project examples/Reified.GettingStarted/Reified.GettingStarted.fsproj --configuration Release --no-build --nologo
+
       - name: Run reference applications
         run: |
           dotnet run --project examples/Reified.ReferenceApp.Intro/Reified.ReferenceApp.Intro.fsproj --configuration Release --no-build --nologo

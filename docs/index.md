@@ -9,8 +9,8 @@ body_class: reified-home
 <div class="docs-home-hero">
 
 <div class="docs-home-hero-visual">
-<img class="hero-lockup hero-lockup--light" src="/content/img/reified-logo-light.png" alt="Reified" width="1159" height="332" />
-<img class="hero-lockup hero-lockup--dark" src="/content/img/reified-logo-dark.png" alt="Reified" width="1159" height="332" />
+<img class="hero-lockup hero-lockup--light" src="/content/img/reified-logo-light.svg" alt="Reified" width="452" height="128" />
+<img class="hero-lockup hero-lockup--dark" src="/content/img/reified-logo-dark.svg" alt="Reified" width="452" height="128" />
 </div>
 
 <div class="docs-home-copy" style="max-width: 78ch; margin: 0 auto;">
@@ -36,57 +36,95 @@ body_class: reified-home
 </script>
 
 <div class="lede">
-<p>Reified's goal is to replace repetitive, error-prone code with APIs that are ergonomic for humans and predictable for LLMs, reducing the context both need to produce reliable software.</p>
+<p>Declare a rule once — on a value, a field, or a whole model — and the checking, the diagnostics, the JSON codec, the contract document, and the test data are all read from that one declaration.</p>
 </div>
-<p>F# already provides strong foundations: discriminated unions and records for modelling, immutability by default, and explicit handling of missing values. We build on those foundations to enforce project-wide rules across values, boundaries, and models.</p>
 
 <p id="reified-tagline" class="reified-tagline">If it compiles, the invariant already held.</p>
 </div>
 
 </div>
 
-<div class="reified-doors">
+<div class="docs-home-example" style="max-width: 78ch; margin: 0 auto 2rem;">
 
-<a class="reified-door reified-door--data" href="{{< relref "/data/" >}}">
-<span class="reified-door-kicker">Structured values and fixtures</span>
-<h2>Reified.Data</h2>
-<p>Build, edit, compare, and match portable structured values without repetitive constructors or copied fixtures.</p>
-<span class="reified-door-cta">Data documentation &rarr;</span>
+```fsharp
+type Signup = { Email: string; Age: int; Newsletter: bool }
+
+let signupSchema =
+    schema<Signup> {
+        field _.Email { constraints [ present; email ] }
+        field _.Age { constrain (atLeast 13) }
+        field _.Newsletter
+        construct (fun email age newsletter ->
+            { Email = email; Age = age; Newsletter = newsletter })
+    }
+
+Schema.parse signupSchema input
+// age: Expected a value at least 13, but was 11.
+// email: Expected an email address, but was ada.
+// newsletter: This value was omitted.
+
+Json.serialize (Json.compile signupSchema) signup
+// {"email":"ada@example.org","age":36,"newsletter":true}
+```
+
+</div>
+
+<p style="max-width: 78ch; margin: 0 auto 0.5rem; text-align: center;">Every failure message, the JSON codec, the
+JSON Schema, and the generated test data come from that one declaration. Nothing above is written twice.</p>
+
+<div class="docs-home-cta-row" style="justify-content: center; margin-bottom: 3.5rem;">
+<a class="docs-home-cta" href="/getting-started/">Get started &rarr;</a>
+</div>
+
+<div class="reified-routes">
+
+<a class="reified-route" href="/values/constraint/">
+<span class="reified-route-problem">Validation boilerplate is everywhere, and invalid values still get through</span>
+<span class="reified-route-target">Constraint &rarr;</span>
 </a>
 
-<a class="reified-door reified-door--result" href="{{< relref "/result/" >}}">
-<span class="reified-door-kicker">Typed failures</span>
-<h2>Reified.Result</h2>
-<p>Compose operations that can fail over the standard F# Result type, with <code>result { }</code> for
-fail-fast sequencing and accumulating builders for collecting every error at once.</p>
-<span class="reified-door-cta">Result documentation &rarr;</span>
+<a class="reified-route" href="/values/refined/">
+<span class="reified-route-problem">A type says <code>string</code> when it means something narrower</span>
+<span class="reified-route-target">Refined values &rarr;</span>
 </a>
 
-<a class="reified-door reified-door--values" href="{{< relref "/values/" >}}">
-<span class="reified-door-kicker">Admitting values</span>
-<h2>Values</h2>
-<p>Three independently installable packages — Constraint, Refinements, and Parse. Reuse value checks, parse
-serialized primitives, and construct refined values, so an invalid value can't reach your domain types in
-the first place.</p>
-<span class="reified-door-cta">Values documentation &rarr;</span>
+<a class="reified-route" href="/schema/getting-started/">
+<span class="reified-route-problem">The same rule is repeated in a parser, a validator, a form, and a test</span>
+<span class="reified-route-target">Schema &rarr;</span>
 </a>
 
-<a class="reified-door reified-door--parse" href="{{< relref "/schema/" >}}">
-<span class="reified-door-kicker">Input and domain values</span>
-<h2>Reified.Schema</h2>
-<p>Declare how structured input becomes a model once, and get JSON codecs, contracts, and validation from that single
-definition, so parsers, docs, forms, and tests can't drift out of sync with each other.</p>
-<span class="reified-door-cta">Schema documentation &rarr;</span>
+<a class="reified-route" href="/schema/json-codec/">
+<span class="reified-route-problem">Decoding and validation are separate steps that drift apart</span>
+<span class="reified-route-target">JSON codecs &rarr;</span>
+</a>
+
+<a class="reified-route" href="/schema/http-servers/">
+<span class="reified-route-problem">Client and server disagree about the shape of a request</span>
+<span class="reified-route-target">HTTP contracts &rarr;</span>
+</a>
+
+<a class="reified-route" href="/data/">
+<span class="reified-route-problem">Constructing test data by hand is slow and repetitive</span>
+<span class="reified-route-target">Data &rarr;</span>
+</a>
+
+<a class="reified-route" href="/result/">
+<span class="reified-route-problem">Failures are exceptions, or a bespoke result type in every project</span>
+<span class="reified-route-target">Result &rarr;</span>
+</a>
+
+<a class="reified-route" href="/getting-started/#installing">
+<span class="reified-route-problem">You want one small library, not a framework</span>
+<span class="reified-route-target">Packages &rarr;</span>
 </a>
 
 </div>
 
-<p style="max-width: 78ch; margin: 0 auto 2rem;">Install <code>Reified</code> for all of the above at once, or a
-focused package when you need one capability. Effects and execution are not here: <a
-href="https://github.com/adz/Axial">Axial</a> describes async work with its dependencies and failures in the
-signature, and its optional server adapters execute Reified HTTP contracts.</p>
+<p style="max-width: 78ch; margin: 0 auto 2rem;">Every package is independently installable, and runs on .NET and
+on Fable JavaScript.</p>
 
 <div class="docs-home-meta" style="margin-bottom: 4rem;">
+<a class="docs-chip" href="/getting-started/">Getting started</a>
 <a class="docs-chip" href="https://github.com/adz/Reified">GitHub</a>
 </div>
 

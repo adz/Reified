@@ -137,14 +137,16 @@ samp,
     }
   }
 
+  // The lockup is a tight SVG with no internal padding, so it is sized to the
+  // wordmark's own height rather than to the old raster's bounding box.
   .navbar-brand__logo {
     display: block;
-    height: 4.725rem;
+    height: 2.75rem;
     width: auto;
     overflow: visible;
 
     .hero-lockup {
-      height: 4.725rem;
+      height: 2.75rem;
       width: auto;
     }
   }
@@ -209,11 +211,11 @@ samp,
     padding: 0.25rem 0.4rem;
 
     .navbar-brand__logo {
-      height: 4.05rem;
+      height: 2.35rem;
       overflow: visible;
 
       .hero-lockup {
-        height: 4.05rem;
+        height: 2.35rem;
       }
     }
 
@@ -851,6 +853,69 @@ body.reified-home .reified-doors {
 .reified-door--values {
   border-top-color: $reified-values;
   .reified-door-kicker, .reified-door-cta { color: $reified-values; }
+}
+
+// Symptom routes: one row per problem the reader already has. Deliberately quieter
+// than .reified-door, so the single "Get started" action above stays dominant.
+.reified-routes {
+  max-width: 78ch;
+  margin: 0 auto 3rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.09);
+}
+
+.reified-route {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0.85rem 0.25rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.09);
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    color: inherit;
+    text-decoration: none;
+    background: rgba(11, 85, 217, 0.04);
+  }
+
+  .reified-route-problem {
+    color: #475569;
+    line-height: 1.5;
+  }
+
+  .reified-route-target {
+    flex: none;
+    font-weight: 700;
+    color: #0b55d9;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 640px) {
+  .reified-route {
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+}
+
+[data-bs-theme="dark"] {
+  .reified-routes,
+  .reified-route {
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  .reified-route .reified-route-problem {
+    color: #b9c2c4;
+  }
+
+  .reified-route:hover {
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .reified-route .reified-route-target {
+    color: #7aa7ff;
+  }
 }
 
 .reified-hero-panels {

@@ -4,6 +4,23 @@ Status: outstanding work. The repository split, the `Reified.*` rename, the pack
 package are done and recorded in `dev-docs/decisions/README.md`. What remains is the documentation
 reorganisation below, plus the FsLiveDocs changes it depends on.
 
+**Done so far (no FsLiveDocs dependency):**
+
+- `docs/getting-started.md` — the repository-wide getting started of §3, at `/getting-started/` and first in
+  the top nav. One complete transaction (model → declaration → realistic input → typed value → accumulated
+  path-aware failures → derived JSON codec), then the widening sequence, then routing by next task. Its code
+  is compiled and run in CI from `examples/Reified.GettingStarted`, and the failure text on the page is that
+  program's real output.
+- `docs/index.md` — landing page reworked per §2 rule 2 and §4: hero, one compact example, a single primary
+  `Get started` action, then symptom routes. The package-card door grid is gone; package inventory moved to
+  the getting-started page's *Installing* section.
+- `site/data/sidebars/gettingstarted.yaml` — the getting started is not a product area, so its sidebar routes
+  onward to the four areas rather than listing pages beneath itself.
+
+Still outstanding here: the per-package `getting-started.md` pages (§6) have not been demoted to quickstarts,
+so `/getting-started/` and `/schema/getting-started/` both carry that title. The task-folder tree of §2 is
+still blocked on FsLiveDocs items 1–4.
+
 Folder name is the section name, so the IA is expressed by naming folders after reader tasks. Numeric
 prefixes order them and are stripped from URLs.
 

@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/content/img/reified-logo-dark.png">
-    <img src="docs/content/img/reified-logo-light.png" alt="Reified" width="420">
+    <source media="(prefers-color-scheme: dark)" srcset="docs/content/img/reified-logo-dark.svg">
+    <img src="docs/content/img/reified-logo-light.svg" alt="Reified" width="420">
   </picture>
 </p>
 
@@ -134,6 +134,10 @@ The contract compiler and schema-derived testing adapter are repository tooling,
 Reified packages have not been published yet.
 
 ## Documentation and examples
+
+Start with **[Getting started](docs/getting-started.md)** — one complete transaction from untrusted input to a
+typed model and a derived JSON codec. Its code is compiled and executed on every CI run from
+[`examples/Reified.GettingStarted`](examples/Reified.GettingStarted/Program.fs).
 
 - [Constraint](docs/values/constraint/_index.md)
 - [Getting started with values](docs/values/getting-started.md)

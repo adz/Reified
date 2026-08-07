@@ -8,6 +8,8 @@
   {{- $sidebar = hugo.Data.sidebars.result -}}
 {{- else if eq .Section "values" -}}
   {{- $sidebar = hugo.Data.sidebars.values -}}
+{{- else if and (eq .Kind "page") (eq .File.TranslationBaseName "getting-started") (eq .Section "") -}}
+  {{- $sidebar = hugo.Data.sidebars.gettingstarted -}}
 {{- end -}}
 
 <div id="td-sidebar-menu" class="td-sidebar__inner">
