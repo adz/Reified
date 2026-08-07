@@ -150,6 +150,10 @@ module CustomerId =
 type describes itself at a boundary without restating the rule.
 [Customer Id](./tutorials/customer-id/) builds one end to end, including its schema.
 
+Once the type exists, a schema field of that type needs nothing but the field: `field _.Id`
+resolves the refinement, and a failure at that field is reported with its path alongside every
+other field's. See [Schema integration](./schema/).
+
 ## Read next
 
 1. [Order Totals](./tutorials/order-totals/) uses the built-in types in anger.
