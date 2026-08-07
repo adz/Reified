@@ -1,8 +1,8 @@
 # Architecture Guardrails
 
 Reified should help applications compress intent, domain knowledge, and invariants into human-reviewable interfaces that
-also constrain generated code. Schema establishes trust at data boundaries; private domain types preserve it; named
-domain transitions evolve it; Flow makes operational dependencies and failures explicit.
+also constrain generated code. Schema establishes trust at data boundaries; private domain types preserve it; and
+named domain transitions evolve it.
 
 This note records the remaining recommendations from the 2026-07 architecture review. Contract generation freshness is
 not listed as a separate CI command because `Reified.Schema.Contracts.Build` now makes generation part of the ordinary
@@ -77,7 +77,7 @@ Only promote high-signal rules into analyzers. Candidates include:
 
 - A public record schema uses `constructResult` for a claimed durable aggregate invariant.
 - A `Schema.check` result is discarded.
-- A Flow-producing application function calls an ambient operational effect.
+- An application function calls an ambient operational effect instead of taking it as an explicit dependency.
 - `Service.resolve` appears outside a designated host-edge assembly.
 - A boundary representation crosses into a domain or application interface.
 - A generated wire type is used as a business-domain type.
@@ -132,7 +132,7 @@ Treat the reference application as the canonical architectural proof:
 
 - Assert its project dependency direction.
 - Assert wire records do not appear in domain/application public interfaces.
-- Demonstrate private refined fields, private aggregates, fallible transitions, and explicit Flow environments together.
+- Demonstrate private refined fields, private aggregates, and fallible transitions together.
 - Reparse persisted contracts on read.
 - Run contextual policies only at their actual admission points.
 - Include examples of both a fallible transition and a total invariant-preserving transition.
@@ -170,7 +170,7 @@ exercise semantic claims the F# compiler cannot prove.
 | Ambient effects | Selected projects do not call operational APIs | Project references plus compiled-call audit | Whether an exception is legitimate |
 | Container lookup | Dynamic resolution stays at hosts | Package/project placement plus compiled-call audit | Host composition choices |
 | Boundary leakage | DTO, draft, or `Data` types do not enter core interfaces | Project isolation plus public-surface audit | Classification of unusual boundary types |
-| Typed failures | Expected refusal remains visible | Domain DUs and `Result`/Flow error channels | Which failures are expected rather than defects |
+| Typed failures | Expected refusal remains visible | Domain DUs and `Result` error channels | Which failures are expected rather than defects |
 | Constraint drift | Schema metadata agrees with constructors | Schema-derived law tests | Custom constraints and missing test distributions |
 | Transition preservation | Total transitions keep intrinsic invariants | Opaque module plus property law | Correctness of the property and generator |
 | Migration validity | Migrated values satisfy the head schema | Typed chain plus revalidation and law tests | Preservation of business meaning |
@@ -217,8 +217,8 @@ Example defaults:
 
 ```text
 Contracts -> Schema
-Domain -> Result, Constraint, Refined, Parse, optionally Schema
-Application -> Domain, optionally Flow
+Domain -> Result, Constraint, Refinements, Parse, optionally Schema
+Application -> Domain
 Infrastructure -> Application
 Host -> all application projects
 Tests -> the projects under test
@@ -357,7 +357,7 @@ Keep small fixture projects under a compile-fail test tree:
 ```text
 tests/compile-fail/private-aggregate-construction/
 tests/compile-fail/incomplete-schema-builder/
-tests/compile-fail/missing-flow-environment/
+tests/compile-fail/wire-type-in-domain-interface/
 tests/compile-fail/missing-contract-migration/
 ```
 
@@ -440,7 +440,6 @@ User-facing material should repeat these points:
 - Schema converts untrusted representations into admitted values or diagnostics.
 - The type system, not schema metadata, carries durable invariants through the application.
 - Application functions decide whether an already trusted value is acceptable for one operation.
-- Flow makes effect dependencies and expected failures visible in interfaces.
 - Project references, analyzers, and CI turn architectural intent into guardrails.
 
 The intended application shape is: parse once, enter strong domain types, perform named legal transitions, and keep the

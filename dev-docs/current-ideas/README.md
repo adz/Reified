@@ -16,8 +16,9 @@ Active sketches:
   page that route by symptom, and the FsLiveDocs changes that reorganisation depends on.
 - `format-and-json-runtime.md` — one package per representation format, and a
   shared schema-to-codec compiler over platform-specific .NET and Fable JSON runtimes.
-- `database.md` — direction sketch for a typed relational layer (generated immutable query AST interpreted through
-  Flow, building on `Schema`; its older `FieldRef` references need redesign if the idea is promoted).
+- `database.md` — direction sketch for a typed relational layer: a generated immutable SQL AST, catalog-driven
+  table metadata, reflection-free row codecs, and constraint violations translated into schema diagnostics.
+  Constructing and mapping SQL only — executing it is explicitly out of scope.
 
 Implemented work and settled decisions do not remain in this folder. Constraint unification and contextual
 constraint localization shipped and are recorded in `dev-docs/decisions/README.md` and `AGENTS.md`; the term

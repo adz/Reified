@@ -40,11 +40,21 @@ From the same ZIO comparison; these belong *with* the remote-config milestone, n
 - **Diff/Patch**: schema-derived structural diff of two values ("what changed between desired and reported
   config"), rendered over the same `Path` vocabulary as diagnostics so display infrastructure is shared. Read-only
   walk over erased getters suffices for diff; patch application should be designed once a real consumer establishes
-  whether it needs typed field lenses or a schema-directed patch representation.
+  whether it needs typed field lenses or a schema-directed patch representation. A create schema and a full
+  persisted schema are not automatically a good PATCH schema — building the reference app raised this and it was
+  deliberately left unanswered. Whatever ships should be an explicit application-authored patch schema, not magical
+  optionalization of every field.
 - **Deliberately rejected** from the ZIO list (recorded so nobody re-litigates casually): automatic structural
   migrations (conflicts with manual-typed-migrations; their own docs show it silently deleting fields), advisory
   validation, multi-format codecs before a consumer asks, `DynamicValue` as a public surface (at most internal
   plumbing for the two items above).
+
+## Smaller queue items
+
+- **A head-version codec recipe or helper for contracts.** `Contract` parses old versions and exposes the head
+  schema, but the "always write the latest version" workflow is assembled by hand from `Contract.headSchema`,
+  conversion, and `Json.compile`. Building the reference app got this wrong more than once. Writing an old version
+  should stay opt-in and rare, so a documented recipe may be the whole answer.
 
 ## Acceptance Checks
 

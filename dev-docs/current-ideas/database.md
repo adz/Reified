@@ -1,37 +1,44 @@
 # Typed Relational Layer
 
-The strongest direction is an immutable, generated, typed relational AST interpreted through Flow. It should not
-resemble EF's tracked object graph, and it should not copy Ecto's Changeset wholesale because Reified already has Schema,
-path-aware diagnostics, and typed Flow errors.
+An immutable, generated, typed relational AST — a *value* describing SQL, with generated table metadata and
+row codecs on either side of it. It should not resemble EF's tracked object graph, and it should not copy Ecto's
+Changeset wholesale, because Reified already has Schema and path-aware diagnostics.
 
-  The result could be genuinely compelling: database-first correctness like SqlHydra, query composition closer to Ecto, immutable F# values throughout, and
-  first-class Flow integration.
+**Scope: constructing SQL and mapping rows, not running them.** The interesting and durable half is the part
+Reified can own — describing a statement as a composable value, generating table and column metadata from a real
+catalog, decoding rows into domain types without reflection, and translating database constraint violations into
+the same diagnostics vocabulary a schema parse produces. Execution is a solved, unremarkable problem with many
+existing answers, and it is the half that would drag an effect system into a description library.
+
+So a `Statement<'result>` is a plain value. Something else runs it: an effect system, `Dapper`, or ordinary ADO.NET
+in a `task { }`. The execution signatures sketched below are illustrative of *shape* only — read them as "some
+executor consumes this value and produces rows", not as an API this repository would ship. Whoever owns execution
+owns connection lifetime, transactions, cancellation, and streaming.
+
+  The result could be genuinely compelling: database-first correctness like SqlHydra, query composition closer to
+  Ecto, and immutable F# values throughout.
 
   ## Where Reified is currently up to
 
   The existing architecture gives SQL a solid foundation:
 
   - `Schema<'model>` describes domain shape, constraints, construction, field metadata, parsing, and checking.
-  - `Schema.parse` and `Schema.check` return `Result<'model, Diagnostics<SchemaError>>`; success contains the ordinary
-    admitted value rather than a universal trust wrapper.
-  - FieldRef<'model,'value> provides stable typed paths for attaching diagnostics.
-  - Flow<'env,'error,'value> models database access naturally:
-      - database capabilities live explicitly in 'env;
-      - expected database failures enter 'error;
-      - cancellation and scoped cleanup remain runtime mechanics.
-
-  - BindError and Flow.mapError already provide the application-level error mapping lane.
-  - Schema retains typed construction information and avoids reflection in hot paths. SQL should follow the same pattern.
+  - `Schema.parse` and `Schema.check` return the ordinary admitted value rather than a universal trust wrapper,
+    with accumulated path-aware `SchemaErrors` on failure.
+  - Schema retains typed construction information and avoids reflection in hot paths. SQL should follow the same
+    pattern — the record-plan compiler behind `Json.compile` is the precedent for generated row decoders.
+  - `Path` and `SchemaError` already give constraint translation somewhere to land, so a unique-violation can be
+    reported at the field that caused it rather than as a driver exception.
 
   The package dependency direction matters:
 
-  Axial.Flow         Reified.Schema
-       \                 /
-            Reified.Sql
-            /       \
-   Postgres         Sqlite
+  Reified.Schema
+        |
+   Reified.Sql          // metadata, immutable AST, row codecs — no I/O
+        |
+  Postgres / Sqlite     // dialect rendering and type mappings
 
-  Neither Flow nor Schema should learn about SQL.
+  Schema must not learn about SQL, and `Reified.Sql` must not learn about executing anything.
 
   ## Three possible interface designs
 
@@ -43,12 +50,10 @@ path-aware diagnostics, and typed Flow errors.
   type Expr<'scope, 'value>
   type Statement<'result>
 
-  Generated table modules produce immutable statements, and one operation executes them:
+  Generated table modules produce immutable statements, and an executor consumes them:
 
   module Db =
-      val run :
-          Statement<'value> ->
-          Flow<#IHas<IDatabase>, DbError, 'value>
+      val run : Statement<'value> -> (* executor-owned result *)
 
   Usage:
 
@@ -65,11 +70,8 @@ path-aware diagnostics, and typed Flow errors.
           })
       |> Query.toList
 
-  flow {
-      let! users = Db.run (activeAdults filter)
-      let! created = Db.run (Users.insert signup)
-      return created
-  }
+  `activeAdults` is a value. It can be built, composed, inspected, and rendered to SQL without a connection
+  existing — which is also what makes it testable without a database.
 
   This design hides virtually everything: query versus command execution, cardinality, row decoding, parameter binding, dialect rendering, and statement
   caching.
@@ -151,37 +153,13 @@ path-aware diagnostics, and typed Flow errors.
   type Update<'value>
   type Delete<'value>
 
-  module Database =
-      val all :
-          Query<'value> ->
-          Flow<#IHas<IDatabase>, DbError, 'value list>
+  These are the types `Reified.Sql` would own. The executor-side verbs — `all`, `tryExactlyOne`, `exactlyOne`,
+  `stream`, `insert`, `update`, `delete` — belong to whatever runs them, and their result type is that executor's
+  concern.
 
-      val tryExactlyOne :
-          Query<'value> ->
-          Flow<#IHas<IDatabase>, DbError, 'value option>
-
-      val exactlyOne :
-          Query<'value> ->
-          Flow<#IHas<IDatabase>, DbError, 'value>
-
-      val stream :
-          Query<'value> ->
-          Flow<#IHas<IDatabase>, DbError, FlowStream<_, _, 'value>>
-
-      val insert :
-          Insert<'value> ->
-          Flow<#IHas<IDatabase>, DbError, 'value>
-
-      val update :
-          Update<'value> ->
-          Flow<#IHas<IDatabase>, DbError, 'value>
-
-      val delete :
-          Delete<'value> ->
-          Flow<#IHas<IDatabase>, DbError, 'value>
-
-  I would not overload everything into Db.run. Separate verbs make cardinality and intent clearer, while all executable values can still share an internal
-  Statement<'result> representation.
+  Separate verbs beat overloading everything into one `run`, because cardinality and intent stay visible at the
+  call site. All of them can still share one internal `Statement<'result>` representation, which is the piece
+  `Reified.Sql` actually defines.
 
   ## Immutable writes
 
@@ -279,7 +257,7 @@ path-aware diagnostics, and typed Flow errors.
       val emailUnique : ConstraintRef<New>
 
       val query : Query<Row>
-      val insert : Model<New> -> Insert<Row>
+      val insert : New -> Insert<Row>
 
   Not every table row should automatically become a domain model. The generator should distinguish:
 
@@ -322,14 +300,17 @@ path-aware diagnostics, and typed Flow errors.
           Name: string option
           Table: string option
           Columns: string list
-          Diagnostics: Diagnostics<SchemaError> option
+          Diagnostics: SchemaErrors option
           Detail: string option
       }
 
-  Generated ConstraintRefs connect database constraints to Schema FieldRefs:
+  Generated ConstraintRefs connect a database constraint to the schema `Path` its violation should be reported at:
 
   Customer.emailUnique
-  // DB constraint name + affected columns + CustomerNew.email FieldRef
+  // DB constraint name + affected columns + the path "email"
+
+  Path is the right currency because it is already what `SchemaErrors` carries and what problem-details rendering
+  consumes, so a unique-violation lands in exactly the place a parse failure on the same field would.
 
   However, conversion to Schema diagnostics must be explicit and semantic. Not every persistence failure is invalid input:
 
@@ -353,7 +334,7 @@ path-aware diagnostics, and typed Flow errors.
   Execution could then return:
 
   type WriteError =
-      | Invalid of Diagnostics<SchemaError>
+      | Invalid of SchemaErrors
       | Database of DbError
 
   Or the lower-level API can always return DbError, leaving the application to map it:
@@ -443,34 +424,14 @@ path-aware diagnostics, and typed Flow errors.
 
   Running a query against an unsupported dialect should fail during compilation, before database I/O.
 
-  ## Transactions
+  ## Transactions — out of scope, and deliberately so
 
-  Transactions must be lexical and Flow-scoped:
+  Transactions are the clearest example of why execution is not this library's half. They need lexical scoping,
+  rollback on failure, defect, and cancellation, savepoints for nesting, and — the genuinely hard part — a way for
+  nested repository calls to reach the transaction-bound connection without hiding it in ambient state.
 
-  Database.transaction {
-      let! customer = Database.insert createCustomer
-      let! invoice = Database.insert (Invoice.forCustomer customer.Id)
-      return customer, invoice
-  }
-
-  The hard architectural issue is ensuring nested repository calls use the transaction-bound connection without placing it in ambient runtime state.
-
-  The preferred model is for the transaction body to receive or locally provide a transaction-bound database service:
-
-  Database.transaction options (fun transaction ->
-      flow {
-          let! customer =
-              createCustomer
-              |> Database.insertWith transaction
-
-          return customer
-      })
-
-  A more ergonomic environment-lens mechanism could later locally replace IDatabase so existing repository functions automatically participate. That likely
-  exposes a small missing capability in Flow worth designing independently. The connection should not be hidden in runtime-local ambient state because that
-  conflicts with Reified’s explicit-environment direction.
-
-  Transactions must guarantee rollback and disposal on typed failure, defect, or interruption. Nested transactions become savepoints where supported.
+  Every one of those is a property of the *executor*, and a statement value has nothing to say about them. A
+  library that describes SQL should not grow a transaction scope; the host that opens connections already has one.
 
   ## Performance model
 
@@ -489,25 +450,23 @@ path-aware diagnostics, and typed Flow errors.
   - no expression compilation required at runtime;
   - no mutable tracking;
   - sequential reader support;
-  - cancellation throughout;
-  - streaming through FlowStream;
   - optional prepared statements.
+
+  Cancellation and streaming are executor concerns and are not listed here. Steps 1–4 are pure functions over the
+  AST; only step 5's cache is stateful, and it keys on AST shape and dialect, never on parameter values.
 
   ## Package layout
 
-  Reified.Sql
-  Reified.Sql.Postgres
+  Reified.Sql             // metadata, immutable AST, row codecs
+  Reified.Sql.Postgres    // dialect rendering and type mappings
   Reified.Sql.Sqlite
   Reified.Sql.Tooling
-  Reified.Sql.Generator
+  Reified.Sql.Generator   // catalog-driven generation
 
-  Potentially split execution from pure query construction later:
-
-  Reified.Sql             // metadata and immutable AST
-  Axial.Flow.Sql        // IDatabase and Flow execution
-
-  That split is architecturally cleaner if users might want query generation without Flow, though it creates another package to explain. I would begin with
-  Reified.Sql as the integrated add-on unless a non-Flow consumer appears.
+  None of these execute anything, so none of them depend on an effect system, a driver, or `System.Data`. An
+  execution adapter is a separate package in whichever repository owns the effect model — and if it never gets
+  written, the query construction and mapping halves are still independently useful, which is the test that this
+  split is the right one.
 
   ## What makes it preferable
 
@@ -521,9 +480,9 @@ path-aware diagnostics, and typed Flow errors.
   - provider-neutral core with typed provider extensions;
   - real-catalog-driven generation;
   - direct generated codecs;
-  - Flow-native cancellation, resource management and errors;
   - Schema-native, path-aware persistence diagnostics;
-  - explicit race-safe constraint translation.
+  - explicit race-safe constraint translation;
+  - and no opinion at all about how the statement is executed.
 
   ## Proposed sequencing
 
@@ -533,9 +492,9 @@ path-aware diagnostics, and typed Flow errors.
   4. Add PostgreSQL rendering, codecs and constraint classification.
   5. Add explicit constraint-to-diagnostics mappings.
   6. Add joins, subqueries, grouping, aggregates and CTEs.
-  7. Solve transaction-bound environment substitution.
-  8. Add streaming, compiled query caching and bulk operations.
-  9. Add provider extensions, drift verification and migration support.
+  7. Add compiled query caching and bulk statement construction.
+  8. Add provider extensions, drift verification and migration support.
 
-  The biggest prototype risks are typed anonymous-record projections, alias/scope typing across complex joins, and transaction-local service replacement.
-  Those should be proven before committing the final public API.
+  The biggest prototype risks are typed anonymous-record projections and alias/scope typing across complex joins.
+  Both are pure type-level problems in the AST, so both can be proven without a database connection — which is a
+  further argument for keeping execution out.

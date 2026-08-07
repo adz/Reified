@@ -238,6 +238,29 @@ adapters live in the [Axial repository](https://github.com/adz/Axial) along with
 - **Pattern reversal, custom constraints, `notEqualTo`, `contains`, and `distinct` are not guessed.** Derivation
   returns `UnsupportedConstraint(path, code)` unless a generator is supplied for that exact field path.
 
+## 2026-07-12: What building a real application on Reified actually proved
+
+Recorded from the reference-app exercise. The application itself is now `examples/Axial.ReferenceApp` in the
+Axial repository, where it consumes Reified as a package; these are the conclusions about Reified that outlived it.
+
+- **The application needed far less of the catalogue than the repository's size suggests.** Schema, diagnostics,
+  contracts, codecs, and a handful of refined types covered nearly everything. That is the argument for judging
+  every further abstraction by application demand rather than by parity with an inspiration ecosystem — and for
+  not presenting each helper subsystem as a peer entry point.
+- **`Data` earned its place for an unexpected reason.** It was written for fixtures, but its real value was that
+  form redisplay and JSON parsing genuinely shared one representation.
+- **Contract migration revalidation caught a real category of trust hole**, and was stronger than expected. It
+  stays.
+- **The explicit builder stayed readable at nested and versioned records.** It needed neither reflection nor a
+  different authoring surface to feel usable, which is the evidence behind keeping declaration explicit.
+- **Refined values do preserve their invariant; the friction is primitive interop and wrapper stacking.** Say that
+  honestly rather than claiming refined wrappers behave transparently like primitives.
+- **A total refined-schema bridge over fallible smart constructors duplicates the invariant.** The domain's natural
+  constructor shape is fallible, so `Schema.refine` became fallible and calls the same constructor the rest of the
+  application calls.
+- **Do not imply a compiled codec fully validates untrusted input.** The reference app's boundaries made the split
+  between the trusted codec lane and the diagnostic parse lane concrete, and the docs must keep it.
+
 ## Current Invariants
 
 Rules that hold across the codebase and are not obvious from any single file.
