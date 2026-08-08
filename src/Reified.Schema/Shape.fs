@@ -4,7 +4,7 @@
 // intentionally constrains the witness type variable; the warning is noise here.
 namespace Reified.Schema
 
-open Reified.Constraint
+open Reified
 
 #nowarn "64"
 

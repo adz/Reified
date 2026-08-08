@@ -1,6 +1,5 @@
 namespace Reified.Schema.Testing.Tests
 
-open Reified.Constraint
 open Reified
 
 open Reified.Schema
@@ -8,7 +7,7 @@ open Reified.Schema.Testing
 open FsCheck.FSharp
 open Xunit
 open Reified.Schema.Syntax
-open Reified.Constraint.Syntax
+open Reified.ConstraintSyntax
 open Swensen.Unquote
 
 module SchemaGenTests =

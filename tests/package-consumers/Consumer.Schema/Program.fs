@@ -2,7 +2,6 @@
 // directly, so a single PackageReference must be enough to declare a model AND to build the Data
 // input it parses. Referencing only Reified.Schema here is the point of the fixture.
 
-open Reified.Constraint
 open Reified
 open Reified.Schema
 open Reified.Schema.Syntax

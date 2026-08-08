@@ -3,7 +3,6 @@ namespace Reified.Schema.Testing
 open Reified
 
 open System
-open Reified.Constraint
 open Reified.Schema
 open FsCheck
 open FsCheck.FSharp

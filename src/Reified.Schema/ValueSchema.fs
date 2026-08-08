@@ -5,7 +5,7 @@ namespace Reified.Schema
 
 open System
 open System.Collections.Generic
-open Reified.Constraint
+open Reified
 open Reified.Refinements
 
 /// <summary>Functions for creating and inspecting value schemas.</summary>

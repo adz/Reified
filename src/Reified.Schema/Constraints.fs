@@ -1,6 +1,6 @@
 namespace Reified.Schema
 
-open Reified.Constraint
+open Reified
 
 /// <summary>Whether boundary input for a field must be supplied.</summary>
 /// <remarks>

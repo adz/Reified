@@ -3,7 +3,7 @@
 // surface can be read top to bottom as a catalog.
 namespace Reified.Schema
 
-open Reified.Constraint
+open Reified
 
 open Reified.Refinements
 

@@ -1,9 +1,9 @@
 module Reified.Schema.Http.Tests.Fixtures
 
-open Reified.Constraint
+open Reified
 open Reified.Schema
 open Reified.Schema.Syntax
-open Reified.Constraint.Syntax
+open Reified.ConstraintSyntax
 
 type Address = { Street: string; City: string }
 

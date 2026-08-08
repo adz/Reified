@@ -5,7 +5,7 @@ namespace Reified.Refinements
 open System
 open System.Collections.Generic
 open System.Globalization
-open Reified.Constraint
+open Reified
 
 /// <summary>A string that is not null, empty, or whitespace.</summary>
 type NonBlankString =

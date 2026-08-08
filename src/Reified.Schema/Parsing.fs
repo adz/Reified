@@ -8,7 +8,6 @@ open Reified
 
 open System
 open System.Globalization
-open Reified.Constraint
 open Reified.Refinements
 open Reified.Schema
 

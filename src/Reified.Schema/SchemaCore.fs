@@ -2,7 +2,7 @@
 // descriptor helpers and the public Field module.
 namespace Reified.Schema
 
-open Reified.Constraint
+open Reified
 
 open System
 open System.Collections.Generic

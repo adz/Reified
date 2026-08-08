@@ -1,4 +1,4 @@
-namespace Reified.Constraint
+namespace Reified
 
 /// <summary>Why one indivisible constraint failed.</summary>
 /// <remarks>

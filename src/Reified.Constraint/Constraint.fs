@@ -1,4 +1,4 @@
-namespace Reified.Constraint
+namespace Reified
 
 open System
 open System.ComponentModel
@@ -44,7 +44,7 @@ module Constraint =
         if String.IsNullOrWhiteSpace value then invalidArg name "Constraint prose must not be blank."
 
     let private ensureNonNegative name value =
-        if value < 0 then Platform.argumentOutOfRange name value "Constraint bounds must be non-negative."
+        if value < 0 then ConstraintPlatform.argumentOutOfRange name value "Constraint bounds must be non-negative."
 
     let private ensureBounds name minimum maximum =
         if minimum > maximum then invalidArg name "The minimum bound must not exceed the maximum bound."

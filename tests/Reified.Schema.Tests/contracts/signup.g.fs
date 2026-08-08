@@ -5,7 +5,6 @@
 namespace Reified.Tests.Generated
 
 open Reified
-open Reified.Constraint
 open Reified.Schema
 
 /// The "plan" cases of Signup (signup.contract, Signup.v1).
@@ -33,7 +32,7 @@ type Signup =
 module Signup =
 
     open Reified.Schema.Syntax
-    open Reified.Constraint.Syntax
+    open Reified.ConstraintSyntax
 
     let private planCases =
         [ EnumCase.create "free" SignupPlan.Free

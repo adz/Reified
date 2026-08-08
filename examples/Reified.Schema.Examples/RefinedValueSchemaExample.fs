@@ -1,6 +1,6 @@
 module RefinedValueSchemaExample
 
-open Reified.Constraint
+open Reified
 open Reified.Schema
 open Reified.Schema.Syntax
 

@@ -5,7 +5,6 @@
 namespace Reified.Tests.Generated
 
 open Reified
-open Reified.Constraint
 open Reified.Schema
 
 /// A card payment source.
@@ -20,7 +19,7 @@ type Card =
 module Card =
 
     open Reified.Schema.Syntax
-    open Reified.Constraint.Syntax
+    open Reified.ConstraintSyntax
 
     /// The schema declared by payment.contract (Card.v1).
     let schema : Schema<Card> =
@@ -56,7 +55,7 @@ type Invoice =
 module Invoice =
 
     open Reified.Schema.Syntax
-    open Reified.Constraint.Syntax
+    open Reified.ConstraintSyntax
 
     /// The schema declared by payment.contract (Invoice.v1).
     let schema : Schema<Invoice> =
@@ -95,7 +94,7 @@ type Payment =
 module Payment =
 
     open Reified.Schema.Syntax
-    open Reified.Constraint.Syntax
+    open Reified.ConstraintSyntax
 
     let private sourceCases =
         [ UnionCase.create "card" PaymentSource.Card (function PaymentSource.Card payload -> Some payload | _ -> None) Card.schema

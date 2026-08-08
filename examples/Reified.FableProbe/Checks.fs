@@ -1,7 +1,7 @@
 namespace Reified.FableProbe
 
 open System
-open Reified.Constraint
+open Reified
 open Reified.Schema
 open Reified.Schema.Syntax
 open Reified.Schema.Json

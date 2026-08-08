@@ -1,6 +1,6 @@
 namespace Reified.Refinements
 
-open Reified.Constraint
+open Reified
 
 /// <summary>A list that contains at least one item.</summary>
 /// <remarks>

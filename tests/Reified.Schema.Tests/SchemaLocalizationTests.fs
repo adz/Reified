@@ -1,7 +1,6 @@
 namespace Reified.Tests
 
 open Reified
-open Reified.Constraint
 open Reified.Schema
 open Reified.Schema.Syntax
 open Swensen.Unquote

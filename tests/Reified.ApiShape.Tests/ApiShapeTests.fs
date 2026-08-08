@@ -10,11 +10,10 @@ open System.Reflection
 open System.Threading.Tasks
 open Reified.Result
 open Reified.Result.Syntax
-open Reified.Constraint
 open Reified.Refinements
 open Reified.Schema
 open Reified.Schema.Syntax
-open Reified.Constraint.Syntax
+open Reified.ConstraintSyntax
 open Swensen.Unquote
 open Microsoft.FSharp.Reflection
 open Xunit
@@ -251,7 +250,7 @@ module ApiShapeTests =
 
     [<Fact>]
     let ``the localization surface keeps its documented public shape`` () =
-        moduleType typeof<Renderer> "Reified.Constraint.RendererModule"
+        moduleType typeof<Renderer> "Reified.RendererModule"
         |> publicStaticMemberNames
         |> assertContainsAll
             [ "english"
@@ -266,11 +265,11 @@ module ApiShapeTests =
               "attributeName"
               "fullMessage" ]
 
-        moduleType typeof<Renderer> "Reified.Constraint.MessageDescriptorModule"
+        moduleType typeof<Renderer> "Reified.MessageDescriptorModule"
         |> publicStaticMemberNames
         |> assertContainsAll [ "key"; "arguments"; "segments" ]
 
-        moduleType typeof<Renderer> "Reified.Constraint.MessageFormatSpecModule"
+        moduleType typeof<Renderer> "Reified.MessageFormatSpecModule"
         |> publicStaticMemberNames
         |> assertContainsAll [ "descriptor"; "fallback"; "pluralArgument" ]
 
@@ -524,7 +523,7 @@ module ApiShapeTests =
         |> assertContainsAll [ "packageName" ]
 
         // One opt-in door per package: Reified.Schema.Syntax carries the whole schema-definition vocabulary,
-        // matching Reified.DataSyntax, Reified.Constraint.Syntax, and Reified.Result.Syntax.
+        // matching Reified.DataSyntax, Reified.ConstraintSyntax, and Reified.Result.Syntax.
         //
         // There is still exactly one value-rule vocabulary. Schema publishes no constraint catalogue of its own:
         // the field-block syntax carries only collection adapters, and supply, which is Schema's concern.
@@ -1162,25 +1161,25 @@ module ApiShapeTests =
 
         // Removed outright, with no compatibility alias: a second nearly identical catalogue is the problem this
         // design exists to remove.
-        [ "Reified.Constraint.Check"
-          "Reified.Constraint.CheckModule"
-          "Reified.Constraint.CheckFailure"
-          "Reified.Constraint.CheckFailureResources"
-          "Reified.Constraint.CheckLengthExpectation"
-          "Reified.Constraint.CheckRangeExpectation"
-          "Reified.Constraint.CheckDSL"
-          "Reified.Constraint.Predicate"
-          "Reified.Constraint.PredicateModule"
-          "Reified.Constraint.PredicateExtensions"
-          "Reified.Constraint.ConstraintMetadata"
-          "Reified.Constraint.ConstraintArgument"
-          "Reified.Constraint.ConstraintDetails" ]
+        [ "Reified.Check"
+          "Reified.CheckModule"
+          "Reified.CheckFailure"
+          "Reified.CheckFailureResources"
+          "Reified.CheckLengthExpectation"
+          "Reified.CheckRangeExpectation"
+          "Reified.CheckDSL"
+          "Reified.Predicate"
+          "Reified.PredicateModule"
+          "Reified.PredicateExtensions"
+          "Reified.ConstraintMetadata"
+          "Reified.ConstraintArgument"
+          "Reified.ConstraintDetails" ]
         |> List.iter (fun removed -> test <@ not (publicTypeNames |> Set.contains removed) @>)
 
         test <@ not (AppDomain.CurrentDomain.GetAssemblies() |> Array.exists (fun assembly -> assembly.GetName().Name = "Reified.Check")) @>
 
         let constraintMembers =
-            moduleTypeFromAssembly "Reified.Constraint" "Reified.Constraint.Constraint"
+            moduleTypeFromAssembly "Reified.Constraint" "Reified.Constraint"
             |> publicStaticMemberNames
 
         constraintMembers
@@ -1230,7 +1229,7 @@ module ApiShapeTests =
 
         // `Violation` names the union; the module carries the compiled suffix.
         let violationMembers =
-            moduleTypeFromAssembly "Reified.Constraint" "Reified.Constraint.ViolationModule"
+            moduleTypeFromAssembly "Reified.Constraint" "Reified.ViolationModule"
             |> publicStaticMemberNames
 
         violationMembers
@@ -1244,7 +1243,7 @@ module ApiShapeTests =
         typeof<AtomicViolation> |> publicUnionCaseNames |> (=) (set [ "Expected"; "Described"; "UnsupportedOperand" ]) |> (fun equal -> test <@ equal @>)
 
         // A violation is plain data: no closure and no description tree is reachable from it.
-        let forbiddenViolationTypeNames = [ "Reified.Constraint.Constraint`1"; "Reified.Constraint.ConstraintDescription" ]
+        let forbiddenViolationTypeNames = [ "Reified.Constraint`1"; "Reified.ConstraintDescription" ]
 
         let reachableFieldTypes =
             [ typeof<Violation>; typeof<AtomicViolation> ]
@@ -1265,7 +1264,7 @@ module ApiShapeTests =
 
         // The DSL is optional vocabulary over the same values, with the documented collision omissions.
         let dslMembers =
-            moduleTypeFromAssembly "Reified.Constraint" "Reified.Constraint.Syntax"
+            moduleTypeFromAssembly "Reified.Constraint" "Reified.ConstraintSyntax"
             |> publicStaticMemberNames
             |> Set.filter (fun name -> not (name.Contains "$"))
 

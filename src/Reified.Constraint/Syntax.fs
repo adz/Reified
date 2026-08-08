@@ -1,4 +1,4 @@
-namespace Reified.Constraint
+namespace Reified
 
 /// <summary>
 /// Constraint constructors usable without the <c>Constraint.</c> prefix inside a module that declares value rules.
@@ -23,14 +23,14 @@ namespace Reified.Constraint
 /// </para>
 /// <code>
 /// module SignupRules =
-///     open Reified.Constraint.Syntax
+///     open Reified.ConstraintSyntax
 ///
 ///     let age : Constraint&lt;int&gt; = atLeast 13
 ///     let contact : Constraint&lt;string&gt; = Constraint.all [ present; email ]
 ///     let requireContact value = value |> guard contact |> orError EmailRequired
 /// </code>
 /// </remarks>
-module Syntax =
+module ConstraintSyntax =
     /// <summary>Alias for <see cref="M:Reified.Constraint.Constraint.present" />.</summary>
     let inline present< ^value when (^value or Constraint.PresentDispatcher): (static member Create:
         ^value -> Constraint< ^value >)> : Constraint< ^value > = Constraint.present

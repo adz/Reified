@@ -2,12 +2,11 @@ namespace Reified.Tests
 
 open Reified
 
-open Reified.Constraint
 
 open Reified.Schema
 open Xunit
 open Reified.Schema.Syntax
-open Reified.Constraint.Syntax
+open Reified.ConstraintSyntax
 open Swensen.Unquote
 
 module SchemaDiagnosticsRenderingTests =

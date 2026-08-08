@@ -1,7 +1,7 @@
 // Renderer: the rendering edge. It owns document/attribute context, contextual candidate order, plural
 // selection, named interpolation, value formatting, and the list/group joining patterns. It knows nothing
 // about Violation or Schema — both push MessageFormatSpec values through the same mechanics.
-namespace Reified.Constraint
+namespace Reified
 
 open System
 

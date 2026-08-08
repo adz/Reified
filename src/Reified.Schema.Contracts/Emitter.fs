@@ -320,7 +320,6 @@ module Emitter =
         line $"namespace {namespaceName}"
         line ""
         line "open Reified"
-        line "open Reified.Constraint"
         line "open Reified.Schema"
 
         for contract in file.Contracts do
@@ -399,7 +398,7 @@ module Emitter =
             line $"module {contractTypeName} ="
             line ""
             line "    open Reified.Schema.Syntax"
-            line "    open Reified.Constraint.Syntax"
+            line "    open Reified.ConstraintSyntax"
 
             for field in caseFields do
                 line ""

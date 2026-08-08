@@ -7,7 +7,7 @@
 //   4. bad input turned into path-aware accumulated failures
 //   5. a second artefact — a JSON codec — derived from the same declaration
 
-open Reified.Constraint.Syntax
+open Reified.ConstraintSyntax
 open Reified
 open Reified.Schema
 open Reified.Schema.Syntax

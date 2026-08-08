@@ -1,6 +1,5 @@
 namespace Reified.Tests
 
-open Reified.Constraint
 open Reified
 
 open Reified.Schema

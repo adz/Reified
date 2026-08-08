@@ -5,7 +5,7 @@
 // interpreters work from these; nothing here executes.
 namespace Reified.Schema
 
-open Reified.Constraint
+open Reified
 
 open System
 open System.Collections.Generic

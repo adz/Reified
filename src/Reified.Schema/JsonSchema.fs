@@ -4,7 +4,7 @@ open System
 open System.Globalization
 open System.Text
 
-open Reified.Constraint
+open Reified
 
 /// <summary>Generates JSON Schema documents from built model schemas.</summary>
 /// <remarks>

@@ -1,4 +1,4 @@
-namespace Reified.Constraint
+namespace Reified
 
 /// <summary>Why a constraint is invisible to export and proof.</summary>
 /// <remarks>

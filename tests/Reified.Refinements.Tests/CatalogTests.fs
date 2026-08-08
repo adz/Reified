@@ -1,6 +1,6 @@
 namespace Reified.Refinements.Tests
 
-open Reified.Constraint
+open Reified
 open Reified.Refinements
 open Swensen.Unquote
 open Xunit

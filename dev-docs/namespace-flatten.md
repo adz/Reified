@@ -68,7 +68,7 @@ Ordered so each phase builds and tests green on its own, and so the riskiest ren
 - [x] **Phase 3** — `Reified.Data` -> `Reified`. Before Constraint and Schema because both
       consume `Data`, and because leaving it a child namespace breaks every
       `Data.<UnionCase>` reference in a file that declares or opens `Reified`.
-- [ ] **Phase 4** — `Reified.Constraint` -> `Reified`, `module Syntax` -> `ConstraintSyntax`.
+- [x] **Phase 4** — `Reified.Constraint` -> `Reified`, `module Syntax` -> `ConstraintSyntax`.
       Before Schema because Schema depends on it.
 - [ ] **Phase 5** — `Reified.Schema` -> `Reified`, `module Syntax` -> `SchemaSyntax`.
       The large one: 21 source files plus the satellite packages' opens.

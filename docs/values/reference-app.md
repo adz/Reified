@@ -19,7 +19,7 @@ open Reified.Parse
 open Reified.Result
 open Reified.Result.Syntax
 open Reified.Constraint
-open Reified.Constraint.Syntax
+open Reified.ConstraintSyntax
 open Reified.Refinements
 ```
 

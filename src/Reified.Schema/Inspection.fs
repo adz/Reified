@@ -4,7 +4,7 @@
 // instead of the erased definitions directly.
 namespace Reified.Schema
 
-open Reified.Constraint
+open Reified
 
 /// <summary>
 /// Describes the shape of a value schema as inspectable metadata for non-validation interpreters.

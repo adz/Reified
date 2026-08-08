@@ -2,7 +2,7 @@
 // constructor chain; the optional inner field builder transforms one Schema<_> value.
 namespace Reified.Schema
 
-open Reified.Constraint
+open Reified
 
 #nowarn "64"
 
@@ -631,13 +631,13 @@ type SchemaBuilder<'model>() =
 /// </summary>
 /// <remarks>
 /// <para>
-/// Optional and opt-in, in the same shape as <c>Reified.DataSyntax</c> and <c>Reified.Constraint.Syntax</c>:
+/// Optional and opt-in, in the same shape as <c>Reified.DataSyntax</c> and <c>Reified.ConstraintSyntax</c>:
 /// <c>open Reified.Schema</c> for <c>Schema</c>, then <c>open Reified.Schema.Syntax</c> for this vocabulary.
 /// </para>
 /// <para>
 /// There is no constraint catalogue here. One <c>Constraint</c> vocabulary serves direct checking, refinement,
 /// and Schema, so a field block reaches for <c>Constraint.email</c> or an opened
-/// <c>Reified.Constraint.Syntax</c> exactly as standalone code does. Boundary supply is Schema-owned and stays
+/// <c>Reified.ConstraintSyntax</c> exactly as standalone code does. Boundary supply is Schema-owned and stays
 /// here as <c>mustSupply</c> and <c>mayOmit</c>.
 /// </para>
 /// </remarks>

@@ -2,7 +2,7 @@
 
 open Reified
 open Reified.Refinements
-open Reified.Constraint.Syntax
+open Reified.ConstraintSyntax
 open Reified.Schema
 open Reified.Schema.Syntax
 

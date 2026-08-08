@@ -2,7 +2,6 @@
 // compile line, so this fixture uses a value from each of them: the file does not compile if the
 // umbrella's dependency list is missing one.
 
-open Reified.Constraint
 open Reified
 open Reified.Refinements
 open Reified.Result

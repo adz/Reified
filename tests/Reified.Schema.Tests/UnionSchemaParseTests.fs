@@ -2,7 +2,6 @@ namespace Reified.Tests
 
 open Reified
 
-open Reified.Constraint
 
 open Reified.Refinements
 open Reified.Schema

@@ -5,7 +5,6 @@
 namespace Reified.Tests.Generated
 
 open Reified
-open Reified.Constraint
 open Reified.Schema
 
 /// Schema and boundary functions for PickupPoint (shipment.fs, PickupPoint.v1).
@@ -14,7 +13,7 @@ open Reified.Schema
 module PickupPoint =
 
     open Reified.Schema.Syntax
-    open Reified.Constraint.Syntax
+    open Reified.ConstraintSyntax
 
     /// The schema declared by shipment.fs (PickupPoint.v1).
     let schema : Schema<PickupPoint> =
@@ -39,7 +38,7 @@ module PickupPoint =
 module CourierDelivery =
 
     open Reified.Schema.Syntax
-    open Reified.Constraint.Syntax
+    open Reified.ConstraintSyntax
 
     /// The schema declared by shipment.fs (CourierDelivery.v1).
     let schema : Schema<CourierDelivery> =
@@ -64,7 +63,7 @@ module CourierDelivery =
 module ShipmentV1 =
 
     open Reified.Schema.Syntax
-    open Reified.Constraint.Syntax
+    open Reified.ConstraintSyntax
 
     /// The schema declared by shipment.fs (Shipment.v1).
     let schema : Schema<ShipmentV1> =
@@ -100,7 +99,7 @@ module ShipmentV1 =
 module Shipment =
 
     open Reified.Schema.Syntax
-    open Reified.Constraint.Syntax
+    open Reified.ConstraintSyntax
 
     let private priorityCases =
         [ EnumCase.create "standard" ShipmentPriority.Standard

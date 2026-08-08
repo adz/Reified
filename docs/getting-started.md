@@ -37,7 +37,7 @@ type Signup =
 Declare how untrusted input becomes one:
 
 ```fsharp
-open Reified.Constraint.Syntax
+open Reified.ConstraintSyntax
 open Reified.Data
 open Reified.Schema
 open Reified.Schema.Syntax

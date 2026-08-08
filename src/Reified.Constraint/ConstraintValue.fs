@@ -1,4 +1,4 @@
-namespace Reified.Constraint
+namespace Reified
 
 open System
 open System.ComponentModel

@@ -1,4 +1,4 @@
-namespace Reified.Constraint
+namespace Reified
 
 /// <summary>What a presence rule expects of a value's shape.</summary>
 /// <remarks>

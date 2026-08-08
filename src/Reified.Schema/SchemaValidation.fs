@@ -3,7 +3,7 @@
 namespace Reified.Schema
 
 open System
-open Reified.Constraint
+open Reified
 open Reified.Refinements
 open Reified.Schema
 

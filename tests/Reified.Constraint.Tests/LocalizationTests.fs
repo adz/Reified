@@ -2,7 +2,7 @@ namespace Reified.Tests
 
 open System
 open System.Globalization
-open Reified.Constraint
+open Reified
 open Swensen.Unquote
 open Xunit
 

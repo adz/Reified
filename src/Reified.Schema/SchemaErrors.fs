@@ -1,7 +1,7 @@
 namespace Reified.Schema
 
 open System
-open Reified.Constraint
+open Reified
 
 type internal SchemaPathComponent =
     | KeyComponent of string

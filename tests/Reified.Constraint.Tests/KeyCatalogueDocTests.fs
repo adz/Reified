@@ -2,7 +2,7 @@ namespace Reified.Tests
 
 open System.IO
 open System.Text.RegularExpressions
-open Reified.Constraint
+open Reified
 open Swensen.Unquote
 open Xunit
 

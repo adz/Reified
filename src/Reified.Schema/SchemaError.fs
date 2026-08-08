@@ -6,7 +6,6 @@ namespace Reified.Schema
 
 open Reified
 
-open Reified.Constraint
 
 /// <summary>Schema input, checking, and contextual rule failures attached to diagnostics paths.</summary>
 /// <remarks>

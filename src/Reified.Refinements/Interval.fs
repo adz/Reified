@@ -1,6 +1,6 @@
 namespace Reified.Refinements
 
-open Reified.Constraint
+open Reified
 
 /// <summary>An inclusive range of ordered values where <c>Lower &lt;= Upper</c>.</summary>
 /// <remarks>

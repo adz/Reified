@@ -1,7 +1,7 @@
 namespace Reified.Refinements
 
 open System
-open Reified.Constraint
+open Reified
 
 /// <summary>A double-precision float that is neither infinite nor <c>NaN</c>.</summary>
 /// <remarks>

@@ -1,6 +1,6 @@
 namespace Reified.Refinements
 
-open Reified.Constraint
+open Reified
 
 /// <summary>A value paired with the inclusive interval it is known to lie within.</summary>
 /// <remarks>

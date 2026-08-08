@@ -1,7 +1,7 @@
 // Message identity: the parsed relative keys, resource-segment encoding, and the two opaque values a
 // renderer needs — MessageDescriptor (runtime identity plus arguments) and MessageFormatSpec (the owning
 // catalogue's fallback and plural metadata). Nothing here knows about Violation, Schema, or cultures.
-namespace Reified.Constraint
+namespace Reified
 
 open System
 

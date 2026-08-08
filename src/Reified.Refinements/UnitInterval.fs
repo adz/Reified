@@ -1,7 +1,7 @@
 namespace Reified.Refinements
 
 open System
-open Reified.Constraint
+open Reified
 
 /// <summary>A finite double between zero and one inclusive.</summary>
 /// <remarks>

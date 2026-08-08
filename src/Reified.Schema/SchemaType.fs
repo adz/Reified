@@ -3,7 +3,7 @@
 // description — behavior lives in interpreters (parsing, checking, codecs, JSON Schema, docs).
 namespace Reified.Schema
 
-open Reified.Constraint
+open Reified
 
 open System
 open System.Collections.Generic

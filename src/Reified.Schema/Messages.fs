@@ -3,7 +3,7 @@
 // needs — descriptor, neutral fallback, plural operand — so no Schema key is ever known to that package.
 namespace Reified.Schema
 
-open Reified.Constraint
+open Reified
 
 /// <summary>The message keys Schema's own failures render through.</summary>
 /// <remarks>

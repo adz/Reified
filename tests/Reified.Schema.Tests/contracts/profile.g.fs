@@ -5,7 +5,6 @@
 namespace Reified.Tests.Generated
 
 open Reified
-open Reified.Constraint
 open Reified.Schema
 
 /// A user profile as first stored.
@@ -21,7 +20,7 @@ type ProfileV1 =
 module ProfileV1 =
 
     open Reified.Schema.Syntax
-    open Reified.Constraint.Syntax
+    open Reified.ConstraintSyntax
 
     /// The schema declared by profile.contract (Profile.v1).
     let schema : Schema<ProfileV1> =
@@ -63,7 +62,7 @@ type Profile =
 module Profile =
 
     open Reified.Schema.Syntax
-    open Reified.Constraint.Syntax
+    open Reified.ConstraintSyntax
 
     /// The schema declared by profile.contract (Profile.v2).
     let schema : Schema<Profile> =

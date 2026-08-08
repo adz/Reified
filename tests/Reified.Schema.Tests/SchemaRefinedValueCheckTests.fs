@@ -1,7 +1,7 @@
 namespace Reified.Tests
 
 open System
-open Reified.Constraint
+open Reified
 open Reified.Schema
 open Swensen.Unquote
 open Xunit

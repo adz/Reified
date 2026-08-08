@@ -1,6 +1,6 @@
 namespace Reified.Schema
 
-open Reified.Constraint
+open Reified
 open Reified.Refinements
 open Reified.Schema.Syntax
 

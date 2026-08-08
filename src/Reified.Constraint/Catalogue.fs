@@ -1,7 +1,7 @@
 // The constraint message catalogue: one canonical source for every built-in identity's parsed key segments,
 // argument names, neutral English predicate, and plural operand. Violation rendering and the public coverage
 // data both read this table, so a rule cannot ship with its message undeclared.
-namespace Reified.Constraint
+namespace Reified
 
 /// <summary>One catalogue entry as authored.</summary>
 type internal CatalogueEntry =

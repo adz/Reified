@@ -1,6 +1,6 @@
 namespace Reified.Refinements
 
-open Reified.Constraint
+open Reified
 
 /// <summary>Admission into an invariant-carrying value, and its total reverse projection.</summary>
 /// <remarks>

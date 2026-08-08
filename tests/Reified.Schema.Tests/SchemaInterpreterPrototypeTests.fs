@@ -1,12 +1,12 @@
 namespace Reified.Tests
 
-open Reified.Constraint
+open Reified
 open System
 open System.Globalization
 open Reified.Schema
 open Xunit
 open Reified.Schema.Syntax
-open Reified.Constraint.Syntax
+open Reified.ConstraintSyntax
 open Swensen.Unquote
 
 /// <summary>
