@@ -4,9 +4,8 @@ open Reified
 
 
 open Reified.Refinements
-open Reified.Schema
 open Xunit
-open Reified.Schema.Syntax
+open Reified.SchemaSyntax
 open Reified.ConstraintSyntax
 open Swensen.Unquote
 

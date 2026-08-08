@@ -70,7 +70,7 @@ then calls the authoritative constructor.
 
 ```fsharp
 open Reified.Schema
-open Reified.Schema.Syntax
+open Reified.SchemaSyntax
 
 module Booking =
     // create, accessors, and toDraft from above

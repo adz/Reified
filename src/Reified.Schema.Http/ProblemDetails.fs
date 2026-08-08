@@ -2,7 +2,7 @@ namespace Reified.Schema.Http
 
 open System.IO
 open System.Text.Json
-open Reified.Schema
+open Reified
 
 /// <summary>Renders diagnostics paths as RFC 6901 JSON pointers such as <c>/address/street</c> or <c>/tags/0</c>.</summary>
 [<RequireQualifiedAccess>]

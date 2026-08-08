@@ -2,8 +2,7 @@ namespace Reified.FableProbe
 
 open System
 open Reified
-open Reified.Schema
-open Reified.Schema.Syntax
+open Reified.SchemaSyntax
 open Reified.Schema.Json
 
 /// The Reified surface that must behave identically on .NET and on Fable JavaScript. Each function returns a

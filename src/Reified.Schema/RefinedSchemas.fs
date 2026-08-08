@@ -1,8 +1,8 @@
-namespace Reified.Schema
+namespace Reified
 
 open Reified
 open Reified.Refinements
-open Reified.Schema.Syntax
+open Reified.SchemaSyntax
 
 /// <summary>Ready-made schemas for the built-in refined values.</summary>
 /// <remarks>

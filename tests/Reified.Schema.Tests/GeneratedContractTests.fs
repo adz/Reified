@@ -2,7 +2,6 @@ namespace Reified.Tests
 
 open Reified
 
-open Reified.Schema
 open Reified.Tests.Generated
 open Swensen.Unquote
 open Xunit

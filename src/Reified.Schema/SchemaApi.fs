@@ -1,7 +1,7 @@
 // The public Schema module: the facade every consumer opens. Each function delegates to an internal
 // implementation (ValueSchema, SchemaCore, Parsing, ShapeOps) — no logic lives here, so the public
 // surface can be read top to bottom as a catalog.
-namespace Reified.Schema
+namespace Reified
 
 open Reified
 

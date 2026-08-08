@@ -3,8 +3,7 @@
 // input it parses. Referencing only Reified.Schema here is the point of the fixture.
 
 open Reified
-open Reified.Schema
-open Reified.Schema.Syntax
+open Reified.SchemaSyntax
 
 type Signup = { Email: string; Age: int }
 

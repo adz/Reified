@@ -9,8 +9,7 @@
 
 open Reified.ConstraintSyntax
 open Reified
-open Reified.Schema
-open Reified.Schema.Syntax
+open Reified.SchemaSyntax
 open Reified.Schema.Json
 
 // ---------------------------------------------------------------------------

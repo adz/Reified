@@ -1,10 +1,10 @@
 namespace Reified.Schema.Json.Tests
 
 open Reified.Schema.Json
-open Reified.Schema
+open Reified
 open Swensen.Unquote
 open Xunit
-open Reified.Schema.Syntax
+open Reified.SchemaSyntax
 
 /// <summary>Covers the compiled JSON codec's handling of <c>Schema.map</c> dictionary value schemas.</summary>
 module MapCodecTests =

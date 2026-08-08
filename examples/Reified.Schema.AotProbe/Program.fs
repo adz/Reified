@@ -1,7 +1,6 @@
 open System
 open Reified
-open Reified.Schema
-open Reified.Schema.Syntax
+open Reified.SchemaSyntax
 
 type ProbeFailure(message: string) =
     inherit Exception(message)

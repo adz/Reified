@@ -5,10 +5,9 @@ open Reified
 open System.Text.Json
 open Xunit
 open Swensen.Unquote
-open Reified.Schema
 open Reified.Schema.Http
 open Reified.Schema.Http.Tests.Fixtures
-open Reified.Schema.Syntax
+open Reified.SchemaSyntax
 
 [<Fact>]
 let ``json pointers render names, keys, and indexes`` () =

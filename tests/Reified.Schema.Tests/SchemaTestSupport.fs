@@ -1,6 +1,6 @@
 namespace Reified.Tests
 
-open Reified.Schema
+open Reified
 
 [<RequireQualifiedAccess>]
 type PathSegment =

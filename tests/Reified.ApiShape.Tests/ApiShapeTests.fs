@@ -11,8 +11,7 @@ open System.Threading.Tasks
 open Reified.Result
 open Reified.Result.Syntax
 open Reified.Refinements
-open Reified.Schema
-open Reified.Schema.Syntax
+open Reified.SchemaSyntax
 open Reified.ConstraintSyntax
 open Swensen.Unquote
 open Microsoft.FSharp.Reflection
@@ -330,15 +329,15 @@ module ApiShapeTests =
 
     [<Fact>]
     let ``schema inspection and input interpreter modules expose the expected surface`` () =
-        moduleTypeFromAssembly "Reified.Schema" "Reified.Schema.Inspect"
+        moduleTypeFromAssembly "Reified.Schema" "Reified.Inspect"
         |> publicStaticMemberNames
         |> assertContainsAll [ "model"; "schema"; "field" ]
 
-        moduleTypeFromAssembly "Reified.Schema" "Reified.Schema.Schema"
+        moduleTypeFromAssembly "Reified.Schema" "Reified.Schema"
         |> publicStaticMemberNames
         |> assertContainsAll [ "parse"; "parseWith"; "constructorErrorAt"; "check"; "refine" ]
 
-        assertTypeAbsentFromAssembly "Reified.Schema" "Reified.Schema.ValueSchema`1"
+        assertTypeAbsentFromAssembly "Reified.Schema" "Reified.ValueSchema`1"
 
         let dataMembers =
             moduleTypeFromAssembly "Reified.Data" "Reified.DataModule"
@@ -397,19 +396,19 @@ module ApiShapeTests =
         test <@ typeof<DataDifference>.Assembly.GetName().Name = "Reified.Data" @>
         test <@ typeof<DataMismatch>.Assembly.GetName().Name = "Reified.Data" @>
 
-        moduleTypeFromAssembly "Reified.Schema" "Reified.Schema.RetainedParseResult"
+        moduleTypeFromAssembly "Reified.Schema" "Reified.RetainedParseResult"
         |> publicStaticMemberNames
         |> assertContainsAll [ "create"; "renderErrors" ]
 
         test <@ typeof<SchemaErrors>.Assembly.GetName().Name = "Reified.Schema" @>
         test <@ typeof<SchemaIssue>.Assembly.GetName().Name = "Reified.Schema" @>
-        test <@ typeof<Reified.Schema.SchemaPath>.Assembly.GetName().Name = "Reified.Schema" @>
+        test <@ typeof<Reified.SchemaPath>.Assembly.GetName().Name = "Reified.Schema" @>
 
-        Assembly.Load("Reified.Schema").GetType("Reified.Schema.SchemaErrorsModule", true)
+        Assembly.Load("Reified.Schema").GetType("Reified.SchemaErrorsModule", true)
         |> publicStaticMemberNames
         |> assertContainsAll [ "toList"; "count"; "isEmpty"; "toString" ]
 
-        Assembly.Load("Reified.Schema").GetType("Reified.Schema.SchemaPathModule", true)
+        Assembly.Load("Reified.Schema").GetType("Reified.SchemaPathModule", true)
         |> publicStaticMemberNames
         |> assertContainsAll [ "root"; "key"; "index"; "append"; "format"; "fold" ]
 
@@ -444,7 +443,7 @@ module ApiShapeTests =
 
         // JSON Schema generation ships inside Reified.Schema; the module path stays
         // Reified.Schema.JsonSchema so no caller changed an open when the package was folded in.
-        moduleTypeFromAssembly "Reified.Schema" "Reified.Schema.JsonSchema"
+        moduleTypeFromAssembly "Reified.Schema" "Reified.JsonSchema"
         |> publicStaticMemberNames
         |> assertContainsAll [ "generate"; "generateValue" ]
 
@@ -518,17 +517,17 @@ module ApiShapeTests =
 
         schemaReferences |> assertContainsNone [ "Reified.Diagnostics"; "Reified.Result" ]
 
-        moduleTypeFromAssembly "Reified.Schema" "Reified.Schema.SchemaValidation"
+        moduleTypeFromAssembly "Reified.Schema" "Reified.SchemaValidation"
         |> publicStaticMemberNames
         |> assertContainsAll [ "packageName" ]
 
-        // One opt-in door per package: Reified.Schema.Syntax carries the whole schema-definition vocabulary,
+        // One opt-in door per package: Reified.SchemaSyntax carries the whole schema-definition vocabulary,
         // matching Reified.DataSyntax, Reified.ConstraintSyntax, and Reified.Result.Syntax.
         //
         // There is still exactly one value-rule vocabulary. Schema publishes no constraint catalogue of its own:
         // the field-block syntax carries only collection adapters, and supply, which is Schema's concern.
         let syntaxMembers =
-            moduleTypeFromAssembly "Reified.Schema" "Reified.Schema.Syntax"
+            moduleTypeFromAssembly "Reified.Schema" "Reified.SchemaSyntax"
             |> publicStaticMemberNames
             |> Set.filter (fun name -> not (name.Contains "$"))
 
@@ -542,10 +541,10 @@ module ApiShapeTests =
                                       "constrainValues" ]
             @>
 
-        // `field` is the type Reified.Schema.field, so the same `open Reified.Schema.Syntax` that supplies the
+        // `field` is the type Reified.Schema.field, so the same `open Reified.SchemaSyntax` that supplies the
         // vocabulary above also reaches it, and one open is all a consumer needs.
-        assertTypeAbsentFromAssembly "Reified.Schema" "Reified.Schema.Syntax+field"
-        assertTypePresentInAssembly "Reified.Schema" "Reified.Schema.field`2" |> ignore
+        assertTypeAbsentFromAssembly "Reified.Schema" "Reified.SchemaSyntax+field"
+        assertTypePresentInAssembly "Reified.Schema" "Reified.field`2" |> ignore
 
         let schemaAssemblyTypeNames =
             schemaAssembly.GetTypes()
@@ -554,12 +553,12 @@ module ApiShapeTests =
             |> Set.ofArray
 
         // The duplicate facades this design removed must not come back under any name.
-        test <@ not (schemaAssemblyTypeNames |> Set.contains "Reified.Schema.Constraint") @>
-        test <@ not (schemaAssemblyTypeNames |> Set.contains "Reified.Schema.SchemaConstraint`1") @>
-        test <@ not (schemaAssemblyTypeNames |> Set.contains "Reified.Schema.ConstraintDescriptor") @>
-        test <@ not (schemaAssemblyTypeNames |> Set.contains "Reified.Schema.ConstraintCheck") @>
+        test <@ not (schemaAssemblyTypeNames |> Set.contains "Reified.Constraint") @>
+        test <@ not (schemaAssemblyTypeNames |> Set.contains "Reified.SchemaConstraint`1") @>
+        test <@ not (schemaAssemblyTypeNames |> Set.contains "Reified.ConstraintDescriptor") @>
+        test <@ not (schemaAssemblyTypeNames |> Set.contains "Reified.ConstraintCheck") @>
 
-        moduleTypeFromAssembly "Reified.Schema" "Reified.Schema.SchemaCheck"
+        moduleTypeFromAssembly "Reified.Schema" "Reified.SchemaCheck"
         |> publicStaticMemberNames
         |> assertContainsAll [ "fromUnderlying"; "complete"; "text"; "ordered" ]
 
@@ -572,8 +571,8 @@ module ApiShapeTests =
         let primitiveValueKindType = typeof<PrimitiveValueKind>
         let externalFieldNameType = typeof<ExternalFieldName>
         let fieldOrderType = typeof<FieldOrder>
-        let schemaModule = moduleType schemaType "Reified.Schema.Schema"
-        let fieldModule = moduleType fieldType "Reified.Schema.Field"
+        let schemaModule = moduleType schemaType "Reified.Schema"
+        let fieldModule = moduleType fieldType "Reified.Field"
         let schemaAssembly = schemaType.Assembly
         let references = referencedAssemblyNames schemaAssembly
         let publicConstructors =
@@ -585,7 +584,7 @@ module ApiShapeTests =
         let publicExternalFieldNameConstructors =
             externalFieldNameType.GetConstructors(BindingFlags.Public ||| BindingFlags.Instance)
         let fieldDefinitionType =
-            schemaAssembly.GetType("Reified.Schema.FieldDefinition`2", true)
+            schemaAssembly.GetType("Reified.FieldDefinition`2", true)
         let fieldCreateMethods =
             publicStaticMethods fieldModule
             |> Array.filter (fun methodInfo -> methodInfo.Name = "create")
@@ -732,7 +731,7 @@ module ApiShapeTests =
 
     [<Fact>]
     let ``refined value schemas accept one bidirectional refinement descriptor`` () =
-        let valueModule = moduleTypeFromAssembly "Reified.Schema" "Reified.Schema.Schema"
+        let valueModule = moduleTypeFromAssembly "Reified.Schema" "Reified.Schema"
 
         let refinedOverloads =
             publicStaticMethods valueModule

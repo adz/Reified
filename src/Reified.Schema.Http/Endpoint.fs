@@ -2,7 +2,7 @@ namespace Reified.Schema.Http
 
 open System.IO
 open System.Text.Json
-open Reified.Schema
+open Reified
 
 /// <summary>One documented response of an endpoint.</summary>
 type ResponseSpec =

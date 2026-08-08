@@ -3,10 +3,9 @@ namespace Reified.Schema.Tests
 open Reified
 
 open Reified.Schema.Json
-open Reified.Schema
 open Swensen.Unquote
 open Xunit
-open Reified.Schema.Syntax
+open Reified.SchemaSyntax
 
 module RecursiveSchemaTests =
     type Category = { Name: string; Children: Category list }
@@ -14,7 +13,7 @@ module RecursiveSchemaTests =
     let private categorySchema () =
         let rec schema: Lazy<Schema<Category>> =
             lazy
-                (Syntax.schema<Category> {
+                (SchemaSyntax.schema<Category> {
                     field _.Name
                     field _.Children {
                         withSchema (Schema.listWith (Schema.defer (fun () -> schema.Value)))

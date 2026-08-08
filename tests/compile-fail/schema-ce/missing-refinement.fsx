@@ -1,8 +1,7 @@
 #load "references.fsx"
 
 open Reified
-open Reified.Schema
-open Reified.Schema.Syntax
+open Reified.SchemaSyntax
 
 type Email =
     private

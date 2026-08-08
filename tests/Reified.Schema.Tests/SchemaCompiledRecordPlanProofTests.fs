@@ -2,10 +2,10 @@ namespace Reified.Tests
 
 open System
 open System.Text
-open Reified.Schema
+open Reified
 open Swensen.Unquote
 open Xunit
-open Reified.Schema.Syntax
+open Reified.SchemaSyntax
 
 /// <summary>
 /// Proves that a constructor-last <c>Schema</c> shape carries enough typed information to lower a flat

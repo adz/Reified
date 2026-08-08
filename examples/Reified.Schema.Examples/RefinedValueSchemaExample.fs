@@ -1,8 +1,7 @@
 module RefinedValueSchemaExample
 
 open Reified
-open Reified.Schema
-open Reified.Schema.Syntax
+open Reified.SchemaSyntax
 
 /// <summary>An email address refined over Reified's text primitive, carrying the well-known email format.</summary>
 type Email =

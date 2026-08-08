@@ -5,7 +5,6 @@
 namespace Reified.Tests.Generated
 
 open Reified
-open Reified.Schema
 
 /// A geographic coordinate.
 type Geo =
@@ -19,7 +18,7 @@ type Geo =
 [<RequireQualifiedAccess>]
 module Geo =
 
-    open Reified.Schema.Syntax
+    open Reified.SchemaSyntax
     open Reified.ConstraintSyntax
 
     /// The schema declared by geo.contract (Geo.v1).

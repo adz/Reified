@@ -14,7 +14,7 @@ package, useful beyond schemas — see [its docs]({{< relref "/data/" >}}).)
 ## The Schema
 
 ```fsharp
-open Reified.Schema.Syntax
+open Reified.SchemaSyntax
 type Contact = { Kind: string; Value: string }
 
 type Customer =

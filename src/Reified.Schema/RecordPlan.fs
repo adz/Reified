@@ -1,6 +1,6 @@
 // Interpreter-facing typed record-plan contracts. SchemaBuilder.fs retains the typed field chain
 // and compiles it through these contracts without reflection or obj-array constructor dispatch.
-namespace Reified.Schema
+namespace Reified
 
 open System
 open System.Collections.Generic

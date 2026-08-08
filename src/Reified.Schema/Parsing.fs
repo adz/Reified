@@ -2,14 +2,13 @@
 // checks, then the record constructor only when every field passed — collecting path-addressed
 // diagnostics. Internal; Schema.parse / parseRetainingInput / check in SchemaApi.fs are the doors.
 // (Checking existing values reuses this pipeline with getters as the value source.)
-namespace Reified.Schema
+namespace Reified
 
 open Reified
 
 open System
 open System.Globalization
 open Reified.Refinements
-open Reified.Schema
 
 /// <summary>Options that customize how structured data is parsed through a schema.</summary>
 type SchemaParseOptions =

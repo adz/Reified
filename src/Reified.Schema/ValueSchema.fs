@@ -1,7 +1,7 @@
 // The value-schema catalog implementation behind Schema.text, Schema.int, Schema.list,
 // Schema.refine, Schema.union and friends: constructors and combinators over the erased value
 // definitions in Definitions.fs. Internal; SchemaApi.fs exposes the public surface.
-namespace Reified.Schema
+namespace Reified
 
 open System
 open System.Collections.Generic
@@ -731,7 +731,7 @@ module internal ValueSchema =
         // Both targets validate that the schema is primitive-backed; the eager projection-type check is .NET-only
         // because Fable erases generics at runtime. The projection itself stays reflection-free on both targets.
         let kind = underlyingPrimitiveKind schema
-        Platform.checkUnderlyingProjection<'primitive> (fun () -> underlyingClrType kind) (nameof schema)
+        SchemaPlatform.checkUnderlyingProjection<'primitive> (fun () -> underlyingClrType kind) (nameof schema)
 
         let rec project (definition: ValueSchemaDefinition) (value: obj) =
             match definition.Shape with

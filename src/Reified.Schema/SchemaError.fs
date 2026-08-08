@@ -2,7 +2,7 @@
 // parsing, checking, and refinement failures render and compose the same way regardless of which
 // interpreter raised them. REIFIED_SCHEMA_CORE_ONLY trims the Refined-dependent cases for
 // consumers that only need the core shape.
-namespace Reified.Schema
+namespace Reified
 
 open Reified
 

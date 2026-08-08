@@ -5,14 +5,13 @@
 namespace Reified.ReferenceApp.Wire
 
 open Reified
-open Reified.Schema
 
 /// Schema and boundary functions for WorkspaceCardV1 (workspace.fs, WorkspaceCard.v1).
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module WorkspaceCardV1 =
 
-    open Reified.Schema.Syntax
+    open Reified.SchemaSyntax
     open Reified.ConstraintSyntax
 
     /// The schema declared by workspace.fs (WorkspaceCard.v1).
@@ -45,7 +44,7 @@ module WorkspaceCardV1 =
 [<RequireQualifiedAccess>]
 module WorkspaceCard =
 
-    open Reified.Schema.Syntax
+    open Reified.SchemaSyntax
     open Reified.ConstraintSyntax
 
     let private visibilityCases =

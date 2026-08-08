@@ -6,7 +6,7 @@
 - `fieldAs "wire-name" _.Member` names the field explicitly; both forms resolve the member type's canonical schema.
 - `field _.Member` derives the camelCased wire name from a quotation. Works on .NET and on Fable JS/TS/Python/BEAM (5.10+) and Dart (5.13+); use `fieldAs` on Fable Rust/PHP.
 - Constraints are `Reified.Constraint.Constraint<'value>`; `Schema.constrain` takes the same value you check directly.
-- Open `Reified.ConstraintSyntax` for the unqualified constraint vocabulary; `Reified.Schema.Syntax` holds `schema`, `fieldAs`, `construct`, and collection adapters; `field` is a type reached by the same `open`.
+- Open `Reified.ConstraintSyntax` for the unqualified constraint vocabulary; `Reified.SchemaSyntax` holds `schema`, `fieldAs`, `construct`, and collection adapters; `field` is a type reached by the same `open`.
 - A field block may contain `withSchema`, `constrain`, `constraints`, `refine`, and `validate`.
 - `withSchema` sets the current field schema.
 - `constrain` adds one constraint. `constraints [ ... ]` adds several in declaration order.

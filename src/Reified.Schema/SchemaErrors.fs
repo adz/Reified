@@ -1,4 +1,4 @@
-namespace Reified.Schema
+namespace Reified
 
 open System
 open Reified

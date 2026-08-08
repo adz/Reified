@@ -5,7 +5,6 @@
 namespace Reified.Tests.Generated
 
 open Reified
-open Reified.Schema
 
 /// A user profile as first stored.
 type ProfileV1 =
@@ -19,7 +18,7 @@ type ProfileV1 =
 [<RequireQualifiedAccess>]
 module ProfileV1 =
 
-    open Reified.Schema.Syntax
+    open Reified.SchemaSyntax
     open Reified.ConstraintSyntax
 
     /// The schema declared by profile.contract (Profile.v1).
@@ -61,7 +60,7 @@ type Profile =
 [<RequireQualifiedAccess>]
 module Profile =
 
-    open Reified.Schema.Syntax
+    open Reified.SchemaSyntax
     open Reified.ConstraintSyntax
 
     /// The schema declared by profile.contract (Profile.v2).

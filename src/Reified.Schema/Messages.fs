@@ -1,7 +1,7 @@
 // Schema's own message catalogue. The identities stay here rather than moving into Reified.Constraint: Schema
 // depends on Constraint, never the reverse, and a MessageFormatSpec carries everything the generic renderer
 // needs — descriptor, neutral fallback, plural operand — so no Schema key is ever known to that package.
-namespace Reified.Schema
+namespace Reified
 
 open Reified
 

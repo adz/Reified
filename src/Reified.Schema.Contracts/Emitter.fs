@@ -86,7 +86,7 @@ module Emitter =
         | Distinct -> "Constraint.distinct"
         | CheckRef name -> failwith $"check reference '{name}' should have been rejected by the resolver"
 
-    /// Renders the typed Reified.Schema.Syntax form used after an inferred or explicit field.
+    /// Renders the typed Reified.SchemaSyntax form used after an inferred or explicit field.
     let private renderFieldConstraint fieldType constraint' =
         let argument (value: string) = if value.StartsWith "-" then $"({value})" else value
 
@@ -320,7 +320,6 @@ module Emitter =
         line $"namespace {namespaceName}"
         line ""
         line "open Reified"
-        line "open Reified.Schema"
 
         for contract in file.Contracts do
             let contractTypeName = typeNameOf contract.ContractName contract.Version
@@ -397,7 +396,7 @@ module Emitter =
             line "[<RequireQualifiedAccess>]"
             line $"module {contractTypeName} ="
             line ""
-            line "    open Reified.Schema.Syntax"
+            line "    open Reified.SchemaSyntax"
             line "    open Reified.ConstraintSyntax"
 
             for field in caseFields do
@@ -463,7 +462,7 @@ module Emitter =
 
             let schemaBuilder =
                 if recursion = " rec" then
-                    "Syntax.schema"
+                    "SchemaSyntax.schema"
                 else
                     "schema"
 

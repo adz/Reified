@@ -2,7 +2,6 @@ namespace Reified.Schema.Http
 
 open Reified
 
-open Reified.Schema
 
 /// <summary>Builds <see cref="T:Reified.Data" /> from the name/value surfaces an HTTP server hands over.</summary>
 /// <remarks>

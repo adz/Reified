@@ -2,11 +2,10 @@ namespace Reified.Schema.Testing.Tests
 
 open Reified
 
-open Reified.Schema
 open Reified.Schema.Testing
 open FsCheck.FSharp
 open Xunit
-open Reified.Schema.Syntax
+open Reified.SchemaSyntax
 open Reified.ConstraintSyntax
 open Swensen.Unquote
 

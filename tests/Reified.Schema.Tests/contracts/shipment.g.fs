@@ -5,14 +5,13 @@
 namespace Reified.Tests.Generated
 
 open Reified
-open Reified.Schema
 
 /// Schema and boundary functions for PickupPoint (shipment.fs, PickupPoint.v1).
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module PickupPoint =
 
-    open Reified.Schema.Syntax
+    open Reified.SchemaSyntax
     open Reified.ConstraintSyntax
 
     /// The schema declared by shipment.fs (PickupPoint.v1).
@@ -37,7 +36,7 @@ module PickupPoint =
 [<RequireQualifiedAccess>]
 module CourierDelivery =
 
-    open Reified.Schema.Syntax
+    open Reified.SchemaSyntax
     open Reified.ConstraintSyntax
 
     /// The schema declared by shipment.fs (CourierDelivery.v1).
@@ -62,7 +61,7 @@ module CourierDelivery =
 [<RequireQualifiedAccess>]
 module ShipmentV1 =
 
-    open Reified.Schema.Syntax
+    open Reified.SchemaSyntax
     open Reified.ConstraintSyntax
 
     /// The schema declared by shipment.fs (Shipment.v1).
@@ -98,7 +97,7 @@ module ShipmentV1 =
 [<RequireQualifiedAccess>]
 module Shipment =
 
-    open Reified.Schema.Syntax
+    open Reified.SchemaSyntax
     open Reified.ConstraintSyntax
 
     let private priorityCases =

@@ -5,7 +5,6 @@
 namespace Reified.Tests.Generated
 
 open Reified
-open Reified.Schema
 
 /// A recursive category tree used to prove self-references in generated schemas.
 type Category =
@@ -21,12 +20,12 @@ type Category =
 [<RequireQualifiedAccess>]
 module Category =
 
-    open Reified.Schema.Syntax
+    open Reified.SchemaSyntax
     open Reified.ConstraintSyntax
 
     /// The schema declared by category.contract (Category.v1).
     let rec schema : Schema<Category> =
-        Syntax.schema<Category> {
+        SchemaSyntax.schema<Category> {
             fieldAs "name" (fun (value: Category) -> value.Name) {
                 withSchema (Schema.text |> Schema.describe "Stable display name.")
                 constrain (minLength 1)

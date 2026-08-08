@@ -4,10 +4,9 @@ open System
 open System.Text.Json
 open BenchmarkDotNet.Attributes
 open BenchmarkDotNet.Order
-open Reified.Schema
-open Reified.Schema.Json
-open Reified.Schema.Syntax
 open Reified
+open Reified.Schema.Json
+open Reified.SchemaSyntax
 
 /// The shared benchmark model: a realistic aggregate with primitives, a nested record, and collections.
 module CodecModel =

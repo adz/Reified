@@ -2,7 +2,7 @@
 // by structured-data keys, JSON properties, diagnostic paths, and UI ids) and FieldOrder (a field's
 // position). Everything downstream — definitions, parsing, codecs — trusts these instead of raw
 // strings and ints. First file of the core; nothing here knows about schemas yet.
-namespace Reified.Schema
+namespace Reified
 
 open System
 open System.Collections.Generic
@@ -73,7 +73,7 @@ module FieldOrder =
     /// <exception cref="T:System.ArgumentOutOfRangeException">Thrown when <paramref name="value" /> is negative.</exception>
     let create value =
         if value < 0 then
-            Platform.argumentOutOfRange (nameof value) (box value) "Field order must be zero or greater."
+            SchemaPlatform.argumentOutOfRange (nameof value) (box value) "Field order must be zero or greater."
 
         FieldOrder value
 

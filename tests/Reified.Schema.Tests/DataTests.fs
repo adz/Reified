@@ -6,7 +6,6 @@ open System
 open System.Collections.Generic
 open Microsoft.Extensions.Configuration
 open System.Collections.Specialized
-open Reified.Schema
 open Swensen.Unquote
 open Xunit
 

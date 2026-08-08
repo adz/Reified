@@ -6,7 +6,7 @@ namespace Reified.Result
 /// </summary>
 /// <remarks>
 /// Optional and opt-in, in the same shape as <c>Reified.DataSyntax</c>, <c>Reified.ConstraintSyntax</c>, and
-/// <c>Reified.Schema.Syntax</c>: <c>open Reified.Result</c> for <c>Result</c>, then
+/// <c>Reified.SchemaSyntax</c>: <c>open Reified.Result</c> for <c>Result</c>, then
 /// <c>open Reified.Result.Syntax</c> for this vocabulary.
 /// </remarks>
 module Syntax =

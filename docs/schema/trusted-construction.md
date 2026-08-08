@@ -34,7 +34,7 @@ A library can guarantee the result of its own functions. It cannot prevent a cal
 constructor:
 
 ```fsharp
-open Reified.Schema.Syntax
+open Reified.SchemaSyntax
 type Booking =
     { Start: DateOnly
       End: DateOnly }

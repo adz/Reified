@@ -2,8 +2,7 @@
 
 open Reified
 open Reified.Refinements
-open Reified.Schema
-open Reified.Schema.Syntax
+open Reified.SchemaSyntax
 
 type Email =
     private

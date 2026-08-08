@@ -7,8 +7,8 @@
 // compiling, which is the signal we want.
 
 open Reified.Refinements
-open Reified.Schema
-open Reified.Schema.Syntax
+open Reified
+open Reified.SchemaSyntax
 open FsToolkit.ErrorHandling
 
 type Order = { Sku: string; Quantity: int }

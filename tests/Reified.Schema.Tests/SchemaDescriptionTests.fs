@@ -1,10 +1,10 @@
 namespace Reified.Tests
 
 open System
-open Reified.Schema
+open Reified
 open Swensen.Unquote
 open Xunit
-open Reified.Schema.Syntax
+open Reified.SchemaSyntax
 
 /// <summary>
 /// Proves that value schemas and model schemas carry portable description metadata: it is declarative annotation

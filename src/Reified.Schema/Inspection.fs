@@ -2,7 +2,7 @@
 // descriptions (SchemaShape, ModelDescription, FieldDescription, ...) with no getters, constructors,
 // or executable checks. Non-validation interpreters — JSON Schema, docs, UI generators — read this
 // instead of the erased definitions directly.
-namespace Reified.Schema
+namespace Reified
 
 open Reified
 

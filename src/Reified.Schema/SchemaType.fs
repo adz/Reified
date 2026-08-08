@@ -1,7 +1,7 @@
 // Schema<'model> itself: a sealed wrapper over a completed definition (model or value) plus the
 // optional compiled record plan, with the public UnionCase/EnumCase companions. A schema is a
 // description — behavior lives in interpreters (parsing, checking, codecs, JSON Schema, docs).
-namespace Reified.Schema
+namespace Reified
 
 open Reified
 

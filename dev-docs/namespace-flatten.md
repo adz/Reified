@@ -70,7 +70,7 @@ Ordered so each phase builds and tests green on its own, and so the riskiest ren
       `Data.<UnionCase>` reference in a file that declares or opens `Reified`.
 - [x] **Phase 4** — `Reified.Constraint` -> `Reified`, `module Syntax` -> `ConstraintSyntax`.
       Before Schema because Schema depends on it.
-- [ ] **Phase 5** — `Reified.Schema` -> `Reified`, `module Syntax` -> `SchemaSyntax`.
+- [x] **Phase 5** — `Reified.Schema` -> `Reified`, `module Syntax` -> `SchemaSyntax`.
       The large one: 21 source files plus the satellite packages' opens.
 - [ ] **Phase 6** — CE machinery into file-level `*Internals` modules with
       `EditorBrowsable(Never)` and `CompilerMessage(..., 42, IsHidden = true)`.

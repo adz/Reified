@@ -2,7 +2,7 @@
 
 // FS0064: the SRTP witness pattern (`(^w or ^s) : ...` with ^w fixed to a concrete witness class)
 // intentionally constrains the witness type variable; the warning is noise here.
-namespace Reified.Schema
+namespace Reified
 
 open Reified
 

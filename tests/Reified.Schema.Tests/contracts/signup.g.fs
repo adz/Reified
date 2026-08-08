@@ -5,7 +5,6 @@
 namespace Reified.Tests.Generated
 
 open Reified
-open Reified.Schema
 
 /// The "plan" cases of Signup (signup.contract, Signup.v1).
 [<RequireQualifiedAccess>]
@@ -31,7 +30,7 @@ type Signup =
 [<RequireQualifiedAccess>]
 module Signup =
 
-    open Reified.Schema.Syntax
+    open Reified.SchemaSyntax
     open Reified.ConstraintSyntax
 
     let private planCases =

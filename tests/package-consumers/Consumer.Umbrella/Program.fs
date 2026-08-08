@@ -5,8 +5,7 @@
 open Reified
 open Reified.Refinements
 open Reified.Result
-open Reified.Schema
-open Reified.Schema.Syntax
+open Reified.SchemaSyntax
 open Reified.Schema.Http
 open Reified.Schema.Json
 

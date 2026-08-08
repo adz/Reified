@@ -1,6 +1,6 @@
 // The record-schema computation expression. The outer builder separates fields and retains a typed
 // constructor chain; the optional inner field builder transforms one Schema<_> value.
-namespace Reified.Schema
+namespace Reified
 
 open Reified
 
@@ -632,7 +632,7 @@ type SchemaBuilder<'model>() =
 /// <remarks>
 /// <para>
 /// Optional and opt-in, in the same shape as <c>Reified.DataSyntax</c> and <c>Reified.ConstraintSyntax</c>:
-/// <c>open Reified.Schema</c> for <c>Schema</c>, then <c>open Reified.Schema.Syntax</c> for this vocabulary.
+/// <c>open Reified.Schema</c> for <c>Schema</c>, then <c>open Reified.SchemaSyntax</c> for this vocabulary.
 /// </para>
 /// <para>
 /// There is no constraint catalogue here. One <c>Constraint</c> vocabulary serves direct checking, refinement,
@@ -641,7 +641,7 @@ type SchemaBuilder<'model>() =
 /// here as <c>mustSupply</c> and <c>mayOmit</c>.
 /// </para>
 /// </remarks>
-module Syntax =
+module SchemaSyntax =
     /// <summary>Record-schema computation expression.</summary>
     let schema<'model> = SchemaBuilder<'model>()
 

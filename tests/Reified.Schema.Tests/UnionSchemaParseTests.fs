@@ -4,10 +4,9 @@ open Reified
 
 
 open Reified.Refinements
-open Reified.Schema
 open Swensen.Unquote
 open Xunit
-open Reified.Schema.Syntax
+open Reified.SchemaSyntax
 
 module UnionSchemaParseTests =
     type private CardDetails =

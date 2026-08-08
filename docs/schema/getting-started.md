@@ -21,7 +21,7 @@ dotnet add package Reified.Schema
 ```fsharp
 open Reified.Data
 open Reified.Schema
-open Reified.Schema.Syntax
+open Reified.SchemaSyntax
 ```
 
 ## 1. Plain fields

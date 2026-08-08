@@ -1,10 +1,10 @@
 namespace Reified.Tests
 
 open System
-open Reified.Schema
+open Reified
 open Swensen.Unquote
 open Xunit
-open Reified.Schema.Syntax
+open Reified.SchemaSyntax
 
 module SchemaEnumValueTests =
     type private Color =

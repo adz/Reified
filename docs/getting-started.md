@@ -40,7 +40,7 @@ Declare how untrusted input becomes one:
 open Reified.ConstraintSyntax
 open Reified.Data
 open Reified.Schema
-open Reified.Schema.Syntax
+open Reified.SchemaSyntax
 
 let signupSchema =
     schema<Signup> {

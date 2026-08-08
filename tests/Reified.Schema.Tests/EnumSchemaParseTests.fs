@@ -2,10 +2,9 @@ namespace Reified.Tests
 
 open Reified
 
-open Reified.Schema
 open Swensen.Unquote
 open Xunit
-open Reified.Schema.Syntax
+open Reified.SchemaSyntax
 
 module EnumSchemaParseTests =
     type private Color =

@@ -3,7 +3,7 @@
 // options, collections, maps, unions, enums, refined and deferred values), and the erased record
 // views FieldDescriptor/ModelSchemaDefinition plus the typed FieldDefinition/Field pair. Metadata
 // interpreters work from these; nothing here executes.
-namespace Reified.Schema
+namespace Reified
 
 open Reified
 

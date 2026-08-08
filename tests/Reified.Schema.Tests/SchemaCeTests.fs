@@ -2,8 +2,7 @@ namespace Reified.Tests
 
 open Reified
 open Reified.Refinements
-open Reified.Schema
-open Reified.Schema.Syntax
+open Reified.SchemaSyntax
 open Reified.Schema.Json
 open Swensen.Unquote
 open Xunit

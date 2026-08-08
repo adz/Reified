@@ -1,6 +1,6 @@
 // The internal core module the public Schema facade (SchemaApi.fs) re-exports, plus field
 // descriptor helpers and the public Field module.
-namespace Reified.Schema
+namespace Reified
 
 open Reified
 

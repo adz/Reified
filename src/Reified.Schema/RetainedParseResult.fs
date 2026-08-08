@@ -1,6 +1,6 @@
 // A parse result that keeps the original boundary Data alongside the outcome, so forms can redisplay
 // exactly what the user typed next to each field error and boundaries can audit raw input.
-namespace Reified.Schema
+namespace Reified
 
 open Reified
 

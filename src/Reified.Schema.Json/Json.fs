@@ -5,7 +5,6 @@ open Reified
 open System
 open System.Globalization
 open System.Text
-open Reified.Schema
 open Reified.Schema.Json.JsonRuntime
 
 /// <summary>A compiled JSON codec for one schema-described model.</summary>

@@ -1,7 +1,7 @@
 // Versioned contracts: detect a payload's schema version and migrate it stepwise to the current one
 // before parsing. This is the at-scale tier over plain schemas — start with Schema.parse; reach for
 // contracts when multiple wire versions must stay readable.
-namespace Reified.Schema
+namespace Reified
 
 open Reified
 

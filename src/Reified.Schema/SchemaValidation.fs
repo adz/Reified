@@ -1,11 +1,10 @@
 // Constraint execution: runs the constraints stored on a schema at parse and check time.
 // Parsing.fs drives this per field; it has no knowledge of input sources or whole-model construction.
-namespace Reified.Schema
+namespace Reified
 
 open System
 open Reified
 open Reified.Refinements
-open Reified.Schema
 
 /// <summary>
 /// Marks the package that owns schema input, diagnostics, validation, and rules interpreters.

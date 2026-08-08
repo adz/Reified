@@ -10,7 +10,6 @@ open Reified
 // domain mapping, and the head-version write path through a compiled codec.
 
 open System.Text.Json
-open Reified.Schema
 open Reified.ConstraintSyntax
 open Reified.Schema.Json
 open Reified.ReferenceApp.Wire

@@ -3,7 +3,7 @@
 /// half declares the same names, so the rest of the code is platform-directive-free. (Fable 5's project cracker does
 /// not expose FABLE_COMPILER as an MSBuild property, so the variants live in one conditionally-halved file rather
 /// than two conditionally-included ones; split them if Fable restores the property.)
-module internal Reified.Schema.Platform
+module internal Reified.SchemaPlatform
 
 open System
 open System.Collections.Generic
