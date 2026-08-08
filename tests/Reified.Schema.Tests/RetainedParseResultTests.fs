@@ -36,7 +36,7 @@ module RetainedParseResultTests =
     let ``retained parse exposes schema issues and errors at a path`` () =
         let raw = Data.objectOfMap (Map.ofList [ "email", Data.Text "" ])
         let parsed = Schema.parseRetainingInput (schema ()) raw
-        let emailPath = Path.key "email"
+        let emailPath = SchemaPath.key "email"
 
         test <@ parsed.Input = raw @>
         test <@ not parsed.IsValid @>

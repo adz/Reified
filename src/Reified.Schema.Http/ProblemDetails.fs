@@ -11,9 +11,9 @@ module JsonPointer =
         token.Replace("~", "~0").Replace("/", "~1")
 
     /// <summary>Renders a diagnostics path as a JSON pointer. The empty path renders as <c>""</c> (the whole document).</summary>
-    let ofPath (path: Path) : string =
+    let ofPath (path: SchemaPath) : string =
         path
-        |> Path.fold
+        |> SchemaPath.fold
             (fun pointer key -> pointer + "/" + escape key)
             (fun pointer index -> pointer + "/" + string index)
             ""

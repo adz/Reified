@@ -61,7 +61,7 @@ let customerId raw =
     }
 ```
 
-Use ordinary functions when additional configuration is required. `Parse.optional`, `Choice.orElse`, and
+Use ordinary functions when additional configuration is required. `Parse.optional`, `Refine.Choice.orElse`, and
 `Refinement.create` all compose through standard `Result` functions.
 
 Continue with [Define Refined Types](../domain-values/).

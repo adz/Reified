@@ -87,7 +87,7 @@ module SchemaRefinedValueTests =
         | Ok _ -> failwith "Expected refinement to reject the value."
         | Error diagnostics ->
             let errors = diagnostics |> SchemaErrors.toList
-            test <@ errors |> List.map _.Path = [ Path.root ] @>
+            test <@ errors |> List.map _.Path = [ SchemaPath.root ] @>
             test <@ errors |> List.map _.Error = [ SchemaError.Violation(Atomic(Described("must not be a blocked address", None))) ] @>
 
     [<Fact>]

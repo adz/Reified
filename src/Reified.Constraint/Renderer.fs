@@ -700,7 +700,7 @@ module Renderer =
             Renderer(renderer.Context, renderer.Attribute, renderer.Resolve, format)
 
         /// <summary>Sets the attribute to a complete path, replacing any previous one.</summary>
-        /// <remarks>Schema supplies its typed <c>Path</c> keys through this; an empty list clears the attribute.</remarks>
+        /// <remarks>Schema supplies its typed <c>SchemaPath</c> keys through this; an empty list clears the attribute.</remarks>
         /// <example><code>renderer |> Renderer.Advanced.attributePath [ "address"; "postcode" ]</code></example>
         let attributePath (segments: string list) (renderer: Renderer) : Renderer =
             if isNull renderer then nullArg (nameof renderer)

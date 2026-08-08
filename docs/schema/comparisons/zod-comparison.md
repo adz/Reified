@@ -18,7 +18,7 @@ differences come from F# and .NET, not from a different philosophy.
 | --- | --- |
 | `z.object({ name: z.string().max(80) })` | `schema<...> { field _.Name { constrain (maxLength 80) }; construct ctor }` |
 | `schema.safeParse(input)` | `Schema.parse schema raw` → `Result` |
-| `result.error.issues` with paths | `SchemaErrors.toList errors` and `Path.format issue.Path` |
+| `result.error.issues` with paths | `SchemaErrors.toList errors` and `SchemaPath.format issue.Path` |
 | `z.string().email().brand<'Email'>()` | `Schema.refine` over a private representation and constraint-backed `Refinement` |
 | `z.discriminatedUnion("type", ...)` | `Schema.union "type" "value" [ UnionCase.create ... ]` |
 | `z.infer<typeof schema>` | not needed — the schema is declared against your record type directly |

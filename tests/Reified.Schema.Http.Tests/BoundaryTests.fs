@@ -13,16 +13,16 @@ open Reified.Schema.Syntax
 [<Fact>]
 let ``json pointers render names, keys, and indexes`` () =
     let path =
-        Path.root
-        |> fun path -> Path.append path (Path.key "address")
-        |> fun path -> Path.append path (Path.key "some/key~x")
-        |> fun path -> Path.append path (Path.index 2)
+        SchemaPath.root
+        |> fun path -> SchemaPath.append path (SchemaPath.key "address")
+        |> fun path -> SchemaPath.append path (SchemaPath.key "some/key~x")
+        |> fun path -> SchemaPath.append path (SchemaPath.index 2)
 
     test <@ JsonPointer.ofPath path = "/address/some~1key~0x/2" @>
 
 [<Fact>]
 let ``the empty path renders as the whole-document pointer`` () =
-    test <@ JsonPointer.ofPath Path.root = "" @>
+    test <@ JsonPointer.ofPath SchemaPath.root = "" @>
 
 [<Fact>]
 let ``form pairs nest through dotted names and group repeats`` () =

@@ -37,16 +37,70 @@ type DistinctList<'value when 'value: equality> =
         member this.GetEnumerator() =
             (this.ToList() :> System.Collections.IEnumerable).GetEnumerator()
 
-/// Text refined value constructors and helpers.
+/// <summary>Smart constructors for built-in refined values, and the refinements behind them.</summary>
+/// <remarks>
+/// <c>Text</c>, <c>Character</c>, <c>Collection</c>, and <c>Choice</c> are nested here rather than declared
+/// beside <c>Refine</c>. Each names a concept general enough to shadow something a caller already has in scope,
+/// and none of them is a companion to a type this package exports, so there is nothing to gain from the
+/// type-and-module pairing that keeps <c>NonBlankString</c> and <c>DistinctList</c> at the top level.
+/// </remarks>
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
-module Text =
-    let nonBlankStringRefinement = Refinement.define Constraint.present NonBlankString _.Value
-    let nonBlankString value = Refinement.create nonBlankStringRefinement value
+module Refine =
+    /// Text refined value constructors and helpers.
+    module Text =
+        let nonBlankStringRefinement = Refinement.define Constraint.present NonBlankString _.Value
+        let nonBlankString value = Refinement.create nonBlankStringRefinement value
+
+    /// Character predicate helpers.
+    module Character =
+        let isAsciiDigit value = value >= '0' && value <= '9'
+        let isAsciiHexDigit value = (value >= '0' && value <= '9') || (value >= 'a' && value <= 'f') || (value >= 'A' && value <= 'F')
+        let isLowercase (value: char) = Char.IsLower value
+        let isUppercase (value: char) = Char.IsUpper value
+        let isWhitespace (value: char) = Char.IsWhiteSpace value
+        let isControl (value: char) = Char.IsControl value
+        let isNumeric (value: char) = Char.IsNumber value
+
+    /// Collection refined value constructors and helpers.
+    module Collection =
+        let nonEmptyListRefinement<'value> () = NonEmptyList.refinement<'value> ()
+        let nonEmptyArrayRefinement<'value> () = NonEmptyArray.refinement<'value> ()
+
+        /// Admits a non-empty array from a list, which is the shape structured wire formats use.
+        let nonEmptyArrayFromListRefinement<'value> () = NonEmptyArray.listRefinement<'value> ()
+
+        let distinctListRefinement<'value when 'value: equality> () =
+            let constraint': Constraint<'value list> = Constraint.distinct<'value list>
+            Refinement.define constraint' DistinctList _.ToList()
+        let nonEmptyList values = values |> Seq.toList |> Refinement.create (nonEmptyListRefinement ())
+        let nonEmptyArray values = values |> Seq.toArray |> Refinement.create (nonEmptyArrayRefinement ())
+        let distinctList values = values |> Seq.toList |> Refinement.create (distinctListRefinement ())
+
+    /// Choice combinators for ordinary fallible conversion functions.
+    module Choice =
+        let orElse leftMap left rightMap right fallbackError input =
+            match left input with Ok value -> Ok(leftMap value) | Error _ -> match right input with Ok value -> Ok(rightMap value) | Error _ -> Error fallbackError
+        let tryAny fallbackError strategies input =
+            if isNull (box strategies) then Error fallbackError
+            else
+                match strategies |> Seq.tryPick (fun strategy -> match strategy input with Ok value -> Some value | Error _ -> None) with
+                | Some value -> Ok value
+                | None -> Error fallbackError
+
+    let nonBlankString = Text.nonBlankString
+    let finiteFloat = FiniteFloat.create
+    let finiteFloat32 = FiniteFloat32.create
+    let unitInterval = UnitInterval.create
+    let interval lower upper = Interval.create lower upper
+    let bounded bounds value = Bounded.create bounds value
+    let nonEmptyList values = Collection.nonEmptyList values
+    let nonEmptyArray values = Collection.nonEmptyArray values
+    let distinctList values = Collection.distinctList values
 
 /// Operations over text known to carry non-whitespace content.
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module NonBlankString =
-    let refinement = Text.nonBlankStringRefinement
+    let refinement = Refine.Text.nonBlankStringRefinement
 
     /// <summary>Returns the underlying string value.</summary>
     let value (input: NonBlankString) = input.Value
@@ -93,44 +147,17 @@ module NonBlankString =
             | head :: tail -> NonEmpty(head, tail)
             | [] -> NonEmpty(trim input, [])
 
-/// Character predicate helpers.
-[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
-module Character =
-    let isAsciiDigit value = value >= '0' && value <= '9'
-    let isAsciiHexDigit value = (value >= '0' && value <= '9') || (value >= 'a' && value <= 'f') || (value >= 'A' && value <= 'F')
-    let isLowercase (value: char) = Char.IsLower value
-    let isUppercase (value: char) = Char.IsUpper value
-    let isWhitespace (value: char) = Char.IsWhiteSpace value
-    let isControl (value: char) = Char.IsControl value
-    let isNumeric (value: char) = Char.IsNumber value
-
-/// Collection refined value constructors and helpers.
-[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
-module Collection =
-    let nonEmptyListRefinement<'value> () = NonEmptyList.refinement<'value> ()
-    let nonEmptyArrayRefinement<'value> () = NonEmptyArray.refinement<'value> ()
-
-    /// Admits a non-empty array from a list, which is the shape structured wire formats use.
-    let nonEmptyArrayFromListRefinement<'value> () = NonEmptyArray.listRefinement<'value> ()
-
-    let distinctListRefinement<'value when 'value: equality> () =
-        let constraint': Constraint<'value list> = Constraint.distinct<'value list>
-        Refinement.define constraint' DistinctList _.ToList()
-    let nonEmptyList values = values |> Seq.toList |> Refinement.create (nonEmptyListRefinement ())
-    let nonEmptyArray values = values |> Seq.toArray |> Refinement.create (nonEmptyArrayRefinement ())
-    let distinctList values = values |> Seq.toList |> Refinement.create (distinctListRefinement ())
-
 /// Operations over lists known to hold no duplicates.
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module DistinctList =
-    let refinement<'value when 'value: equality> () = Collection.distinctListRefinement<'value> ()
+    let refinement<'value when 'value: equality> () = Refine.Collection.distinctListRefinement<'value> ()
 
     /// <summary>Returns the refined value as a standard list.</summary>
     let toList (input: DistinctList<'value>) = input.ToList()
 
     /// <summary>Admits a list, failing when it holds duplicates.</summary>
-    let create values = Collection.distinctList values
+    let create values = Refine.Collection.distinctList values
 
     /// <summary>Removes duplicates rather than rejecting them, preserving first-seen order. Total.</summary>
     let ofSeq values = values |> Seq.toList |> List.distinct |> DistinctList
@@ -268,27 +295,3 @@ module DistinctList =
     /// <summary>Adds a projection of every item, matching <c>List.sumBy</c>.</summary>
     let inline sumBy projection (input: DistinctList<'value>) = input.ToList() |> List.sumBy projection
 
-/// Choice combinators for ordinary fallible conversion functions.
-[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
-module Choice =
-    let orElse leftMap left rightMap right fallbackError input =
-        match left input with Ok value -> Ok(leftMap value) | Error _ -> match right input with Ok value -> Ok(rightMap value) | Error _ -> Error fallbackError
-    let tryAny fallbackError strategies input =
-        if isNull (box strategies) then Error fallbackError
-        else
-            match strategies |> Seq.tryPick (fun strategy -> match strategy input with Ok value -> Some value | Error _ -> None) with
-            | Some value -> Ok value
-            | None -> Error fallbackError
-
-/// Convenience smart constructors for built-in refined values.
-[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
-module Refine =
-    let nonBlankString = Text.nonBlankString
-    let finiteFloat = FiniteFloat.create
-    let finiteFloat32 = FiniteFloat32.create
-    let unitInterval = UnitInterval.create
-    let interval lower upper = Interval.create lower upper
-    let bounded bounds value = Bounded.create bounds value
-    let nonEmptyList values = Collection.nonEmptyList values
-    let nonEmptyArray values = Collection.nonEmptyArray values
-    let distinctList values = Collection.distinctList values

@@ -121,7 +121,7 @@ module ContractTests =
         let input = raw [ "version", scalar 2; "name", scalar "edge"; "port", scalar 8080 ]
         match Contract.parse contract input with
         | Error(ContractError.Migration(MigrationError.RevalidationFailed diagnostics)) ->
-            test <@ diagnostics |> SchemaErrors.toList |> List.map _.Path = [ Path.key "label" ] @>
+            test <@ diagnostics |> SchemaErrors.toList |> List.map _.Path = [ SchemaPath.key "label" ] @>
         | result -> failwithf "Expected revalidation diagnostics, got %A" result
 
     [<Fact>]
@@ -154,7 +154,7 @@ module ContractTests =
             test
                 <@
                     diagnostics |> SchemaErrors.toList |> List.map _.Path =
-                        [ Path.key "label"; Path.key "port" ]
+                        [ SchemaPath.key "label"; SchemaPath.key "port" ]
                 @>
         | result -> failwithf "Expected parse diagnostics, got %A" result
 

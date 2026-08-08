@@ -64,7 +64,7 @@ type SchemaDefaults =
 
     /// <summary>Builds a non-empty list schema from an explicitly resolved item schema.</summary>
     static member NonEmptyListWith(item: Schema<'item>) : Schema<Reified.Refinements.NonEmptyList<'item>> =
-        SchemaCore.refine (Reified.Refinements.Collection.nonEmptyListRefinement<'item> ()) (SchemaCore.listWith item)
+        SchemaCore.refine (Reified.Refinements.Refine.Collection.nonEmptyListRefinement<'item> ()) (SchemaCore.listWith item)
 
     static member inline Schema(_: Reified.Refinements.NonEmptyList< ^item>) : Schema<Reified.Refinements.NonEmptyList< ^item>> =
         let inline resolve (witness: ^w, marker: ^value) : Schema< ^value> =
@@ -89,7 +89,7 @@ type SchemaDefaults =
 
     /// <summary>Builds a duplicate-free list schema from an explicitly resolved item schema.</summary>
     static member DistinctListWith(item: Schema<'item>) : Schema<Reified.Refinements.DistinctList<'item>> =
-        SchemaCore.refine (Reified.Refinements.Collection.distinctListRefinement<'item> ()) (SchemaCore.listWith item)
+        SchemaCore.refine (Reified.Refinements.Refine.Collection.distinctListRefinement<'item> ()) (SchemaCore.listWith item)
 
     static member inline Schema(_: Reified.Refinements.DistinctList< ^item>) : Schema<Reified.Refinements.DistinctList< ^item>> =
         let inline resolve (witness: ^w, marker: ^value) : Schema< ^value> =

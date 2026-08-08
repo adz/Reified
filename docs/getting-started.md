@@ -81,7 +81,7 @@ match Schema.parse signupSchema input with
 | Ok signup -> register signup
 | Error errors ->
     for issue in SchemaErrors.toList errors do
-        printfn "%s: %s" (Path.format issue.Path) (SchemaError.render issue.Error)
+        printfn "%s: %s" (SchemaPath.format issue.Path) (SchemaError.render issue.Error)
 ```
 
 ```text

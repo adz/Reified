@@ -52,7 +52,7 @@ let badInput =
 
 let private renderFailures (errors: SchemaErrors) =
     SchemaErrors.toList errors
-    |> List.map (fun issue -> sprintf "%s: %s" (Path.format issue.Path) (SchemaError.render issue.Error))
+    |> List.map (fun issue -> sprintf "%s: %s" (SchemaPath.format issue.Path) (SchemaError.render issue.Error))
 
 [<EntryPoint>]
 let main _ =

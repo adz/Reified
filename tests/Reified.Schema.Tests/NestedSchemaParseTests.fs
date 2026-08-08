@@ -157,7 +157,7 @@ module NestedSchemaParseTests =
 
         let sortedErrors =
             parsed.Errors
-            |> List.sortBy (fun error -> Path.format error.Path)
+            |> List.sortBy (fun error -> SchemaPath.format error.Path)
 
         test <@ not parsed.IsValid @>
 

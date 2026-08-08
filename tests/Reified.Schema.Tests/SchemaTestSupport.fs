@@ -16,7 +16,7 @@ module TestPath =
             let next =
                 match segment with
                 | PathSegment.Key key
-                | PathSegment.Name key -> Path.key key
-                | PathSegment.Index index -> Path.index index
+                | PathSegment.Name key -> SchemaPath.key key
+                | PathSegment.Index index -> SchemaPath.index index
 
-            Path.append path next) Path.root
+            SchemaPath.append path next) SchemaPath.root

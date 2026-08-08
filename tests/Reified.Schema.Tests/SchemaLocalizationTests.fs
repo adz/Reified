@@ -64,7 +64,7 @@ module SchemaLocalizationTests =
         let rendered =
             errors
             |> SchemaErrors.messages (Renderer.english |> Renderer.context "signup")
-            |> List.map (fun (path, message) -> Path.format path, message)
+            |> List.map (fun (path, message) -> SchemaPath.format path, message)
 
         test <@ rendered |> List.contains ("name", "must be present") @>
         test <@ rendered |> List.contains ("addresses[0].postcode", "must have a size between 2 and 40, but was 1") @>
@@ -76,7 +76,7 @@ module SchemaLocalizationTests =
         let rendered =
             errors
             |> SchemaErrors.fullMessages (Renderer.english |> Renderer.context "signup")
-            |> List.map (fun (path, message) -> Path.format path, message)
+            |> List.map (fun (path, message) -> SchemaPath.format path, message)
 
         test <@ rendered |> List.contains ("name", "Name must be present") @>
         test <@ rendered |> List.contains ("addresses[0].postcode", "Postcode must have a size between 2 and 40, but was 1") @>
@@ -96,7 +96,7 @@ module SchemaLocalizationTests =
                 None)
             |> Renderer.context "signup"
 
-        let rendered = errors |> SchemaErrors.messages renderer |> List.map (fst >> Path.format)
+        let rendered = errors |> SchemaErrors.messages renderer |> List.map (fst >> SchemaPath.format)
 
         test <@ rendered = [ "addresses[1].postcode" ] @>
         test <@ seen |> Seq.forall (fun key -> not (key.Contains "[")) @>
@@ -131,7 +131,7 @@ module SchemaLocalizationTests =
         let rendered =
             errors |> SchemaErrors.fullMessages (Renderer.english |> Renderer.context "signup")
 
-        test <@ rendered |> List.map (fst >> Path.format) = [ "" ] @>
+        test <@ rendered |> List.map (fst >> SchemaPath.format) = [ "" ] @>
         test <@ rendered |> List.map snd = [ "value must be an object" ] @>
 
     [<Fact>]

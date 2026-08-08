@@ -174,11 +174,11 @@ module SchemaValidationTests =
             <@
                 issues validation =
                     Error
-                        [ { Path = Path.key "age"
+                        [ { Path = SchemaPath.key "age"
                             Error = SchemaError.Violation(Atomic(Expected(RelationAtom(Compared(AtLeast, ConstraintValue.Integer 18L)), Some(ConstraintValue.Integer 10L)))) }
                           // Two constraints on one field accumulate into one violation tree at that path, not two
                           // diagnostics: grouping is the constraint layer's job and the path is Schema's.
-                          { Path = Path.key "email"
+                          { Path = SchemaPath.key "email"
                             Error =
                               SchemaError.Violation(
                                   All(
@@ -198,9 +198,9 @@ module SchemaValidationTests =
             <@
                 issues validation =
                     Error
-                        [ { Path = Path.key "age"
+                        [ { Path = SchemaPath.key "age"
                             Error = SchemaError.Violation(Atomic(Expected(RelationAtom(Compared(AtLeast, ConstraintValue.Integer 18L)), Some(ConstraintValue.Integer 16L)))) }
-                          { Path = Path.key "email"
+                          { Path = SchemaPath.key "email"
                             Error =
                               SchemaError.Violation(
                                   Atomic(Expected(FormatAtom Format.Email, Some(ConstraintValue.Text "not-an-email")))
@@ -233,9 +233,9 @@ module SchemaValidationTests =
             <@
                 issues validation =
                     Error
-                        [ { Path = Path.key "age"
+                        [ { Path = SchemaPath.key "age"
                             Error = SchemaError.Violation(Atomic(Described("Must be an adult.", None))) }
-                          { Path = Path.key "email"
+                          { Path = SchemaPath.key "email"
                             Error = SchemaError.Violation(Atomic(Described("Email is required.", None))) } ]
             @>
 
@@ -264,7 +264,7 @@ module SchemaValidationTests =
             <@
                 issues validation =
                     Error
-                        [ { Path = Path.key "primary-on-wire"
+                        [ { Path = SchemaPath.key "primary-on-wire"
                             Error = SchemaError.Violation(Atomic(Expected(MembershipAtom(OneOf [ ConstraintValue.Text "secondary-value" ]), Some(ConstraintValue.Text "wrong-secondary")))) } ]
             @>
 
@@ -302,7 +302,7 @@ module SchemaValidationTests =
             <@
                 issues validation =
                     Error
-                        [ { Path = Path.append (Path.key "address") (Path.key "city")
+                        [ { Path = SchemaPath.append (SchemaPath.key "address") (SchemaPath.key "city")
                             Error = SchemaError.Violation(Atomic(Expected(PresenceAtom Present, None))) } ]
             @>
 
@@ -351,7 +351,7 @@ module SchemaValidationTests =
             <@
                 issues validation =
                     Error
-                        [ { Path = Path.key "contacts"
+                        [ { Path = SchemaPath.key "contacts"
                             Error = SchemaError.Violation(Atomic(Expected(CardinalityAtom(Cardinality.Maximum 2), Some(ConstraintValue.Integer 3L)))) } ]
             @>
 
@@ -372,7 +372,7 @@ module SchemaValidationTests =
             <@
                 issues validation =
                     Error
-                        [ { Path = Path.append (Path.key "values") (Path.index 1)
+                        [ { Path = SchemaPath.append (SchemaPath.key "values") (SchemaPath.index 1)
                             Error = SchemaError.Violation(Atomic(Expected(PresenceAtom Present, None))) } ]
             @>
 
@@ -411,11 +411,11 @@ module SchemaValidationTests =
             <@
                 issues validation =
                     Error
-                        [ { Path = Path.key "age"
+                        [ { Path = SchemaPath.key "age"
                             Error = SchemaError.Violation(Atomic(Expected(RelationAtom(Compared(AtLeast, ConstraintValue.Integer 18L)), Some(ConstraintValue.Integer 17L)))) }
                           // Two constraints on one field accumulate into one violation tree at that path, not two
                           // diagnostics: grouping is the constraint layer's job and the path is Schema's.
-                          { Path = Path.key "email"
+                          { Path = SchemaPath.key "email"
                             Error =
                               SchemaError.Violation(
                                   All(

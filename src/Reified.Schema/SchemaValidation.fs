@@ -149,7 +149,7 @@ module SchemaCheck =
 [<RequireQualifiedAccess>]
 module internal ModelFieldCheck =
     let private diagnosticsAt path error =
-        SchemaErrors.singleton (Path path) error
+        SchemaErrors.singleton (SchemaPath path) error
 
     let private mergeErrors errors =
         SchemaErrors.collect errors

@@ -3,18 +3,18 @@ namespace Reified.Schema
 open System
 open Reified.Constraint
 
-type internal PathComponent =
+type internal SchemaPathComponent =
     | KeyComponent of string
     | IndexComponent of int
 
 /// <summary>An immutable location within structured schema input.</summary>
 [<Sealed; AllowNullLiteral>]
-type Path internal (components: PathComponent list) =
+type SchemaPath internal (components: SchemaPathComponent list) =
     member internal _.Components = components
 
     override _.Equals(other) =
         match other with
-        | :? Path as path -> components = path.Components
+        | :? SchemaPath as path -> components = path.Components
         | _ -> false
 
     override _.GetHashCode() = hash components
@@ -22,33 +22,33 @@ type Path internal (components: PathComponent list) =
     interface IComparable with
         member _.CompareTo(other) =
             match other with
-            | :? Path as path -> compare components path.Components
+            | :? SchemaPath as path -> compare components path.Components
             | _ -> invalidArg (nameof other) "Cannot compare values of different types."
 
 /// <summary>Functions for building and formatting schema error paths.</summary>
 [<RequireQualifiedAccess>]
-module Path =
+module SchemaPath =
     /// <summary>The root of a schema value.</summary>
-    let root = Path []
+    let root = SchemaPath []
 
     /// <summary>A string field or map-key location.</summary>
     let key value =
         if isNull value then nullArg (nameof value)
-        Path [ KeyComponent value ]
+        SchemaPath [ KeyComponent value ]
 
     /// <summary>A zero-based collection-item location.</summary>
     let index value =
         if value < 0 then invalidArg (nameof value) "A path index cannot be negative."
-        Path [ IndexComponent value ]
+        SchemaPath [ IndexComponent value ]
 
     /// <summary>Appends a relative path to a parent path.</summary>
-    let append (parent: Path) (child: Path) =
+    let append (parent: SchemaPath) (child: SchemaPath) =
         if isNull parent then nullArg (nameof parent)
         if isNull child then nullArg (nameof child)
-        Path(parent.Components @ child.Components)
+        SchemaPath(parent.Components @ child.Components)
 
     /// <summary>Formats a path with dot-separated keys and bracketed indexes.</summary>
-    let format (path: Path) =
+    let format (path: SchemaPath) =
         if isNull path then nullArg (nameof path)
 
         path.Components
@@ -59,7 +59,7 @@ module Path =
             | IndexComponent index -> $"{text}[{index}]") ""
 
     /// <summary>Folds over string keys and integer indexes without exposing a path-segment type.</summary>
-    let fold keyFolder indexFolder state (path: Path) =
+    let fold keyFolder indexFolder state (path: SchemaPath) =
         if isNull (box keyFolder) then nullArg (nameof keyFolder)
         if isNull (box indexFolder) then nullArg (nameof indexFolder)
         if isNull path then nullArg (nameof path)
@@ -74,7 +74,7 @@ module Path =
 type SchemaIssue =
     {
         /// <summary>The location of the failure.</summary>
-        Path: Path
+        Path: SchemaPath
         /// <summary>The schema failure.</summary>
         Error: SchemaError
     }
@@ -116,15 +116,15 @@ module SchemaErrors =
         toList errors
         |> List.map (fun issue ->
             let message = SchemaError.render issue.Error
-            let path = Path.format issue.Path
+            let path = SchemaPath.format issue.Path
             if String.IsNullOrEmpty path then message else $"{path}: {message}")
         |> String.concat Environment.NewLine
 
     /// Schema owns the diagnostic path and supplies it as the renderer's attribute path. Index components are
     /// omitted from resource candidates — `addresses[0].postcode` and `addresses[7].postcode` are the same field
     /// and must not need two catalogue entries — but every returned path keeps its indexes unchanged.
-    let private scope (renderer: Renderer) (path: Path) =
-        let keys = path |> Path.fold (fun keys key -> key :: keys) (fun keys _ -> keys) [] |> List.rev
+    let private scope (renderer: Renderer) (path: SchemaPath) =
+        let keys = path |> SchemaPath.fold (fun keys key -> key :: keys) (fun keys _ -> keys) [] |> List.rev
         renderer |> Renderer.Advanced.attributePath keys
 
     let private renderIssue full (renderer: Renderer) (issue: SchemaIssue) =
@@ -148,13 +148,13 @@ module SchemaErrors =
 
     /// <summary>Renders each failure as a localized predicate, paired with the path it occurred at.</summary>
     /// <remarks>
-    /// Predicates, not sentences: the returned <c>Path</c> already identifies the field, so a form that renders
+    /// Predicates, not sentences: the returned <c>SchemaPath</c> already identifies the field, so a form that renders
     /// its own label would otherwise print the field name twice. Supply only the document context — Schema folds
     /// its typed path in as the attribute itself.
     /// </remarks>
     /// <example><code>errors |> SchemaErrors.messages (renderer |> Renderer.context "signup")
-    /// // [ Path "name", "must be present" ]</code></example>
-    let messages (renderer: Renderer) (errors: SchemaErrors) : (Path * string) list =
+    /// // [ SchemaPath "name", "must be present" ]</code></example>
+    let messages (renderer: Renderer) (errors: SchemaErrors) : (SchemaPath * string) list =
         if isNull renderer then nullArg (nameof renderer)
 
         toList errors
@@ -162,12 +162,12 @@ module SchemaErrors =
 
     /// <summary>Renders each failure as a complete fragment with its attribute noun, paired with its path.</summary>
     /// <remarks>
-    /// For API payloads and anywhere else without an adjacent label. At <c>Path.root</c> the noun comes from
+    /// For API payloads and anywhere else without an adjacent label. At <c>SchemaPath.root</c> the noun comes from
     /// <c>constraint.attribute.default</c>; the document context is never used as a noun.
     /// </remarks>
     /// <example><code>errors |> SchemaErrors.fullMessages (renderer |> Renderer.context "signup")
-    /// // [ Path "name", "Name must be present" ]</code></example>
-    let fullMessages (renderer: Renderer) (errors: SchemaErrors) : (Path * string) list =
+    /// // [ SchemaPath "name", "Name must be present" ]</code></example>
+    let fullMessages (renderer: Renderer) (errors: SchemaErrors) : (SchemaPath * string) list =
         if isNull renderer then nullArg (nameof renderer)
 
         toList errors
@@ -179,7 +179,7 @@ module SchemaErrors =
     let toStringWith (renderer: Renderer) (errors: SchemaErrors) : string =
         fullMessages renderer errors
         |> List.map (fun (path, message) ->
-            let path = Path.format path
+            let path = SchemaPath.format path
             if String.IsNullOrEmpty path then message else $"{path}: {message}")
         |> String.concat Environment.NewLine
 

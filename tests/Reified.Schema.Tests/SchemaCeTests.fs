@@ -188,7 +188,7 @@ module SchemaCeTests =
             | Ok _ -> []
 
         let expected =
-            [ Path.key "email",
+            [ SchemaPath.key "email",
               SchemaError.Custom("company-email", Some "Expected an example.com address.") ]
 
         test <@ parseIssues = expected @>

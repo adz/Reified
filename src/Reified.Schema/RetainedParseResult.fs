@@ -10,10 +10,10 @@ module private DataPathConversion =
         |> List.fold (fun current part ->
             let next =
                 match part with
-                | DataPathSegment.Name name -> Path.key name
-                | DataPathSegment.Index index -> Path.index index
+                | DataPathSegment.Name name -> SchemaPath.key name
+                | DataPathSegment.Index index -> SchemaPath.index index
 
-            Path.append current next) Path.root
+            SchemaPath.append current next) SchemaPath.root
 
 /// <summary>A schema parse result that retains its original structured input.</summary>
 type RetainedParseResult<'value> =
@@ -43,7 +43,7 @@ type RetainedParseResult<'value> =
         | Error errors -> SchemaErrors.toList errors
 
     /// <summary>Returns schema errors attached exactly to the supplied path.</summary>
-    member this.ErrorsFor(path: Path) =
+    member this.ErrorsFor(path: SchemaPath) =
         if isNull path then nullArg (nameof path)
 
         this.Errors
@@ -69,5 +69,5 @@ module RetainedParseResult =
         parsed.Errors
         |> List.map (fun issue ->
             let message = SchemaError.render issue.Error
-            let path = Path.format issue.Path
+            let path = SchemaPath.format issue.Path
             if System.String.IsNullOrEmpty path then message else $"{path}: {message}")

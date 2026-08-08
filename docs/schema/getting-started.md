@@ -86,7 +86,7 @@ match Schema.parse signupSchema input with
 | Ok signup -> save signup
 | Error errors ->
     for issue in SchemaErrors.toList errors do
-        printfn "%s: %s" (Path.format issue.Path) (SchemaError.render issue.Error)
+        printfn "%s: %s" (SchemaPath.format issue.Path) (SchemaError.render issue.Error)
 ```
 
 Input missing `newsletter` and carrying `"age": "not-a-number"`:

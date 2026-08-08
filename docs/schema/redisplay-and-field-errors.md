@@ -83,17 +83,17 @@ open Reified.Constraint
 let signup = renderer |> Renderer.context "signup"
 
 errors |> SchemaErrors.messages signup
-// [ Path "email",              "must be a valid email"
-//   Path "contacts[1].value",  "must be present" ]
+// [ SchemaPath "email",              "must be a valid email"
+//   SchemaPath "contacts[1].value",  "must be present" ]
 
 errors |> SchemaErrors.fullMessages signup
-// [ Path "email",              "Email must be a valid email"
-//   Path "contacts[1].value",  "Value must be present" ]
+// [ SchemaPath "email",              "Email must be a valid email"
+//   SchemaPath "contacts[1].value",  "Value must be present" ]
 
 errors |> SchemaErrors.toStringWith signup   // one full message per line
 ```
 
-`messages` returns bare predicates, which is what a form wants: the returned `Path` already identifies the field, so
+`messages` returns bare predicates, which is what a form wants: the returned `SchemaPath` already identifies the field, so
 a template that renders its own label does not print the name twice. `fullMessages` composes the attribute noun once
 for payloads, logs, and summaries.
 
@@ -107,7 +107,7 @@ for field in formFields do
     let messages =
         errors
         |> SchemaErrors.messages signup
-        |> List.filter (fun (path, _) -> Path.format path = field.Path)
+        |> List.filter (fun (path, _) -> SchemaPath.format path = field.Path)
         |> List.map snd
 
     render field value messages
@@ -137,7 +137,7 @@ Schema depends on Constraint and never the reverse.
 `SchemaMessages.keys`, `.arguments`, and `.english` expose the same data. Constructor failures and custom errors
 carrying authored prose have no catalogue entry: Schema does not invent a key for text your application wrote.
 
-At `Path.root`, full rendering uses `constraint.attribute.default` — "value" in English — never the document context.
+At `SchemaPath.root`, full rendering uses `constraint.attribute.default` — "value" in English — never the document context.
 
 ## Mapping To Domain Errors
 

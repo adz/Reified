@@ -82,8 +82,8 @@ module SchemaDiagnosticsRenderingTests =
             | Ok _ -> failwith "Expected a failed parse."
 
         let expected =
-            [ { Path = Path.key "age"; Error = SchemaError.InvalidFormat "int" }
-              { Path = Path.key "email"; Error = SchemaError.Blank } ]
+            [ { Path = SchemaPath.key "age"; Error = SchemaError.InvalidFormat "int" }
+              { Path = SchemaPath.key "email"; Error = SchemaError.Blank } ]
 
         test <@ flattened = expected @>
         test <@ parsed.Errors = expected @>
@@ -98,7 +98,7 @@ module SchemaDiagnosticsRenderingTests =
             | Error diagnostics -> SchemaErrors.toList diagnostics
             | Ok _ -> failwith "Expected a failed parse."
 
-        test <@ flattened = [ { Path = Path.root; Error = SchemaError.ExpectedObject } ] @>
+        test <@ flattened = [ { Path = SchemaPath.root; Error = SchemaError.ExpectedObject } ] @>
 
     [<Fact>]
     let ``flatten and toString agree on which fields failed`` () =
@@ -116,7 +116,7 @@ module SchemaDiagnosticsRenderingTests =
             let text = SchemaErrors.toString diagnostics
 
             let flattenedFieldNames =
-                flattened |> List.map (fun issue -> Path.format issue.Path) |> List.distinct |> List.sort
+                flattened |> List.map (fun issue -> SchemaPath.format issue.Path) |> List.distinct |> List.sort
 
             test <@ flattenedFieldNames = [ "age"; "email" ] @>
             test <@ text.Contains("email:") @>

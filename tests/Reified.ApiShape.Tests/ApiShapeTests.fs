@@ -405,13 +405,13 @@ module ApiShapeTests =
 
         test <@ typeof<SchemaErrors>.Assembly.GetName().Name = "Reified.Schema" @>
         test <@ typeof<SchemaIssue>.Assembly.GetName().Name = "Reified.Schema" @>
-        test <@ typeof<Reified.Schema.Path>.Assembly.GetName().Name = "Reified.Schema" @>
+        test <@ typeof<Reified.Schema.SchemaPath>.Assembly.GetName().Name = "Reified.Schema" @>
 
         Assembly.Load("Reified.Schema").GetType("Reified.Schema.SchemaErrorsModule", true)
         |> publicStaticMemberNames
         |> assertContainsAll [ "toList"; "count"; "isEmpty"; "toString" ]
 
-        Assembly.Load("Reified.Schema").GetType("Reified.Schema.PathModule", true)
+        Assembly.Load("Reified.Schema").GetType("Reified.Schema.SchemaPathModule", true)
         |> publicStaticMemberNames
         |> assertContainsAll [ "root"; "key"; "index"; "append"; "format"; "fold" ]
 

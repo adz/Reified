@@ -20,5 +20,5 @@ module CatalogTests =
     [<Fact>]
     let ``choice remains an ordinary conversion combinator`` () =
         let parseInt (text: string) = match System.Int32.TryParse text with true, value -> Ok value | _ -> Error "int"
-        let result = Choice.orElse id parseInt String.length Ok "neither" "42"
+        let result = Refine.Choice.orElse id parseInt String.length Ok "neither" "42"
         test <@ result = Ok 42 @>

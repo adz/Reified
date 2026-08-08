@@ -18,14 +18,14 @@ open Reified.Schema
 type SchemaParseOptions =
     internal
         {
-            ConstructorErrorPath: PathComponent list option
+            ConstructorErrorPath: SchemaPathComponent list option
         }
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module internal SchemaParsing =
 
-    let private diagnosticsPath (path: DataPath) : PathComponent list =
+    let private diagnosticsPath (path: DataPath) : SchemaPathComponent list =
         path
         |> List.map (function
             | DataPathSegment.Name name -> KeyComponent name
@@ -53,7 +53,7 @@ module internal SchemaParsing =
             ConstructorErrorPath = path |> DataPath.parse |> diagnosticsPath |> Some }
 
     let private diagnosticsAt path error =
-        SchemaErrors.singleton (Path path) error
+        SchemaErrors.singleton (SchemaPath path) error
 
     let private errorAt path error =
         Error(diagnosticsAt path error)

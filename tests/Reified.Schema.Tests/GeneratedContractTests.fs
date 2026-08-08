@@ -65,8 +65,8 @@ module GeneratedContractTests =
                 |> SchemaErrors.toList
                 |> List.map _.Path
 
-            test <@ paths |> List.contains (Path.key "email") @>
-            test <@ paths |> List.contains (Path.key "age") @>
+            test <@ paths |> List.contains (SchemaPath.key "email") @>
+            test <@ paths |> List.contains (SchemaPath.key "age") @>
 
     [<Fact>]
     let ``validate checks nested optional payloads at nested paths`` () =
@@ -76,7 +76,7 @@ module GeneratedContractTests =
             | Error diagnostics -> diagnostics
 
         let paths = badGeo |> SchemaErrors.toList |> List.map _.Path
-        test <@ paths = [ Path.key "lat" ] @>
+        test <@ paths = [ SchemaPath.key "lat" ] @>
 
         let withLocation =
             Signup.validate
@@ -264,7 +264,7 @@ module GeneratedContractTests =
             let paths = diagnostics |> SchemaErrors.toList |> List.map _.Path
 
             for expected in [ "reference"; "notify_email"; "tags"; "weightKg"; "boxes" ] do
-                test <@ paths |> List.contains (Path.key expected) @>
+                test <@ paths |> List.contains (SchemaPath.key expected) @>
 
     [<Fact>]
     let ``record-derived version chains migrate through the generated contract builder`` () =

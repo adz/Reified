@@ -105,6 +105,6 @@ module OptionalSchemaParseTests =
             <@
                 issues =
                     Error
-                        [ { Path = Path.key "nickname"
+                        [ { Path = SchemaPath.key "nickname"
                             Error = SchemaError.Violation(Atomic(Expected(CardinalityAtom(Cardinality.Minimum 2), Some(ConstraintValue.Integer 1L)))) } ]
             @>
