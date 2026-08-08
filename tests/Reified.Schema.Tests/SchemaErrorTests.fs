@@ -1,8 +1,7 @@
 namespace Reified.Tests
 
-open Reified.Parse
+open Reified
 
-open Reified.Data
 
 open Reified.Constraint
 open Reified.Refinements

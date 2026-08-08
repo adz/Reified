@@ -4,7 +4,7 @@
 // </auto-generated>
 namespace Reified.Tests.Generated
 
-open Reified.Data
+open Reified
 open Reified.Constraint
 open Reified.Schema
 

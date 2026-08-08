@@ -1,7 +1,7 @@
 // Reified.Parse installed alone. Parse has zero dependencies, so this fixture is the direct test of
 // that claim: if anything leaks in, the restore graph shows it.
 
-open Reified.Parse
+open Reified
 
 [<EntryPoint>]
 let main _ =

@@ -99,8 +99,8 @@ module SchemaOptionalValueTests =
                 construct (fun name nickname -> { Name = name; Nickname = nickname })
             }
 
-        let omitted = Reified.Data.Data.Object [ "name", Reified.Data.Data.Text "Ada" ]
-        let explicitNull = Reified.Data.Data.Object [ "name", Reified.Data.Data.Text "Ada"; "nickname", Reified.Data.Data.Null ]
+        let omitted = Reified.Data.Object [ "name", Reified.Data.Text "Ada" ]
+        let explicitNull = Reified.Data.Object [ "name", Reified.Data.Text "Ada"; "nickname", Reified.Data.Null ]
 
         test <@ Schema.parse constrained omitted |> Result.isError @>
         test <@ Schema.parse constrained explicitNull = Ok { Name = "Ada"; Nickname = None } @>

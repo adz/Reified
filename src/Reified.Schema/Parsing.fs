@@ -4,9 +4,7 @@
 // (Checking existing values reuses this pipeline with getters as the value source.)
 namespace Reified.Schema
 
-open Reified.Parse
-
-open Reified.Data
+open Reified
 
 open System
 open System.Globalization

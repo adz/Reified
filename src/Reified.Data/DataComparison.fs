@@ -1,4 +1,4 @@
-namespace Reified.Data
+namespace Reified
 
 /// <summary>Internal exact structural comparison for structured data.</summary>
 [<RequireQualifiedAccess>]

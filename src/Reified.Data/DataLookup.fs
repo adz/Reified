@@ -1,4 +1,4 @@
-namespace Reified.Data
+namespace Reified
 
 /// <summary>Internal lookup and scalar redisplay operations over owned structured data.</summary>
 [<RequireQualifiedAccess>]

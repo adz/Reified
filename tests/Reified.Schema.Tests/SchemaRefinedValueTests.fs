@@ -1,7 +1,7 @@
 namespace Reified.Tests
 
 open Reified.Constraint
-open Reified.Data
+open Reified
 
 open System
 open Reified.Refinements

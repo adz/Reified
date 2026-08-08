@@ -41,8 +41,18 @@ These were established by spike; they constrain the design and are not negotiabl
 - **No shipped alias module.** A user whose domain owns a catalogue name writes their own
   local `type`/`module` abbreviation. A shipped alias would duplicate generic constraints
   across files and drift silently.
-- **`Reified.Data` and `Reified.Result` keep their namespaces.** Neither is referenced by
-  `Reified.Schema.fsproj`; they are genuinely separable.
+- **`Reified.Result` keeps its namespace.** Not referenced by `Reified.Schema.fsproj`, and
+  verified safe: a child namespace named `Result` shadows neither FSharp.Core's `Result`
+  module nor its type.
+- **`Reified.Data` flattens too — forced, not chosen.** A child namespace shadows a type of
+  the same name for any file declaring or opening the parent, so `namespace Reified` plus
+  `namespace Reified.Data` makes `Data.Text` unresolvable. Confirmed cross-assembly by
+  spike. Type annotations (`: Data`) and module functions (`Data.ofMap`) still resolve —
+  only RequireQualifiedAccess *union cases* break, which is exactly how `Data` is consumed.
+  Qualifying every case site was the alternative: 1 source file, 29 test files, and every
+  user who writes `open Reified` alongside `open Reified.Data`. Flattening removes the
+  child namespace and the shadow with it. `Data`'s 20 public names were already verified
+  collision-free in the merged namespace.
 
 ## Phases
 
@@ -51,20 +61,23 @@ Ordered so each phase builds and tests green on its own, and so the riskiest ren
 
 - [x] **Phase 0** — Land the prerequisite renames (`SchemaPath`, `Refine.*` nesting).
 - [x] **Phase 1** — `Reified.Schema.Derive` -> `Reified.DerivedSchema`. Mandatory before
-      phase 4: it is the only sub-namespace sharing `Reified.Schema.dll`, so FS0247 fires
+      phase 5: it is the only sub-namespace sharing `Reified.Schema.dll`, so FS0247 fires
       otherwise. Standalone and small, so it goes first.
-- [ ] **Phase 2** — `Reified.Parse` -> `Reified`. Two files, two public names. The canary
+- [x] **Phase 2** — `Reified.Parse` -> `Reified`. Two files, two public names. The canary
       that proves the flatten end to end at minimum cost.
-- [ ] **Phase 3** — `Reified.Constraint` -> `Reified`, `module Syntax` -> `ConstraintSyntax`.
+- [x] **Phase 3** — `Reified.Data` -> `Reified`. Before Constraint and Schema because both
+      consume `Data`, and because leaving it a child namespace breaks every
+      `Data.<UnionCase>` reference in a file that declares or opens `Reified`.
+- [ ] **Phase 4** — `Reified.Constraint` -> `Reified`, `module Syntax` -> `ConstraintSyntax`.
       Before Schema because Schema depends on it.
-- [ ] **Phase 4** — `Reified.Schema` -> `Reified`, `module Syntax` -> `SchemaSyntax`.
+- [ ] **Phase 5** — `Reified.Schema` -> `Reified`, `module Syntax` -> `SchemaSyntax`.
       The large one: 21 source files plus the satellite packages' opens.
-- [ ] **Phase 5** — CE machinery into file-level `*Internals` modules with
+- [ ] **Phase 6** — CE machinery into file-level `*Internals` modules with
       `EditorBrowsable(Never)` and `CompilerMessage(..., 42, IsHidden = true)`.
       `field` excluded.
-- [ ] **Phase 6** — Umbrella `.fsproj` comment, docs, `llms.txt`, docgen inputs, generated
+- [ ] **Phase 7** — Umbrella `.fsproj` comment, docs, `llms.txt`, docgen inputs, generated
       reference pages.
-- [ ] **Phase 7** — Full validation: build, tests, source inventory, Fable surface, docs.
+- [ ] **Phase 8** — Full validation: build, tests, source inventory, Fable surface, docs.
 
 ## Sweep bill
 

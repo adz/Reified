@@ -3,7 +3,7 @@
 // input it parses. Referencing only Reified.Schema here is the point of the fixture.
 
 open Reified.Constraint
-open Reified.Data
+open Reified
 open Reified.Schema
 open Reified.Schema.Syntax
 

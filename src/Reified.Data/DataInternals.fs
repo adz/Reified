@@ -1,4 +1,4 @@
-namespace Reified.Data
+namespace Reified
 
 open System
 

@@ -2,7 +2,7 @@
 // exactly what the user typed next to each field error and boundaries can audit raw input.
 namespace Reified.Schema
 
-open Reified.Data
+open Reified
 
 module private DataPathConversion =
     let schemaPath (path: DataPath) =

@@ -1,6 +1,6 @@
 namespace Reified.Tests
 
-open Reified.Data
+open Reified
 
 open Reified.Schema
 open Reified.Tests.Generated

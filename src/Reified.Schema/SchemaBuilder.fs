@@ -631,7 +631,7 @@ type SchemaBuilder<'model>() =
 /// </summary>
 /// <remarks>
 /// <para>
-/// Optional and opt-in, in the same shape as <c>Reified.Data.Syntax</c> and <c>Reified.Constraint.Syntax</c>:
+/// Optional and opt-in, in the same shape as <c>Reified.DataSyntax</c> and <c>Reified.Constraint.Syntax</c>:
 /// <c>open Reified.Schema</c> for <c>Schema</c>, then <c>open Reified.Schema.Syntax</c> for this vocabulary.
 /// </para>
 /// <para>

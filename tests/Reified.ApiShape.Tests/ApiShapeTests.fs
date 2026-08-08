@@ -1,8 +1,7 @@
 namespace Reified.Tests
 
-open Reified.Parse
+open Reified
 
-open Reified.Data
 
 open System
 open System.Diagnostics
@@ -343,7 +342,7 @@ module ApiShapeTests =
         assertTypeAbsentFromAssembly "Reified.Schema" "Reified.Schema.ValueSchema`1"
 
         let dataMembers =
-            moduleTypeFromAssembly "Reified.Data" "Reified.Data.DataModule"
+            moduleTypeFromAssembly "Reified.Data" "Reified.DataModule"
             |> publicStaticMemberNames
 
         dataMembers
@@ -385,7 +384,7 @@ module ApiShapeTests =
               "redisplayPath" ]
 
         let dataEditMembers =
-            moduleTypeFromAssembly "Reified.Data" "Reified.Data.DataEditModule"
+            moduleTypeFromAssembly "Reified.Data" "Reified.DataEditModule"
             |> publicStaticMemberNames
 
         dataEditMembers
@@ -525,7 +524,7 @@ module ApiShapeTests =
         |> assertContainsAll [ "packageName" ]
 
         // One opt-in door per package: Reified.Schema.Syntax carries the whole schema-definition vocabulary,
-        // matching Reified.Data.Syntax, Reified.Constraint.Syntax, and Reified.Result.Syntax.
+        // matching Reified.DataSyntax, Reified.Constraint.Syntax, and Reified.Result.Syntax.
         //
         // There is still exactly one value-rule vocabulary. Schema publishes no constraint catalogue of its own:
         // the field-block syntax carries only collection adapters, and supply, which is Schema's concern.
@@ -1320,7 +1319,7 @@ module ApiShapeTests =
         assertModuleAbsentFromAssembly "Reified.Result" "Reified.Result.Collection"
 
         let parseMembers =
-            moduleTypeFromAssembly "Reified.Parse" "Reified.Parse.Parse"
+            moduleTypeFromAssembly "Reified.Parse" "Reified.Parse"
             |> publicStaticMemberNames
 
         test <@ typeof<ParseError>.Assembly.GetName().Name = "Reified.Parse" @>

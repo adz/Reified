@@ -1,4 +1,4 @@
-namespace Reified.Parse
+namespace Reified
 
 open System
 open System.Globalization

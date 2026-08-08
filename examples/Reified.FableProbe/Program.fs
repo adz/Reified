@@ -1,6 +1,6 @@
 module Reified.FableProbe.Program
 
-open Reified.Data
+open Reified
 open Reified.Schema.Json
 
 // Runs the same assertions on .NET and on Fable JavaScript. A check that passes here and fails there is the

@@ -11,7 +11,7 @@ Matching checks only the values relevant to a test. Unmentioned fields and items
 
 ```fsharp
 open Reified.Data
-open Reified.Data.Syntax
+open Reified.DataSyntax
 
 let actual =
     data [

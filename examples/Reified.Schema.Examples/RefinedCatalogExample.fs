@@ -1,6 +1,6 @@
 module RefinedCatalogExample
 
-open Reified.Parse
+open Reified
 
 open System
 open Reified.Result

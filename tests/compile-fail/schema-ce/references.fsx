@@ -4,7 +4,7 @@
 #r "../../../artifacts/bin/Reified.Data/debug_net8.0/Reified.Data.dll"
 #r "../../../artifacts/bin/Reified.Schema/debug_net8.0/Reified.Schema.dll"
 
-open Reified.Data
+open Reified
 open Reified.Refinements
 open Reified.Schema
 open Reified.Schema.Syntax

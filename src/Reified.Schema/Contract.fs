@@ -3,7 +3,7 @@
 // contracts when multiple wire versions must stay readable.
 namespace Reified.Schema
 
-open Reified.Data
+open Reified
 
 open System
 /// A failure produced while migrating an older wire representation.

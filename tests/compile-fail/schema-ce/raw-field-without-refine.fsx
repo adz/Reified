@@ -1,6 +1,6 @@
 #load "references.fsx"
 
-open Reified.Data
+open Reified
 open Reified.Schema
 open Reified.Schema.Syntax
 

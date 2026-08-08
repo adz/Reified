@@ -1,4 +1,4 @@
-open Reified.Data
+open Reified
 
 // The generated-wire reference slice: the same boundary discipline as Reified.ReferenceApp,
 // but the wire tier is generated from [<DeriveSchema>] records instead of hand-written.

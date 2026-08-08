@@ -1,7 +1,7 @@
 namespace Reified.Schema.Testing.Tests
 
 open Reified.Constraint
-open Reified.Data
+open Reified
 
 open Reified.Schema
 open Reified.Schema.Testing

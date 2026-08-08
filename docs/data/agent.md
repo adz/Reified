@@ -6,7 +6,7 @@ weight: 100
 
 # For AI agents
 
-Use `Reified.Data.Syntax` for source-neutral fixtures and produced output. Construct values with `data`, derive related
+Use `Reified.DataSyntax` for source-neutral fixtures and produced output. Construct values with `data`, derive related
 values with `patch`, `variants`, or `matrix`, and prove output with `matching`. Use `Data.compare` when the complete tree
 is the contract and partial patterns when only selected evidence matters.
 

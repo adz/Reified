@@ -1,4 +1,4 @@
-namespace Reified.Parse
+namespace Reified
 
 /// <summary>Primitive parse failures returned by <c>Parse</c> helpers.</summary>
 type ParseError =

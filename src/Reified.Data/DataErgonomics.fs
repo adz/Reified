@@ -1,4 +1,4 @@
-namespace Reified.Data
+namespace Reified
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
@@ -256,7 +256,7 @@ module Data =
 
 
 /// <summary>Concise opt-in syntax for literals, immutable edits, cases, and matching.</summary>
-module Syntax =
+module DataSyntax =
     /// <summary>Associates a field name with an exact value or recursive data pattern.</summary>
     let inline (=>) (name: string) (value: ^value) : DataField =
         Data.assoc name value

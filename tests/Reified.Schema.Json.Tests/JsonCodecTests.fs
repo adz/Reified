@@ -22,11 +22,11 @@ module JsonCodecTests =
         test
             <@
                 value =
-                    Reified.Data.Data.Object
-                        [ "n", Reified.Data.Data.Number "1.20e+3"
-                          "n", Reified.Data.Data.Number "2"
-                          "text", Reified.Data.Data.Text "Ada"
-                          "items", Reified.Data.Data.List [ Reified.Data.Data.Bool true; Reified.Data.Data.Null ] ]
+                    Reified.Data.Object
+                        [ "n", Reified.Data.Number "1.20e+3"
+                          "n", Reified.Data.Number "2"
+                          "text", Reified.Data.Text "Ada"
+                          "items", Reified.Data.List [ Reified.Data.Bool true; Reified.Data.Null ] ]
             @>
 
     [<Fact>]

@@ -4,7 +4,7 @@
 // </auto-generated>
 namespace Reified.ReferenceApp.Wire
 
-open Reified.Data
+open Reified
 open Reified.Constraint
 open Reified.Schema
 

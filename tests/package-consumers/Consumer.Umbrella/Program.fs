@@ -3,8 +3,7 @@
 // umbrella's dependency list is missing one.
 
 open Reified.Constraint
-open Reified.Data
-open Reified.Parse
+open Reified
 open Reified.Refinements
 open Reified.Result
 open Reified.Schema

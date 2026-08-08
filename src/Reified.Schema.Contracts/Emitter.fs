@@ -1,6 +1,6 @@
 namespace Reified.Schema.Contracts
 
-open Reified.Data
+open Reified
 
 open System
 open System.Text
@@ -319,7 +319,7 @@ module Emitter =
         line "// </auto-generated>"
         line $"namespace {namespaceName}"
         line ""
-        line "open Reified.Data"
+        line "open Reified"
         line "open Reified.Constraint"
         line "open Reified.Schema"
 

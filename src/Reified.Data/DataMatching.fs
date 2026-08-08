@@ -1,4 +1,4 @@
-namespace Reified.Data
+namespace Reified
 
 /// <summary>Internal recursive pattern matching and expectation evaluation for structured data.</summary>
 [<RequireQualifiedAccess>]

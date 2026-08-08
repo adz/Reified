@@ -1,6 +1,6 @@
 namespace Reified.Schema.Contracts
 
-open Reified.Data
+open Reified
 
 open System
 open System.Text.RegularExpressions

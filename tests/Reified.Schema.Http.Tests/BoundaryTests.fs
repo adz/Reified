@@ -1,6 +1,6 @@
 module Reified.Schema.Http.Tests.BoundaryTests
 
-open Reified.Data
+open Reified
 
 open System.Text.Json
 open Xunit

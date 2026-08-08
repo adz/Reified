@@ -1,6 +1,6 @@
 namespace Reified.Schema.Http
 
-open Reified.Data
+open Reified
 
 open Reified.Schema
 

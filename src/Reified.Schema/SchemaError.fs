@@ -4,7 +4,7 @@
 // consumers that only need the core shape.
 namespace Reified.Schema
 
-open Reified.Parse
+open Reified
 
 open Reified.Constraint
 

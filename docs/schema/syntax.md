@@ -15,7 +15,7 @@ open Reified.Schema
 open Reified.Schema.Syntax
 ```
 
-The same shape applies to `Reified.Data.Syntax`, `Reified.Constraint.Syntax`, and `Reified.Result.Syntax` — two
+The same shape applies to `Reified.DataSyntax`, `Reified.Constraint.Syntax`, and `Reified.Result.Syntax` — two
 lines, every package.
 
 A record schema is one constructor-last computation expression:

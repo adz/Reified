@@ -1,6 +1,6 @@
 namespace Reified.Schema.Tests
 
-open Reified.Data
+open Reified
 
 open Reified.Schema.Json
 open Reified.Schema
