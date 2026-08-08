@@ -2,7 +2,7 @@ namespace Reified.Tests
 
 open System
 open Reified
-open Reified.DataSyntax
+open Reified.DataDSL
 open Swensen.Unquote
 open Xunit
 

@@ -3,7 +3,7 @@ namespace Reified.Tests
 open Reified
 
 open System
-open Reified.SchemaSyntax
+open Reified.SchemaDSL
 open Swensen.Unquote
 open Xunit
 
@@ -202,8 +202,8 @@ module ShapeSyntaxTests =
 
     [<Fact>]
     let ``nested constraints apply to list items and map values`` () =
-        let names = Schema.list<string>() |> SchemaSyntax.constrainItems (Constraint.minLength 2)
-        let labels = Schema.map<string>() |> SchemaSyntax.constrainValues (Constraint.minLength 2)
+        let names = Schema.list<string>() |> SchemaDSL.constrainItems (Constraint.minLength 2)
+        let labels = Schema.map<string>() |> SchemaDSL.constrainValues (Constraint.minLength 2)
         let nameInput = (Data.List [ Data.Text "x" ])
         let labelInput = (Data.objectOfMap (Map.ofList [ "short", Data.Text "x" ]))
 

@@ -40,8 +40,8 @@ A schema describes how structured input becomes a model. It returns the typed va
 
 ```fsharp
 open Reified
-open Reified.ConstraintSyntax
-open Reified.SchemaSyntax
+open Reified.ConstraintDSL
+open Reified.SchemaDSL
 
 type Signup =
     { Email: string

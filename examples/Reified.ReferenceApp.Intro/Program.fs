@@ -11,8 +11,8 @@ open Reified
 // Schema owns accumulated, path-aware input failures; the next reference app adds it.
 
 open Reified.Result
-open Reified.Result.Syntax
-open Reified.ConstraintSyntax
+open Reified.ResultDSL
+open Reified.ConstraintDSL
 open Reified.Refinements
 
 // ---------------------------------------------------------------------------

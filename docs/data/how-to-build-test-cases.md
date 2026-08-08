@@ -13,7 +13,7 @@ The four functions on this page are `variant`, `variants`, `dimension`, and `mat
 
 ```fsharp
 open Reified
-open Reified.DataSyntax
+open Reified.DataDSL
 
 let baseline =
     data [

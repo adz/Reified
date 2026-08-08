@@ -1,8 +1,8 @@
 module Reified.Schema.Http.Tests.Fixtures
 
 open Reified
-open Reified.SchemaSyntax
-open Reified.ConstraintSyntax
+open Reified.SchemaDSL
+open Reified.ConstraintDSL
 
 type Address = { Street: string; City: string }
 

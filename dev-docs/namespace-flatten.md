@@ -6,8 +6,8 @@ rather than paying a namespace tax.
 | Task | Preamble |
 |---|---|
 | Read schemas, inspect, contracts | `open Reified` |
-| Define schemas | `+ open Reified.SchemaSyntax` |
-| Constraints unqualified | `+ open Reified.ConstraintSyntax` |
+| Define schemas | `+ open Reified.SchemaDSL` |
+| Constraints unqualified | `+ open Reified.ConstraintDSL` |
 | Use refined types | `+ open Reified.Refinements` |
 | Derive from attributes | `+ open Reified.DerivedSchema` |
 
@@ -31,8 +31,12 @@ These were established by spike; they constrain the design and are not negotiabl
 
 ## Decisions taken
 
-- **Keep `Syntax` in the name.** `SchemaSyntax` / `ConstraintSyntax`, not `DSL` — renaming
-  the concept buys nothing and adds call sites to the sweep.
+- **The vocabularies are `<Pkg>DSL`.** `SchemaDSL`, `ConstraintDSL`, `DataDSL`, `ResultDSL`.
+  The `<Pkg>` prefix is forced — three modules named `Syntax` cannot share `Reified` — and
+  `DSL` over `Syntax` is the house name for them. `ResultDSL` carries only computation
+  expressions rather than a vocabulary of constructors, so the name fits it least; it sits
+  under the shared convention anyway, and moved to `namespace Reified` so all four are
+  reached the same way rather than as `Reified.Result.ResultDSL`.
 - **`field` stays at namespace level.** `ApiShapeTests.fs` pins it present on purpose:
   `field _.Email` must resolve from the same open that supplies the vocabulary.
 - **`Reified.Refinements` is untouched.** `Refine` and `Refinement` stay there rather than
@@ -68,9 +72,9 @@ Ordered so each phase builds and tests green on its own, and so the riskiest ren
 - [x] **Phase 3** — `Reified.Data` -> `Reified`. Before Constraint and Schema because both
       consume `Data`, and because leaving it a child namespace breaks every
       `Data.<UnionCase>` reference in a file that declares or opens `Reified`.
-- [x] **Phase 4** — `Reified.Constraint` -> `Reified`, `module Syntax` -> `ConstraintSyntax`.
+- [x] **Phase 4** — `Reified.Constraint` -> `Reified`, `module Syntax` -> `ConstraintDSL`.
       Before Schema because Schema depends on it.
-- [x] **Phase 5** — `Reified.Schema` -> `Reified`, `module Syntax` -> `SchemaSyntax`.
+- [x] **Phase 5** — `Reified.Schema` -> `Reified`, `module Syntax` -> `SchemaDSL`.
       The large one: 21 source files plus the satellite packages' opens.
 - [x] **Phase 6** — CE machinery into `SchemaFieldSteps` and `SchemaCeBuilder` modules with
       `EditorBrowsable(Never)` and `CompilerMessage(..., 42, IsHidden = true)`. Two modules

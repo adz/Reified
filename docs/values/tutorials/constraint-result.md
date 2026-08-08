@@ -11,7 +11,7 @@ This tutorial validates a signup request and maps each `Violation` into an appli
 ```fsharp
 open Reified
 open Reified.Result
-open Reified.Result.Syntax
+open Reified.ResultDSL
 
 type SignupRequest =
     { Name: string

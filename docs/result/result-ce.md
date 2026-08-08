@@ -12,7 +12,7 @@ description: Write dependent fallible steps as straight-line code with result { 
 ```fsharp
 open System
 open Reified.Result
-open Reified.Result.Syntax
+open Reified.ResultDSL
 
 type SignupError =
     | NameMissing

@@ -23,14 +23,14 @@ namespace Reified
 /// </para>
 /// <code>
 /// module SignupRules =
-///     open Reified.ConstraintSyntax
+///     open Reified.ConstraintDSL
 ///
 ///     let age : Constraint&lt;int&gt; = atLeast 13
 ///     let contact : Constraint&lt;string&gt; = Constraint.all [ present; email ]
 ///     let requireContact value = value |> guard contact |> orError EmailRequired
 /// </code>
 /// </remarks>
-module ConstraintSyntax =
+module ConstraintDSL =
     /// <summary>Alias for <see cref="M:Reified.Constraint.Constraint.present" />.</summary>
     let inline present< ^value when (^value or Constraint.PresentDispatcher): (static member Create:
         ^value -> Constraint< ^value >)> : Constraint< ^value > = Constraint.present

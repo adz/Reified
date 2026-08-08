@@ -12,11 +12,11 @@ matter to the test.
 
 ## Create the baseline
 
-Open `Reified.Data` for the `Data` type and module. Open `Reified.DataSyntax` for the concise literal, edit, and matching syntax:
+Open `Reified.Data` for the `Data` type and module. Open `Reified.DataDSL` for the concise literal, edit, and matching syntax:
 
 ```fsharp
 open Reified
-open Reified.DataSyntax
+open Reified.DataDSL
 
 let customer =
     data [

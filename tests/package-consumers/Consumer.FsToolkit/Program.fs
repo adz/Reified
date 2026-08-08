@@ -8,7 +8,7 @@
 
 open Reified.Refinements
 open Reified
-open Reified.SchemaSyntax
+open Reified.SchemaDSL
 open FsToolkit.ErrorHandling
 
 type Order = { Sku: string; Quantity: int }

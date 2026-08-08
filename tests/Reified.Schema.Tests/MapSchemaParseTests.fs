@@ -4,7 +4,7 @@ open Reified
 
 open Swensen.Unquote
 open Xunit
-open Reified.SchemaSyntax
+open Reified.SchemaDSL
 
 module MapSchemaParseTests =
     type private Thresholds = { Values: Map<string, decimal> }

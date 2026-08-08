@@ -22,7 +22,7 @@ with the standard F# `Result<'value,'error>` and never wraps or replaces that ty
 
 ```fsharp
 open Reified.Result
-open Reified.Result.Syntax
+open Reified.ResultDSL
 
 type SignupError =
     | NameMissing

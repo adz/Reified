@@ -18,8 +18,8 @@ type ProfileV1 =
 [<RequireQualifiedAccess>]
 module ProfileV1 =
 
-    open Reified.SchemaSyntax
-    open Reified.ConstraintSyntax
+    open Reified.SchemaDSL
+    open Reified.ConstraintDSL
 
     /// The schema declared by profile.contract (Profile.v1).
     let schema : Schema<ProfileV1> =
@@ -60,8 +60,8 @@ type Profile =
 [<RequireQualifiedAccess>]
 module Profile =
 
-    open Reified.SchemaSyntax
-    open Reified.ConstraintSyntax
+    open Reified.SchemaDSL
+    open Reified.ConstraintDSL
 
     /// The schema declared by profile.contract (Profile.v2).
     let schema : Schema<Profile> =

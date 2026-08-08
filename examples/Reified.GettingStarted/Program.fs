@@ -8,8 +8,8 @@
 //   5. a second artefact — a JSON codec — derived from the same declaration
 
 open Reified
-open Reified.SchemaSyntax
-open Reified.ConstraintSyntax
+open Reified.SchemaDSL
+open Reified.ConstraintDSL
 open Reified.Schema.Json
 
 // ---------------------------------------------------------------------------

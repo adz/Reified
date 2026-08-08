@@ -184,7 +184,7 @@ refinement's. They stay separate steps, and each contributes its own error:
 open Reified
 open Reified.Refinements
 open Reified.Result
-open Reified.Result.Syntax
+open Reified.ResultDSL
 
 type QuantityError =
     | InvalidInteger of ParseError

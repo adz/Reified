@@ -71,7 +71,7 @@ Expand the field to expose its wire schema:
 
 ```fsharp
 open Reified
-open Reified.SchemaSyntax
+open Reified.SchemaDSL
 
 field _.Email {
     withSchema Schema.text

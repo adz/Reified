@@ -4,7 +4,7 @@ open Reified.Schema.Json
 open Reified
 open Swensen.Unquote
 open Xunit
-open Reified.SchemaSyntax
+open Reified.SchemaDSL
 
 /// <summary>Covers the compiled JSON codec's handling of <c>Schema.map</c> dictionary value schemas.</summary>
 module MapCodecTests =

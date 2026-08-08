@@ -1,5 +1,5 @@
 open Reified.Result
-open Reified.Result.Syntax
+open Reified.ResultDSL
 
 [<EntryPoint>]
 let main _ =

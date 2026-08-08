@@ -13,7 +13,7 @@ own their canonical schemas, so `Order` can infer both the nested field and the 
 
 ```fsharp
 open Reified
-open Reified.SchemaSyntax
+open Reified.SchemaDSL
 
 type Address =
     { Street: string; City: string }

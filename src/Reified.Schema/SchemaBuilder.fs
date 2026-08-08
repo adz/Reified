@@ -655,17 +655,17 @@ open SchemaCeBuilder
 /// </summary>
 /// <remarks>
 /// <para>
-/// Optional and opt-in, in the same shape as <c>Reified.DataSyntax</c> and <c>Reified.ConstraintSyntax</c>:
-/// <c>open Reified.Schema</c> for <c>Schema</c>, then <c>open Reified.SchemaSyntax</c> for this vocabulary.
+/// Optional and opt-in, in the same shape as <c>Reified.DataDSL</c> and <c>Reified.ConstraintDSL</c>:
+/// <c>open Reified.Schema</c> for <c>Schema</c>, then <c>open Reified.SchemaDSL</c> for this vocabulary.
 /// </para>
 /// <para>
 /// There is no constraint catalogue here. One <c>Constraint</c> vocabulary serves direct checking, refinement,
 /// and Schema, so a field block reaches for <c>Constraint.email</c> or an opened
-/// <c>Reified.ConstraintSyntax</c> exactly as standalone code does. Boundary supply is Schema-owned and stays
+/// <c>Reified.ConstraintDSL</c> exactly as standalone code does. Boundary supply is Schema-owned and stays
 /// here as <c>mustSupply</c> and <c>mayOmit</c>.
 /// </para>
 /// </remarks>
-module SchemaSyntax =
+module SchemaDSL =
     /// <summary>Record-schema computation expression.</summary>
     let schema<'model> = SchemaBuilder<'model>()
 

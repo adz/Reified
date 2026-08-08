@@ -17,8 +17,8 @@ type Card =
 [<RequireQualifiedAccess>]
 module Card =
 
-    open Reified.SchemaSyntax
-    open Reified.ConstraintSyntax
+    open Reified.SchemaDSL
+    open Reified.ConstraintDSL
 
     /// The schema declared by payment.contract (Card.v1).
     let schema : Schema<Card> =
@@ -53,8 +53,8 @@ type Invoice =
 [<RequireQualifiedAccess>]
 module Invoice =
 
-    open Reified.SchemaSyntax
-    open Reified.ConstraintSyntax
+    open Reified.SchemaDSL
+    open Reified.ConstraintDSL
 
     /// The schema declared by payment.contract (Invoice.v1).
     let schema : Schema<Invoice> =
@@ -92,8 +92,8 @@ type Payment =
 [<RequireQualifiedAccess>]
 module Payment =
 
-    open Reified.SchemaSyntax
-    open Reified.ConstraintSyntax
+    open Reified.SchemaDSL
+    open Reified.ConstraintDSL
 
     let private sourceCases =
         [ UnionCase.create "card" PaymentSource.Card (function PaymentSource.Card payload -> Some payload | _ -> None) Card.schema

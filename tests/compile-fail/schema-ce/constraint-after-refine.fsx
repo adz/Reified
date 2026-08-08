@@ -2,8 +2,8 @@
 
 open Reified
 open Reified.Refinements
-open Reified.ConstraintSyntax
-open Reified.SchemaSyntax
+open Reified.ConstraintDSL
+open Reified.SchemaDSL
 
 type Email =
     private

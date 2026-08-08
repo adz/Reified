@@ -23,7 +23,7 @@ Reified has two paths for JSON, and they exist because they optimize for differe
 ```fsharp
 open Reified
 open Reified.Schema.Json
-open Reified.SchemaSyntax
+open Reified.SchemaDSL
 
 type Address =
     { Street: string; City: string }

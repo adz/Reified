@@ -15,7 +15,7 @@ open System
 open Reified
 open Reified.Refinements
 open Reified.Result
-open Reified.Result.Syntax
+open Reified.ResultDSL
 ```
 
 ## Model the domain

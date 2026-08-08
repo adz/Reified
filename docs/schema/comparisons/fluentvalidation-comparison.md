@@ -35,7 +35,7 @@ An Reified schema owns construction. Parsing either produces a trusted model or 
 intermediate invalid object:
 
 ```fsharp
-open Reified.SchemaSyntax
+open Reified.SchemaDSL
 let customerSchema =
     schema<Customer> {
         field _.Name {

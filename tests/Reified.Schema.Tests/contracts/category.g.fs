@@ -20,12 +20,12 @@ type Category =
 [<RequireQualifiedAccess>]
 module Category =
 
-    open Reified.SchemaSyntax
-    open Reified.ConstraintSyntax
+    open Reified.SchemaDSL
+    open Reified.ConstraintDSL
 
     /// The schema declared by category.contract (Category.v1).
     let rec schema : Schema<Category> =
-        SchemaSyntax.schema<Category> {
+        SchemaDSL.schema<Category> {
             fieldAs "name" (fun (value: Category) -> value.Name) {
                 withSchema (Schema.text |> Schema.describe "Stable display name.")
                 constrain (minLength 1)

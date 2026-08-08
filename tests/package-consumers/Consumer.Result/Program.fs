@@ -2,7 +2,7 @@
 // and that the result { } builder and accumulating helpers are reachable from one open.
 
 open Reified.Result
-open Reified.Result.Syntax
+open Reified.ResultDSL
 
 type SignupError = MissingName
 

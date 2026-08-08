@@ -4,8 +4,8 @@ open Reified
 open System
 open Reified.Schema.Json
 open Xunit
-open Reified.SchemaSyntax
-open Reified.ConstraintSyntax
+open Reified.SchemaDSL
+open Reified.ConstraintDSL
 open Swensen.Unquote
 
 /// <summary>

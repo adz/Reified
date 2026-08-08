@@ -5,8 +5,8 @@ open Reified
 
 open System
 open Xunit
-open Reified.SchemaSyntax
-open Reified.ConstraintSyntax
+open Reified.SchemaDSL
+open Reified.ConstraintDSL
 open Swensen.Unquote
 
 module SchemaValidationTests =

@@ -7,7 +7,7 @@ open Xunit
 open Swensen.Unquote
 open Reified.Schema.Http
 open Reified.Schema.Http.Tests.Fixtures
-open Reified.SchemaSyntax
+open Reified.SchemaDSL
 
 [<Fact>]
 let ``json pointers render names, keys, and indexes`` () =

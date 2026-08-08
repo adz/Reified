@@ -7,11 +7,11 @@ description: Every literal, rendering, and immutable edit operation in Reified.D
 
 # Declare, render, and edit data
 
-Open `Reified.Data` for `Data`. Open `Reified.DataSyntax` for the concise operators and functions used on this page.
+Open `Reified.Data` for `Data`. Open `Reified.DataDSL` for the concise operators and functions used on this page.
 
 ```fsharp
 open Reified
-open Reified.DataSyntax
+open Reified.DataDSL
 ```
 
 ## Declare objects and lists
@@ -172,7 +172,7 @@ let changed =
     ]
 ```
 
-Inside `Data.patch`, use the unqualified edit constructors from `Reified.DataSyntax`:
+Inside `Data.patch`, use the unqualified edit constructors from `Reified.DataDSL`:
 
 | Operation | Result |
 | --- | --- |

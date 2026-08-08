@@ -30,8 +30,8 @@ type Signup =
 [<RequireQualifiedAccess>]
 module Signup =
 
-    open Reified.SchemaSyntax
-    open Reified.ConstraintSyntax
+    open Reified.SchemaDSL
+    open Reified.ConstraintDSL
 
     let private planCases =
         [ EnumCase.create "free" SignupPlan.Free

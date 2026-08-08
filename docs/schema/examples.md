@@ -36,8 +36,8 @@ open Reified
 
 open System
 open Reified.Result
-open Reified.Result.Syntax
-open Reified.ConstraintSyntax
+open Reified.ResultDSL
+open Reified.ConstraintDSL
 open Reified.Refinements
 
 // Slug is no longer a catalogue entry: it carries no invariant past the boundary, so it
@@ -203,7 +203,7 @@ Source code:
 module RefinedValueSchemaExample
 
 open Reified
-open Reified.SchemaSyntax
+open Reified.SchemaDSL
 
 /// <summary>An email address refined over Reified's text primitive, carrying the well-known email format.</summary>
 type Email =

@@ -1,7 +1,7 @@
 #load "references.fsx"
 
 open Reified
-open Reified.SchemaSyntax
+open Reified.SchemaDSL
 
 // A field can only be optional when its type can hold an absent input. `Name` is `string`, so there is
 // nowhere to put an absent value and the constructor could never be applied — `mayOmit` must not compile.

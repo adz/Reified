@@ -3,7 +3,7 @@ namespace Reified.Tests
 open Reified
 open Swensen.Unquote
 open Xunit
-open Reified.SchemaSyntax
+open Reified.SchemaDSL
 
 /// <summary>
 /// Proves that a constructor-last shape binds each field's getter to the constructor argument at that field's

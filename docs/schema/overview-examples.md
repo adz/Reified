@@ -8,7 +8,7 @@ description: Short examples of fields, checked construction, refinement, recursi
 
 ```fsharp
 open Reified
-open Reified.SchemaSyntax
+open Reified.SchemaDSL
 ```
 
 ## Canonical fields

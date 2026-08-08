@@ -38,8 +38,8 @@ Declare how untrusted input becomes one:
 
 ```fsharp
 open Reified
-open Reified.SchemaSyntax
-open Reified.ConstraintSyntax
+open Reified.SchemaDSL
+open Reified.ConstraintDSL
 
 let signupSchema =
     schema<Signup> {

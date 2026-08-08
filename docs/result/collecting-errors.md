@@ -14,7 +14,7 @@ columns of a row — the caller usually wants every problem at once, not the fir
 ```fsharp
 open System
 open Reified.Result
-open Reified.Result.Syntax
+open Reified.ResultDSL
 
 type SignupError =
     | NameMissing

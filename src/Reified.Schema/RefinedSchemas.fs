@@ -2,7 +2,7 @@ namespace Reified
 
 open Reified
 open Reified.Refinements
-open Reified.SchemaSyntax
+open Reified.SchemaDSL
 
 /// <summary>Ready-made schemas for the built-in refined values.</summary>
 /// <remarks>

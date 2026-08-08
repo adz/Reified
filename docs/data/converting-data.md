@@ -12,7 +12,7 @@ into that tree. Extraction and rendering functions take values back out.
 
 ```fsharp
 open Reified
-open Reified.DataSyntax
+open Reified.DataDSL
 ```
 
 ## Parse JSON text portably

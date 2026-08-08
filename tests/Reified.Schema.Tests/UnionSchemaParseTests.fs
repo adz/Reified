@@ -6,7 +6,7 @@ open Reified
 open Reified.Refinements
 open Swensen.Unquote
 open Xunit
-open Reified.SchemaSyntax
+open Reified.SchemaDSL
 
 module UnionSchemaParseTests =
     type private CardDetails =

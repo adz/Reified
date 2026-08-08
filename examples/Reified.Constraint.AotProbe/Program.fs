@@ -1,5 +1,5 @@
 open Reified
-open Reified.ConstraintSyntax
+open Reified.ConstraintDSL
 
 /// `typeof` inside an inline function is the mechanism operand projection relies on; native AOT trims
 /// aggressively, so prove the Guid and TimeSpan atoms survive publication rather than assuming they do.

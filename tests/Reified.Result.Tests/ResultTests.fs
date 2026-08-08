@@ -3,7 +3,7 @@ namespace Reified.Tests
 open System
 open Microsoft.FSharp.Core
 open Reified.Result
-open Reified.Result.Syntax
+open Reified.ResultDSL
 open Swensen.Unquote
 open Xunit
 

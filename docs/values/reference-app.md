@@ -17,8 +17,8 @@ The examples open the syntax modules, so the constraint and result vocabulary is
 ```fsharp
 open Reified
 open Reified.Result
-open Reified.Result.Syntax
-open Reified.ConstraintSyntax
+open Reified.ResultDSL
+open Reified.ConstraintDSL
 open Reified.Refinements
 ```
 

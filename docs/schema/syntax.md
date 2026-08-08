@@ -12,10 +12,10 @@ is missing.
 
 ```fsharp
 open Reified
-open Reified.SchemaSyntax
+open Reified.SchemaDSL
 ```
 
-The same shape applies to `Reified.DataSyntax`, `Reified.ConstraintSyntax`, and `Reified.Result.Syntax` — two
+The same shape applies to `Reified.DataDSL`, `Reified.ConstraintDSL`, and `Reified.ResultDSL` — two
 lines, every package.
 
 A record schema is one constructor-last computation expression:
@@ -121,7 +121,7 @@ field _.Email {
 }
 ```
 
-The typed vocabulary in `Reified.SchemaSyntax` covers every [interpreted]({{< relref "/values/constraint/constraints" >}})
+The typed vocabulary in `Reified.SchemaDSL` covers every [interpreted]({{< relref "/values/constraint/constraints" >}})
 constraint — the built-ins Reified can read as data and lower to JSON Schema. The field type checks every
 entry, so `email` cannot be applied to an `int` field. Lifted constraints such as `minLength` apply to strings,
 lists, arrays, and maps with shape-appropriate interpretation.

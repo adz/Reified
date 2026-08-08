@@ -72,7 +72,7 @@ These packages return the standard F# `Result`, so any Result vocabulary compose
 
 ```fsharp
 open Reified.Result
-open Reified.Result.Syntax
+open Reified.ResultDSL
 
 type QuantityError =
     | InvalidInteger of ParseError

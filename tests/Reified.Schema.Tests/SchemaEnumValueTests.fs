@@ -4,7 +4,7 @@ open System
 open Reified
 open Swensen.Unquote
 open Xunit
-open Reified.SchemaSyntax
+open Reified.SchemaDSL
 
 module SchemaEnumValueTests =
     type private Color =

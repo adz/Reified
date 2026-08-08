@@ -1,6 +1,6 @@
 open System
 open Reified
-open Reified.SchemaSyntax
+open Reified.SchemaDSL
 
 type ProbeFailure(message: string) =
     inherit Exception(message)

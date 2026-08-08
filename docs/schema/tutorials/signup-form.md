@@ -18,7 +18,7 @@ The schema declares each field once: external name, getter, and constraints.
 
 ```fsharp
 open Reified
-open Reified.SchemaSyntax
+open Reified.SchemaDSL
 
 type Signup = { Email: string; Age: int }
 

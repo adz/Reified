@@ -5,7 +5,7 @@ open Reified.Refinements
 open Swensen.Unquote
 open Xunit
 
-open Reified.SchemaSyntax
+open Reified.SchemaDSL
 
 /// Specs for the unbounded constructor-last chain: field counts beyond the old twelve-field arity cap,
 /// and the bare-getter field form (`field _.Name`) with derived camelCase wire names.

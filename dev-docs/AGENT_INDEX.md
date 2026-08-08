@@ -18,7 +18,7 @@ Working on `src/Reified.Schema`? Read `dev-docs/schema/internals.md` first (impl
 
 `Reified.Schema`, `Reified.Constraint`, `Reified.Data`, and `Reified.Parse` declare `namespace Reified`, so
 `open Reified` reaches the whole core surface. Each package's vocabulary is a separate opt-in module named for
-its package — `Reified.SchemaSyntax`, `Reified.ConstraintSyntax`, `Reified.DataSyntax`. `Reified.Refinements`,
+its package — `Reified.SchemaDSL`, `Reified.ConstraintDSL`, `Reified.DataDSL`. `Reified.Refinements`,
 `Reified.Result`, `Reified.DerivedSchema`, and the `Reified.Schema.*` satellites keep their own namespaces.
 
 A child namespace shadows a same-named type for anyone declaring or opening the parent, which is why `Data`

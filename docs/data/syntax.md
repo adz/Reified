@@ -2,18 +2,18 @@
 weight: 18
 title: Explicit API and concise syntax
 type: docs
-description: The complete Reified.DataSyntax vocabulary, its explicit equivalents, and a full example without opening it.
+description: The complete Reified.DataDSL vocabulary, its explicit equivalents, and a full example without opening it.
 ---
 
 # Explicit API and concise syntax
 
-`Reified.DataSyntax` is optional. It supplies short names and the `=>` and `?=>` operators. The underlying construction and
+`Reified.DataDSL` is optional. It supplies short names and the `=>` and `?=>` operators. The underlying construction and
 editing API remains available through `Data` and `DataEdit`.
 
-## Without opening Reified.DataSyntax
+## Without opening Reified.DataDSL
 
 This example declares nested data, omits an optional field, applies an atomic patch, and renders the result without
-opening `Reified.DataSyntax`:
+opening `Reified.DataDSL`:
 
 ```fsharp
 open Reified
@@ -51,11 +51,11 @@ For a single edit, apply the direct `Data` operation instead:
 customer |> Data.replace "name" "Grace"
 ```
 
-## The same example with Reified.DataSyntax
+## The same example with Reified.DataDSL
 
 ```fsharp
 open Reified
-open Reified.DataSyntax
+open Reified.DataDSL
 
 let customer =
     data [
@@ -98,10 +98,10 @@ let request =
 `set` makes the final path contain the value, adding a missing final object field when necessary. `replace` requires
 the target to exist, so a misspelled or unexpectedly absent path fails.
 
-The matching and case-generation names also live in `Reified.DataSyntax`. Without opening it, qualify them as
-`Reified.DataSyntax.at`, `Reified.DataSyntax.containing`, `Reified.DataSyntax.variant`, and so on.
+The matching and case-generation names also live in `Reified.DataDSL`. Without opening it, qualify them as
+`Reified.DataDSL.at`, `Reified.DataDSL.containing`, `Reified.DataDSL.variant`, and so on.
 
-## Remaining Reified.DataSyntax names
+## Remaining Reified.DataDSL names
 
 | Area | Names |
 | --- | --- |

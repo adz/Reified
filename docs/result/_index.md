@@ -30,7 +30,7 @@ dotnet add package Reified.Result
 ```fsharp
 open System
 open Reified.Result
-open Reified.Result.Syntax
+open Reified.ResultDSL
 
 type SignupError =
     | NameMissing

@@ -18,8 +18,8 @@ type Geo =
 [<RequireQualifiedAccess>]
 module Geo =
 
-    open Reified.SchemaSyntax
-    open Reified.ConstraintSyntax
+    open Reified.SchemaDSL
+    open Reified.ConstraintDSL
 
     /// The schema declared by geo.contract (Geo.v1).
     let schema : Schema<Geo> =

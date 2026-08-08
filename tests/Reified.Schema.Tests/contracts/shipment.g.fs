@@ -11,8 +11,8 @@ open Reified
 [<RequireQualifiedAccess>]
 module PickupPoint =
 
-    open Reified.SchemaSyntax
-    open Reified.ConstraintSyntax
+    open Reified.SchemaDSL
+    open Reified.ConstraintDSL
 
     /// The schema declared by shipment.fs (PickupPoint.v1).
     let schema : Schema<PickupPoint> =
@@ -36,8 +36,8 @@ module PickupPoint =
 [<RequireQualifiedAccess>]
 module CourierDelivery =
 
-    open Reified.SchemaSyntax
-    open Reified.ConstraintSyntax
+    open Reified.SchemaDSL
+    open Reified.ConstraintDSL
 
     /// The schema declared by shipment.fs (CourierDelivery.v1).
     let schema : Schema<CourierDelivery> =
@@ -61,8 +61,8 @@ module CourierDelivery =
 [<RequireQualifiedAccess>]
 module ShipmentV1 =
 
-    open Reified.SchemaSyntax
-    open Reified.ConstraintSyntax
+    open Reified.SchemaDSL
+    open Reified.ConstraintDSL
 
     /// The schema declared by shipment.fs (Shipment.v1).
     let schema : Schema<ShipmentV1> =
@@ -97,8 +97,8 @@ module ShipmentV1 =
 [<RequireQualifiedAccess>]
 module Shipment =
 
-    open Reified.SchemaSyntax
-    open Reified.ConstraintSyntax
+    open Reified.SchemaDSL
+    open Reified.ConstraintDSL
 
     let private priorityCases =
         [ EnumCase.create "standard" ShipmentPriority.Standard

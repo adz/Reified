@@ -9,10 +9,10 @@ open System.IO
 open System.Reflection
 open System.Threading.Tasks
 open Reified.Result
-open Reified.Result.Syntax
+open Reified.ResultDSL
 open Reified.Refinements
-open Reified.SchemaSyntax
-open Reified.ConstraintSyntax
+open Reified.SchemaDSL
+open Reified.ConstraintDSL
 open Swensen.Unquote
 open Microsoft.FSharp.Reflection
 open Xunit
@@ -521,13 +521,13 @@ module ApiShapeTests =
         |> publicStaticMemberNames
         |> assertContainsAll [ "packageName" ]
 
-        // One opt-in door per package: Reified.SchemaSyntax carries the whole schema-definition vocabulary,
-        // matching Reified.DataSyntax, Reified.ConstraintSyntax, and Reified.Result.Syntax.
+        // One opt-in door per package: Reified.SchemaDSL carries the whole schema-definition vocabulary,
+        // matching Reified.DataDSL, Reified.ConstraintDSL, and Reified.ResultDSL.
         //
         // There is still exactly one value-rule vocabulary. Schema publishes no constraint catalogue of its own:
         // the field-block syntax carries only collection adapters, and supply, which is Schema's concern.
         let syntaxMembers =
-            moduleTypeFromAssembly "Reified.Schema" "Reified.SchemaSyntax"
+            moduleTypeFromAssembly "Reified.Schema" "Reified.SchemaDSL"
             |> publicStaticMemberNames
             |> Set.filter (fun name -> not (name.Contains "$"))
 
@@ -541,9 +541,9 @@ module ApiShapeTests =
                                       "constrainValues" ]
             @>
 
-        // `field` is the type Reified.Schema.field, so the same `open Reified.SchemaSyntax` that supplies the
+        // `field` is the type Reified.Schema.field, so the same `open Reified.SchemaDSL` that supplies the
         // vocabulary above also reaches it, and one open is all a consumer needs.
-        assertTypeAbsentFromAssembly "Reified.Schema" "Reified.SchemaSyntax+field"
+        assertTypeAbsentFromAssembly "Reified.Schema" "Reified.SchemaDSL+field"
         assertTypePresentInAssembly "Reified.Schema" "Reified.field`2" |> ignore
 
         let schemaAssemblyTypeNames =
@@ -1263,7 +1263,7 @@ module ApiShapeTests =
 
         // The DSL is optional vocabulary over the same values, with the documented collision omissions.
         let dslMembers =
-            moduleTypeFromAssembly "Reified.Constraint" "Reified.ConstraintSyntax"
+            moduleTypeFromAssembly "Reified.Constraint" "Reified.ConstraintDSL"
             |> publicStaticMemberNames
             |> Set.filter (fun name -> not (name.Contains "$"))
 

@@ -14,7 +14,7 @@ dotnet add package Reified.Result
 
 ```fsharp
 open Reified.Result
-open Reified.Result.Syntax
+open Reified.ResultDSL
 ```
 
 The package works with the standard F# `Result<'value, 'error>` — it does not wrap or replace it. What it supplies is
