@@ -72,9 +72,12 @@ Ordered so each phase builds and tests green on its own, and so the riskiest ren
       Before Schema because Schema depends on it.
 - [x] **Phase 5** — `Reified.Schema` -> `Reified`, `module Syntax` -> `SchemaSyntax`.
       The large one: 21 source files plus the satellite packages' opens.
-- [ ] **Phase 6** — CE machinery into file-level `*Internals` modules with
-      `EditorBrowsable(Never)` and `CompilerMessage(..., 42, IsHidden = true)`.
-      `field` excluded.
+- [x] **Phase 6** — CE machinery into `SchemaFieldSteps` and `SchemaCeBuilder` modules with
+      `EditorBrowsable(Never)` and `CompilerMessage(..., 42, IsHidden = true)`. Two modules
+      rather than one because `field` sits between them in dependency order and stays at
+      namespace level. `IRecordPlanCompiler` and `IRecordPlanState` deliberately stay out:
+      `Reified.Schema.Json` implements them, so they are an extension point rather than
+      machinery, and hiding them would warn legitimate implementers.
 - [ ] **Phase 7** — Umbrella `.fsproj` comment, docs, `llms.txt`, docgen inputs, generated
       reference pages.
 - [ ] **Phase 8** — Full validation: build, tests, source inventory, Fable surface, docs.

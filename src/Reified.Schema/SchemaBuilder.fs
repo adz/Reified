@@ -5,86 +5,102 @@ namespace Reified
 open Reified
 
 #nowarn "64"
+// The two machinery modules below are opened back into file scope so the rest of this file reads
+// unchanged; 42 is the CompilerMessage that warns consumers away from them.
+#nowarn "42"
 
 open System.ComponentModel
 open Reified.Refinements
 
 open Microsoft.FSharp.Quotations
 
+/// <summary>The typed field-configuration steps the record computation expression threads between
+/// <c>field</c> and the compiled plan.</summary>
+/// <remarks>
+/// Public because the computation expression's signatures name them, never because a caller writes one.
+/// Grouping them here keeps a dozen step types out of <c>Reified</c> itself; <c>field</c> stays at namespace
+/// level because <c>field _.Email</c> has to resolve from the same open that supplies the vocabulary.
+/// </remarks>
 [<EditorBrowsable(EditorBrowsableState.Never)>]
-type FieldInitial<'model, 'target> internal (name: string, getter: 'model -> 'target) =
-    member internal _.Name = name
-    member internal _.Getter = getter
+[<CompilerMessage("Internal Reified computation-expression machinery. Do not use directly.", 42, IsHidden = true)>]
+module SchemaFieldSteps =
+    [<EditorBrowsable(EditorBrowsableState.Never)>]
+    type FieldInitial<'model, 'target> internal (name: string, getter: 'model -> 'target) =
+        member internal _.Name = name
+        member internal _.Getter = getter
 
-[<EditorBrowsable(EditorBrowsableState.Never)>]
-type FieldWorking<'model, 'target, 'current> internal
-    (
-        initial: FieldInitial<'model, 'target>,
-        schema: Schema<'current>
-    ) =
-    member internal _.Initial = initial
-    member internal _.Schema = schema
+    [<EditorBrowsable(EditorBrowsableState.Never)>]
+    type FieldWorking<'model, 'target, 'current> internal
+        (
+            initial: FieldInitial<'model, 'target>,
+            schema: Schema<'current>
+        ) =
+        member internal _.Initial = initial
+        member internal _.Schema = schema
 
-[<EditorBrowsable(EditorBrowsableState.Never)>]
-type FieldConfigured<'model, 'target> internal
-    (
-        initial: FieldInitial<'model, 'target>,
-        configure: Schema<'target> -> Schema<'target>
-    ) =
-    member _.Initial = initial
-    member _.Configure = configure
+    [<EditorBrowsable(EditorBrowsableState.Never)>]
+    type FieldConfigured<'model, 'target> internal
+        (
+            initial: FieldInitial<'model, 'target>,
+            configure: Schema<'target> -> Schema<'target>
+        ) =
+        member _.Initial = initial
+        member _.Configure = configure
 
-[<EditorBrowsable(EditorBrowsableState.Never)>]
-type FieldRefining<'model, 'target, 'raw> internal
-    (
-        initial: FieldInitial<'model, 'target>,
-        rawSchema: Schema<'raw>,
-        validations: ('target -> Result<unit, SchemaError>) list
-    ) =
-    member internal _.Initial = initial
-    member internal _.RawSchema = rawSchema
-    member internal _.Validations = validations
+    [<EditorBrowsable(EditorBrowsableState.Never)>]
+    type FieldRefining<'model, 'target, 'raw> internal
+        (
+            initial: FieldInitial<'model, 'target>,
+            rawSchema: Schema<'raw>,
+            validations: ('target -> Result<unit, SchemaError>) list
+        ) =
+        member internal _.Initial = initial
+        member internal _.RawSchema = rawSchema
+        member internal _.Validations = validations
 
-[<EditorBrowsable(EditorBrowsableState.Never)>]
-type FieldDeclaration<'model, 'value> internal (definition: FieldDefinition<'model, 'value>) =
-    member internal _.Definition = definition
+    [<EditorBrowsable(EditorBrowsableState.Never)>]
+    type FieldDeclaration<'model, 'value> internal (definition: FieldDefinition<'model, 'value>) =
+        member internal _.Definition = definition
 
-[<EditorBrowsable(EditorBrowsableState.Never)>]
-type ConfiguredFieldDeclaration<'model, 'target> internal
-    (
-        initial: FieldInitial<'model, 'target>,
-        configure: Schema<'target> -> Schema<'target>
-    ) =
-    member _.Initial = initial
-    member _.Configure = configure
+    [<EditorBrowsable(EditorBrowsableState.Never)>]
+    type ConfiguredFieldDeclaration<'model, 'target> internal
+        (
+            initial: FieldInitial<'model, 'target>,
+            configure: Schema<'target> -> Schema<'target>
+        ) =
+        member _.Initial = initial
+        member _.Configure = configure
 
-[<EditorBrowsable(EditorBrowsableState.Never)>]
-type RefiningFieldDeclaration<'model, 'raw, 'target> internal
-    (
-        initial: FieldInitial<'model, 'target>,
-        rawSchema: Schema<'raw>,
-        validations: ('target -> Result<unit, SchemaError>) list
-    ) =
-    member internal _.Initial = initial
-    member internal _.RawSchema = rawSchema
-    member internal _.Validations = validations
+    [<EditorBrowsable(EditorBrowsableState.Never)>]
+    type RefiningFieldDeclaration<'model, 'raw, 'target> internal
+        (
+            initial: FieldInitial<'model, 'target>,
+            rawSchema: Schema<'raw>,
+            validations: ('target -> Result<unit, SchemaError>) list
+        ) =
+        member internal _.Initial = initial
+        member internal _.RawSchema = rawSchema
+        member internal _.Validations = validations
 
-/// Compile-time resolution of one canonical refinement for a known underlying and destination type.
-/// <exclude />
-[<EditorBrowsable(EditorBrowsableState.Never)>]
-type RefinementDefaults =
-    static member inline Resolve() : Refinement<^underlying, ^refined> =
-        let inline call (witness: ^w, underlying: ^underlying, refined: ^refined) =
-            ((^w or ^refined):
-                (static member Refinement:
-                    ^underlying * ^refined -> Refinement<^underlying, ^refined>)
-                    (underlying, refined))
+    /// Compile-time resolution of one canonical refinement for a known underlying and destination type.
+    /// <exclude />
+    [<EditorBrowsable(EditorBrowsableState.Never)>]
+    type RefinementDefaults =
+        static member inline Resolve() : Refinement<^underlying, ^refined> =
+            let inline call (witness: ^w, underlying: ^underlying, refined: ^refined) =
+                ((^w or ^refined):
+                    (static member Refinement:
+                        ^underlying * ^refined -> Refinement<^underlying, ^refined>)
+                        (underlying, refined))
 
-        call (
-            Unchecked.defaultof<RefinementDefaults>,
-            Unchecked.defaultof<^underlying>,
-            Unchecked.defaultof<^refined>
-        )
+            call (
+                Unchecked.defaultof<RefinementDefaults>,
+                Unchecked.defaultof<^underlying>,
+                Unchecked.defaultof<^refined>
+            )
+
+open SchemaFieldSteps
+
 
 /// <summary>
 /// Declares one field inside <c>schema&lt;'model&gt; { }</c>, and configures it when followed by a block.
@@ -402,228 +418,236 @@ type field<'model, 'target> internal (name: string, getter: 'model -> 'target) =
         : FieldDeclaration<'model, 'target> =
         invalidOp $"Field '{source.Initial.Name}' has an unfinished raw schema."
 
+/// <summary>The record computation expression's builder and its compiled plan carriers.</summary>
+/// <remarks>Same reasoning as <c>SchemaFieldSteps</c>; these sit after <c>field</c> because they consume it.</remarks>
 [<EditorBrowsable(EditorBrowsableState.Never)>]
-type FieldStep<'model, 'value> internal (definition: FieldDefinition<'model, 'value>) =
-    member internal _.Definition = definition
+[<CompilerMessage("Internal Reified computation-expression machinery. Do not use directly.", 42, IsHidden = true)>]
+module SchemaCeBuilder =
+    [<EditorBrowsable(EditorBrowsableState.Never)>]
+    type FieldStep<'model, 'value> internal (definition: FieldDefinition<'model, 'value>) =
+        member internal _.Definition = definition
 
-[<EditorBrowsable(EditorBrowsableState.Never)>]
-type ConstructorStep<'model, 'constructor> internal (constructor: 'constructor) =
-    member internal _.Constructor = constructor
+    [<EditorBrowsable(EditorBrowsableState.Never)>]
+    type ConstructorStep<'model, 'constructor> internal (constructor: 'constructor) =
+        member internal _.Constructor = constructor
 
-[<EditorBrowsable(EditorBrowsableState.Never)>]
-type CheckedConstructorStep<'model, 'constructor> internal (constructor: 'constructor) =
-    member internal _.Constructor = constructor
+    [<EditorBrowsable(EditorBrowsableState.Never)>]
+    type CheckedConstructorStep<'model, 'constructor> internal (constructor: 'constructor) =
+        member internal _.Constructor = constructor
 
-type internal ICeFields<'model, 'remaining, 'constructed> =
-    abstract member GetFields: int -> obj list * int
-    abstract member Apply: 'remaining * obj array * int -> 'constructed
-    abstract member Build<'constructor, 'result> :
-        factory: IRecordPlanCompiler<'model, 'result> *
-        state: IRecordPlanState<'model, 'constructor, 'remaining> *
-        order: int ->
-            IRecordPlanState<'model, 'constructor, 'constructed> * int
+    type internal ICeFields<'model, 'remaining, 'constructed> =
+        abstract member GetFields: int -> obj list * int
+        abstract member Apply: 'remaining * obj array * int -> 'constructed
+        abstract member Build<'constructor, 'result> :
+            factory: IRecordPlanCompiler<'model, 'result> *
+            state: IRecordPlanState<'model, 'constructor, 'remaining> *
+            order: int ->
+                IRecordPlanState<'model, 'constructor, 'constructed> * int
 
-type internal CeFieldsEmpty<'model, 'constructed>() =
-    interface ICeFields<'model, 'constructed, 'constructed> with
-        member _.GetFields(index) = [], index
-        member _.Apply(constructed, _, _) = constructed
-        member _.Build(_, state, order) = state, order
+    type internal CeFieldsEmpty<'model, 'constructed>() =
+        interface ICeFields<'model, 'constructed, 'constructed> with
+            member _.GetFields(index) = [], index
+            member _.Apply(constructed, _, _) = constructed
+            member _.Build(_, state, order) = state, order
 
-type internal CeFieldsCons<'model, 'field, 'tail, 'constructed>
-    (
-        field: FieldDefinition<'model, 'field>,
-        tail: ICeFields<'model, 'tail, 'constructed>
-    ) =
-    interface ICeFields<'model, 'field -> 'tail, 'constructed> with
-        member _.GetFields(index) =
-            let descriptor: FieldDescriptor<'model> =
-                { ExternalName = field.ExternalName
-                  Order = FieldOrder.create index
-                  Getter = fun model -> field.Getter model |> box
-                  ValueSchema = field.ValueSchema
-                  Rules = field.Rules }
-
-            let rest, next = tail.GetFields(index + 1)
-            box descriptor :: rest, next
-
-        member _.Apply(constructor, arguments, index) =
-            let next = constructor (unbox<'field> arguments[index])
-            tail.Apply(next, arguments, index + 1)
-
-        member _.Build(factory, state, order) =
-            let typedField =
-                Field(
-                    { field with
-                        Order = FieldOrder.create order }
-                )
-
-            let next = factory.OnField(order, typedField, state)
-            tail.Build(factory, next, order + 1)
-
-[<EditorBrowsable(EditorBrowsableState.Never)>]
-type SchemaPlan<'model, 'expected, 'constructed, 'actual> internal
-    (
-        fields: obj,
-        constructor: 'actual,
-        finish: 'constructed -> Result<'model, string>
-    ) =
-    member internal _.Fields = fields
-    member internal _.Constructor = constructor
-    member internal _.Finish = finish
-
-type internal CeCompiledRecordPlan<'model, 'constructor, 'constructed>
-    (
-        constructor: 'constructor,
-        fields: ICeFields<'model, 'constructor, 'constructed>,
-        finish: 'constructed -> Result<'model, string>
-    ) =
-    interface ICompiledRecordPlan<'model> with
-        member _.CompilePlan(factory) =
-            let initial = factory.OnEnd<'constructor>()
-            let completed, _ = fields.Build(factory, initial, 0)
-            factory.OnComplete(constructor, completed, finish)
-
-[<RequireQualifiedAccess>]
-module internal SchemaBuilderInternals =
-    let close
-        (constructor: 'constructor)
-        (fields: ICeFields<'model, 'constructor, 'constructed>)
-        (finish: 'constructed -> Result<'model, string>)
-        : Schema<'model> =
-        let descriptors, count =
-            fields.GetFields 0
-            |> fun (values, count) ->
-                values |> List.map unbox<FieldDescriptor<'model>>, count
-
-        let tryApply arguments =
-            ConstructorApplication.ensureArgumentCount count arguments
-            fields.Apply(constructor, arguments, 0) |> finish
-
-        let application =
-            { ArgumentCount = count
-              ApplyTrusted =
-                fun arguments ->
-                    match tryApply arguments with
-                    | Ok model -> model
-                    | Error message -> invalidOp message
-              TryApplyTrusted = tryApply }
-
-        let compiled =
-            CeCompiledRecordPlan<'model, 'constructor, 'constructed>(constructor, fields, finish)
-            :> ICompiledRecordPlan<'model>
-
-        Schema(ModelDefinition(ModelSchemaDefinition.create application descriptors), Some compiled)
-
-/// <summary>Builds a typed record schema from ordered field declarations and a final constructor.</summary>
-/// <exclude />
-[<EditorBrowsable(EditorBrowsableState.Never)>]
-type SchemaBuilder<'model>() =
-    static member DefaultField
+    type internal CeFieldsCons<'model, 'field, 'tail, 'constructed>
         (
-            source: field<'model, 'value>,
-            schema: Schema<'value>
-        ) : FieldStep<'model, 'value> =
-        FieldStep(
-            { ExternalName = ExternalFieldName.create source.Name
-              Order = FieldOrder.create 0
-              Getter = source.Getter
-              ValueSchema = schema.ValueDefinition
-              Rules = [] }
-        )
-
-    static member RefinedField
-        (
-            source: RefiningFieldDeclaration<'model, 'raw, 'target>,
-            refinement: Refinement<'raw, 'target>
-        ) : FieldStep<'model, 'target> =
-        let schema =
-            source.Validations
-            |> List.fold
-                (fun current validation -> SchemaCore.validate validation current)
-                (source.RawSchema |> SchemaCore.refine refinement)
-
-        FieldStep(
-            { ExternalName = ExternalFieldName.create source.Initial.Name
-              Order = FieldOrder.create 0
-              Getter = source.Initial.Getter
-              ValueSchema = schema.ValueDefinition
-              Rules = [] }
-        )
-
-    static member ConfiguredField
-        (
-            source: ConfiguredFieldDeclaration<'model, 'target>,
-            schema: Schema<'target>
-        ) : FieldStep<'model, 'target> =
-        SchemaBuilder<'model>.DefaultField(
-            field<'model, 'target>(source.Initial.Name, source.Initial.Getter),
-            source.Configure schema
-        )
-
-    member inline _.Yield(field: field<'model, ^value>) : FieldStep<'model, ^value> =
-        let schema: Schema< ^value> = SchemaDefaults.Resolve()
-        SchemaBuilder<'model>.DefaultField(field, schema)
-
-    member _.Yield(source: FieldDeclaration<'model, 'value>) =
-        FieldStep(source.Definition)
-
-    member inline _.Yield
-        (field: RefiningFieldDeclaration<'model, ^raw, ^target>)
-        : FieldStep<'model, ^target> =
-        let refinement: Refinement<^raw, ^target> = RefinementDefaults.Resolve()
-        SchemaBuilder<'model>.RefinedField(field, refinement)
-
-    member inline _.Yield
-        (field: ConfiguredFieldDeclaration<'model, ^target>)
-        : FieldStep<'model, ^target> =
-        let schema: Schema< ^target> = SchemaDefaults.Resolve()
-        SchemaBuilder<'model>.ConfiguredField(field, schema)
-
-    member _.Yield(step: ConstructorStep<'model, 'constructor>) =
-        SchemaPlan<'model, 'model, 'model, 'constructor>(
-            box (CeFieldsEmpty<'model, 'model>() :> ICeFields<'model, 'model, 'model>),
-            step.Constructor,
-            Ok
-        )
-
-    member _.Yield(step: CheckedConstructorStep<'model, 'constructor>) =
-        SchemaPlan<'model, Result<'model, string>, Result<'model, string>, 'constructor>(
-            box (
-                CeFieldsEmpty<'model, Result<'model, string>>()
-                :> ICeFields<'model, Result<'model, string>, Result<'model, string>>
-            ),
-            step.Constructor,
-            id
-        )
-
-    member _.Combine
-        (
-            source: FieldStep<'model, 'value>,
-            plan: SchemaPlan<'model, 'tail, 'constructed, 'constructor>
+            field: FieldDefinition<'model, 'field>,
+            tail: ICeFields<'model, 'tail, 'constructed>
         ) =
-        let tail =
-            unbox<ICeFields<'model, 'tail, 'constructed>> plan.Fields
+        interface ICeFields<'model, 'field -> 'tail, 'constructed> with
+            member _.GetFields(index) =
+                let descriptor: FieldDescriptor<'model> =
+                    { ExternalName = field.ExternalName
+                      Order = FieldOrder.create index
+                      Getter = fun model -> field.Getter model |> box
+                      ValueSchema = field.ValueSchema
+                      Rules = field.Rules }
 
-        let fields =
-            CeFieldsCons<'model, 'value, 'tail, 'constructed>(source.Definition, tail)
-            :> ICeFields<'model, 'value -> 'tail, 'constructed>
+                let rest, next = tail.GetFields(index + 1)
+                box descriptor :: rest, next
 
-        SchemaPlan<'model, 'value -> 'tail, 'constructed, 'constructor>(
-            box fields,
-            plan.Constructor,
-            plan.Finish
-        )
+            member _.Apply(constructor, arguments, index) =
+                let next = constructor (unbox<'field> arguments[index])
+                tail.Apply(next, arguments, index + 1)
 
-    member _.Delay(factory: unit -> 'state) =
-        factory()
+            member _.Build(factory, state, order) =
+                let typedField =
+                    Field(
+                        { field with
+                            Order = FieldOrder.create order }
+                    )
 
-    member _.Run
-        (plan: SchemaPlan<'model, 'constructor, 'constructed, 'constructor>)
-        : Schema<'model> =
-        let fields =
-            unbox<ICeFields<'model, 'constructor, 'constructed>> plan.Fields
+                let next = factory.OnField(order, typedField, state)
+                tail.Build(factory, next, order + 1)
 
-        SchemaBuilderInternals.close plan.Constructor fields plan.Finish
+    [<EditorBrowsable(EditorBrowsableState.Never)>]
+    type SchemaPlan<'model, 'expected, 'constructed, 'actual> internal
+        (
+            fields: obj,
+            constructor: 'actual,
+            finish: 'constructed -> Result<'model, string>
+        ) =
+        member internal _.Fields = fields
+        member internal _.Constructor = constructor
+        member internal _.Finish = finish
+
+    type internal CeCompiledRecordPlan<'model, 'constructor, 'constructed>
+        (
+            constructor: 'constructor,
+            fields: ICeFields<'model, 'constructor, 'constructed>,
+            finish: 'constructed -> Result<'model, string>
+        ) =
+        interface ICompiledRecordPlan<'model> with
+            member _.CompilePlan(factory) =
+                let initial = factory.OnEnd<'constructor>()
+                let completed, _ = fields.Build(factory, initial, 0)
+                factory.OnComplete(constructor, completed, finish)
+
+    [<RequireQualifiedAccess>]
+    module internal SchemaBuilderInternals =
+        let close
+            (constructor: 'constructor)
+            (fields: ICeFields<'model, 'constructor, 'constructed>)
+            (finish: 'constructed -> Result<'model, string>)
+            : Schema<'model> =
+            let descriptors, count =
+                fields.GetFields 0
+                |> fun (values, count) ->
+                    values |> List.map unbox<FieldDescriptor<'model>>, count
+
+            let tryApply arguments =
+                ConstructorApplication.ensureArgumentCount count arguments
+                fields.Apply(constructor, arguments, 0) |> finish
+
+            let application =
+                { ArgumentCount = count
+                  ApplyTrusted =
+                    fun arguments ->
+                        match tryApply arguments with
+                        | Ok model -> model
+                        | Error message -> invalidOp message
+                  TryApplyTrusted = tryApply }
+
+            let compiled =
+                CeCompiledRecordPlan<'model, 'constructor, 'constructed>(constructor, fields, finish)
+                :> ICompiledRecordPlan<'model>
+
+            Schema(ModelDefinition(ModelSchemaDefinition.create application descriptors), Some compiled)
+
+    /// <summary>Builds a typed record schema from ordered field declarations and a final constructor.</summary>
+    /// <exclude />
+    [<EditorBrowsable(EditorBrowsableState.Never)>]
+    type SchemaBuilder<'model>() =
+        static member DefaultField
+            (
+                source: field<'model, 'value>,
+                schema: Schema<'value>
+            ) : FieldStep<'model, 'value> =
+            FieldStep(
+                { ExternalName = ExternalFieldName.create source.Name
+                  Order = FieldOrder.create 0
+                  Getter = source.Getter
+                  ValueSchema = schema.ValueDefinition
+                  Rules = [] }
+            )
+
+        static member RefinedField
+            (
+                source: RefiningFieldDeclaration<'model, 'raw, 'target>,
+                refinement: Refinement<'raw, 'target>
+            ) : FieldStep<'model, 'target> =
+            let schema =
+                source.Validations
+                |> List.fold
+                    (fun current validation -> SchemaCore.validate validation current)
+                    (source.RawSchema |> SchemaCore.refine refinement)
+
+            FieldStep(
+                { ExternalName = ExternalFieldName.create source.Initial.Name
+                  Order = FieldOrder.create 0
+                  Getter = source.Initial.Getter
+                  ValueSchema = schema.ValueDefinition
+                  Rules = [] }
+            )
+
+        static member ConfiguredField
+            (
+                source: ConfiguredFieldDeclaration<'model, 'target>,
+                schema: Schema<'target>
+            ) : FieldStep<'model, 'target> =
+            SchemaBuilder<'model>.DefaultField(
+                field<'model, 'target>(source.Initial.Name, source.Initial.Getter),
+                source.Configure schema
+            )
+
+        member inline _.Yield(field: field<'model, ^value>) : FieldStep<'model, ^value> =
+            let schema: Schema< ^value> = SchemaDefaults.Resolve()
+            SchemaBuilder<'model>.DefaultField(field, schema)
+
+        member _.Yield(source: FieldDeclaration<'model, 'value>) =
+            FieldStep(source.Definition)
+
+        member inline _.Yield
+            (field: RefiningFieldDeclaration<'model, ^raw, ^target>)
+            : FieldStep<'model, ^target> =
+            let refinement: Refinement<^raw, ^target> = RefinementDefaults.Resolve()
+            SchemaBuilder<'model>.RefinedField(field, refinement)
+
+        member inline _.Yield
+            (field: ConfiguredFieldDeclaration<'model, ^target>)
+            : FieldStep<'model, ^target> =
+            let schema: Schema< ^target> = SchemaDefaults.Resolve()
+            SchemaBuilder<'model>.ConfiguredField(field, schema)
+
+        member _.Yield(step: ConstructorStep<'model, 'constructor>) =
+            SchemaPlan<'model, 'model, 'model, 'constructor>(
+                box (CeFieldsEmpty<'model, 'model>() :> ICeFields<'model, 'model, 'model>),
+                step.Constructor,
+                Ok
+            )
+
+        member _.Yield(step: CheckedConstructorStep<'model, 'constructor>) =
+            SchemaPlan<'model, Result<'model, string>, Result<'model, string>, 'constructor>(
+                box (
+                    CeFieldsEmpty<'model, Result<'model, string>>()
+                    :> ICeFields<'model, Result<'model, string>, Result<'model, string>>
+                ),
+                step.Constructor,
+                id
+            )
+
+        member _.Combine
+            (
+                source: FieldStep<'model, 'value>,
+                plan: SchemaPlan<'model, 'tail, 'constructed, 'constructor>
+            ) =
+            let tail =
+                unbox<ICeFields<'model, 'tail, 'constructed>> plan.Fields
+
+            let fields =
+                CeFieldsCons<'model, 'value, 'tail, 'constructed>(source.Definition, tail)
+                :> ICeFields<'model, 'value -> 'tail, 'constructed>
+
+            SchemaPlan<'model, 'value -> 'tail, 'constructed, 'constructor>(
+                box fields,
+                plan.Constructor,
+                plan.Finish
+            )
+
+        member _.Delay(factory: unit -> 'state) =
+            factory()
+
+        member _.Run
+            (plan: SchemaPlan<'model, 'constructor, 'constructed, 'constructor>)
+            : Schema<'model> =
+            let fields =
+                unbox<ICeFields<'model, 'constructor, 'constructed>> plan.Fields
+
+            SchemaBuilderInternals.close plan.Constructor fields plan.Finish
+
+open SchemaCeBuilder
+
 
 /// <summary>
 /// The concise schema-definition vocabulary: the record computation expression, its field and constructor
