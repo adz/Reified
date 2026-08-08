@@ -15,8 +15,7 @@ dotnet add package Reified.Parse         # serialized primitive decoding
 ```
 
 ```fsharp
-open Reified.Constraint
-open Reified.Parse
+open Reified
 open Reified.Refinements
 ```
 

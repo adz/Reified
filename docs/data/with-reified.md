@@ -13,9 +13,8 @@ takes a `Data` value, and every source that can become `Data` can therefore feed
 ## Feeding a schema
 
 ```fsharp
-open Reified.Data
+open Reified
 open Reified.DataSyntax
-open Reified.Schema
 
 let input =
     data [

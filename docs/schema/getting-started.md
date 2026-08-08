@@ -19,8 +19,7 @@ dotnet add package Reified.Schema
 ```
 
 ```fsharp
-open Reified.Data
-open Reified.Schema
+open Reified
 open Reified.SchemaSyntax
 ```
 

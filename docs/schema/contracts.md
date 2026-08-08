@@ -37,7 +37,7 @@ Parse or migrate to the current wire model first, then call `toDomain`. See
 `Contract.supersedes`, then choose how the input version is discovered with `Contract.build`.
 
 ```fsharp
-open Reified.Schema
+open Reified
 
 type ConfigV1 = { Host: string }
 type Config = { Host: string; Port: int }

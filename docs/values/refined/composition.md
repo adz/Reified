@@ -10,8 +10,7 @@ Parsing and refinement have different failure types because they answer differen
 error that preserves that distinction, then compose with `result { }`.
 
 ```fsharp
-open Reified.Constraint
-open Reified.Parse
+open Reified
 open Reified.Refinements
 open Reified.Result
 open Reified.Result.Syntax

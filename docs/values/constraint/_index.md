@@ -18,7 +18,7 @@ valid values, and the failure it produces is derived from that same description.
 that runs it.
 
 ```fsharp
-open Reified.Constraint
+open Reified
 
 let retryCount : Constraint<int> =
     Constraint.between 0 10

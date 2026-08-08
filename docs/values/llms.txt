@@ -38,8 +38,7 @@
 Golden path:
 
 ```fsharp
-open Reified.Constraint
-open Reified.Parse
+open Reified
 open Reified.Refinements
 open Reified.Result
 

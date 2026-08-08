@@ -40,7 +40,7 @@ dotnet add package Reified.Refinements
 ```
 
 ```fsharp
-open Reified.Constraint
+open Reified
 open Reified.Refinements
 ```
 

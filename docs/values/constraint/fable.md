@@ -17,7 +17,7 @@ present-and-useless.
 `Renderer.ofLookup` is the constructor to use. It takes any key-to-template function:
 
 ```fsharp
-open Reified.Constraint
+open Reified
 
 let translations =
     Map [ "constraint.presence.present", "doit être renseigné"

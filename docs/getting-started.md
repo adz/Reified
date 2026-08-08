@@ -37,10 +37,9 @@ type Signup =
 Declare how untrusted input becomes one:
 
 ```fsharp
-open Reified.ConstraintSyntax
-open Reified.Data
-open Reified.Schema
+open Reified
 open Reified.SchemaSyntax
+open Reified.ConstraintSyntax
 
 let signupSchema =
     schema<Signup> {
@@ -127,7 +126,7 @@ declaration.
 The smallest version needs no schema at all. Install `Reified.Constraint`:
 
 ```fsharp
-open Reified.Constraint
+open Reified
 
 let retryCount : Constraint<int> = Constraint.between 0 10
 

@@ -21,7 +21,7 @@ override the handful of fields whose wording actually differs.
 A short script writes a starting file for a translator:
 
 ```fsharp
-open Reified.Constraint
+open Reified
 
 let skeleton () =
     Catalogue.keys
@@ -39,7 +39,7 @@ let skeleton () =
 Do the same with `SchemaMessages.keys` if the application parses boundary input:
 
 ```fsharp
-open Reified.Schema
+open Reified
 
 SchemaMessages.keys |> List.map (fun key -> $"{key} = {SchemaMessages.english[key]}")
 ```

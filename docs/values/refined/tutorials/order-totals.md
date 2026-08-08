@@ -12,7 +12,7 @@ branch, an option, or a guard from the code downstream.
 
 ```fsharp
 open System
-open Reified.Constraint
+open Reified
 open Reified.Refinements
 open Reified.Result
 open Reified.Result.Syntax

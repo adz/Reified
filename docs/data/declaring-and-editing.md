@@ -10,7 +10,7 @@ description: Every literal, rendering, and immutable edit operation in Reified.D
 Open `Reified.Data` for `Data`. Open `Reified.DataSyntax` for the concise operators and functions used on this page.
 
 ```fsharp
-open Reified.Data
+open Reified
 open Reified.DataSyntax
 ```
 

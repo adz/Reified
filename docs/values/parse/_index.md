@@ -17,7 +17,7 @@ dotnet add package Reified.Parse
 ```
 
 ```fsharp
-open Reified.Parse
+open Reified
 
 Parse.int "12"     // Ok 12
 Parse.int ""       // Error (MissingValue "int")
@@ -181,7 +181,7 @@ Parsing changes representation. Checking a typed value is a constraint's job, an
 refinement's. They stay separate steps, and each contributes its own error:
 
 ```fsharp
-open Reified.Constraint
+open Reified
 open Reified.Refinements
 open Reified.Result
 open Reified.Result.Syntax

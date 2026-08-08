@@ -7,7 +7,7 @@ description: Naming rules, composing them, and keeping the value.
 # Using constraints
 
 ```fsharp
-open Reified.Constraint
+open Reified
 ```
 
 A constraint tests an existing typed value. It never trims, normalizes, or replaces its input.

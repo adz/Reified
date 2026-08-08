@@ -23,7 +23,7 @@ schema-local restrictions. This page is the shorter API-oriented view of that in
 
 ```fsharp
 open Reified.Refinements
-open Reified.Schema
+open Reified
 
 let nameSchema : Schema<NonBlankString> =
     Schema.text

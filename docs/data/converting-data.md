@@ -11,7 +11,7 @@ description: Convert JSON, .NET values, configuration, and command-line input in
 into that tree. Extraction and rendering functions take values back out.
 
 ```fsharp
-open Reified.Data
+open Reified
 open Reified.DataSyntax
 ```
 

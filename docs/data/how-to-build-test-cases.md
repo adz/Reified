@@ -12,7 +12,7 @@ Keep one representative baseline and describe each test case as a strict immutab
 The four functions on this page are `variant`, `variants`, `dimension`, and `matrix`.
 
 ```fsharp
-open Reified.Data
+open Reified
 open Reified.DataSyntax
 
 let baseline =

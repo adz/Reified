@@ -21,8 +21,7 @@ Values is a navigation grouping over three packages that admit values: `Reified.
   mappings, and `Schema.admit` for structured draft-to-domain construction.
 
 ```fsharp
-open Reified.Constraint
-open Reified.Parse
+open Reified
 open Reified.Refinements
 open Reified.Result
 open Reified.Result.Syntax

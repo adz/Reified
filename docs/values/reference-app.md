@@ -15,10 +15,9 @@ dotnet run --project examples/Reified.ReferenceApp.Intro/Reified.ReferenceApp.In
 The examples open the syntax modules, so the constraint and result vocabulary is unqualified:
 
 ```fsharp
-open Reified.Parse
+open Reified
 open Reified.Result
 open Reified.Result.Syntax
-open Reified.Constraint
 open Reified.ConstraintSyntax
 open Reified.Refinements
 ```

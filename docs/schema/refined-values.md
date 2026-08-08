@@ -46,7 +46,7 @@ The rest of this page expands what a domain type like `Email` contributes and sh
 ## Define the domain type
 
 ```fsharp
-open Reified.Constraint
+open Reified
 open Reified.Refinements
 
 type Email = private Email of string
@@ -70,7 +70,7 @@ The `email` format is intrinsic to `Email`, so its refinement owns that constrai
 Expand the field to expose its wire schema:
 
 ```fsharp
-open Reified.Schema
+open Reified
 open Reified.SchemaSyntax
 
 field _.Email {

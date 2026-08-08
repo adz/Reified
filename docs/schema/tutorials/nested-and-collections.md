@@ -12,7 +12,7 @@ own their canonical schemas, so `Order` can infer both the nested field and the 
 ## Declare The Schemas
 
 ```fsharp
-open Reified.Schema
+open Reified
 open Reified.SchemaSyntax
 
 type Address =

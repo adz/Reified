@@ -14,6 +14,17 @@ task is about promoting, rejecting, or implementing that sketch.
 Working on `src/Reified.Schema`? Read `dev-docs/schema/internals.md` first (implementation map), and
 `dev-docs/schema/constructor-last.md` for the current authoring-surface direction.
 
+## Namespaces
+
+`Reified.Schema`, `Reified.Constraint`, `Reified.Data`, and `Reified.Parse` declare `namespace Reified`, so
+`open Reified` reaches the whole core surface. Each package's vocabulary is a separate opt-in module named for
+its package — `Reified.SchemaSyntax`, `Reified.ConstraintSyntax`, `Reified.DataSyntax`. `Reified.Refinements`,
+`Reified.Result`, `Reified.DerivedSchema`, and the `Reified.Schema.*` satellites keep their own namespaces.
+
+A child namespace shadows a same-named type for anyone declaring or opening the parent, which is why `Data`
+could not stay in `Reified.Data`. Keep that in mind before adding a `Reified.X` namespace whose package also
+exports a type called `X`. See `dev-docs/namespace-flatten.md`.
+
 ## Package Graph
 
 - `Reified` (`src/Reified/`): umbrella package. No sources and no assembly — only a dependency on every packable
@@ -22,7 +33,7 @@ Working on `src/Reified.Schema`? Read `dev-docs/schema/internals.md` first (impl
   transitive, so an umbrella dependency would install the targets without running them.
 - `Reified.Result` (`src/Reified.Result/`): generic Result combinators, conversions/extraction helpers, and `result { }`
   in the `Reified.Result` namespace. Independent leaf.
-- `Reified.Constraint` (`src/Reified.Constraint/`): `Constraint<'value>`, `Violation`, the `ConstraintDescription` read model, and `Syntax`, all in the `Reified.Constraint` namespace. One value-rule vocabulary; there is no `Check` type and no second catalogue.
+- `Reified.Constraint` (`src/Reified.Constraint/`): `Constraint<'value>`, `Violation`, the `ConstraintDescription` read model, and `ConstraintSyntax`, all in the `Reified` namespace. One value-rule vocabulary; there is no `Check` type and no second catalogue.
   Returns the standard F# `Result` type; does not depend on `Reified.Result`. Independent leaf.
 - `Reified.Parse` (`src/Reified.Parse/`): `ParseError` and primitive `Parse.*` functions. Independent leaf.
 - `Reified.Refinements` (`src/Reified.Refinements/`): invariant-carrying types and the operations that justify them. Depends

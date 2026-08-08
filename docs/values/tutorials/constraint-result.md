@@ -9,7 +9,7 @@ description: Apply reusable constraints and compose the values they keep through
 This tutorial validates a signup request and maps each `Violation` into an application error.
 
 ```fsharp
-open Reified.Constraint
+open Reified
 open Reified.Result
 open Reified.Result.Syntax
 

@@ -7,8 +7,7 @@ description: Short examples of fields, checked construction, refinement, recursi
 # Schema Overview Examples
 
 ```fsharp
-open Reified.Data
-open Reified.Schema
+open Reified
 open Reified.SchemaSyntax
 ```
 

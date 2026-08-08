@@ -36,8 +36,7 @@ library's.
 ## The three in one function
 
 ```fsharp
-open Reified.Parse
-open Reified.Constraint
+open Reified
 open Reified.Refinements
 
 type Quantity =

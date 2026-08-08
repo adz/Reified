@@ -23,7 +23,7 @@ Each case supplies a tag, a constructor, a payload extractor, and a payload sche
 
 ```fsharp
 open Reified.Refinements
-open Reified.Schema
+open Reified
 open Reified.SchemaSyntax
 
 type CardDetails =

@@ -78,7 +78,7 @@ Ordered so each phase builds and tests green on its own, and so the riskiest ren
       namespace level. `IRecordPlanCompiler` and `IRecordPlanState` deliberately stay out:
       `Reified.Schema.Json` implements them, so they are an extension point rather than
       machinery, and hiding them would warn legitimate implementers.
-- [ ] **Phase 7** — Umbrella `.fsproj` comment, docs, `llms.txt`, docgen inputs, generated
+- [x] **Phase 7** — Umbrella `.fsproj` comment, docs, `llms.txt`, docgen inputs, generated
       reference pages.
 - [ ] **Phase 8** — Full validation: build, tests, source inventory, Fable surface, docs.
 

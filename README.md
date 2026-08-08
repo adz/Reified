@@ -18,7 +18,7 @@ Declare value and model invariants once. Derive validation, parsing, diagnostics
 Most validation stacks keep the rule and its message in separate places. Reified makes a constraint inspectable data, so checking, diagnostics, export, and generation read the same declaration.
 
 ```fsharp
-open Reified.Constraint
+open Reified
 
 let retryCount : Constraint<int> =
     Constraint.between 0 10
@@ -39,10 +39,9 @@ Nobody wrote the failure sentence separately. Change the bounds and every interp
 A schema describes how structured input becomes a model. It returns the typed value only after every field and constructor invariant succeeds.
 
 ```fsharp
-open Reified.Constraint
-open Reified.Constraint.Syntax
-open Reified.Schema
-open Reified.Schema.Syntax
+open Reified
+open Reified.ConstraintSyntax
+open Reified.SchemaSyntax
 
 type Signup =
     { Email: string
@@ -93,7 +92,7 @@ The codec is compiled from the schema's typed field plan, so there is no runtime
 For wire records — DTOs whose whole job is to cross a boundary — declaring the schema by hand is duplication. Mark the record instead:
 
 ```fsharp
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type Signup =

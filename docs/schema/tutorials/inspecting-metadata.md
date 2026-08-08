@@ -15,7 +15,7 @@ UI metadata.
 `Inspect.model` turns a built schema into a plain metadata tree:
 
 ```fsharp
-open Reified.Schema
+open Reified
 
 let description = Inspect.model signupSchema
 

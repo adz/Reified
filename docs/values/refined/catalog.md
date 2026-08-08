@@ -12,7 +12,7 @@ branch from every consumer. A wrapper that only validates at construction is a c
 not a type — see [When not to make a type](#when-not-to-make-a-type).
 
 ```fsharp
-open Reified.Constraint
+open Reified
 open Reified.Refinements
 ```
 

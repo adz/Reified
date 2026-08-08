@@ -15,7 +15,7 @@ Two F# rules force it:
   `Expr<_>` and fails with `FS0002`.
 
 A constructor is a member, so it auto-quotes, and a type's name is in scope through an ordinary `open`. Declaring
-`field` as a type is therefore what lets the call site stay unqualified with a single `open Reified.Schema.Syntax`.
+`field` as a type is therefore what lets the call site stay unqualified with a single `open Reified.SchemaSyntax`.
 
 Do not try to move it back to a module `let`: that shape cannot be called as `field _.Name` at all, and passing it
 an explicit quotation compiles but throws, because the quotation then carries no `WithValue` node.

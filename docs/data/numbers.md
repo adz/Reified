@@ -11,7 +11,7 @@ description: How numeric values become Data.Number tokens and when their exact s
 JSON rendering both write that token without quotes.
 
 ```fsharp
-open Reified.Data
+open Reified
 open Reified.DataSyntax
 ```
 

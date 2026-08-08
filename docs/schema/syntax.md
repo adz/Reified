@@ -11,7 +11,7 @@ the package namespace, then its `Syntax`. Nothing is auto-opened; if a name belo
 is missing.
 
 ```fsharp
-open Reified.Schema
+open Reified
 open Reified.SchemaSyntax
 ```
 

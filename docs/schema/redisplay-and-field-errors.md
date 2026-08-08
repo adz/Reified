@@ -78,7 +78,7 @@ let messages = RetainedParseResult.renderErrors parsed
 Schema fold its typed path in as the attribute:
 
 ```fsharp
-open Reified.Constraint
+open Reified
 
 let signup = renderer |> Renderer.context "signup"
 

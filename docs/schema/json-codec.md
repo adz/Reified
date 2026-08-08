@@ -21,7 +21,7 @@ Reified has two paths for JSON, and they exist because they optimize for differe
 ## Compile Once, Reuse Everywhere
 
 ```fsharp
-open Reified.Schema
+open Reified
 open Reified.Schema.Json
 open Reified.SchemaSyntax
 

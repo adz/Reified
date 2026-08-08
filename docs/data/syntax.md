@@ -16,7 +16,7 @@ This example declares nested data, omits an optional field, applies an atomic pa
 opening `Reified.DataSyntax`:
 
 ```fsharp
-open Reified.Data
+open Reified
 
 let nickname : string option = None
 
@@ -54,7 +54,7 @@ customer |> Data.replace "name" "Grace"
 ## The same example with Reified.DataSyntax
 
 ```fsharp
-open Reified.Data
+open Reified
 open Reified.DataSyntax
 
 let customer =

@@ -33,7 +33,7 @@ dotnet add package Reified.Data
 ## Build, change, and check one value
 
 ```fsharp
-open Reified.Data
+open Reified
 open Reified.DataSyntax
 
 let baseline =
@@ -84,7 +84,7 @@ Use `data` to build a `Data` value. Lists represent both objects and lists. A li
 is an object; a list containing ordinary values is a list.
 
 ```fsharp
-open Reified.Data
+open Reified
 open Reified.DataSyntax
 
 let person = data [ "name" => "Ada"; "active" => true ]

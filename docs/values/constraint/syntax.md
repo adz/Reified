@@ -11,7 +11,7 @@ description: Write concise constraint modules and adapt results without dependin
 where a module's purpose already makes the context clear:
 
 ```fsharp
-open Reified.Constraint
+open Reified
 
 module SignupRules =
     open Reified.ConstraintSyntax

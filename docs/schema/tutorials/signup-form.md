@@ -17,7 +17,7 @@ be redisplayed with the user's original input and per-field errors.
 The schema declares each field once: external name, getter, and constraints.
 
 ```fsharp
-open Reified.Schema
+open Reified
 open Reified.SchemaSyntax
 
 type Signup = { Email: string; Age: int }

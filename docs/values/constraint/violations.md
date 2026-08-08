@@ -14,7 +14,7 @@ it for a person, or keep it structured when application code needs to classify o
 Use `Violation.render` at the edge where the failure becomes text:
 
 ```fsharp
-open Reified.Constraint
+open Reified
 
 let retryCount : Constraint<int> =
     Constraint.between 0 10

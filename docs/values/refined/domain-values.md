@@ -19,7 +19,7 @@ than it saves. [When not to make a type](../catalog/#when-not-to-make-a-type) dr
 ## Define the wrapper and Value projection
 
 ```fsharp
-open Reified.Constraint
+open Reified
 open Reified.Refinements
 
 type ContactEmail =

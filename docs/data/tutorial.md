@@ -15,7 +15,7 @@ matter to the test.
 Open `Reified.Data` for the `Data` type and module. Open `Reified.DataSyntax` for the concise literal, edit, and matching syntax:
 
 ```fsharp
-open Reified.Data
+open Reified
 open Reified.DataSyntax
 
 let customer =

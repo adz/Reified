@@ -11,7 +11,7 @@ to yours, and — just as importantly — shows how to decide whether it should 
 all.
 
 ```fsharp
-open Reified.Constraint
+open Reified
 open Reified.Refinements
 ```
 
@@ -116,7 +116,7 @@ Keep the raw type at input and storage boundaries, and the refined type in betwe
 boundary describes the type without restating it:
 
 ```fsharp
-open Reified.Schema
+open Reified
 
 let customerIdSchema : Schema<CustomerId> =
     Schema.int |> Schema.refine CustomerId.refinement

@@ -69,7 +69,7 @@ A **schema** is Reified's typed description of input shape, field constraints, a
 then calls the authoritative constructor.
 
 ```fsharp
-open Reified.Schema
+open Reified
 open Reified.SchemaSyntax
 
 module Booking =
@@ -104,7 +104,7 @@ normal record. It also gives reviewers a short list of allowed operations.
 namespace MyApp.Domain
 
 open System
-open Reified.Schema
+open Reified
 
 type BookingDraft =
     { Start: DateOnly
