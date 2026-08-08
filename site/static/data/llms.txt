@@ -1,7 +1,7 @@
 # Reified Data
 
 - `Reified.Data` is a standalone fixture and produced-data package with no dependencies on other Reified packages.
-- Open `Reified.Data.Syntax`; construct with `data`, derive values with `patch`, `variants`, or `matrix`, and match with
+- Open `Reified.DataSyntax`; construct with `data`, derive values with `patch`, `variants`, or `matrix`, and match with
   `at`, `absent`, `containing`, and explicit list patterns.
 - Use `Data.compare` when the complete tree is the contract and partial patterns when only selected evidence matters.
 - `Data.render` and `Data.renderIndented` are human-readable displays; `Data.Json.render` and

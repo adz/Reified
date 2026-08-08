@@ -78,7 +78,7 @@ module Checks =
 
         [ describes (RelationAtom(Compared(Equal, ConstraintValue.Guid guid))) (Constraint.equalTo guid)
           describes (RelationAtom(Compared(AtLeast, ConstraintValue.TimeSpan span))) (Constraint.atLeast span)
-          describes (MembershipAtom(OneOf [ ConstraintValue.Guid guid ])) (Constraint.oneOf [ guid ])
+          describes (MembershipAtom(Membership.OneOf [ ConstraintValue.Guid guid ])) (Constraint.oneOf [ guid ])
           describes (RelationAtom(Compared(Equal, ConstraintValue.Text "ada"))) (Constraint.equalTo "ada")
           describes (RelationAtom(Compared(AtLeast, ConstraintValue.Integer 3L))) (Constraint.atLeast 3) ]
         |> List.forall id

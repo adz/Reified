@@ -93,7 +93,7 @@ module SchemaGen =
         | _, RelationAtom(Compared(Equal, operand)) -> scalar && (scalarLiteral operand).IsSome
         | SchemaShape.Primitive PrimitiveValueKind.Text, PresenceAtom Present
         | SchemaShape.Primitive PrimitiveValueKind.Text, CardinalityAtom _
-        | SchemaShape.Primitive PrimitiveValueKind.Text, MembershipAtom(OneOf _)
+        | SchemaShape.Primitive PrimitiveValueKind.Text, MembershipAtom(Membership.OneOf _)
         | SchemaShape.Primitive PrimitiveValueKind.Text, FormatAtom Email -> true
         | _, RelationAtom(Compared((GreaterThan | LessThan | AtLeast | AtMost), _))
         | _, RelationAtom(Within _)
@@ -172,7 +172,7 @@ module SchemaGen =
         let low =
             atoms
             |> List.choose (function
-                | CardinalityAtom(Exact n)
+                | CardinalityAtom(Cardinality.Exact n)
                 | CardinalityAtom(Cardinality.Minimum n)
                 | CardinalityAtom(Cardinality.Between(n, _)) -> Some n
                 | _ -> None)
@@ -180,7 +180,7 @@ module SchemaGen =
         let high =
             atoms
             |> List.choose (function
-                | CardinalityAtom(Exact n)
+                | CardinalityAtom(Cardinality.Exact n)
                 | CardinalityAtom(Cardinality.Maximum n)
                 | CardinalityAtom(Cardinality.Between(_, n)) -> Some n
                 | _ -> None)
@@ -188,7 +188,7 @@ module SchemaGen =
         low, high
 
     let private textGenerator atoms =
-        let oneOf = atoms |> List.tryPick (function MembershipAtom(OneOf choices) -> Some(choices |> List.choose tryText) | _ -> None)
+        let oneOf = atoms |> List.tryPick (function MembershipAtom(Membership.OneOf choices) -> Some(choices |> List.choose tryText) | _ -> None)
         let email = atoms |> List.contains (FormatAtom Email)
         let present = atoms |> List.contains (PresenceAtom Present)
         let lows, highs = sizeBounds atoms

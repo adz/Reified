@@ -546,7 +546,7 @@ module Constraint =
     /// <remarks>Text sizes count Unicode code points, so one emoji counts once even though it is two UTF-16 units.</remarks>
     /// <example><code>let code : Constraint&lt;string&gt; = Constraint.length 6</code></example>
     let inline length< ^value when (^value or CardinalityDispatcher): (static member Create: ^value * Cardinality -> Constraint< ^value >)> expected : Constraint< ^value > =
-        cardinality (Exact expected)
+        cardinality (Cardinality.Exact expected)
 
     /// <summary>Requires text or a collection to have at least the supplied size.</summary>
     /// <remarks>Literal size, so a single space satisfies <c>minLength 1</c>. Use <c>present</c> to reject whitespace.</remarks>
@@ -570,7 +570,7 @@ module Constraint =
     /// <summary>Requires a collection to hold exactly one item.</summary>
     /// <example><code>let primaryAddress : Constraint&lt;Address list&gt; = Constraint.single</code></example>
     let inline single< ^value when (^value or CardinalityDispatcher): (static member Create: ^value * Cardinality -> Constraint< ^value >)> : Constraint< ^value > =
-        cardinality (Exact 1)
+        cardinality (Cardinality.Exact 1)
 
     /// <summary>Requires a collection to hold at least one item.</summary>
     /// <remarks>A literal count: for text, a single space satisfies it. Use <c>present</c> to reject blank text.</remarks>
@@ -691,7 +691,7 @@ module Constraint =
         (predicate: 'value -> bool)
         =
         if choices |> List.forall Option.isSome then
-            atomic (MembershipAtom(OneOf(choices |> List.map Option.get))) predicate actual
+            atomic (MembershipAtom(Membership.OneOf(choices |> List.map Option.get))) predicate actual
         else
             unsupported (UnsupportedOperation.Relation Equal) predicate
 

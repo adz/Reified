@@ -80,7 +80,7 @@ Ordered so each phase builds and tests green on its own, and so the riskiest ren
       machinery, and hiding them would warn legitimate implementers.
 - [x] **Phase 7** — Umbrella `.fsproj` comment, docs, `llms.txt`, docgen inputs, generated
       reference pages.
-- [ ] **Phase 8** — Full validation: build, tests, source inventory, Fable surface, docs.
+- [x] **Phase 8** — Full validation: build, tests, source inventory, Fable surface, docs.
 
 ## Sweep bill
 
@@ -88,4 +88,16 @@ Ordered so each phase builds and tests green on its own, and so the riskiest ren
 - `ApiShapeTests.fs` asserts on compiled type names throughout; every `Reified.Schema.X`
   and `Reified.Constraint.X` string changes.
 - `scripts/docgen/Program.fs` member IDs are all `T:Reified.Schema.*` / `M:Reified.Constraint.*`.
-- Generated reference pages re-slug; they are gitignored, so regenerate rather than edit.
+- Generated reference pages re-slug; they are gitignored, so regenerate rather than edit. The slug
+  assertions in `scripts/validate-docs.sh` and `scripts/validate-product-docs.sh` move with them.
+
+## Surprises worth keeping
+
+- **MSBuild caches `UsingTask` assemblies in reused nodes.** After changing the contract emitter, the
+  checked-in generated output regenerates from the *old* task assembly until the build server is shut
+  down. `MSBUILDDISABLENODEREUSE=1` or `dotnet build-server shutdown` first, or you will chase a
+  compile error that the source no longer explains.
+- **Merging namespaces made two union cases ambiguous.** `Data`'s `DataPatternNode` has `Exact` and
+  `OneOf`; so do `Cardinality` and `Membership`. The .NET compiler picked the intended one silently;
+  Fable did not. Both are now written qualified. Fable earns its place in the validation set here —
+  it was the only check that caught this.

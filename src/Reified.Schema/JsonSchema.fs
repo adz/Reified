@@ -196,7 +196,7 @@ module JsonSchema =
             | SchemaShape.Many _ -> Enforced [ "\"maxItems\":0" ]
             | SchemaShape.MapOf _ -> Enforced [ "\"maxProperties\":0" ]
             | _ -> NotEnforceable
-        | CardinalityAtom(Exact expected) -> sizeKeywords [ "min", expected; "max", expected ]
+        | CardinalityAtom(Cardinality.Exact expected) -> sizeKeywords [ "min", expected; "max", expected ]
         | CardinalityAtom(Cardinality.Minimum minimum) -> sizeKeywords [ "min", minimum ]
         | CardinalityAtom(Cardinality.Maximum maximum) -> sizeKeywords [ "max", maximum ]
         | CardinalityAtom(Cardinality.Between(minimum, maximum)) -> sizeKeywords [ "min", minimum; "max", maximum ]
@@ -217,7 +217,7 @@ module JsonSchema =
             | Some minimum, Some maximum ->
                 Enforced [ sprintf "\"minimum\":%s" minimum; sprintf "\"maximum\":%s" maximum ]
             | _ -> NotEnforceable
-        | MembershipAtom(OneOf choices) ->
+        | MembershipAtom(Membership.OneOf choices) ->
             match choices |> List.map comparableLiteral with
             | literals when not literals.IsEmpty && literals |> List.forall Option.isSome ->
                 Enforced [ literals |> List.map Option.get |> String.concat "," |> sprintf "\"enum\":[%s]" ]

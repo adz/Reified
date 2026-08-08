@@ -43,7 +43,7 @@ module ConstraintTests =
                     if code = "AUD" then
                         Ok()
                     else
-                        Error(Atomic(Expected(MembershipAtom(OneOf [ ConstraintValue.Text "AUD" ]), ConstraintValue.tryCreate code))))
+                        Error(Atomic(Expected(MembershipAtom(Membership.OneOf [ ConstraintValue.Text "AUD" ]), ConstraintValue.tryCreate code))))
 
             let agreements =
                 [ agrees text [ null; ""; " "; "a"; "ab"; "abcde" ]
@@ -202,7 +202,7 @@ module ConstraintTests =
                       CardinalityAtom(Cardinality.Between(2, 4))
                       FormatAtom Email
                       FormatAtom(Pattern "^a$")
-                      MembershipAtom(OneOf [ ConstraintValue.Text "a"; ConstraintValue.Text "b" ])
+                      MembershipAtom(Membership.OneOf [ ConstraintValue.Text "a"; ConstraintValue.Text "b" ])
                       RelationAtom(Compared(Equal, ConstraintValue.Integer 1L))
                       RelationAtom(Compared(NotEqual, ConstraintValue.Integer 1L))
                       RelationAtom(Compared(GreaterThan, ConstraintValue.Integer 1L))
@@ -438,11 +438,11 @@ module ConstraintTests =
                     if code = "AUD" then
                         Ok()
                     else
-                        Error(Atomic(Expected(MembershipAtom(OneOf [ ConstraintValue.Text "AUD" ]), ConstraintValue.tryCreate code))))
+                        Error(Atomic(Expected(MembershipAtom(Membership.OneOf [ ConstraintValue.Text "AUD" ]), ConstraintValue.tryCreate code))))
 
             test <@
                 violation currency "NZD" =
-                    Atomic(Expected(MembershipAtom(OneOf [ ConstraintValue.Text "AUD" ]), Some(ConstraintValue.Text "NZD")))
+                    Atomic(Expected(MembershipAtom(Membership.OneOf [ ConstraintValue.Text "AUD" ]), Some(ConstraintValue.Text "NZD")))
             @>
 
             // The enclosing description stays opaque, so a typed reason makes no false portable claim.
@@ -495,7 +495,7 @@ module ConstraintTests =
 
             test <@ expression (Constraint.equalTo identifier) = ConstraintExpression.Atom(RelationAtom(Compared(Equal, ConstraintValue.Guid identifier))) @>
             test <@ expression (Constraint.atLeast span) = ConstraintExpression.Atom(RelationAtom(Compared(AtLeast, ConstraintValue.TimeSpan span))) @>
-            test <@ expression (Constraint.oneOf [ identifier ]) = ConstraintExpression.Atom(MembershipAtom(OneOf [ ConstraintValue.Guid identifier ])) @>
+            test <@ expression (Constraint.oneOf [ identifier ]) = ConstraintExpression.Atom(MembershipAtom(Membership.OneOf [ ConstraintValue.Guid identifier ])) @>
 
             // The projection still reports honestly for a type no representation covers.
             test <@ expression (Constraint.equalTo (Version(1, 0))) = ConstraintExpression.Opaque(OpaqueConstraint.UnsupportedOperand(UnsupportedOperation.Relation Equal)) @>
@@ -598,7 +598,7 @@ module ConstraintTests =
             let atoms =
                 [ PresenceAtom Present
                   PresenceAtom Blank
-                  CardinalityAtom(Exact 1)
+                  CardinalityAtom(Cardinality.Exact 1)
                   CardinalityAtom(Cardinality.Minimum 1)
                   CardinalityAtom(Cardinality.Maximum 1)
                   CardinalityAtom(Cardinality.Between(1, 2))
@@ -609,7 +609,7 @@ module ConstraintTests =
                   RelationAtom(Compared(AtLeast, ConstraintValue.Integer 1L))
                   RelationAtom(Compared(AtMost, ConstraintValue.Integer 1L))
                   RelationAtom(Within(ConstraintValue.Integer 1L, ConstraintValue.Integer 2L))
-                  MembershipAtom(OneOf [])
+                  MembershipAtom(Membership.OneOf [])
                   MembershipAtom(NoneOf [])
                   MembershipAtom(Membership.Contains(ConstraintValue.Integer 1L))
                   MembershipAtom(Membership.NotContains(ConstraintValue.Integer 1L))

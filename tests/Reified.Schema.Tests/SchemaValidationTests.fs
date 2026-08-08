@@ -263,7 +263,7 @@ module SchemaValidationTests =
                 issues validation =
                     Error
                         [ { Path = SchemaPath.key "primary-on-wire"
-                            Error = SchemaError.Violation(Atomic(Expected(MembershipAtom(OneOf [ ConstraintValue.Text "secondary-value" ]), Some(ConstraintValue.Text "wrong-secondary")))) } ]
+                            Error = SchemaError.Violation(Atomic(Expected(MembershipAtom(Membership.OneOf [ ConstraintValue.Text "secondary-value" ]), Some(ConstraintValue.Text "wrong-secondary")))) } ]
             @>
 
     [<Fact>]

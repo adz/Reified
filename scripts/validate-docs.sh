@@ -25,6 +25,6 @@ assert_edit_link() {
 
 assert_edit_link "getting-started/index.html" "docs/getting-started.md"
 assert_edit_link "schema/getting-started/index.html" "docs/schema/getting-started.md"
-assert_edit_link "schema/reference/schema/t-schema-schema/index.html" "docs/schema/reference/schema/t-schema-schema.md"
+assert_edit_link "schema/reference/schema/t-schema/index.html" "docs/schema/reference/schema/t-schema.md"
 
 echo "Docs validation build written to $validate_dir"

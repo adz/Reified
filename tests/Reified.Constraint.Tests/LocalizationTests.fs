@@ -383,7 +383,7 @@ module LocalizationTests =
         let private described text = Atomic(Described(text, None))
 
         let private oneOf values =
-            Atomic(Expected(MembershipAtom(OneOf(values |> List.map ConstraintValue.Text)), None))
+            Atomic(Expected(MembershipAtom(Membership.OneOf(values |> List.map ConstraintValue.Text)), None))
 
         [<Fact>]
         let ``list joining is deterministic from zero items upwards`` () =

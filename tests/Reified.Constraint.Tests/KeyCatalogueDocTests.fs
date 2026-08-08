@@ -25,7 +25,7 @@ module KeyCatalogueDocTests =
     let internal atoms () =
         [ PresenceAtom Present
           PresenceAtom Blank
-          CardinalityAtom(Exact 1)
+          CardinalityAtom(Cardinality.Exact 1)
           CardinalityAtom(Cardinality.Minimum 1)
           CardinalityAtom(Cardinality.Maximum 1)
           CardinalityAtom(Cardinality.Between(1, 2))
@@ -36,7 +36,7 @@ module KeyCatalogueDocTests =
           RelationAtom(Compared(AtLeast, ConstraintValue.Integer 1L))
           RelationAtom(Compared(AtMost, ConstraintValue.Integer 1L))
           RelationAtom(Within(ConstraintValue.Integer 1L, ConstraintValue.Integer 2L))
-          MembershipAtom(OneOf [])
+          MembershipAtom(Membership.OneOf [])
           MembershipAtom(NoneOf [])
           MembershipAtom(Membership.Contains(ConstraintValue.Integer 1L))
           MembershipAtom(Membership.NotContains(ConstraintValue.Integer 1L))

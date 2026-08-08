@@ -847,7 +847,7 @@ module ApiShapeTests =
                 | CardinalityAtom(Cardinality.Maximum maximum) -> Some $"maxLength {maximum}"
                 | FormatAtom Email -> Some "email"
                 | FormatAtom(Pattern pattern) -> Some $"pattern {pattern}"
-                | MembershipAtom(OneOf choices) -> Some $"oneOf {choices.Length}"
+                | MembershipAtom(Membership.OneOf choices) -> Some $"oneOf {choices.Length}"
                 | RelationAtom(Within(minimum, maximum)) ->
                     Some $"within {ConstraintValue.render minimum}-{ConstraintValue.render maximum}"
                 | CardinalityAtom(Cardinality.Between(minimum, maximum)) -> Some $"between {minimum}-{maximum}"

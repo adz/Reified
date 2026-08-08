@@ -160,13 +160,13 @@ module ConstraintAtom =
         match atom with
         | PresenceAtom Present -> "constraint.presence.present"
         | PresenceAtom Blank -> "constraint.presence.blank"
-        | CardinalityAtom(Exact _) -> "constraint.cardinality.exact"
+        | CardinalityAtom(Cardinality.Exact _) -> "constraint.cardinality.exact"
         | CardinalityAtom(Minimum _) -> "constraint.cardinality.minimum"
         | CardinalityAtom(Maximum _) -> "constraint.cardinality.maximum"
         | CardinalityAtom(Between _) -> "constraint.cardinality.between"
         | RelationAtom(Compared(operator, _)) -> "constraint.relation." + relationOperatorKey operator
         | RelationAtom(Within _) -> "constraint.relation.within"
-        | MembershipAtom(OneOf _) -> "constraint.membership.oneOf"
+        | MembershipAtom(Membership.OneOf _) -> "constraint.membership.oneOf"
         | MembershipAtom(NoneOf _) -> "constraint.membership.noneOf"
         | MembershipAtom(Contains _) -> "constraint.membership.contains"
         | MembershipAtom(NotContains _) -> "constraint.membership.notContains"
@@ -183,14 +183,14 @@ module ConstraintAtom =
     let arguments (atom: ConstraintAtom) : Map<string, ConstraintValue> =
         match atom with
         | PresenceAtom _ -> Map.empty
-        | CardinalityAtom(Exact expected) -> Map [ "expected", ConstraintValue.Integer(int64 expected) ]
+        | CardinalityAtom(Cardinality.Exact expected) -> Map [ "expected", ConstraintValue.Integer(int64 expected) ]
         | CardinalityAtom(Minimum minimum) -> Map [ "minimum", ConstraintValue.Integer(int64 minimum) ]
         | CardinalityAtom(Maximum maximum) -> Map [ "maximum", ConstraintValue.Integer(int64 maximum) ]
         | CardinalityAtom(Between(minimum, maximum)) ->
             Map [ "minimum", ConstraintValue.Integer(int64 minimum); "maximum", ConstraintValue.Integer(int64 maximum) ]
         | RelationAtom(Compared(_, expected)) -> Map [ "expected", expected ]
         | RelationAtom(Within(minimum, maximum)) -> Map [ "minimum", minimum; "maximum", maximum ]
-        | MembershipAtom(OneOf choices)
+        | MembershipAtom(Membership.OneOf choices)
         | MembershipAtom(NoneOf choices) -> Map [ "choices", ConstraintValue.List choices ]
         | MembershipAtom(Contains item)
         | MembershipAtom(NotContains item) -> Map [ "item", item ]
@@ -207,7 +207,7 @@ module ConstraintAtom =
         match atom with
         | PresenceAtom Present -> "value must be present"
         | PresenceAtom Blank -> "value must be blank"
-        | CardinalityAtom(Exact expected) -> $"expected a size of exactly {expected}"
+        | CardinalityAtom(Cardinality.Exact expected) -> $"expected a size of exactly {expected}"
         | CardinalityAtom(Minimum minimum) -> $"expected a size of at least {minimum}"
         | CardinalityAtom(Maximum maximum) -> $"expected a size of at most {maximum}"
         | CardinalityAtom(Between(minimum, maximum)) -> $"expected a size between {minimum} and {maximum}"
@@ -218,7 +218,7 @@ module ConstraintAtom =
         | RelationAtom(Compared(AtLeast, expected)) -> $"expected a value at least {value expected}"
         | RelationAtom(Compared(AtMost, expected)) -> $"expected a value at most {value expected}"
         | RelationAtom(Within(minimum, maximum)) -> $"expected a value between {value minimum} and {value maximum}"
-        | MembershipAtom(OneOf choices) ->
+        | MembershipAtom(Membership.OneOf choices) ->
             let choices = choices |> List.map value |> String.concat ", "
             $"expected one of: {choices}"
         | MembershipAtom(NoneOf choices) ->

@@ -41,13 +41,13 @@ case "$product" in
     test -f "$validate_dir/values/constraint/fable/index.html"
     test -f "$validate_dir/values/refined/domain-values/index.html"
     test -f "$validate_dir/values/parse/index.html"
-    test -f "$validate_dir/values/reference/constraint/t-constraint-renderer/index.html"
+    test -f "$validate_dir/values/reference/constraint/t-renderer/index.html"
     # Values is navigation only: no page may advertise a Reified.Values package.
     ! grep -rqF 'dotnet add package Reified.Values' "$validate_dir/values"
     ;;
   schema)
     test -f "$validate_dir/schema/getting-started/index.html"
-    test -f "$validate_dir/schema/reference/schema/t-schema-schema/index.html"
+    test -f "$validate_dir/schema/reference/schema/t-schema/index.html"
     grep -q 'id="package-schemaoverview-reference-check" checked' "$validate_dir/schema/reference/schema/index.html"
     grep -q 'id="package-schemajson-codec-reference-check" checked' "$validate_dir/schema/reference/codec/index.html"
     grep -q 'id="package-schemahttp-servers-reference-check" checked' "$validate_dir/schema/reference/schema/http/index.html"
