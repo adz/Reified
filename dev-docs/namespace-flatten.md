@@ -50,7 +50,7 @@ Ordered so each phase builds and tests green on its own, and so the riskiest ren
 (Schema) lands after its dependency (Constraint) has proven the pattern.
 
 - [x] **Phase 0** — Land the prerequisite renames (`SchemaPath`, `Refine.*` nesting).
-- [ ] **Phase 1** — `Reified.Schema.Derive` -> `Reified.DerivedSchema`. Mandatory before
+- [x] **Phase 1** — `Reified.Schema.Derive` -> `Reified.DerivedSchema`. Mandatory before
       phase 4: it is the only sub-namespace sharing `Reified.Schema.dll`, so FS0247 fires
       otherwise. Standalone and small, so it goes first.
 - [ ] **Phase 2** — `Reified.Parse` -> `Reified`. Two files, two public names. The canary

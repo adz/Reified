@@ -2,7 +2,7 @@
 // regenerate it after editing this file (the build target does this when the tool is present).
 namespace Reified.ReferenceApp.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 /// Who can see a workspace card.
 type Visibility =

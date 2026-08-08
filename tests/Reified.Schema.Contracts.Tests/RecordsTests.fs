@@ -25,7 +25,7 @@ module RecordsTests =
                 """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type Order = { Sku: string; Quantity: int }
@@ -50,7 +50,7 @@ type Order = { Sku: string; Quantity: int }
                 """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 type NotWire = { A: int }
 
@@ -70,7 +70,7 @@ module Helpers =
                 """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type Order =
@@ -98,7 +98,7 @@ type Order =
                 """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type Profile =
@@ -134,7 +134,7 @@ type Profile =
                 """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 /// An order.
 [<DeriveSchema>]
@@ -156,7 +156,7 @@ type Order =
                 """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type OrderV1 = { Sku: string }
@@ -172,7 +172,7 @@ type Order = { Sku: string; Quantity: int }
                 """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type ApolloV2 = { Crew: int }
@@ -187,7 +187,7 @@ type ApolloV2 = { Crew: int }
                 """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema(Chain = "Order", Version = 1)>]
 type LegacyOrder = { Sku: string }
@@ -206,7 +206,7 @@ type Order = { Sku: string; Quantity: int }
                 """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type Card = { Number: string }
@@ -249,7 +249,7 @@ type Signup = { Plan: Plan; Source: Source }
                 """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type Order =
@@ -271,7 +271,7 @@ type Order =
                 """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type Order = private { Sku: string }
@@ -284,7 +284,7 @@ type Order = private { Sku: string }
                 """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 module Inner =
     [<DeriveSchema>]
@@ -298,7 +298,7 @@ module Inner =
                 """
 module My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type Order = { Sku: string }
@@ -313,7 +313,7 @@ type Order = { Sku: string }
                 """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type Box<'t> = { Value: string }
@@ -326,7 +326,7 @@ type Box<'t> = { Value: string }
                 """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type Choice =
@@ -343,7 +343,7 @@ type Choice =
                 """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type Order = { Location: Elsewhere }
@@ -356,7 +356,7 @@ type Order = { Location: Elsewhere }
                 """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveUnion "kind">]
 type Source =
@@ -375,7 +375,7 @@ type Order = { Source: Source }
                 """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type Category =
@@ -396,7 +396,7 @@ type Category =
                 """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema(Chain = "Order", Version = 1)>]
 type LegacyOrder = { Sku: string }
@@ -420,14 +420,14 @@ type Order = { Sku: string; Quantity: int }
                 """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type Order = { Sku: string }
 
 namespace My.Other
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type Stray = { A: int }
@@ -443,7 +443,7 @@ type Stray = { A: int }
                     """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type Order = { MarketingOptIn: bool }
@@ -461,7 +461,7 @@ type Order = { MarketingOptIn: bool }
                 """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type Order =
@@ -480,7 +480,7 @@ type Order =
                 """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type Order = { Sku: string }
@@ -495,7 +495,7 @@ type Order = { Sku: string }
                 """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 type Order =
     { Sku: string }
@@ -513,7 +513,7 @@ type Order =
                 """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema; SchemaConstructor>]
 type Order = { Sku: string }
@@ -528,7 +528,7 @@ type Order = { Sku: string }
                 """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type Order =
@@ -547,7 +547,7 @@ type Order =
                 """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type Order =

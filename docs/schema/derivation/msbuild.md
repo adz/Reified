@@ -51,7 +51,7 @@ By default output is written below `obj/`, so it should not be committed.
 ```fsharp
 namespace MyApp.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type Order = { Sku: string; Quantity: int }

@@ -1,6 +1,6 @@
 namespace Reified.Tests.Generated
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 /// A named pickup location.
 [<DeriveSchema>]

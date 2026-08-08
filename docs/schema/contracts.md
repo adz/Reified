@@ -88,7 +88,7 @@ match Contract.parse configContract raw with
 The generator groups marked records ending in `Vn` and treats a bare record as the current version:
 
 ```fsharp
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type ProfileV1 = { Name: string }

@@ -41,7 +41,7 @@ Working on `src/Reified.Schema`? Read `dev-docs/schema/internals.md` first (impl
   Depends on `Reified.Schema` and FsCheck; never move the test-library dependency into a public package.
 - `Reified.Schema.Contracts` (`src/Reified.Schema.Contracts/`): non-packable wire-tier generation library — the
   `[<DeriveSchema>]` record frontend (`Records.fs`, FCS syntax-only), the `.contract` parser, and the shared
-  resolver/emitter. The `Reified.Schema.Derive` attribute namespace lives in `Reified.Schema` itself (inert metadata).
+  resolver/emitter. The `Reified.DerivedSchema` attribute namespace lives in `Reified.Schema` itself (inert metadata).
   FCS stays tool-tier only: never referenced from a packable library.
 - `Reified.Schema.Contracts.Build` (`src/Reified.Schema.Contracts.Build/`): packable targets-only MSBuild package
   running `scripts/schemagen` before compile over `<ReifiedDeriveSchema>`/`<ReifiedContract>` items.

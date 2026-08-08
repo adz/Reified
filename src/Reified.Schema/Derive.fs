@@ -1,7 +1,7 @@
 // Inert attributes read by schemagen from source text at generation time — never by runtime
 // reflection, and never touched by the schema library itself at runtime. Their vocabulary mirrors
 // the Schema computation expression.
-namespace Reified.Schema.Derive
+namespace Reified.DerivedSchema
 
 open System
 

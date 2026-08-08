@@ -22,7 +22,7 @@ schema describes how input fields parse and which constraints apply.
 ```fsharp
 namespace MyApp.Contracts
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type BookingWire =

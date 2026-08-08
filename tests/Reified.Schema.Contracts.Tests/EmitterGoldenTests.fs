@@ -83,7 +83,7 @@ contract Kw.v1 {
                     """
 namespace My.Wire
 
-open Reified.Schema.Derive
+open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type Order =

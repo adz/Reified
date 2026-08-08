@@ -25,7 +25,7 @@ migrations), `Schema.defer` recursion with finite inspection and `$defs`-based J
 non-packable `Reified.Schema.Testing` FsCheck adapter (`SchemaGen`), (2026-07-16) multi-version `schemagen`
 generation with the user-facing `docs/schema/contracts.md` guide, and (2026-07-17) record-first wire schema
 generation (`[<DeriveSchema>]` records through an FCS syntax-only frontend into the shared AST/resolver/emitter,
-`Reified.Schema.Derive` attributes, `.contract` parked as the secondary declaration form).
+`Reified.DerivedSchema` attributes, `.contract` parked as the secondary declaration form).
 
 ## Phase 30: Contracts milestone bundle (gated on a real consumer)
 
