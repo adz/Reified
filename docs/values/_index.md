@@ -80,7 +80,7 @@ part of the type, so nothing downstream re-checks it.
 
 ### Across all three
 
-- [Getting started](./getting-started/)
+- [Quickstart](./quickstart/)
 - [Tutorial: constraints and Result](./tutorials/constraint-result/)
 - [Introductory reference app](./reference-app/)
 - API reference: [`Reified.Constraint`]({{% relref "/values/reference/constraint/" %}}),

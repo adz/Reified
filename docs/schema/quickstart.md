@@ -1,10 +1,10 @@
 ---
 weight: 10
-title: Getting Started
+title: Quickstart
 description: Build one schema up in four stages — plain fields, refined fields, constraints, and a private model behind a checked constructor.
 ---
 
-# Getting Started
+# Quickstart
 
 A `Schema<'model>` is one declaration of a structured boundary. It names fields, gives each a value schema, runs
 constraints and refinements, accumulates failures with paths, and calls your constructor only once the fields succeed.

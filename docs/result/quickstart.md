@@ -1,10 +1,10 @@
 ---
 weight: 10
-title: Getting Started
+title: Quickstart
 description: Compose operations that can fail into one application error type, using the standard F# Result.
 ---
 
-# Getting Started
+# Quickstart
 
 `Reified.Result` is a standalone leaf. Nothing else in Reified is required, and it depends on no other Reified package:
 

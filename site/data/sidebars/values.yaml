@@ -5,7 +5,7 @@ groups:
     caption: Constraint, Refined, and Parse. A grouping, not a package — each installs independently.
     descendants: false
     entries:
-      - /values/getting-started
+      - /values/quickstart
       - /values/reference-app
 
   - title: Reified.Constraint

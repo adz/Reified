@@ -183,7 +183,7 @@ The `Owner` field carries no rules of its own: every refined type has exactly on
 resolves it from the type. Use a constraint on the field when the rule belongs to *this boundary*; use a
 refined type when it belongs to the domain.
 
-→ [Modelling with Schema](/schema/getting-started/)
+→ [Modelling with Schema](/schema/quickstart/)
 
 ## Everything else is derived from that declaration
 
@@ -255,7 +255,7 @@ vocabulary. Keep it when something downstream — a form, an API payload, a tran
 | Reusing value rules and their explanations | [Constraint](/values/constraint/) |
 | Making a domain type carry its own invariant | [Refined values](/values/refined/) |
 | Decoding serialized primitives | [Parse](/values/parse/) |
-| Declaring a model and parsing input into it | [Schema](/schema/getting-started/) |
+| Declaring a model and parsing input into it | [Schema](/schema/quickstart/) |
 | Reading and writing JSON from that model | [JSON codecs](/schema/json-codec/) |
 | Publishing an HTTP contract and OpenAPI | [HTTP servers](/schema/http-servers/) |
 | Versioning a wire format | [Contracts](/schema/contracts/) |

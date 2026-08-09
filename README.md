@@ -139,9 +139,9 @@ typed model and a derived JSON codec. Its code is compiled and executed on every
 [`examples/Reified.GettingStarted`](examples/Reified.GettingStarted/Program.fs).
 
 - [Constraint](docs/values/constraint/_index.md)
-- [Getting started with values](docs/values/getting-started.md)
+- [Values quickstart](docs/values/quickstart.md)
 - [Refined domain values](docs/values/refined/domain-values.md)
-- [Getting started with Schema](docs/schema/getting-started.md)
+- [Schema quickstart](docs/schema/quickstart.md)
 - [JSON codecs](docs/schema/json-codec.md)
 - [Versioned contracts](docs/schema/contracts.md)
 - [Runnable Schema examples](docs/schema/examples.md)

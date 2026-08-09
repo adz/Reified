@@ -77,13 +77,13 @@ JSON Schema, and the generated test data come from that one declaration. Nothing
 </div>
 
 <p style="max-width: 78ch; margin: 0 auto 3.5rem; text-align: center;">There are two ways in. Declare a
-<a href="/schema/getting-started/">Schema</a> when structured input has to become a domain model with every field
+<a href="/schema/quickstart/">Schema</a> when structured input has to become a domain model with every field
 failure reported at once. Use plain <a href="/result/">Result</a> with your own error type when the code is small and
 the failures are yours. Everything else below is machinery those two use.</p>
 
 <div class="reified-routes">
 
-<a class="reified-route" href="/schema/getting-started/">
+<a class="reified-route" href="/schema/quickstart/">
 <span class="reified-route-problem">The same rule is repeated in a parser, a validator, a form, and a test</span>
 <span class="reified-route-target">Schema &rarr;</span>
 </a>

@@ -32,8 +32,8 @@ and test-data generation interpret the same field names, value shapes, and const
 </div>
 
 <div class="docs-home-meta">
-<a class="docs-home-cta" href="{{< relref "/schema/getting-started.md" >}}">Get started &gt;</a>
-<a class="docs-chip" href="{{< relref "/schema/getting-started.md" >}}">Getting started guide</a>
+<a class="docs-home-cta" href="{{< relref "/schema/quickstart.md" >}}">Get started &gt;</a>
+<a class="docs-chip" href="{{< relref "/schema/quickstart.md" >}}">Quickstart</a>
 <a class="docs-chip" href="{{< relref "/schema/overview-examples.md" >}}">Overview examples</a>
 <a class="docs-chip" href="{{< relref "/schema/reference-apps.md" >}}">Reference apps walkthrough</a>
 </div>

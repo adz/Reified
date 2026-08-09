@@ -118,7 +118,7 @@ Keep the `ParseError` instead — `Result.mapError InvalidInteger` into a case t
 needs to tell the three failures apart or redisplay the offending text.
 
 When the text is one field of structured input rather than a standalone value, do not do this by hand.
-[`Schema`]({{% relref "/schema/getting-started" %}}) parses each field, accumulates every failure, and reports the
+[`Schema`]({{% relref "/schema/quickstart" %}}) parses each field, accumulates every failure, and reports the
 field path alongside it.
 
 ## Optional input

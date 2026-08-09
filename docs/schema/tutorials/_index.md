@@ -6,7 +6,7 @@ description: Tutorials for parsing boundary input into trusted models.
 
 # Schema Tutorials
 
-[Getting Started]({{% relref "/schema/getting-started" %}}) is the first thing to read: it builds one model up through
+[The quickstart]({{% relref "/schema/quickstart" %}}) is the first thing to read: it builds one model up through
 plain fields, refined fields, field constraints, and a private model behind a checked constructor.
 
 These tutorials then take single topics further — a complete form, nested models and collections, and reading schema

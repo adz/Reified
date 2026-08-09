@@ -27,7 +27,7 @@ case "$product" in
     test -f "$validate_dir/data/reference/data/t-data/index.html"
     ;;
   result)
-    test -f "$validate_dir/result/getting-started/index.html"
+    test -f "$validate_dir/result/quickstart/index.html"
     test -f "$validate_dir/result/collecting-errors/index.html"
     test -f "$validate_dir/result/fstoolkit-comparison/index.html"
     test -f "$validate_dir/result/reference/result/result/m-result-result-traverse/index.html"
@@ -35,7 +35,7 @@ case "$product" in
     test -z "$duplicate_sidebar_ids"
     ;;
   values)
-    test -f "$validate_dir/values/getting-started/index.html"
+    test -f "$validate_dir/values/quickstart/index.html"
     test -f "$validate_dir/values/constraint/localization/index.html"
     test -f "$validate_dir/values/constraint/adding-a-language/index.html"
     test -f "$validate_dir/values/constraint/fable/index.html"
@@ -46,7 +46,7 @@ case "$product" in
     ! grep -rqF 'dotnet add package Reified.Values' "$validate_dir/values"
     ;;
   schema)
-    test -f "$validate_dir/schema/getting-started/index.html"
+    test -f "$validate_dir/schema/quickstart/index.html"
     test -f "$validate_dir/schema/reference/schema/t-schema/index.html"
     grep -q 'id="package-schemaoverview-reference-check" checked' "$validate_dir/schema/reference/schema/index.html"
     grep -q 'id="package-schemajson-codec-reference-check" checked' "$validate_dir/schema/reference/codec/index.html"

@@ -1,10 +1,10 @@
 ---
 weight: 10
-title: Getting Started
+title: Quickstart
 description: Check typed values, decode serialized primitives, and construct invariant-carrying domain types.
 ---
 
-# Getting Started
+# Quickstart
 
 Install only the packages an application needs — Values is a grouping, not a package:
 
@@ -104,7 +104,7 @@ input paths. The same declaration can also drive JSON codecs, JSON Schema, forms
 Use these packages directly for local functions, domain constructors, and workflows. Use Schema when an entire form,
 request, configuration document, or other structured input must become a model with field-aware diagnostics. The
 approaches compose: Schema uses constraints and refinements defined independently here. Start with
-[Schema Getting Started]({{% relref "/schema/getting-started/" %}}) when that is your boundary.
+[the Schema quickstart]({{% relref "/schema/quickstart/" %}}) when that is your boundary.
 
 ## Continue
 

@@ -10,7 +10,7 @@ groups:
     caption: The core package. JSON, HTTP, and testing packages extend it.
     descendants: false
     entries:
-      - /schema/getting-started
+      - /schema/quickstart
       - /schema/overview-examples
       - /schema/tutorials
       - /schema/syntax
