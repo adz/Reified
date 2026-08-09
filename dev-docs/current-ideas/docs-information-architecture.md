@@ -16,10 +16,27 @@ reorganisation below, plus the FsLiveDocs changes it depends on.
   the getting-started page's *Installing* section.
 - `site/data/sidebars/gettingstarted.yaml` — the getting started is not a product area, so its sidebar routes
   onward to the four areas rather than listing pages beneath itself.
+- **Cross-links render as links.** All 57 bracketed `relref` cross-links moved to the `{{% … %}}` form (§6).
+  Four of them turned out to point at pages that do not exist — three reference-folder roots that carry no
+  `_index.md`, and a `JsonSchema.generate` entity id that changed — and now point at real pages.
+- **Per-package getting-started pages demoted** (§6). `docs/{result,values,schema}/getting-started.md` are now
+  `quickstart.md`, titled *Quickstart*, so `/getting-started/` is the only page with that name.
+- **Meta pages moved to Notes** (§6). `packages-and-platforms`, `benchmarks`, and `aot-trimming-fable` left
+  `/schema/` for a new top-level `/notes/` area with its own sidebar; the Schema sidebar routes to it instead
+  of listing its pages. Notes is not a product area — no package, no `llms.txt`, no generated reference.
+  Comparisons deliberately stayed put: §5 makes *how it compares* a headline learning page, not a note.
+- **§5's two pages already lead with the claim.** `docs/values/constraint/_index.md` and
+  `docs/values/constraint/comparison.md` both open on the derived-failure claim, and Localization now opens
+  with *If you never translate*. Nothing further to hoist.
 
-Still outstanding here: the per-package `getting-started.md` pages (§6) have not been demoted to quickstarts,
-so `/getting-started/` and `/schema/getting-started/` both carry that title. The task-folder tree of §2 is
-still blocked on FsLiveDocs items 1–4.
+Still outstanding here: the task-folder tree of §2 is blocked on FsLiveDocs items 1–4, and a top-level
+`/how-it-compares/` gathering the three scattered comparison pages is part of that same move — doing it in
+Hugo first would just be churned by the migration.
+
+Unrelated to the IA, found while checking links: docgen emits five hrefs to `/reference/Reified/*.html`,
+a path form nothing serves. Three name computation-expression builder types that are now hidden and should
+render as plain text; two (`Field<'model,'value>`, `Refinements.DateRange`) have real pages it failed to
+resolve.
 
 Folder name is the section name, so the IA is expressed by naming folders after reader tasks. Numeric
 prefixes order them and are stripped from URLs.
@@ -133,22 +150,25 @@ Highest leverage, and neither depends on any tooling change.
   this is stranded at `weight: 40` inside a page titled "Localization", which reads as a niche concern for
   teams shipping multiple languages, when the primary benefit — no parallel catalogue of error messages to
   keep in step — applies to everyone shipping one. Localization becomes the proof, not the headline.
-  *(Started: `docs/values/constraint/_index.md` was rewritten around this claim before the split.)*
+  *(Done in place: `docs/values/constraint/_index.md` opens on the claim, and Localization now opens with
+  "If you never translate". The move into an `03-validating-values/` folder waits on §2.)*
 - **`02-how-it-compares/`** leads with the same claim, because it is where FluentValidation and
   DataAnnotations are weakest: both maintain rules and messages separately, so drift is guaranteed.
-  *(Started: `docs/values/constraint/comparison.md` exists.)*
+  *(Done in place: `docs/values/constraint/comparison.md` opens on "Where the rule lives / where the message
+  lives". Gathering it with the Zod, FluentValidation, and FsToolkit comparisons waits on §2.)*
 
 ## 6. Also outstanding
 
-- **141 dead cross-links.** `[text]({{< relref … >}})` renders as plain text with no anchor — verified
-  against five variants: the `{{% … %}}` form, absolute links, relative links, and `relref` inside a raw
-  HTML `href` all work. 141 occurrences across 53 files. Mechanical substitution, but may be moot if the
-  FsLiveDocs migration lands first.
+- ~~**141 dead cross-links.**~~ Done. `[text]({{< relref … >}})` renders as plain text with no anchor —
+  verified against five variants: the `{{% … %}}` form, absolute links, relative links, and `relref` inside
+  a raw HTML `href` all work. 57 occurrences survived the split, across 33 files; all now use `{{% … %}}`.
 - ~~**Stop committing generated reference.**~~ Done at the split: `docs/*/reference/` is generated and
   ignored, so `./docs` holds hand-written prose only and `git log docs/` records what was written.
-- **Demote per-package `getting-started.md`** to quickstarts, or delete where they duplicate.
-- **Move meta pages** (`packages-and-platforms`, `benchmarks`, `aot-trimming-fable`, comparisons) out of
-  the learning path into notes.
+- ~~**Demote per-package `getting-started.md`**~~ Done: they are `quickstart.md` now. None duplicated
+  `/getting-started/` closely enough to delete — each is that package's own build-up, not a second tour.
+- ~~**Move meta pages**~~ Done for `packages-and-platforms`, `benchmarks`, and `aot-trimming-fable`, which
+  now live in `/notes/`. Comparisons stay in the learning path: §5 makes *how it compares* a page to lead
+  with, and §2 gives it its own task folder (`02-how-it-compares/`).
 
 ---
 
