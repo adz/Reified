@@ -11,7 +11,7 @@ This page is the reference for that machinery.
 
 Before reaching for it, decide whether the concept deserves a type at all. Checked construction is how a value is
 admitted, not a reason on its own: if nothing downstream becomes total or loses a branch, the rule belongs in a
-[constraint]({{< relref "/values/constraint/" >}}) on the primitive instead. Numeric ranges are the clearest
+[constraint]({{% relref "/values/constraint/" %}}) on the primitive instead. Numeric ranges are the clearest
 example — F# cannot carry "greater than zero" through arithmetic, so a refined number costs more at every use site
 than it saves. [When not to make a type](../catalog/#when-not-to-make-a-type) draws the line, and
 [Customer Id](../tutorials/customer-id/) works a full example through.
@@ -33,7 +33,7 @@ module ContactEmail =
 ## Guard construction with a refinement
 
 Use `Refinement.define` when one constraint from the built-in catalogue describes admission. Those constraints are
-[interpreted]({{< relref "/values/constraint/constraints" >}}): Reified can read the rule as data, so the refinement
+[interpreted]({{% relref "/values/constraint/constraints" %}}): Reified can read the rule as data, so the refinement
 carries metadata other tools can use, not only a check.
 
 ```fsharp
@@ -82,7 +82,7 @@ The same constraint values provide executable checks and `ConstraintDetails` met
 
 Use `defineWithCheck` for an invariant no built-in constraint describes. The check runs, but nothing downstream can
 read the rule — the trade-off is
-[interpreted versus opaque]({{< relref "/values/constraint/constraints" >}}):
+[interpreted versus opaque]({{% relref "/values/constraint/constraints" %}}):
 
 ```fsharp
 type EvenInt = private EvenInt of int

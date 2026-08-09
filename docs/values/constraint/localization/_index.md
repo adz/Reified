@@ -153,4 +153,4 @@ language formats numbers. Look up the identity instead; that is what the identit
 - [Fable support](../fable/) — what the rendering edge does and does not do in JavaScript.
 
 Schema renders its own parse and structural failures through these same mechanics, with the field path supplied for
-you: see [Redisplay and field errors]({{< relref "/schema/redisplay-and-field-errors" >}}).
+you: see [Redisplay and field errors]({{% relref "/schema/redisplay-and-field-errors" %}}).

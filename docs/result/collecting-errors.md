@@ -135,7 +135,7 @@ Data.ofNameValues form |> Schema.parse signupSchema
 // Error carries name -> present, age -> atLeast 18
 ```
 
-See [Schema getting started]({{< relref "/schema/getting-started" >}}).
+See [Schema getting started]({{% relref "/schema/getting-started" %}}).
 
 Staying at the Result layer is still reasonable when the failures are not really fields — independent checks in
 application code, or a small internal function whose caller just wants a list. In that case carry the association

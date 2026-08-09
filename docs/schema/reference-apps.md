@@ -9,7 +9,7 @@ description: The reference application tiers — plain results and refined value
 The reference apps exercise the schema group the way an application does — values crossing CLI, form, JSON, and
 storage boundaries — so that API friction invisible in a snippet has nowhere to hide. Two tiers are runnable here:
 
-1. [`Reified.ReferenceApp.Intro`]({{< relref "/values/reference-app.md" >}}) — plain `Result`, checks,
+1. [`Reified.ReferenceApp.Intro`]({{% relref "/values/reference-app.md" %}}) — plain `Result`, checks,
    refined values, and accumulated validation, with no schemas at all. Start there if you are new; this page
    covers the schema tier.
 2. `examples/Reified.ReferenceApp.Wire` — boundary discipline with the wire tier **generated** from
@@ -50,7 +50,7 @@ rejects an owner listed as a member — a rule the wire deliberately cannot expr
 through a compiled codec. Generated schemas are ordinary schemas, so `JsonSchema.generate` and `Json.compile`
 come along for free.
 
-See [Versioned Contracts]({{< relref "/schema/contracts.md" >}}) for the full attribute vocabulary, the
+See [Versioned Contracts]({{% relref "/schema/contracts.md" %}}) for the full attribute vocabulary, the
 `.contract` grammar alternative, and running generation in your build with `Reified.Schema.Contracts.Build`.
 
 ## Serving the same declaration over HTTP
@@ -59,4 +59,4 @@ See [Versioned Contracts]({{< relref "/schema/contracts.md" >}}) for the full at
 opens a socket. The host adapters that execute those contracts, and the twin ASP.NET Core and GenHTTP reference
 APIs that prove the boundary is host-neutral, live in the
 [Axial repository](https://github.com/adz/Axial). Routing and app wiring remain the host's
-([HTTP Servers]({{< relref "/schema/http-servers.md" >}})).
+([HTTP Servers]({{% relref "/schema/http-servers.md" %}})).

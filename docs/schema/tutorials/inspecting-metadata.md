@@ -92,4 +92,4 @@ form control, the JSON Schema, the docs table, and the parser all change togethe
 ## Next
 
 - [Refined Value Schemas](../../refined-values/) for how refinement layers stay inspectable.
-- [Schema reference]({{< relref "/schema/reference/schema/" >}}) for the full `Inspect` API.
+- [Schema reference]({{% relref "/schema/reference/schema/" %}}) for the full `Inspect` API.

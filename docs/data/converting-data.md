@@ -188,7 +188,7 @@ Data.ofCliArgs argv
 |> Schema.parse Registration.schema
 ```
 
-Start from [the smallest schema]({{< relref "/schema/getting-started" >}}) if you have not declared one yet.
+Start from [the smallest schema]({{% relref "/schema/getting-started" %}}) if you have not declared one yet.
 
 ## Read values from Data
 

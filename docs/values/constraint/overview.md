@@ -68,7 +68,7 @@ let nickname : Constraint<string option> =
 ```
 
 Whether a property may be *omitted from the input* is a different question again, and belongs to Schema's
-[`mustSupply`/`mayOmit`]({{< relref "/schema/" >}}).
+[`mustSupply`/`mayOmit`]({{% relref "/schema/" %}}).
 
 ### What "blank" means
 

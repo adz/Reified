@@ -6,7 +6,7 @@ weight: 100
 
 # For AI agents
 
-Use this section for `Reified.Schema`. Load the separate [Data agent guidance]({{< relref "/data/agent.md" >}})
+Use this section for `Reified.Schema`. Load the separate [Data agent guidance]({{% relref "/data/agent.md" %}})
 when working with source-neutral fixtures or produced output.
 
 - Start domain models with `Schema<'model>` and constructor-last declarations.
@@ -21,5 +21,5 @@ when working with source-neutral fixtures or produced output.
 - Compile `Reified.Schema.Json` codecs once for trusted payloads; use `Data` plus `Schema.parse` for untrusted payloads.
 - Keep generated `[<DeriveSchema>]` records at the wire tier and map them through a domain constructor.
 
-Platform support is listed in [Packages and platforms]({{< relref "/schema/packages-and-platforms.md" >}}). For compact prompt context, load
+Platform support is listed in [Packages and platforms]({{% relref "/schema/packages-and-platforms.md" %}}). For compact prompt context, load
 [`/schema/llms.txt`](/schema/llms.txt).

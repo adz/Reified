@@ -145,4 +145,4 @@ The same works for lists: `data [ "ids" => [ for id in ids -> id * 10 ] ]`.
 - [Match selected parts of data](how-to-test-produced-json/)
 - [Build variations and matrices](how-to-build-test-cases/)
 - [Compare complete data](compare-data/)
-- [API reference]({{< relref "/data/reference/" >}})
+- [API reference]({{% relref "/data/reference/data/" %}})

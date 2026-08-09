@@ -77,16 +77,16 @@ Every page below builds on this same `parseName`/`parseAge` pair, so the example
   and `and!`.
 - [Comparison with FsToolkit.ErrorHandling](./fstoolkit-comparison/) — what each library is for, and how they
   interoperate.
-- [API reference]({{< relref "/result/reference/" >}}) — every function, generated from the source.
+- [API reference]({{% relref "/result/reference/result/" %}}) — every function, generated from the source.
 
 ## Related
 
 `Reified.Result` composes failures. Admitting values in the first place is the
-[Values]({{< relref "/values/" >}}) packages' job: `Reified.Constraint` tests a typed value,
+[Values]({{% relref "/values/" %}}) packages' job: `Reified.Constraint` tests a typed value,
 `Reified.Refinements` constructs values whose types record a successful check, and `Reified.Parse` decodes serialized
 primitives. All of them return the standard F# `Result`, so these helpers work on their output — but none of them
 requires this package, and this package does not require them.
 
 Accumulation here is **flat**: `result.list { }` collects a list of your error values with no field identity.
 When a whole form, request, or document must become a model with path-aware accumulated diagnostics, that is
-[Reified.Schema]({{< relref "/schema/" >}}).
+[Reified.Schema]({{% relref "/schema/" %}}).

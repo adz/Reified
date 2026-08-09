@@ -33,7 +33,7 @@ whitespace, and none needs a particular pattern. So they are `Constraint.trimmed
 [When not to make a type](./catalog/#when-not-to-make-a-type).
 
 `Reified.Refinements` depends only on `Reified.Constraint`. It does not
-[parse text]({{< relref "/values/parse/" >}}) and does not normalize input.
+[parse text]({{% relref "/values/parse/" %}}) and does not normalize input.
 
 ```sh
 dotnet add package Reified.Refinements

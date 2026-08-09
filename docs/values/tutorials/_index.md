@@ -12,5 +12,5 @@ These tutorials stay in pure F# code. Use them when one failure should stop the 
 
 - [Constraint and Result](./constraint-result/): attach domain errors to `Violation` values, then compose with `result {}`.
 
-Move to [Schema tutorials]({{< relref "/schema/tutorials/" >}}) when independent fields should report all sibling
+Move to [Schema tutorials]({{% relref "/schema/tutorials/" %}}) when independent fields should report all sibling
 failures together.

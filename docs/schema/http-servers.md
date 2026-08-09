@@ -72,7 +72,7 @@ contract is part of the published document too.
 
 ## Complete API reference
 
-- [Host-neutral schema HTTP boundary]({{< relref "/schema/reference/schema/http/" >}})
+- [Host-neutral schema HTTP boundary]({{% relref "/schema/reference/schema/http/" %}})
 
 The host adapters document their own `Request`, `Response`, and lowering surfaces in the
 [Axial documentation](https://github.com/adz/Axial).

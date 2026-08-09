@@ -38,7 +38,7 @@ let count raw =
     }
 ```
 
-The `result { }` above is [`Reified.Result`]({{< relref "/result/" >}}) and is optional — these packages return the
+The `result { }` above is [`Reified.Result`]({{% relref "/result/" %}}) and is optional — these packages return the
 standard F# `Result`, so any Result vocabulary composes them.
 
 Start with [Getting Started](./getting-started/), then read [Define Refined Types](./refined/domain-values/).

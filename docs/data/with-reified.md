@@ -35,7 +35,7 @@ to parse. Repeated names build a list in `ofNameValues` but overwrite in `ofConf
 come from indexed key segments instead. CLI flags arrive as the text `"true"` or `"false"`. So the same
 schema will accept input from any of them, but two sources have to agree on the resulting tree, not just
 on the logical content — see
-[the adapter rules]({{< relref "/data/converting-data" >}}) for what each one produces.
+[the adapter rules]({{% relref "/data/converting-data" %}}) for what each one produces.
 
 This is also why the builder syntax matters in tests: a fixture written with `data [ ... ]` exercises
 the identical parse path as production JSON, with no serializer in the loop.
@@ -48,7 +48,7 @@ diagnostics (`address.city`, `lines[2].quantity`) address back into the input tr
 `Data.redisplayPath` (string form) or `Data.redisplayAt` (`DataPath` form) recovers the raw fragment
 at any of them.
 
-See [redisplay and field errors]({{< relref "/schema/redisplay-and-field-errors/" >}}) for the full
+See [redisplay and field errors]({{% relref "/schema/redisplay-and-field-errors/" %}}) for the full
 pattern.
 
 ## Boundary adapters

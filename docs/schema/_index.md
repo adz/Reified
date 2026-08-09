@@ -93,7 +93,7 @@ The Schema documentation covers the core package and its focused codec, derivati
 | `Reified.Schema.Http` | HTTP-neutral request and response contracts | [HTTP Servers](./http-servers/) |
 
 `JsonSchema` is a module inside `Reified.Schema`, not a package of its own — see the
-[JSON Schema reference]({{< relref "/schema/reference/schema/m-schema-jsonschema-generate" >}}).
+[JSON Schema reference]({{% relref "/schema/reference/schema/m-jsonschema-generate" %}}).
 
 One piece of Schema tooling is not published at all. `Reified.Schema.Testing` is an FsCheck adapter that lives in this
 repository and is deliberately not packable, because a published library should not carry a test-framework dependency.
@@ -106,7 +106,7 @@ without checking it again — see [Trusted Construction](./trusted-construction/
 
 ## Related Products
 
-[Values]({{< relref "/values/" >}}) provides the reusable checks and refined values that Schema
+[Values]({{% relref "/values/" %}}) provides the reusable checks and refined values that Schema
 uses. It can also be installed and used on its own. Effects and dependencies are out of scope for Reified; they live
 in the [Axial repository](https://github.com/adz/Axial), and Schema does not require them.
 

@@ -115,8 +115,8 @@ for field in formFields do
 
 Constraint failures use Reified's `constraint.*` catalogue; Schema's own parse and structural failures have their own,
 below. Both render through the same mechanics, so one renderer covers both. See
-[Localization]({{< relref "/values/constraint/localization/" >}}) for those mechanics and
-[Adding a language]({{< relref "/values/constraint/adding-a-language/" >}}) for generating a translation.
+[Localization]({{% relref "/values/constraint/localization/" %}}) for those mechanics and
+[Adding a language]({{% relref "/values/constraint/adding-a-language/" %}}) for generating a translation.
 
 ## The Schema catalogue
 

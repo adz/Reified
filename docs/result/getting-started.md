@@ -70,8 +70,8 @@ it can depend on the earlier results. See [Collecting every error](./collecting-
 ## Where the other packages fit
 
 This accumulation is **flat**: a list of your error values with no field identity and no path. Admitting values in the
-first place belongs to the [Values]({{< relref "/values/" >}}) packages, and path-aware accumulated diagnostics over a
-whole structured input belong to [Reified.Schema]({{< relref "/schema/" >}}).
+first place belongs to the [Values]({{% relref "/values/" %}}) packages, and path-aware accumulated diagnostics over a
+whole structured input belong to [Reified.Schema]({{% relref "/schema/" %}}).
 
 All of them return the standard F# `Result`, so these helpers work on their output — but none of them requires this
 package.

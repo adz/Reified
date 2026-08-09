@@ -14,9 +14,8 @@ field's path.
 `Reified.Refinements` has no Schema dependency. Domain types can define refinements without choosing a wire format; an
 application that uses `Reified.Schema` decides where those refinements participate in structured decoding and encoding.
 
-If Schema is new to you, start with [Schema Getting Started]({{< relref "/schema/getting-started/" >}}) for fields,
-record construction, and path-aware diagnostics. Then read [Refined Values in Schema]({{< relref
-"/schema/refined-values/" >}}) for canonical field schemas, raw-value constraints, explicit refinement, and
+If Schema is new to you, start with [Schema Getting Started]({{% relref "/schema/getting-started/" %}}) for fields,
+record construction, and path-aware diagnostics. Then read [Refined Values in Schema]({{% relref "/schema/refined-values/" %}}) for canonical field schemas, raw-value constraints, explicit refinement, and
 schema-local restrictions. This page is the shorter API-oriented view of that integration.
 
 ## Refine a primitive schema
@@ -85,4 +84,4 @@ let bookingSchema : Schema<Booking> =
 ```
 
 For the complete progression from a raw field schema to a canonical refined field, continue to
-[Refined Values in Schema]({{< relref "/schema/refined-values/" >}}).
+[Refined Values in Schema]({{% relref "/schema/refined-values/" %}}).

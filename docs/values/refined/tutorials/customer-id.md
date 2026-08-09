@@ -25,7 +25,7 @@ receives it. Ask what becomes total, or what branch disappears:
 | `CustomerId` — a positive account number | **Type.** Lookup, ordering, and equality all rely on it, and an id of `0` is a bug you want to catch once. |
 | `EmailAddress` — matches an email pattern | **Constraint.** Nothing downstream is total because of it; you unwrap it to send mail. |
 | `ShippingWeight` — positive, and summed across a parcel | **Constraint.** The moment you add two of them, F# cannot carry "positive" through, so the type turns every sum into a `Result`. |
-| `NormalisedName` — trimmed and lower-cased | **Neither.** That is a transformation, so it belongs in [Parse]({{< relref "/values/parse/" >}}). |
+| `NormalisedName` — trimmed and lower-cased | **Neither.** That is a transformation, so it belongs in [Parse]({{% relref "/values/parse/" %}}). |
 
 Only the first changes what later code can assume. The second is real validation with no
 downstream consequence; the third is validation that arithmetic immediately undoes. Both
@@ -128,7 +128,7 @@ path. Encoding projects back through `Value`. The emitted JSON Schema carries
 write the rule twice.
 
 To resolve the type in a bare field without a `withSchema`, register it once as described
-in [Refined Schemas]({{< relref "/schema/refined-values/" >}}), which works the same
+in [Refined Schemas]({{% relref "/schema/refined-values/" %}}), which works the same
 example through the Schema DSL and shows where schema-local constraints fit alongside it.
 
 ## Next
@@ -136,4 +136,4 @@ example through the Schema DSL and shows where schema-local constraints fit alon
 - [Order Totals](../order-totals/) — the built-in types used in anger.
 - [Define Refined Types](../../domain-values/) — the full `Refinement` reference.
 - [Schema Integration](../../schema/) — applying refinements at structured boundaries.
-- [Refined Schemas]({{< relref "/schema/refined-values/" >}}) — the Schema-side view.
+- [Refined Schemas]({{% relref "/schema/refined-values/" %}}) — the Schema-side view.

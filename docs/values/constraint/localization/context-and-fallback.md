@@ -27,7 +27,7 @@ The context is never used as a noun. With no attribute, `fullMessage` uses the c
 rather than "Signup must be present".
 
 Schema supplies its typed path as the attribute for you; see
-[Redisplay and field errors]({{< relref "/schema/redisplay-and-field-errors" >}}).
+[Redisplay and field errors]({{% relref "/schema/redisplay-and-field-errors" %}}).
 
 ### Message fallback
 

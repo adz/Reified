@@ -30,7 +30,7 @@ dotnet add package Reified.Parse        # serialized primitive decoding
 
 `Reified.Refinements` depends on `Reified.Constraint`. `Reified.Parse` depends on neither. None of them depends on
 `Reified.Result`: every one returns the standard F# `Result`, so they compose with
-[`Reified.Result`]({{< relref "/result/" >}}), FsToolkit.ErrorHandling, or your own helpers — your choice, not the
+[`Reified.Result`]({{% relref "/result/" %}}), FsToolkit.ErrorHandling, or your own helpers — your choice, not the
 library's.
 
 ## The three in one function
@@ -83,10 +83,12 @@ part of the type, so nothing downstream re-checks it.
 - [Getting started](./getting-started/)
 - [Tutorial: constraints and Result](./tutorials/constraint-result/)
 - [Introductory reference app](./reference-app/)
-- [API reference]({{< relref "/values/reference/" >}})
+- API reference: [`Reified.Constraint`]({{% relref "/values/reference/constraint/" %}}),
+  [`Reified.Refinements`]({{% relref "/values/reference/refined/" %}}),
+  [`Reified.Parse`]({{% relref "/values/reference/parse/" %}})
 
 ## Related
 
-[`Reified.Result`]({{< relref "/result/" >}}) composes the failures these packages return into one application error
-type. [`Reified.Schema`]({{< relref "/schema/" >}}) applies the same constraints and refinements at declared fields
+[`Reified.Result`]({{% relref "/result/" %}}) composes the failures these packages return into one application error
+type. [`Reified.Schema`]({{% relref "/schema/" %}}) applies the same constraints and refinements at declared fields
 of a structured input, and returns accumulated diagnostics carrying the path of each failure.

@@ -68,7 +68,7 @@ The successful check is now part of the type, so nothing downstream re-checks it
 ## A complete boundary function
 
 These packages return the standard F# `Result`, so any Result vocabulary composes them. This example uses
-[`Reified.Result`]({{< relref "/result/" >}}), but FsToolkit.ErrorHandling or your own helpers work identically:
+[`Reified.Result`]({{% relref "/result/" %}}), but FsToolkit.ErrorHandling or your own helpers work identically:
 
 ```fsharp
 open Reified.Result
@@ -97,14 +97,14 @@ it. See [Working with violations](./constraint/violations/) for grouped failures
 These packages perform explicit operations over individual values. The caller decides which input each failure belongs
 to and how to represent the application's error type.
 
-[Reified.Schema]({{< relref "/schema/" >}}) is the structured-boundary layer. A `Schema<'model>` declares fields and
+[Reified.Schema]({{% relref "/schema/" %}}) is the structured-boundary layer. A `Schema<'model>` declares fields and
 constructors, applies constraints and refinements at those fields, and returns accumulated `SchemaError` values with
 input paths. The same declaration can also drive JSON codecs, JSON Schema, forms, contracts, and inspection.
 
 Use these packages directly for local functions, domain constructors, and workflows. Use Schema when an entire form,
 request, configuration document, or other structured input must become a model with field-aware diagnostics. The
 approaches compose: Schema uses constraints and refinements defined independently here. Start with
-[Schema Getting Started]({{< relref "/schema/getting-started/" >}}) when that is your boundary.
+[Schema Getting Started]({{% relref "/schema/getting-started/" %}}) when that is your boundary.
 
 ## Continue
 
