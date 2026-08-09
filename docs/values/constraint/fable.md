@@ -137,5 +137,5 @@ serves the browser and the server.
 
 The rendering path uses no runtime reflection. Message identities are generated data, plural selection is a value
 comparison, and interpolation is string parsing, so a NativeAOT or trimmed .NET build has nothing to preserve
-beyond the resources themselves. See [AOT, trimming, and Fable]({{% relref "/schema/aot-trimming-fable/" %}}) for
+beyond the resources themselves. See [AOT, trimming, and Fable]({{% relref "/notes/aot-trimming-fable/" %}}) for
 the wider picture across packages.

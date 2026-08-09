@@ -1,10 +1,19 @@
-# Sidebar for the repository-wide getting started page. It is not a product area, so it
-# routes onward to the four areas rather than listing pages beneath itself.
+# Sidebar for the Notes area. Notes is not a product area — it holds the meta pages
+# (inventory, platforms, measurements, design rationale) that were competing with the
+# learning path inside /schema/. It lists its own pages, then routes back to the areas.
 groups:
+  - title: Notes
+    home: /notes
+    kind: primary
+    caption: Package inventory, platform support, measured numbers, and the compiler-directed design.
+    entries:
+      - /notes/packages-and-platforms
+      - /notes/benchmarks
+      - /notes/aot-trimming-fable
+
   - title: Getting started
     home: /getting-started
-    kind: primary
-    caption: Declare one model, parse untrusted input into it, and derive a JSON codec from the same declaration.
+    caption: One complete transaction, from untrusted input to a typed model and a derived JSON codec.
     descendants: false
 
   - title: Values
@@ -25,9 +34,4 @@ groups:
   - title: Reified.Result
     home: /result
     caption: Composition over the standard F# Result type.
-    descendants: false
-
-  - title: Notes
-    home: /notes
-    caption: Package inventory, platform support, measured numbers, and the compiler-directed design.
     descendants: false

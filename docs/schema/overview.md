@@ -58,13 +58,13 @@ current domain model.
 - [Versioned Contracts](../contracts/) — evolve wire formats without freezing the domain model.
 - [Recommended Patterns](../patterns/) — private aggregates, legal transitions, wire/domain separation, project layout,
   and the repository's test-adapter pattern.
-- [Packages and Platforms](../packages-and-platforms/) — package boundaries and .NET/Fable JavaScript support.
+- [Packages and Platforms]({{% relref "/notes/packages-and-platforms/" %}}) — package boundaries and .NET/Fable JavaScript support.
 
 ## In Practice
 
 - [Runnable Examples](../examples/) — executed during the docs build, mirrored back into the site.
-- [Benchmarks](../benchmarks/) — measured parse and codec numbers on .NET and Fable.
-- [Compiler-Directed, AOT, and Fable](../aot-trimming-fable/) — why the guarantees hold by construction.
+- [Benchmarks]({{% relref "/notes/benchmarks/" %}}) — measured parse and codec numbers on .NET and Fable.
+- [Compiler-Directed, AOT, and Fable]({{% relref "/notes/aot-trimming-fable/" %}}) — why the guarantees hold by construction.
 - Comparisons: [vs zod](../comparisons/zod-comparison/), [vs FluentValidation](../comparisons/fluentvalidation-comparison/).
 
 ## Installation

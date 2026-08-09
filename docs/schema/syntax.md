@@ -55,7 +55,7 @@ fieldAs "type" _.Number
 
 `field` derives its name by reading a quotation of the getter, once, while the schema value is built. That runs on
 .NET and on the Fable targets with quotation support, so both forms are available almost everywhere — see
-[Compiler-Directed, AOT, and Fable](../aot-trimming-fable/) for the version and target requirements. `fieldAs` is
+[Compiler-Directed, AOT, and Fable]({{% relref "/notes/aot-trimming-fable/" %}}) for the version and target requirements. `fieldAs` is
 the portable spelling for Fable's Rust and PHP targets, which have no quotation support.
 
 ## Field blocks

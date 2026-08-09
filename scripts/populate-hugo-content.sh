@@ -53,18 +53,26 @@ values_dir="$root_dir/site/content/values"
 data_dir="$root_dir/site/content/data"
 schema_dir="$root_dir/site/content/schema"
 
+# Notes is not a product area: it has no package, no llms.txt, and no generated
+# reference. It holds the meta pages — inventory, platforms, benchmarks, and the
+# compiler-directed design — that would otherwise sit inside a learning path.
+notes_dir="$root_dir/site/content/notes"
+
 # error-handling, validation, and flow are retired area names; remove any leftovers
 # so a stale tree cannot keep serving pages after the split.
 rm -rf "$root_dir/site/content/error-handling" "$root_dir/site/content/validation" \
   "$root_dir/site/content/flow" "$result_dir" "$values_dir" "$data_dir" "$schema_dir" \
   "$root_dir/site/content/docs" "$root_dir/site/content/reference" "$root_dir/site/content/parse" \
-  "$root_dir/site/content/getting-started.md"
+  "$notes_dir" "$root_dir/site/content/getting-started.md"
 
 for product in "${products[@]}"; do
   mkdir -p "$root_dir/site/content/$product"
   cp -r "$root_dir/docs/$product/." "$root_dir/site/content/$product/"
   rm -f "$root_dir/site/content/$product/llms.txt"
 done
+
+mkdir -p "$notes_dir"
+cp -r "$root_dir/docs/notes/." "$notes_dir/"
 
 # Product-local generated API reference is copied with the guides. Apply the
 # navigation weights needed by the rendered site.
@@ -81,7 +89,7 @@ upsert_frontmatter "$schema_ref/codec/_index.md" "weight" "20"
 
 # Hugo's docs layout supplies the page title. Keep generated content uniform
 # with pages whose source already omits a body-level H1.
-find "$result_dir" "$values_dir" "$data_dir" "$schema_dir" -type f -name "*.md" -print0 |
+find "$result_dir" "$values_dir" "$data_dir" "$schema_dir" "$notes_dir" -type f -name "*.md" -print0 |
   node -e '
     const fs = require("node:fs");
     for (const path of fs.readFileSync(0, "utf8").split("\0")) {

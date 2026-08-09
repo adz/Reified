@@ -52,7 +52,7 @@ Pass a wire name explicitly when it differs from the property: `fieldAs "email_a
 
 Deriving the name from `_.Email` uses a quotation. That compiles on .NET and on the Fable targets that support
 quotations, including JavaScript; reach for `fieldAs` on Fable's Rust and PHP targets. See
-[Schema Syntax](../syntax/) and [Compiler-Directed, AOT, and Fable](../aot-trimming-fable/).
+[Schema Syntax](../syntax/) and [Compiler-Directed, AOT, and Fable]({{% relref "/notes/aot-trimming-fable/" %}}).
 
 ### Parse
 

@@ -21,8 +21,6 @@ groups:
       - /schema/refined-values
       - /schema/union-schemas
       - /schema/patterns
-      - /schema/benchmarks
-      - /schema/aot-trimming-fable
       - /schema/examples
       - /schema/reference-apps
       - /schema/comparisons
@@ -40,7 +38,7 @@ groups:
         - /schema/reference/codec
 
   - title: Reified.Schema.JsonSchema
-    home: /schema/reference/schema/m-schema-jsonschema-generate
+    home: /schema/reference/schema/m-jsonschema-generate
     caption: Generate a compact JSON Schema document from a schema declaration.
 
   - title: Reified.Schema.Contracts
@@ -58,8 +56,11 @@ groups:
     home: /schema/patterns/testing-schema-guarantees
     caption: Derive accepted values from a schema and test rules, codecs, and mappings against them.
 
-  - title: Product information
-    home: /schema/packages-and-platforms
-    caption: Package boundaries and .NET/Fable JavaScript support.
+  # Package inventory, platform support, benchmarks, and the compiler-directed design
+  # live in Notes, not in this learning path.
+  - title: Notes
+    home: /notes
+    caption: Package inventory, platform support, measured numbers, and the compiler-directed design.
+    descendants: false
     entries:
       - /schema/agent

@@ -269,7 +269,7 @@ dotnet add package Reified
 
 That is the whole set: value rules, refined types, parsing, `Result` composition, data, and Schema with its JSON
 codecs. On .NET 8 it also brings the HTTP contract package; a `netstandard2.1` consumer gets the rest. Every package is also independently installable if you want one capability on its own — see
-[Packages and platforms](/schema/packages-and-platforms/) for the list, what each one gives you, and which run on
+[Packages and platforms](/notes/packages-and-platforms/) for the list, what each one gives you, and which run on
 Fable as well as .NET.
 
 Reified is pre-1.0 and has not been published to NuGet yet, so that line does not resolve for now.

@@ -16,7 +16,7 @@ Reified has two paths for JSON, and they exist because they optimize for differe
 - **Trusted path** — `Json.compile` + `Json.serialize`/`Json.deserialize`: for payloads whose producer you trust, such
   as internal services, storage, caches, and queues. It enforces the wire shape and required fields, skips constraint
   checking, and runs about 6x faster with a fraction of the allocations (see the
-  [benchmarks]({{% relref "/schema/benchmarks.md#schema-json-codec" %}})).
+  [benchmarks]({{% relref "/notes/benchmarks.md#schema-json-codec" %}})).
 
 ## Compile Once, Reuse Everywhere
 
