@@ -857,10 +857,31 @@ body.reified-home .reified-doors {
 
 // Symptom routes: one row per problem the reader already has. Deliberately quieter
 // than .reified-door, so the single "Get started" action above stays dominant.
+.reified-group {
+  max-width: 78ch;
+  margin: 0 auto 3rem;
+}
+
+.reified-group-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+}
+
+.reified-group-lede {
+  color: #475569;
+  line-height: 1.6;
+  margin: 0 0 1.25rem;
+}
+
 .reified-routes {
   max-width: 78ch;
   margin: 0 auto 3rem;
   border-top: 1px solid rgba(0, 0, 0, 0.09);
+}
+
+.reified-group .reified-routes {
+  margin-bottom: 0;
 }
 
 .reified-route {
@@ -905,7 +926,8 @@ body.reified-home .reified-doors {
     border-color: rgba(255, 255, 255, 0.12);
   }
 
-  .reified-route .reified-route-problem {
+  .reified-route .reified-route-problem,
+  .reified-group-lede {
     color: #b9c2c4;
   }
 

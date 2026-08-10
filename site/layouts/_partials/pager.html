@@ -8,8 +8,10 @@
   {{- $sidebar = hugo.Data.sidebars.result -}}
 {{- else if eq .Section "values" -}}
   {{- $sidebar = hugo.Data.sidebars.values -}}
-{{- else if eq .Section "flow" -}}
-  {{- $sidebar = hugo.Data.sidebars.flow -}}
+{{- else if eq .Section "notes" -}}
+  {{- $sidebar = hugo.Data.sidebars.notes -}}
+{{- else if and (eq .Kind "page") (eq .Section "") -}}
+  {{- $sidebar = hugo.Data.sidebars.gettingstarted -}}
 {{- end -}}
 
 {{- $ordered := slice -}}

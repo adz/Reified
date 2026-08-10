@@ -200,5 +200,3 @@ let quantity raw =
 
 See [Refined values]({{% relref "/values/refined/" %}}) for the refinement model, and the
 [Parse API reference]({{% relref "/values/reference/parse/" %}}) for every parser.
-[Which failure type, and what to do with it]({{% relref "/getting-started" %}}#which-failure-type-and-what-to-do-with-it)
-compares `ParseError` with the other failure shapes in one table.

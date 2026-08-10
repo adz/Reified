@@ -10,7 +10,8 @@
   {{- $sidebar = hugo.Data.sidebars.values -}}
 {{- else if eq .Section "notes" -}}
   {{- $sidebar = hugo.Data.sidebars.notes -}}
-{{- else if and (eq .Kind "page") (eq .File.TranslationBaseName "getting-started") (eq .Section "") -}}
+{{- else if and (eq .Kind "page") (eq .Section "") -}}
+  {{- /* Root-level pages are the getting-started area: getting-started and its siblings. */ -}}
   {{- $sidebar = hugo.Data.sidebars.gettingstarted -}}
 {{- end -}}
 

@@ -18,8 +18,6 @@ is compiled and executed on every CI run from
 [`examples/Reified.GettingStarted`](https://github.com/adz/Reified/blob/main/examples/Reified.GettingStarted/Program.fs);
 the outputs below are that program's real output.
 
-## The whole thing in one screen
-
 ```bash
 dotnet add package Reified.Schema
 dotnet add package Reified.Schema.Json
@@ -187,15 +185,7 @@ refined type when it belongs to the domain.
 
 ## Everything else is derived from that declaration
 
-| From | Interpreter | You get |
-| --- | --- | --- |
-| `Data` input | `Schema.parse` | the model, or `SchemaErrors` with paths |
-| an existing value | `Schema.check` | the same value, or `SchemaErrors` |
-| the schema | `Json.compile` | a reflection-free JSON codec |
-| the schema | `JsonSchema.generate` | a JSON Schema document |
-| the schema | `Inspect.model` | field metadata, for forms and admin UIs |
-| the schema | `Contract.parse` | versioned wire input mapped to the current model |
-| the schema | `SchemaGen` | generated values that satisfy it, for tests |
+The schema is a value, so parsing is only one of the things that can read it:
 
 ```fsharp
 JsonSchema.generate signupSchema
@@ -206,8 +196,11 @@ JsonSchema.generate signupSchema
 //  "required":["email","age","newsletter"]}
 ```
 
-`"minimum": 13` was not written twice. Nor was the JSON codec, nor the failure message, nor the generator that
-produces valid test data.
+`"minimum": 13` was not written twice — it is the `atLeast 13` from the declaration, read for a different
+purpose. The same declaration does four more jobs: checking a value you already hold, accepting payloads from
+older versions, describing the model to a form, and generating test data that obeys the rules.
+
+→ [What a schema gives you](/what-a-schema-gives-you/)
 
 ## Failures are ordinary F# values
 
@@ -219,47 +212,24 @@ builders for collecting every error at once — over the standard `Result` type 
 
 ## The words this documentation uses
 
-Four operations sound similar and are not. The rest of the documentation uses these words precisely:
+Three operations sound similar and are not. The rest of the documentation uses these words precisely:
 
 | Word | Operation | Example |
 | --- | --- | --- |
 | **parse** | Change one representation into another. Text becomes a typed value. | `Parse.int "42"` |
+| | The same move over a whole tree of untrusted input, accumulating every failure with its path. | `input \|> Schema.parse signupSchema` |
 | **check** | Test a value you already hold against a rule. The value does not change. | `Constraint.check (atLeast 13) age` |
-| **refine** | Admit a checked value into a type that carries the invariant from then on. | `ContactEmail.create raw` |
-| **parse (structured)** | Take a whole tree of untrusted input to a domain model, accumulating every failure with its path. | `Schema.parse signupSchema input` |
+| **refine** | Give a checked value a type that carries the rule from then on, so nothing downstream re-checks it. | `ContactEmail.create raw` |
 
-"Validation" is the familiar broad name for the whole area, and this documentation uses it that way — and for
-`validate`, Schema's specifically named operation. When the distinction matters, the word will be one of the four
-above instead.
-
-## Which failure type, and what to do with it
-
-Each layer fails in its own shape. What you do with the failure is the same decision every time: map it into your
-own error, keep it for its facts, accumulate it, or render it.
-
-| Layer | Failure | Map it | Keep it | Accumulate it | Render it |
-| --- | --- | --- | --- | --- | --- |
-| `Parse` | `ParseError` | `Result.mapError`, `Result.orError` | when missing, malformed, and out-of-range need different handling | not on its own — use `Result.traverseAll` or Schema | `$"..."`; it has no renderer |
-| `Constraint` | `Violation` | `Result.orError` for your own case | when you need the failing rule, the actual value, or another language | `result.list { }` over independent checks | `Violation.render`, or a `Renderer` |
-| `Refinements` | `Violation` | as above, at the construction site | as above | as above | as above |
-| `Result` | your own error type | it already is your type | always — it is yours | `result.list { }`, `Result.traverseAll` | your own function |
-| `Schema` | `SchemaErrors` | `RetainedParseResult.mapErrors` at the boundary | when you need paths, raw input, or metadata | it already did, with paths | `SchemaErrors.messages` / `fullMessages` |
-
-Two rules of thumb. Map early when the failure is leaving a small function whose caller should not learn Reified's
-vocabulary. Keep it when something downstream — a form, an API payload, a translator — still needs the facts.
+"Validation" is the everyday word for all of this, and the documentation uses it that way when talking about the
+area as a whole. When the distinction matters, it will be one of the three above instead.
 
 ## Where to go next
 
-| What you are doing | Start at |
-| --- | --- |
-| Reusing value rules and their explanations | [Constraint](/values/constraint/) |
-| Making a domain type carry its own invariant | [Refined values](/values/refined/) |
-| Decoding serialized primitives | [Parse](/values/parse/) |
-| Declaring a model and parsing input into it | [Schema](/schema/quickstart/) |
-| Reading and writing JSON from that model | [JSON codecs](/schema/json-codec/) |
-| Publishing an HTTP contract and OpenAPI | [HTTP servers](/schema/http-servers/) |
-| Versioning a wire format | [Contracts](/schema/contracts/) |
-| Building test data and fixtures | [Data](/data/) |
+The library is three groups: rules that live in values, boundaries that produce models, and failures and
+fixtures as ordinary values. Each page below states what it is for, so you can start from the job you have.
+
+→ [Where to go next](/where-to-go-next/)
 
 ## Installing
 

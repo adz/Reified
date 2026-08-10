@@ -1,33 +1,12 @@
-# Sidebar for the repository-wide getting started page. It is not a product area, so it
-# routes onward to the four areas rather than listing pages beneath itself.
+# Sidebar for the repository-wide getting started page and its siblings. The four product areas
+# are top-nav items, so this sidebar lists only the getting-started pages; routing onward to the
+# areas lives on the landing page and on /where-to-go-next/.
 groups:
   - title: Getting started
     home: /getting-started
     kind: primary
     caption: Declare one model, parse untrusted input into it, and derive a JSON codec from the same declaration.
     descendants: false
-
-  - title: Values
-    home: /values
-    caption: Constraint, Refinements, and Parse — rules about a value, and types that carry them.
-    descendants: false
-
-  - title: Reified.Schema
-    home: /schema
-    caption: Declare how structured input becomes a model, then derive codecs, contracts, and fixtures.
-    descendants: false
-
-  - title: Reified.Data
-    home: /data
-    caption: Portable structured values for documents, fixtures, boundaries, and adapters.
-    descendants: false
-
-  - title: Reified.Result
-    home: /result
-    caption: Composition over the standard F# Result type.
-    descendants: false
-
-  - title: Notes
-    home: /notes
-    caption: Package inventory, platform support, measured numbers, and the compiler-directed design.
-    descendants: false
+    entries:
+      - /what-a-schema-gives-you
+      - /where-to-go-next

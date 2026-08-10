@@ -76,57 +76,92 @@ JSON Schema, and the generated test data come from that one declaration. Nothing
 <a class="docs-home-cta" href="/getting-started/">Get started &rarr;</a>
 </div>
 
-<p style="max-width: 78ch; margin: 0 auto 3.5rem; text-align: center;">There are two ways in. Declare a
-<a href="/schema/quickstart/">Schema</a> when structured input has to become a domain model with every field
-failure reported at once. Use plain <a href="/result/">Result</a> with your own error type when the code is small and
-the failures are yours. Everything else below is machinery those two use.</p>
+<div class="reified-group" style="margin-top: 3.5rem;">
+<h2 class="reified-group-title">Rules that live in values</h2>
+<p class="reified-group-lede">A rule written as a value can be executed by a checker, explained by a renderer,
+exported to JSON Schema, and sampled by a generator. Write it once and the message, the document, and the test
+data follow from it — and a type built through the rule never has to be checked again.</p>
 
 <div class="reified-routes">
 
-<a class="reified-route" href="/schema/quickstart/">
-<span class="reified-route-problem">The same rule is repeated in a parser, a validator, a form, and a test</span>
-<span class="reified-route-target">Schema &rarr;</span>
-</a>
-
-<a class="reified-route" href="/result/">
-<span class="reified-route-problem">Failures are exceptions, or a bespoke result type in every project</span>
-<span class="reified-route-target">Result &rarr;</span>
-</a>
-
 <a class="reified-route" href="/values/constraint/">
-<span class="reified-route-problem">Validation boilerplate is everywhere, and invalid values still get through</span>
+<span class="reified-route-problem">Reusable rules that carry their own explanation, in any language</span>
 <span class="reified-route-target">Constraint &rarr;</span>
 </a>
 
 <a class="reified-route" href="/values/refined/">
-<span class="reified-route-problem">A type says <code>string</code> when it means something narrower</span>
+<span class="reified-route-problem">Types that can only hold values the rule admits — <code>NonBlankString</code>, your own <code>CustomerId</code></span>
 <span class="reified-route-target">Refined values &rarr;</span>
 </a>
 
+<a class="reified-route" href="/values/parse/">
+<span class="reified-route-problem">Serialized primitives to typed values, with the failure as data</span>
+<span class="reified-route-target">Parse &rarr;</span>
+</a>
+
+</div>
+</div>
+
+<div class="reified-group">
+<h2 class="reified-group-title">Boundaries that produce models</h2>
+<p class="reified-group-lede">Declare the model once and it does the whole job: untrusted input becomes the
+model — or a set of failures with paths — and the same declaration is also the JSON codec, the published
+contract, and the field metadata a form renders. Nothing downstream wonders whether validation ran.</p>
+
+<div class="reified-routes">
+
+<a class="reified-route" href="/schema/quickstart/">
+<span class="reified-route-problem">One declaration per model, read by every layer that would otherwise repeat it</span>
+<span class="reified-route-target">Schema &rarr;</span>
+</a>
+
+<a class="reified-route" href="/what-a-schema-gives-you/">
+<span class="reified-route-problem">The seven jobs around a model that one declaration already does</span>
+<span class="reified-route-target">What a schema gives you &rarr;</span>
+</a>
+
 <a class="reified-route" href="/schema/json-codec/">
-<span class="reified-route-problem">Decoding and validation are separate steps that drift apart</span>
+<span class="reified-route-problem">Reflection-free JSON, so decoding and validation cannot drift apart</span>
 <span class="reified-route-target">JSON codecs &rarr;</span>
 </a>
 
 <a class="reified-route" href="/schema/http-servers/">
-<span class="reified-route-problem">Client and server disagree about the shape of a request</span>
+<span class="reified-route-problem">Endpoints whose OpenAPI is generated from the same declaration they enforce</span>
 <span class="reified-route-target">HTTP contracts &rarr;</span>
 </a>
 
-<a class="reified-route" href="/data/">
-<span class="reified-route-problem">Constructing test data by hand is slow and repetitive</span>
-<span class="reified-route-target">Data &rarr;</span>
-</a>
-
-<a class="reified-route" href="/getting-started/#installing">
-<span class="reified-route-problem">You want one small library, not a framework</span>
-<span class="reified-route-target">Packages &rarr;</span>
+<a class="reified-route" href="/schema/contracts/">
+<span class="reified-route-problem">Old payload versions migrated into the current model, on purpose</span>
+<span class="reified-route-target">Contracts &rarr;</span>
 </a>
 
 </div>
+</div>
 
-<p style="max-width: 78ch; margin: 0 auto 2rem;">Every package is independently installable, and runs on .NET and
-on Fable JavaScript.</p>
+<div class="reified-group">
+<h2 class="reified-group-title">Failures and fixtures as ordinary values</h2>
+<p class="reified-group-lede">No exception model and no framework result type. Errors are data you can match
+on, group by path, translate, or serialize — composed over the standard <code>Result</code> rather than
+replacing it. Test data comes from the same declarations, so fixtures cannot drift from the rules.</p>
+
+<div class="reified-routes">
+
+<a class="reified-route" href="/result/">
+<span class="reified-route-problem">Fail-fast sequencing and error accumulation over your own error type</span>
+<span class="reified-route-target">Result &rarr;</span>
+</a>
+
+<a class="reified-route" href="/data/">
+<span class="reified-route-problem">Building, editing, and comparing test data without hand-writing every case</span>
+<span class="reified-route-target">Data &rarr;</span>
+</a>
+
+</div>
+</div>
+
+<p style="max-width: 78ch; margin: 0 auto 2rem; text-align: center;">Every package is independently installable
+and runs on .NET and on Fable JavaScript — take one capability or the whole set.
+<a href="/notes/packages-and-platforms/">Packages and platforms &rarr;</a></p>
 
 <div class="docs-home-meta" style="margin-bottom: 4rem;">
 <a class="docs-chip" href="/getting-started/">Getting started</a>
