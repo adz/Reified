@@ -13,7 +13,7 @@ groups:
       - /schema/quickstart
       - /schema/overview-examples
       - /schema/tutorials
-      - /schema/syntax
+      - /schema/dsl
       - /schema/field-desugaring
       - /schema/input-sources
       - /schema/redisplay-and-field-errors

@@ -35,7 +35,7 @@ Signup.validate  // Signup -> Result<Signup, SchemaErrors>
 ```
 
 This is source generation, not runtime reflection. The attributes are inert metadata; the generated F# uses the same
-[Schema DSL](../syntax/) as a hand-written declaration and therefore works with parsing, inspection, JSON codecs,
+[Schema DSL](../dsl/) as a hand-written declaration and therefore works with parsing, inspection, JSON codecs,
 JSON Schema, NativeAOT, trimming, and Fable.
 
 ## Guides

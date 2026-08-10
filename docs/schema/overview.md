@@ -44,7 +44,7 @@ current domain model.
 - [Schema Overview Examples](../overview-examples/) — short examples of inference, checked construction, refinement,
   recursion, and core interpreters.
 - [Tutorials](../tutorials/) — parse a signup form, nest models, apply rules, and inspect metadata.
-- [Schema Syntax](../syntax/) — constructor-last declarations and field blocks.
+- [SchemaDSL](../dsl/) — constructor-last declarations and field blocks.
 - [Derived Schemas](../derivation/) — generate declarations from F# records, configure MSBuild, and browse attributes.
 - [Field Blocks and Plain Functions](../field-desugaring/) — how `withSchema`, `constrain`, `refine`, and `validate`
   correspond to ordinary schema transformations.

@@ -61,7 +61,7 @@ part of the type, so nothing downstream re-checks it.
 
 - [Overview](./constraint/) — one reusable description of valid values.
 - [Reusable constraints](./constraint/constraints/)
-- [Constraint syntax](./constraint/syntax/)
+- [ConstraintDSL](./constraint/dsl/)
 - [Working with violations](./constraint/violations/)
 - [Contextual localization](./constraint/localization/) and [adding a language](./constraint/adding-a-language/)
 - [Under Fable](./constraint/fable/)

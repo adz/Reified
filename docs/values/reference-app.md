@@ -12,7 +12,7 @@ Every snippet below is taken from `examples/Reified.ReferenceApp.Intro/Program.f
 dotnet run --project examples/Reified.ReferenceApp.Intro/Reified.ReferenceApp.Intro.fsproj --nologo
 ```
 
-The examples open the syntax modules, so the constraint and result vocabulary is unqualified:
+The examples open the DSL modules, so the constraint and result vocabulary is unqualified:
 
 ```fsharp
 open Reified

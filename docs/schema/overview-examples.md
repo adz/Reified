@@ -79,7 +79,7 @@ field _.Email {
 ```fsharp
 let rec schema : Lazy<Schema<Category>> =
     lazy (
-        Syntax.schema<Category> {
+        SchemaDSL.schema<Category> {
             field _.Name
             field _.Children {
                 withSchema (Schema.listWith (Schema.defer schema))

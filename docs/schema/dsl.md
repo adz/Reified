@@ -1,14 +1,14 @@
 ---
 weight: 20
-title: Schema Syntax
+title: SchemaDSL
 description: Record fields, field blocks, canonical schemas, and checked constructors.
 ---
 
-# Schema Syntax
+# SchemaDSL
 
-Every Reified package puts its concise vocabulary behind one opt-in module named `Syntax`, so the preamble is always
-the package namespace, then its `Syntax`. Nothing is auto-opened; if a name below is not in scope, the second line
-is missing.
+Every Reified package puts its concise vocabulary behind one opt-in module named after the package —
+`SchemaDSL` here — so the preamble is always the package namespace, then its DSL. Nothing is auto-opened; if a
+name below is not in scope, the second line is missing.
 
 ```fsharp
 open Reified
@@ -187,7 +187,7 @@ Use `Schema.defer` where a field refers back to the schema being defined:
 ```fsharp
 let rec schema : Lazy<Schema<Category>> =
     lazy (
-        Syntax.schema<Category> {
+        SchemaDSL.schema<Category> {
             field _.Name
             field _.Children {
                 withSchema (Schema.listWith (Schema.defer schema))

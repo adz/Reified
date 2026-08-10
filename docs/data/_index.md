@@ -138,7 +138,7 @@ The same works for lists: `data [ "ids" => [ for id in ids -> id * 10 ] ]`.
 
 - [Tutorial: build, vary, and test structured data](tutorial/)
 - [What Data represents](what-it-does/)
-- [Explicit API and concise syntax](syntax/)
+- [DataDSL](dsl/)
 - [Numbers](numbers/)
 - [Declare, render, and edit data](declaring-and-editing/)
 - [Convert data and parse JSON](converting-data/)

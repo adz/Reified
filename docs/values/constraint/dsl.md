@@ -1,11 +1,11 @@
 ---
 weight: 10
-title: Constraint syntax
+title: ConstraintDSL
 type: docs
 description: Write concise constraint modules and adapt results without depending on Reified.Result.
 ---
 
-# Constraint syntax
+# ConstraintDSL
 
 `Reified.ConstraintDSL` exposes the common constructors without the `Constraint.` prefix. Open it locally
 where a module's purpose already makes the context clear:

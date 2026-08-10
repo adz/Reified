@@ -56,6 +56,29 @@ JSON Schema document without rewriting the rule.
 `Result.orError` comes from `Reified.Result`. Without that package, `Result.mapError (fun _ -> InvalidEmail)` does the
 same thing.
 
+## Where the rules for a model live
+
+Once there is more than one rule, they belong together in a module rather than scattered across the code that
+uses them. That is also where `Reified.ConstraintDSL` earns its place: it exposes the same constructors
+without the `Constraint.` prefix, which reads well when the module name already says what these rules are for.
+
+```fsharp
+open Reified
+
+module SignupRules =
+    open Reified.ConstraintDSL
+
+    let emailAddress : Constraint<string> = Constraint.all [ present; email; maxLength 254 ]
+    let age : Constraint<int> = atLeast 13
+```
+
+Open it inside the module, not at the top of a file — `present` and `email` are ordinary words, and their
+meaning should be obvious from the two lines above them. The DSL changes vocabulary, not semantics: every name
+returns the same `Constraint<'value>` the qualified name returns. Code elsewhere refers to `SignupRules.age`,
+and the rest of this page uses `Constraint.` spellings so each example stands on its own.
+
+→ [ConstraintDSL](./dsl/)
+
 Reach for the structured path when the extra facts earn their keep — when you want to classify failures, render
 messages in more than one language, or report several field failures at once. Then keep the violation and
 `Result.mapError` it into a case that carries it:
@@ -111,14 +134,20 @@ simply never build the resources.
 
 ## The same declaration is read by everything downstream
 
-There is one vocabulary, not several. The same value works unchanged in a refinement and in a schema:
+There is one vocabulary, not several. A rule named in a module works unchanged in a refinement and in a
+schema, and the DSL spelling reads the same in all three places:
 
 ```fsharp
+module RetryRules =
+    open Reified.ConstraintDSL
+
+    let count : Constraint<int> = Constraint.between 0 10
+
 let retryCountRefinement =
-    Refinement.define retryCount RetryCount _.Value
+    Refinement.define RetryRules.count RetryCount _.Value
 
 let schema =
-    Schema.int |> Schema.constrain retryCount
+    Schema.int |> Schema.constrain RetryRules.count
 ```
 
 A constraint built from named parts lowers to JSON Schema, generates test data, and renders localizable
@@ -136,11 +165,14 @@ A standalone binding is the exception: the annotation is the only type informati
 selects the shape.
 
 ```fsharp
-let requiredName : Constraint<string> = Constraint.present
+module SignupRules =
+    open Reified.ConstraintDSL
+
+    let requiredName : Constraint<string> = present
+    let selectedPlan : Constraint<string option> = present
 ```
 
-For how a `Violation` compares with the other failure shapes, and when to map, keep, accumulate, or render each,
-see [Which failure type, and what to do with it]({{% relref "/getting-started" %}}#which-failure-type-and-what-to-do-with-it).
+Both are `present`; the annotation is what decides whether it means non-blank text or a supplied option.
 
 The same value facts appear at three further levels:
 
@@ -153,7 +185,7 @@ The same value facts appear at three further levels:
 Weighing this against DataAnnotations, FluentValidation, or Validus? Read
 [How it compares](./comparison/).
 
-Otherwise take the [Constraint syntax](./syntax/) for the vocabulary and how to write a rule module,
+Otherwise take [ConstraintDSL](./dsl/) for the full vocabulary and how to write a rule module,
 then [Using constraints](./overview/) for composition and keeping the input, [Working with
 violations](./violations/) for rendering and inspecting failures, [Interpreted and opaque](./constraints/)
 for what makes a rule inspectable and what an escape hatch costs, and [Localization](./localization/) for

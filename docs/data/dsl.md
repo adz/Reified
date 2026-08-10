@@ -1,11 +1,11 @@
 ---
 weight: 18
-title: Explicit API and concise syntax
+title: DataDSL
 type: docs
 description: The complete Reified.DataDSL vocabulary, its explicit equivalents, and a full example without opening it.
 ---
 
-# Explicit API and concise syntax
+# DataDSL
 
 `Reified.DataDSL` is optional. It supplies short names and the `=>` and `?=>` operators. The underlying construction and
 editing API remains available through `Data` and `DataEdit`.
@@ -77,7 +77,7 @@ let request =
 
 ## Literal and edit mappings
 
-| Concise syntax | Explicit API | Result |
+| DataDSL | Explicit API | Result |
 | --- | --- | --- |
 | `name => value` | `Data.assoc name value` | `DataField` |
 | `name ?=> option` | `Data.optionalAssoc name option` | `DataField` |
@@ -112,4 +112,4 @@ The matching and case-generation names also live in `Reified.DataDSL`. Without o
 | Matching | `matching` |
 | Cases | `variant`, `variants`, `dimension`, `matrix` |
 
-`Data.tryMatch` is always qualified because it is not part of the concise syntax.
+`Data.tryMatch` is always qualified because it is not part of the DSL.

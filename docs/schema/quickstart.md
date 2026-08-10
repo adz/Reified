@@ -52,7 +52,7 @@ Pass a wire name explicitly when it differs from the property: `fieldAs "email_a
 
 Deriving the name from `_.Email` uses a quotation. That compiles on .NET and on the Fable targets that support
 quotations, including JavaScript; reach for `fieldAs` on Fable's Rust and PHP targets. See
-[Schema Syntax](../syntax/) and [Compiler-Directed, AOT, and Fable]({{% relref "/notes/aot-trimming-fable/" %}}).
+[SchemaDSL](../dsl/) and [Compiler-Directed, AOT, and Fable]({{% relref "/notes/aot-trimming-fable/" %}}).
 
 ### Parse
 
@@ -372,7 +372,7 @@ The four stages are a ladder, not a target. Take the lowest rung that prevents a
 4. Private model and draft — relationships between fields.
 
 - [Construction Guarantees](../trusted-construction/) — what each rung does and does not promise.
-- [Schema Syntax](../syntax/) — the full declaration vocabulary.
+- [SchemaDSL](../dsl/) — the full declaration vocabulary.
 - [Derived Schemas](../derivation/) — generate that declaration from an attributed F# wire record.
 - [Field Blocks and Plain Functions](../field-desugaring/) — a field block read as ordinary functions over one `Schema`.
 - [Refined Schemas](../refined-values/) — your own domain types as fields.
