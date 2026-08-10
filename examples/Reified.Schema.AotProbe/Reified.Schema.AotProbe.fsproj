@@ -24,7 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Reified.Schema\Reified.Schema.fsproj"
-                      AdditionalProperties="TargetFramework=net8.0;PublishAot=false" />
+                      AdditionalProperties="TargetFramework=net8.0" />
   </ItemGroup>
 
 </Project>
