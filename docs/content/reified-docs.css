@@ -1,629 +1,290 @@
+/*
+ * Reified's own theme for the FsLiveDocs-generated site (DaisyUI/Tailwind markup —
+ * .navbar / .drawer-content / .drawer-side / #search-ui / main / aside), not the old
+ * Docsy layout this project used before the FsLiveDocs migration. Precise and a little
+ * severe: a cool paper background, a monospace-inflected accent, sharp corners over
+ * soft ones — "engineered", not "friendly".
+ */
+
+:root,
+[data-theme="light"] {
+    --reified-bg: #f4f3ef;
+    --reified-surface: #ffffff;
+    --reified-surface-soft: #eae8e1;
+    --reified-text: #17181a;
+    --reified-muted: #52565c;
+    --reified-faint: #82868c;
+    --reified-border: rgba(23, 24, 26, 0.12);
+    --reified-accent: #1f5fae;
+    --reified-accent-soft: rgba(31, 95, 174, 0.08);
+}
+
+[data-theme="dark"] {
+    --reified-bg: #121316;
+    --reified-surface: #1a1c20;
+    --reified-surface-soft: #202226;
+    --reified-text: #e7e8ea;
+    --reified-muted: #a7abb2;
+    --reified-faint: #75797f;
+    --reified-border: rgba(231, 232, 234, 0.12);
+    --reified-accent: #6ea8ff;
+    --reified-accent-soft: rgba(110, 168, 255, 0.1);
+}
+
 :root {
-    --reified-bg: #f7f4ee;
-    --reified-surface: rgba(255, 255, 255, 0.82);
-    --reified-surface-strong: #ffffff;
-    --reified-surface-soft: #f1ece3;
-    --reified-border: rgba(42, 41, 37, 0.12);
-    --reified-border-strong: rgba(42, 41, 37, 0.18);
-    --reified-text: #1e1b18;
-    --reified-muted: #61594f;
-    --reified-faint: #8a8176;
-    --reified-accent: #3767b1;
-    --reified-accent-soft: rgba(55, 103, 177, 0.1);
-    --reified-shadow: 0 18px 50px rgba(41, 32, 23, 0.08);
-    --reified-radius: 18px;
-    --reified-radius-sm: 12px;
-    --reified-max-width: 1160px;
-    --reified-sidebar-width: 250px;
-    --reified-page-width: 230px;
     --reified-display-font: "IBM Plex Serif", Georgia, "Times New Roman", serif;
-    --reified-heading-font: "Source Sans 3", "Segoe UI", Arial, sans-serif;
-    --reified-body-font: "Source Sans 3", "Segoe UI", Arial, sans-serif;
     --reified-sans-font: "Source Sans 3", "Segoe UI", Arial, sans-serif;
     --reified-mono-font: "Fira Code", "IBM Plex Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+    --reified-radius: 4px;
 }
 
-html {
-    background:
-        radial-gradient(circle at top left, rgba(55, 103, 177, 0.07), transparent 28%),
-        radial-gradient(circle at top right, rgba(104, 92, 255, 0.05), transparent 24%),
-        linear-gradient(180deg, #fbf9f5 0%, var(--reified-bg) 100%);
-}
-
-body {
+html,
+body,
+.drawer-content {
+    background: var(--reified-bg) !important;
     color: var(--reified-text);
     font-family: var(--reified-sans-font);
-    background: transparent;
-    min-height: 100vh;
-    display: grid;
-    grid-template-columns: minmax(0, var(--reified-sidebar-width)) minmax(0, 1fr) minmax(0, var(--reified-page-width));
-    grid-template-areas:
-        "header header header"
-        "nav content toc";
-    grid-template-rows: auto 1fr;
-    gap: 0;
 }
 
-body > header {
-    grid-area: header;
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1.25rem;
-    padding: 1rem 1.5rem;
-    margin-bottom: 0;
-    border-bottom: 1px solid var(--reified-border);
-    backdrop-filter: blur(20px);
-    background: rgba(251, 249, 245, 0.88);
+.navbar,
+.drawer-side > div {
+    background: var(--reified-bg) !important;
+    border-color: var(--reified-border) !important;
 }
 
-body > header .start,
-body > header .end {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+/* Content typography ------------------------------------------------------------- */
+
+main #content {
+    max-width: 76ch;
 }
 
-body > header .start {
-    min-width: 0;
-}
-
-body > header .end {
-    color: var(--reified-muted);
-}
-
-.navbar-brand {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.1rem;
-    flex-shrink: 0;
-    text-decoration: none;
-    color: var(--reified-text);
-}
-
-.docs-wordmark-name {
+main h1,
+main h2,
+main h3,
+main h4 {
     font-family: var(--reified-display-font);
-    font-size: clamp(1.55rem, 1.9vw, 2rem);
-    line-height: 0.9;
-    letter-spacing: -0.08em;
     font-weight: 700;
-}
-
-.docs-wordmark-sigil {
-    color: var(--reified-accent);
-    font: 700 0.66rem/1 var(--reified-mono-font);
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-}
-
-.docs-brand-copy {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-    min-width: 0;
-}
-
-.docs-pill {
-    width: fit-content;
-    padding: 0.18rem 0.6rem;
-    border-radius: 999px;
-    border: 1px solid var(--reified-border-strong);
-    color: var(--reified-accent);
-    background: rgba(255, 255, 255, 0.72);
-    font: 600 0.7rem/1 var(--reified-mono-font);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-}
-
-.docs-tagline {
-    color: var(--reified-muted);
-    font-size: 0.95rem;
-    line-height: 1.2;
-    white-space: nowrap;
-}
-
-body > aside#fsdocs-main-menu {
-    grid-area: nav;
-    position: sticky;
-    top: 4.8rem;
-    align-self: start;
-    max-height: calc(100vh - 5.75rem);
-    overflow: auto;
-    padding: 1.5rem 1rem 1.5rem 1.5rem;
-    border-right: 1px solid var(--reified-border);
-    background: rgba(249, 247, 242, 0.7);
-}
-
-body > aside#fsdocs-page-menu {
-    grid-area: toc;
-    position: sticky;
-    top: 4.8rem;
-    align-self: start;
-    max-height: calc(100vh - 5.75rem);
-    overflow: auto;
-    padding: 1.5rem 1.5rem 1.5rem 1rem;
-    border-left: 1px solid var(--reified-border);
-    background: rgba(249, 247, 242, 0.28);
-    opacity: 0.42;
-    transition: opacity 160ms ease, background-color 160ms ease;
-    font-size: 0.93rem;
-    color: var(--reified-faint);
-}
-
-body > aside#fsdocs-page-menu:hover,
-body > aside#fsdocs-page-menu:focus-within {
-    opacity: 0.9;
-    background: rgba(249, 247, 242, 0.48);
-}
-
-body > aside#fsdocs-page-menu a {
-    color: inherit;
-}
-
-body > aside#fsdocs-page-menu #on-this-page {
-    font-size: 0.74rem;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--reified-accent);
-}
-
-body > aside#fsdocs-page-menu li,
-body > aside#fsdocs-page-menu p {
-    line-height: 1.55;
-}
-
-body > main {
-    grid-area: content;
-    min-width: 0;
-    padding: 2rem 2.25rem 4rem;
-}
-
-#content {
-    max-width: var(--reified-max-width);
-    margin: 0 auto;
-}
-
-#content > h1:first-child {
-    margin-top: 0;
-    margin-bottom: 1rem;
-    font-family: var(--reified-heading-font);
-    font-size: clamp(2.4rem, 4.7vw, 4.25rem);
-    line-height: 0.96;
-    letter-spacing: -0.06em;
-    font-weight: 700;
+    letter-spacing: -0.02em;
     text-wrap: balance;
 }
 
-#content > p:first-of-type {
-    max-width: 78ch;
-    color: var(--reified-muted);
-    font-size: 1.12rem;
+main h1:first-child {
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    line-height: 1.05;
+}
+
+main p,
+main li,
+main td {
+    color: var(--reified-text);
     line-height: 1.7;
-    text-wrap: balance;
 }
 
-#content h2,
-#content h3,
-#content h4 {
-    font-family: var(--reified-heading-font);
-    letter-spacing: -0.04em;
-    line-height: 1.15;
-    font-weight: 700;
-    text-wrap: balance;
-}
-
-#content h2 {
-    margin-top: 3rem;
-    margin-bottom: 0.8rem;
-    font-size: clamp(1.6rem, 2vw, 2.2rem);
-}
-
-#content h3 {
-    margin-top: 2rem;
-    margin-bottom: 0.6rem;
-    font-size: 1.25rem;
-}
-
-#content p,
-#content li,
-#content dd,
-#content dt,
-#content table {
-    font-size: 1rem;
-    line-height: 1.75;
-}
-
-#content a {
+main a {
     color: var(--reified-accent);
     text-decoration-thickness: 0.08em;
     text-underline-offset: 0.16em;
 }
 
-#content a:hover {
-    text-decoration-thickness: 0.12em;
-}
-
-#content code,
-#content pre,
-.highlight,
-.code,
-code {
+main code,
+main pre,
+main kbd {
     font-family: var(--reified-mono-font);
-    font-size: 0.95em;
+    font-size: 0.92em;
 }
 
-#content pre {
-    overflow: auto;
-    padding: 1.15rem 1.25rem;
+main pre {
+    border-radius: var(--reified-radius);
     border: 1px solid var(--reified-border);
-    border-radius: var(--reified-radius-sm);
-    background: linear-gradient(180deg, #fcfbf8 0%, #f6f2ea 100%);
-    box-shadow: var(--reified-shadow);
+    background: var(--reified-surface-soft);
 }
 
-#content pre code {
-    color: var(--reified-text);
-    background: transparent;
-}
-
-#content code {
-    padding: 0.12rem 0.35rem;
-    border-radius: 999px;
-    background: rgba(55, 103, 177, 0.08);
+main :not(pre) > code {
+    padding: 0.1rem 0.35rem;
+    border-radius: var(--reified-radius);
+    background: var(--reified-accent-soft);
     color: var(--reified-text);
 }
 
-#content pre code {
-    padding: 0;
-    border-radius: 0;
-    background: transparent;
+main table {
+    border: 1px solid var(--reified-border);
+    border-radius: var(--reified-radius);
 }
 
-#content blockquote {
-    margin: 1.25rem 0;
-    padding: 1rem 1.15rem;
-    border-left: 3px solid var(--reified-accent);
-    border-radius: 0 var(--reified-radius-sm) var(--reified-radius-sm) 0;
-    background: rgba(55, 103, 177, 0.05);
+main th {
+    background: var(--reified-surface-soft);
     color: var(--reified-muted);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
 }
 
-#content table {
+/* Landing page: full-bleed, no chrome ---------------------------------------------- */
+
+.drawer-content:has(.reified-landing) > .grid {
     display: block;
-    overflow: auto;
-    border-collapse: collapse;
-    border: 1px solid var(--reified-border);
-    border-radius: var(--reified-radius-sm);
-    background: var(--reified-surface-strong);
-    box-shadow: 0 8px 26px rgba(41, 32, 23, 0.05);
+    padding: 0;
 }
 
-#content th,
-#content td {
-    padding: 0.8rem 0.95rem;
-    border-bottom: 1px solid var(--reified-border);
-    vertical-align: top;
+body:has(.reified-landing) > .navbar {
+    display: none;
 }
 
-#content th {
-    text-align: left;
-    font-weight: 600;
-    color: var(--reified-muted);
-    background: rgba(247, 244, 238, 0.95);
+body:has(.reified-landing) #search-ui {
+    display: none;
 }
 
-#content tr:last-child td {
-    border-bottom: 0;
-}
-
-#content details {
-    border: 1px solid var(--reified-border);
-    border-radius: var(--reified-radius-sm);
-    background: rgba(255, 255, 255, 0.7);
-    padding: 0.75rem 0.9rem;
-}
-
-#content details + details {
-    margin-top: 0.8rem;
-}
-
-#content summary {
-    cursor: pointer;
-    font-weight: 600;
-}
-
-#content hr {
-    margin: 2rem 0;
+.drawer-content:has(.reified-landing) main {
+    min-height: 100vh;
     border: 0;
-    border-top: 1px solid var(--reified-border);
+    border-radius: 0;
+    background: var(--reified-bg);
+    box-shadow: none;
+}
+
+.drawer-content:has(.reified-landing) aside,
+.drawer:has(.reified-landing) .drawer-side {
+    display: none !important;
+}
+
+.docs-home-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3rem 2rem 4rem;
 }
 
 .docs-home-hero {
     display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+    grid-template-columns: 1fr;
+    justify-items: center;
     gap: 1.5rem;
-    padding: 1.75rem 0 1rem;
+    padding: 1rem 0 0;
+    text-align: center;
 }
 
-.docs-home-hero .eyebrow {
+.docs-home-hero-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+}
+
+.hero-lockup {
+    width: 100%;
+    height: auto;
+}
+
+.docs-home-copy {
+    max-width: 78ch;
+    margin: 0 auto;
+}
+
+.eyebrow {
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
     margin-bottom: 1rem;
-    padding: 0.3rem 0.7rem;
+    padding: 0.3rem 0.75rem;
     border: 1px solid var(--reified-border);
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.65);
+    background: var(--reified-surface);
     color: var(--reified-accent);
     font: 600 0.72rem/1 var(--reified-mono-font);
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
 }
 
-.docs-home-hero .page-summary {
-    margin: 0 0 0.8rem;
-    color: var(--reified-faint);
-    font: 600 0.9rem/1.45 var(--reified-sans-font);
-    letter-spacing: 0.01em;
-}
-
-.docs-home-hero h1 {
-    max-width: 12ch;
-    margin: 0 0 1rem;
-    font-family: var(--reified-heading-font);
+.docs-home-copy h1 {
+    margin: 0 0 1.25rem;
+    color: var(--reified-text);
+    font-family: var(--reified-display-font);
     font-weight: 700;
-    font-size: clamp(2.4rem, 4.9vw, 4.8rem);
-    line-height: 0.96;
-    letter-spacing: -0.06em;
+    font-size: clamp(2.2rem, 4.6vw, 3.6rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
     text-wrap: balance;
 }
 
-.docs-home-hero .lede {
+.lede {
     max-width: 62ch;
+    margin: 0 auto 0.5rem;
     color: var(--reified-muted);
-    font-size: 1.08rem;
-    line-height: 1.75;
+    font-size: 1.15rem;
+    line-height: 1.65;
+}
+
+.docs-home-example {
+    max-width: 60rem;
+    margin: 0 auto 1.5rem;
+    padding: 1.1rem 1.3rem;
+    border: 1px solid var(--reified-border);
+    border-radius: var(--reified-radius);
+    background: var(--reified-surface);
+    text-align: left;
+}
+
+.docs-home-example pre {
+    margin: 0;
+    overflow-x: auto;
+    border: 0;
+    background: transparent;
+}
+
+.docs-home-example code {
+    font-size: 0.9rem;
+    line-height: 1.55;
+    white-space: pre;
+}
+
+.reified-landing .btn-primary {
+    border-radius: var(--reified-radius);
+    border-color: var(--reified-accent);
+    background: var(--reified-accent);
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.reified-landing .btn-primary:hover {
+    filter: brightness(0.9);
+}
+
+.reified-landing table {
+    max-width: 78ch;
+    margin: 2.5rem auto 1.5rem;
+    border: 1px solid var(--reified-border);
+    border-radius: var(--reified-radius);
+    background: var(--reified-surface);
+}
+
+.reified-landing table th {
+    background: var(--reified-surface-soft);
 }
 
 .docs-home-meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.6rem;
-    margin-top: 1.2rem;
-}
-
-.docs-home-panel {
-    display: grid;
-    gap: 0.85rem;
-    align-content: start;
-}
-
-.docs-home-sample {
-    margin: 1.75rem 0 1.5rem;
-}
-
-.docs-home-sample h2 {
-    margin-bottom: 0.8rem;
-}
-
-.docs-home-sample pre {
-    margin: 0;
-}
-
-.docs-home-sample .sample-note {
-    margin: 0.85rem 0 0;
-    max-width: 62ch;
-    color: var(--reified-muted);
-    font-size: 1rem;
-    line-height: 1.65;
-}
-
-.docs-home-panel-card {
-    padding: 1rem 1.05rem 1.05rem;
-    border: 1px solid var(--reified-border);
-    border-radius: var(--reified-radius);
-    background: rgba(255, 255, 255, 0.82);
-    box-shadow: var(--reified-shadow);
-    backdrop-filter: blur(12px);
-}
-
-.docs-home-panel-card .label {
-    display: inline-block;
-    margin-bottom: 0.55rem;
-    color: var(--reified-accent);
-    font: 600 0.72rem/1 var(--reified-mono-font);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-}
-
-.docs-home-panel-card strong {
-    display: block;
-    color: var(--reified-text);
-    font-family: var(--reified-heading-font);
-    font-size: 1.08rem;
-    line-height: 1.3;
-    font-weight: 600;
-    text-wrap: balance;
+    justify-content: center;
+    gap: 0.65rem;
 }
 
 .docs-chip {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    padding: 0.42rem 0.75rem;
+    min-height: 2.2rem;
+    padding: 0.3rem 1rem;
     border: 1px solid var(--reified-border);
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.72);
-    color: var(--reified-text);
-    font: 500 0.9rem/1 var(--reified-sans-font);
-}
-
-.docs-grid {
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    gap: 1rem;
-    margin: 1.75rem 0 1rem;
-}
-
-.docs-card {
-    grid-column: span 4;
-    padding: 1.15rem 1.15rem 1.2rem;
-    border: 1px solid var(--reified-border);
-    border-radius: var(--reified-radius);
     background: var(--reified-surface);
-    box-shadow: var(--reified-shadow);
-    backdrop-filter: blur(12px);
-}
-
-.docs-card h2,
-.docs-card h3 {
-    margin-top: 0;
-    margin-bottom: 0.55rem;
-}
-
-.docs-card p {
-    margin: 0;
     color: var(--reified-muted);
-}
-
-.docs-card .label {
-    display: inline-block;
-    margin-bottom: 0.75rem;
-    color: var(--reified-accent);
-    font: 600 0.72rem/1 var(--reified-mono-font);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-}
-
-.docs-card a {
-    display: inline-flex;
-    margin-top: 0.9rem;
-    font-weight: 600;
-}
-
-.docs-stack {
-    margin-top: 1.25rem;
-    display: grid;
-    gap: 0.75rem;
-}
-
-.docs-stack .docs-card {
-    grid-column: span 12;
-}
-
-.reified-sidebar-collapse-toggle {
-    width: 100%;
-    margin: 0.35rem 0 0.75rem;
-    padding: 0.4rem 0.6rem;
-    border: 1px solid var(--reified-border);
-    border-radius: 8px;
-    color: var(--reified-muted);
-    background: rgba(255, 255, 255, 0.68);
-    font: 600 0.78rem/1.2 var(--reified-sans-font);
-    text-align: left;
+    font-size: 0.92rem;
+    font-weight: 500;
     text-decoration: none;
 }
 
-.reified-sidebar-collapse-toggle::before {
-    content: "v";
-    display: inline-block;
-    width: 1rem;
-    color: var(--reified-accent);
-}
-
-.reified-sidebar-collapse-toggle[aria-expanded="false"]::before {
-    content: ">";
-}
-
-/*
- * This project's baseof.html drops Docsy's `.td-sidebar__inner` wrapper, so Docsy's own
- * sticky positioning (applied to `__inner`) never takes effect. Docsy's `.td-sidebar-nav`
- * still gets its own `max-height: calc(100vh - 8.5rem)` scroll box independently of this
- * outer element, so nesting a second, differently-sized scroll region here left a dead
- * gap between the inner box's cutoff and the outer container's height. Make `.td-sidebar`
- * itself the single sticky/scrolling region (matching the `#fsdocs-main-menu` pattern
- * above) and let the nav fill it without an inner max-height of its own.
- */
-.td-sidebar {
-    position: sticky;
-    top: 4.8rem;
-    align-self: start;
-    max-height: calc(100vh - 5.75rem);
-    overflow-y: auto;
-}
-
-.td-sidebar .td-sidebar-nav {
-    max-height: none;
-    overflow-y: visible;
-}
-
-@media (max-width: 1240px) {
-    body {
-        grid-template-columns: minmax(0, 240px) minmax(0, 1fr);
-        grid-template-areas:
-            "header header"
-            "nav content";
-    }
-
-    body > aside#fsdocs-page-menu {
-        display: none;
-    }
-}
-
-@media (max-width: 960px) {
-    body {
-        display: block;
-    }
-
-    body > header {
-        position: sticky;
-        padding: 0.9rem 1rem;
-    }
-
-    body > aside#fsdocs-main-menu,
-    body > aside#fsdocs-page-menu {
-        position: static;
-        max-height: none;
-        border: 0;
-        padding: 0.75rem 1rem;
-        background: transparent;
-    }
-
-    body > main {
-        padding: 1.1rem 1rem 3rem;
-    }
-
-    .docs-brand-copy {
-        display: none;
-    }
-
-    .docs-home-hero {
-        grid-template-columns: 1fr;
-    }
-
-    .docs-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .docs-card {
-        grid-column: auto;
-    }
-}
-
 @media (max-width: 640px) {
-    .docs-wordmark-sigil {
-        display: none;
-    }
-
-    .docs-wordmark-name {
-        font-size: 1.45rem;
-    }
-
-    #content > h1:first-child {
-        font-size: clamp(2rem, 13vw, 3rem);
+    .docs-home-copy h1 {
+        font-size: 2rem;
     }
 }

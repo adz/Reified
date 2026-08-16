@@ -1,11 +1,16 @@
 {
   "siteName": "Reified",
   "repoUrl": "https://github.com/adz/Reified",
-  "stylesheet": "/content/reified-docs.css",
+  "logoText": "Rf",
+  "logoPath": "content/img/reified-mark-light.svg",
+  "logoDarkPath": "content/img/reified-mark-dark.svg",
+  "showSiteName": true,
+  "stylesheet": "content/reified-docs.css",
+  "themes": ["light", "dark"],
   "navigation": [
-    { "label": "Docs", "href": "/index.html" },
-    { "label": "Reference", "href": "/api.html" },
-    { "label": "Packages", "href": "/notes/packages-and-platforms.html" },
+    { "label": "Docs", "href": "index.html" },
+    { "label": "Reference", "href": "api.html" },
+    { "label": "Packages", "href": "notes/packages-and-platforms.html" },
     { "label": "GitHub", "href": "https://github.com/adz/Reified" }
   ],
   "projects": [

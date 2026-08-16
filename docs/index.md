@@ -10,8 +10,8 @@ targetFramework: net8.0
 <div class="docs-home-hero">
 
 <div class="docs-home-hero-visual">
-<img class="hero-lockup hero-lockup--light" src="/content/img/reified-logo-light.svg" alt="Reified" width="452" height="128" />
-<img class="hero-lockup hero-lockup--dark" src="/content/img/reified-logo-dark.svg" alt="Reified" width="452" height="128" />
+<img class="hero-lockup" data-theme-variant="light" src="content/img/reified-logo-light.svg" alt="Reified" width="226" height="64" />
+<img class="hero-lockup" data-theme-variant="dark" style="display: none;" src="content/img/reified-logo-dark.svg" alt="Reified" width="226" height="64" />
 </div>
 
 <div class="docs-home-copy" style="max-width: 78ch; margin: 0 auto;">
@@ -55,9 +55,9 @@ Json.serialize (Json.compile signupSchema) signup
 <p style="max-width: 78ch; margin: 0 auto 0.5rem; text-align: center;">Every failure message, the JSON codec, the
 JSON Schema, and the generated test data come from that one declaration. Nothing above is written twice.</p>
 
-<div class="docs-home-cta-row" style="justify-content: center; margin-bottom: 2rem;">
-<a class="docs-home-cta" href="/getting-started/index.html">Get started &rarr;</a>
-</div>
+<p style="text-align: center; margin-bottom: 2rem;">
+<a class="btn btn-primary" href="getting-started/index.html">Get started &rarr;</a>
+</p>
 
 </div>
 
@@ -74,9 +74,9 @@ JSON Schema, and the generated test data come from that one declaration. Nothing
 
 <p style="max-width: 78ch; margin: 2rem auto; text-align: center;">Every package is independently installable
 and runs on .NET and on Fable JavaScript — take one capability or the whole set.
-<a href="/notes/packages-and-platforms.html">Packages and platforms &rarr;</a></p>
+<a href="notes/packages-and-platforms.html">Packages and platforms &rarr;</a></p>
 
 <div class="docs-home-meta" style="margin-bottom: 4rem;">
-<a class="docs-chip" href="/getting-started/index.html">Getting started</a>
+<a class="docs-chip" href="getting-started/index.html">Getting started</a>
 <a class="docs-chip" href="https://github.com/adz/Reified">GitHub</a>
 </div>
