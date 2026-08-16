@@ -10,6 +10,53 @@ alternative looks obviously better than it is, or when something was tried and r
 Flow decisions are not kept here. The effect system, its service and hosting satellites, and the host HTTP
 adapters live in the [Axial repository](https://github.com/adz/Axial) along with the reasoning behind them.
 
+## 2026-08-17: Documentation tooling migrated from Hugo/Docsy to FsLiveDocs
+
+- **`site/` (Hugo/Docsy) and `scripts/docgen/` are gone.** Replaced by FsLiveDocs 0.3.x, driven by
+  `.livedocs/config.json` (site name, repo URL, nav, project list) and the `docs/` tree, built via
+  `dotnet livedocs audit|build|capture`. CI (`ci.yml`, `release.yml`) and the old
+  `scripts/build-docs-site.sh`/`generate-api-docs.sh`/`populate-hugo-content.sh`/`preview-docs.sh`/
+  `validate-*-docs.sh` are replaced with the equivalent `livedocs` subcommands; nothing hand-rolled
+  remains.
+- **`./docs` reorganised into the task-folder tree** from the (now deleted)
+  `docs-information-architecture.md`: `01-getting-started` … `10-notes`, numeric prefixes stripped
+  from URLs by FsLiveDocs itself. The landing page (`docs/index.md`) routes by symptom per that
+  doc's §4. `Reified.Schema.Contracts.Build` and the no-code `Reified` umbrella package are excluded
+  from the documented-projects list in `.livedocs/config.json` — the umbrella caused FsLiveDocs to
+  attribute every referenced package's entities to it too, and it has no API of its own to document.
+- **Deep reference stays generated, not authored.** No `docs/api/{EntityId}.md` enrichment was added
+  in this pass — the existing hand-written guide pages (constraint, refined values, schema, etc.)
+  already covered the guide/reference split adequately; authored API enrichment is future work, not
+  blocking.
+- **~40% of existing `fsharp` code fences are marked `no-check`** with a shared reason ("not yet
+  re-verified after the FsLiveDocs migration") rather than fixed line-by-line. The old docgen
+  pipeline verified them under different rules (Hugo relref resolution, no per-block fence modes),
+  so most failures were migration artifacts (duplicate `let` bindings once pages became one
+  Page-mode compilation unit, stale cross-links) rather than wrong prose. 192 of 456 blocks are
+  genuinely re-verified; the rest need per-block attention as a follow-up, not a blanket unblock.
+- **Two real FsLiveDocs 0.3.1 bugs were found and one was fixed upstream**, both while getting this
+  migration's `audit`/`build`/`capture` to run for real (not a demo — see `dev-docs/PLAN.md`):
+  - Fixed and shipped as FsLiveDocs 0.3.2 (commit `6322f9b` in the FsLiveDocs repo, not yet
+    published to NuGet as of this entry): `SymbolLister` double-counted every doubly-nested module
+    (`module M = module Advanced = ...`), because `ApiDocModel.EntityInfos` already lists nested
+    entities as their own root-level entries and the old code additionally recursed into
+    `NestedEntities`. Broke `audit`/`build` with `Duplicate documentation block id` for any XML
+    `<example>` on such a member, and inflated the "N unnamed parameter" warning counts. Verified
+    against FsLiveDocs' own test suite and self-dogfooded `audit`/`build`/`capture`.
+  - **Still open, blocks a real `capture` for this repo**: `capture` (not `audit`, not `build`)
+    raises `Release API artifact contains duplicate member ID <Id>` for a type and its same-named
+    companion module — `Reified.Refinements.Interval<'value>` alongside `module Interval`. A single
+    extraction pass is clean by direct inspection (confirmed by instrumenting
+    `SymbolLister.merge`'s output immediately before `ReleaseCapsule.validateApi` runs on the exact
+    same in-memory object, no serialization round-trip); where the second copy comes from was not
+    found. `dotnet livedocs capture --version 0.7.0` for this repo fails until this is fixed
+    upstream or the tool is patched again.
+- **`.config/dotnet-tools.json` pins `FsLiveDocs` 0.3.2**, built and packed locally from the
+  FsLiveDocs checkout at `/home/adam/projects/FsLiveDocs/main` (commit `6322f9b`) — not yet on
+  NuGet. `dotnet tool restore` will fail elsewhere until 0.3.2 is published, or until whoever picks
+  up the open bug ships whatever version fixes it. This repo does not carry a private NuGet feed;
+  a local `--add-source` was used only to install the tool in this working copy.
+
 ## 2026-08-08: Data patterns stay separate from Constraint, and Result gained an accumulating traversal
 
 - **`Data`'s match patterns do not accept `Constraint<'value>`.** They look like a second rule catalogue and are

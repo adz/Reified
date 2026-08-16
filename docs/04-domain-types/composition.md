@@ -1,0 +1,67 @@
+---
+weight: 30
+title: Compose Parse and Refinement
+description: Map parse and check failures into an application error and compose with result {}.
+targetFramework: net8.0
+---
+
+# Compose Parse and Refinement
+
+Parsing and refinement have different failure types because they answer different questions. Define an application
+error that preserves that distinction, then compose with `result { }`.
+
+```fsharp
+open Reified
+open Reified.Refinements
+open Reified.Result
+open Reified.ResultDSL
+
+type QuantityError =
+    | InvalidInteger of ParseError
+    | InvalidQuantity of Violation
+
+let quantity raw =
+    result {
+        let! parsed = Parse.int raw |> Result.mapError InvalidInteger
+        let! quantity = parsed |> Constraint.guard (Constraint.greaterThan 0) |> Result.mapError InvalidQuantity
+        return quantity
+    }
+```
+
+## Compose several values
+
+```fsharp
+type OrderInputError =
+    | InvalidQuantityText of ParseError
+    | InvalidQuantity of Violation
+    | InvalidSku of Violation
+
+let orderLine rawQuantity rawSku =
+    result {
+        let! parsed = Parse.int rawQuantity |> Result.mapError InvalidQuantityText
+        let! quantity = parsed |> Constraint.guard (Constraint.greaterThan 0) |> Result.mapError InvalidQuantity
+        let! sku = Refine.nonBlankString rawSku |> Result.mapError InvalidSku
+        return quantity, sku
+    }
+```
+
+Every bind names the operation and the error translation. The application decides whether two failures share a case or
+remain distinct.
+
+## Reuse a refinement
+
+Application-defined types expose a named refinement value:
+
+```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+let customerId raw =
+    result {
+        let! parsed = Parse.int raw |> Result.mapError InvalidCustomerIdText
+        let! id = Refinement.create CustomerId.refinement parsed |> Result.mapError InvalidCustomerId
+        return id
+    }
+```
+
+Use ordinary functions when additional configuration is required. `Parse.optional`, `Refine.Choice.orElse`, and
+`Refinement.create` all compose through standard `Result` functions.
+
+Continue with [Define Refined Types](/domain-types/domain-values.html).

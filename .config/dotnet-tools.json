@@ -8,6 +8,13 @@
         "fable"
       ],
       "rollForward": false
+    },
+    "fslivedocs": {
+      "version": "0.3.2",
+      "commands": [
+        "livedocs"
+      ],
+      "rollForward": false
     }
   }
 }

@@ -1,0 +1,23 @@
+{
+  "siteName": "Reified",
+  "repoUrl": "https://github.com/adz/Reified",
+  "stylesheet": "/content/reified-docs.css",
+  "navigation": [
+    { "label": "Docs", "href": "/index.html" },
+    { "label": "Reference", "href": "/api.html" },
+    { "label": "Packages", "href": "/notes/packages-and-platforms.html" },
+    { "label": "GitHub", "href": "https://github.com/adz/Reified" }
+  ],
+  "projects": [
+    "src/Reified.Constraint/Reified.Constraint.fsproj",
+    "src/Reified.Data/Reified.Data.fsproj",
+    "src/Reified.Parse/Reified.Parse.fsproj",
+    "src/Reified.Refinements/Reified.Refinements.fsproj",
+    "src/Reified.Result/Reified.Result.fsproj",
+    "src/Reified.Schema.Contracts/Reified.Schema.Contracts.fsproj",
+    "src/Reified.Schema.Http/Reified.Schema.Http.fsproj",
+    "src/Reified.Schema.Json/Reified.Schema.Json.fsproj",
+    "src/Reified.Schema.Testing/Reified.Schema.Testing.fsproj",
+    "src/Reified.Schema/Reified.Schema.fsproj"
+  ]
+}

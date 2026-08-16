@@ -15,6 +15,13 @@ Record-first `[<DeriveSchema>]` generation is now the primary generated path; `.
 form with no planned LSP investment. The schema surface has been through heavy recent churn (direct `Result` returns
 and contracts) and should be treated as settling rather than settled.
 
+Documentation tooling moved from Hugo/Docsy to FsLiveDocs on 2026-08-17 (`dev-docs/decisions/README.md` has the
+full entry). `dotnet livedocs audit` and `build` both pass for the current `./docs` tree. `dotnet livedocs capture
+--version 0.7.0` does not yet succeed — a still-open FsLiveDocs bug (duplicate member ID for a type and its
+same-named companion module, e.g. `Interval`/`module Interval`) blocks it. No 0.7.0 release capsule exists yet as
+a result; cutting one is gated on that bug, the same way earlier work was gated on FsLiveDocs prerequisites
+1–4 landing.
+
 ## Current Direction
 
 Reified describes; it does not run. Effects left with Flow when the repository split, so everything here is a

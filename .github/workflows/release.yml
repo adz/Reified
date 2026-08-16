@@ -26,30 +26,11 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.23'
-
-      - name: Set up Hugo
-        uses: peaceiris/actions-hugo@v3
-        with:
-          hugo-version: 'latest'
-          extended: true
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22.x
-
       - name: Restore local tools
         run: dotnet tool restore
 
       - name: Restore
         run: dotnet restore
-
-      - name: Install PostCSS dependencies
-        run: npm install --prefix site
 
       - name: Build
         run: dotnet build Reified.slnx --configuration Release --no-restore --nologo -v minimal
@@ -73,8 +54,14 @@ jobs:
       - name: Pack libraries
         run: bash scripts/pack.sh -v "${{ steps.version.outputs.package_version }}"
 
+      - name: Audit documentation
+        run: dotnet livedocs audit --warn-as-error
+
       - name: Build docs site
-        run: bash scripts/build-docs-site.sh
+        run: dotnet livedocs build --version "${{ steps.version.outputs.package_version }}"
+
+      - name: Capture release capsule
+        run: dotnet livedocs capture --version "${{ steps.version.outputs.package_version }}" --output "artifacts/Reified-${{ steps.version.outputs.package_version }}-livedocs.zip"
 
       - name: Archive package artifacts
         uses: actions/upload-artifact@v4
@@ -88,6 +75,13 @@ jobs:
         with:
           name: api-docs
           path: output/
+          if-no-files-found: error
+
+      - name: Archive release capsule
+        uses: actions/upload-artifact@v4
+        with:
+          name: livedocs-capsule
+          path: artifacts/*-livedocs.zip
           if-no-files-found: error
 
       - name: Publish GitHub Release
