@@ -20,11 +20,13 @@ form with no planned LSP investment. The schema surface has been through heavy r
 and contracts) and should be treated as settling rather than settled.
 
 Documentation tooling moved from Hugo/Docsy to FsLiveDocs on 2026-08-17 (`dev-docs/decisions/README.md` has the
-full entry). `dotnet livedocs audit` and `build` both pass for the current `./docs` tree. `dotnet livedocs capture
---version 0.7.0` does not yet succeed — a still-open FsLiveDocs bug (duplicate member ID for a type and its
-same-named companion module, e.g. `Interval`/`module Interval`) blocks it. No 0.7.0 release capsule exists yet as
-a result; cutting one is gated on that bug, the same way earlier work was gated on FsLiveDocs prerequisites
-1–4 landing.
+full entry). `dotnet livedocs audit`, `build`, and `capture` all pass for the current `./docs` tree; a real release
+capsule, `artifacts/livedocs/Reified-0.7.0-livedocs.zip`, has been captured and inspected clean (222 entities, 1,497
+members, SHA-256 `a301146e2e02ad002331a5150c4b79f94ef7eb6e3b0fa9b8b8df969c3b2c8870`). Reaching a working `capture`
+took two FsLiveDocs fixes: the doubly-nested-module bug (0.3.2, published to NuGet) and a type-abbreviation member
+collision (`DateRange = Interval<DateTimeOffset>` re-reporting `Interval`'s own members, fixed as 0.3.3 — see
+`dev-docs/decisions/README.md`). `.config/dotnet-tools.json` currently pins the locally-packed 0.3.3 pending its
+NuGet publish.
 
 ## Current Direction
 
