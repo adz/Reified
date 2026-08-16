@@ -24,6 +24,9 @@ Active sketches:
   than one is attached and any of them picks a value. Proposes composing the atoms into one generator, filtering
   finite candidate sets at construction through `Constraint.test`, and reporting unsatisfiable combinations
   rather than sampling from them.
+- `contract-as-wire-projection.md` — undecided answer to the parked `.contract` grammar question: keep it as a
+  generated, fail-closed wire projection of any schema (review/diff artifact, JSON-Schema-like) rather than a
+  second hand-authored declaration surface.
 
 Implemented work and settled decisions do not remain in this folder. Constraint unification and contextual
 constraint localization shipped and are recorded in `dev-docs/decisions/README.md` and `AGENTS.md`; the term

@@ -6,9 +6,13 @@ Speculative sketches live in `dev-docs/current-ideas/`, but this file is the liv
 
 ## Release Strategy
 
-Per `prd.md`: the boundary stack — `Reified.Result`, `Reified.Constraint`, `Reified.Refinements`, and `Reified.Parse` as focused
-packages, plus `Reified.Schema` and `Reified.Schema.Json` — is the 1.0 gate, driven by
-a real adoption target (a ~100-variant versioned config system). The contract-declaration
+The boundary stack — `Reified.Result`, `Reified.Constraint`, `Reified.Refinements`, and `Reified.Parse` as focused
+packages, plus `Reified.Schema` and `Reified.Schema.Json` — is the 1.0 gate. The Acceptance Checks in
+`dev-docs/TASKS.md` are the concrete, checkable form of that gate; there is no separate adoption-target project
+tracked against it. As of 2026-08-14 all eight checks pass, including a docgen xref-rewriting fix
+(`scripts/docgen/Program.fs`) that resolved six broken generated reference links (stale `SchemaCeBuilder`-nested
+slugs, a `Field<'model,'value>` disambiguation-suffix mismatch, and `DateRange` — a type abbreviation with no
+standalone page). The contract-declaration
 thread originally sequenced versioning/migration machinery before the grammar; in practice the grammar and generator
 shipped first (2026-07-12, single-version wire-tier scope), and the versioning/migration engine shipped on 2026-07-13.
 Record-first `[<DeriveSchema>]` generation is now the primary generated path; `.contract` remains a secondary wire-tier
