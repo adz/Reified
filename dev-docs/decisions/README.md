@@ -56,14 +56,15 @@ adapters live in the [Axial repository](https://github.com/adz/Axial) along with
     and `dotnet livedocs inspect` confirms the resulting capsule.
 - **A real 0.7.0 release capsule exists**: `artifacts/livedocs/Reified-0.7.0-livedocs.zip` (222
   entities, 1,497 members, 2,042 documentation nodes, 184 examples; SHA-256
-  `a301146e2e02ad002331a5150c4b79f94ef7eb6e3b0fa9b8b8df969c3b2c8870`), captured and inspected clean
-  once FsLiveDocs 0.3.3 was in place. Not published anywhere — this is local pipeline verification,
-  not a cut GitHub release.
-- **`.config/dotnet-tools.json` pins `FsLiveDocs` 0.3.3**, built and packed locally from the
-  FsLiveDocs checkout at `/home/adam/projects/FsLiveDocs/main` (commit `f6897d4`) — not yet on
-  NuGet (0.3.2 is; 0.3.3 is queued for publish). `dotnet tool restore` will fail elsewhere until
-  0.3.3 is published. This repo does not carry a private NuGet feed; a local `--add-source` was
-  used only to install the tool in this working copy.
+  `d761e028c2e5a39d93906fdd4ac4068c6cdcacaf6b9d9682d3c126aac238e66a`), captured and inspected clean
+  against the **published** FsLiveDocs 0.3.3 (see below). Not published anywhere itself — this is
+  local pipeline verification, not a cut GitHub release.
+- **`.config/dotnet-tools.json` pins `FsLiveDocs` 0.3.3 from NuGet.** Both 0.3.2 and 0.3.3 are
+  published (0.3.3 built by FsLiveDocs' own GitHub CI from commit `f6897d4`). An earlier local pack
+  of 0.3.3 (same version number, different content — different SHA-256 nupkg) was used briefly
+  before the real release landed; it has been discarded from the local NuGet cache so restore
+  always resolves the published package, not a stray local build. `dotnet tool restore` works from
+  a clean checkout with no private feed or `--add-source` needed.
 
 ## 2026-08-08: Data patterns stay separate from Constraint, and Result gained an accumulating traversal
 

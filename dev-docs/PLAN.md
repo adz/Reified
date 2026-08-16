@@ -22,11 +22,17 @@ and contracts) and should be treated as settling rather than settled.
 Documentation tooling moved from Hugo/Docsy to FsLiveDocs on 2026-08-17 (`dev-docs/decisions/README.md` has the
 full entry). `dotnet livedocs audit`, `build`, and `capture` all pass for the current `./docs` tree; a real release
 capsule, `artifacts/livedocs/Reified-0.7.0-livedocs.zip`, has been captured and inspected clean (222 entities, 1,497
-members, SHA-256 `a301146e2e02ad002331a5150c4b79f94ef7eb6e3b0fa9b8b8df969c3b2c8870`). Reaching a working `capture`
-took two FsLiveDocs fixes: the doubly-nested-module bug (0.3.2, published to NuGet) and a type-abbreviation member
-collision (`DateRange = Interval<DateTimeOffset>` re-reporting `Interval`'s own members, fixed as 0.3.3 — see
-`dev-docs/decisions/README.md`). `.config/dotnet-tools.json` currently pins the locally-packed 0.3.3 pending its
-NuGet publish.
+members, SHA-256 `d761e028c2e5a39d93906fdd4ac4068c6cdcacaf6b9d9682d3c126aac238e66a`) against the published FsLiveDocs
+0.3.3. Reaching a working `capture` took two FsLiveDocs fixes: the doubly-nested-module bug (0.3.2) and a
+type-abbreviation member collision (`DateRange = Interval<DateTimeOffset>` re-reporting `Interval`'s own members,
+fixed as 0.3.3 — see `dev-docs/decisions/README.md`). Both versions are on NuGet; `.config/dotnet-tools.json` pins
+0.3.3 with no local pack or private feed involved.
+
+The homepage and header logo were also broken right after the migration: `.livedocs/config.json` had no logo
+configured at all, and the stylesheet was untouched Hugo/Docsy CSS that doesn't match FsLiveDocs' real
+DaisyUI/Tailwind markup, so essentially none of it applied. Fixed 2026-08-17: logo config added, and
+`docs/content/reified-docs.css` rewritten against the actual generated DOM (see Axial's equivalent stylesheet for
+the working pattern this follows) with Reified's own light/dark identity.
 
 ## Current Direction
 
