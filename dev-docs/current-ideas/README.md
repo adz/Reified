@@ -12,8 +12,9 @@ Active sketches:
   under `prototypes/refined-private-record/`.
 - `architecture-guardrails.md` — proposed adopter-facing architecture guidance and a staged tooling direction for
   schema laws, compile-negative proofs, project roles, and compiled-code/public-surface audits.
-- `docs-information-architecture.md` — reorganising `./docs` into task folders, the getting-started and landing
-  page that route by symptom, and the FsLiveDocs changes that reorganisation depends on.
+- `docs-open-questions.md` — two questions left over from the docs information architecture work, now that the
+  reorganisation itself is done: whether `Data` is a Foundation or Schema satellite package, and whether a plain
+  ASP.NET serving path needs its own package.
 - `format-and-json-runtime.md` — one package per representation format, and a
   shared schema-to-codec compiler over platform-specific .NET and Fable JSON runtimes.
 - `database.md` — direction sketch for a typed relational layer: a generated immutable SQL AST, catalog-driven
@@ -31,7 +32,10 @@ rather than deferred as placeholders, so they return only when a real consumer e
 nesting, and proof semantics. Contract generation, versioning, and record-first
 derivation outcomes are recorded in `dev-docs/decisions/README.md`; remaining consumer-gated schema work is in
 `dev-docs/TASKS.md`. Retiring `Reified.ErrorHandling` and promoting Result to a top-level documentation area
-is implemented, and its durable rules are in the decisions summary.
+is implemented, and its durable rules are in the decisions summary. The documentation tooling migration from
+Hugo/Docsy to FsLiveDocs, and the `./docs` reorganisation into task folders it depended on, are both implemented
+and recorded in the decisions summary, including the FsLiveDocs bug found and fixed along the way and the one
+still open.
 
 Flow sketches are not kept here. FlowStream proving, transport packages, and the application gate naming
 proposal moved to the [Axial repository](https://github.com/adz/Axial) with Flow itself.

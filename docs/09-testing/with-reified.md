@@ -1,0 +1,60 @@
+---
+weight: 10
+title: Using Data with Reified
+type: docs
+description: Feeding schemas, boundary parsing, and redisplay-aware error reporting.
+targetFramework: net8.0
+---
+
+# Using Data with the rest of Reified
+
+`Reified.Data` stands alone, but it is also the input half of Reified's schema story: every schema parse
+takes a `Data` value, and every source that can become `Data` can therefore feed a schema.
+
+## Feeding a schema
+
+```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+open Reified
+open Reified.DataDSL
+
+let input =
+    data [
+        "email" => "ada@example.com"
+        "age" => 42
+    ]
+
+let parsed = Schema.parse signupSchema input
+```
+
+One schema serves every source: `Data.ofJsonDocument` for a request body, `Data.ofNameValues` for a
+form post, `Data.ofCliArgs` for a command line, `Data.ofConfiguration` for settings. The schema never
+learns which one it was.
+
+What each adapter hands over is not identical, though, because the sources are not. JSON carries typed
+Booleans and numbers, while form, CLI, and configuration leaves are all text that the schema still has
+to parse. Repeated names build a list in `ofNameValues` but overwrite in `ofConfiguration`, where lists
+come from indexed key segments instead. CLI flags arrive as the text `"true"` or `"false"`. So the same
+schema will accept input from any of them, but two sources have to agree on the resulting tree, not just
+on the logical content — see
+[the adapter rules](/testing/converting-data.html) for what each one produces.
+
+This is also why the builder syntax matters in tests: a fixture written with `data [ ... ]` exercises
+the identical parse path as production JSON, with no serializer in the loop.
+
+## Redisplay and error reporting
+
+`Schema.parseRetainingInput` keeps the original `Data` alongside the parse result, so a failed form
+round-trip can re-show exactly what the user typed next to each field error. The paths in schema
+diagnostics (`address.city`, `lines[2].quantity`) address back into the input tree —
+`Data.redisplayPath` (string form) or `Data.redisplayAt` (`DataPath` form) recovers the raw fragment
+at any of them.
+
+See [redisplay and field errors](/modelling/redisplay-and-field-errors.html) for the full
+pattern.
+
+## Boundary adapters
+
+The HTTP server packages (`Reified.Schema.Http` and its host adapters) build `Data` from request
+surfaces — route values, query strings, headers, JSON bodies — before any schema is involved. Writing
+your own adapter for a new source means producing `Data`, nothing more; every schema and interpreter
+downstream works unchanged.
