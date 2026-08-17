@@ -38,7 +38,8 @@ repository tooling and are never packed.
 ## Preparing a release
 
 1. Update the shared `<Version>` in `Directory.Build.props`.
-2. Update `RELEASE_NOTES.md`.
+2. Update `RELEASE_NOTES.md`, `NEXT_VERSION`, and add `dev-docs/releases/<version>.md` with that version's notes.
+   `scripts/check-release-notes.sh` fails the release build if the notes file for `NEXT_VERSION` is missing.
 3. Run the local verification commands:
 
 ```bash
@@ -76,10 +77,11 @@ For a tag build:
 - it builds `Reified.slnx`
 - it tests `Reified.slnx` (every package-scoped test project)
 - it derives the package version from the tag by stripping the leading `v`
+- it runs `bash scripts/check-release-notes.sh <version>`, which fails if `dev-docs/releases/<version>.md` is missing
 - it runs `bash scripts/pack.sh -v <version>`
 - it builds the docs site
 - it uploads package and docs artifacts
-- it creates a GitHub Release with `.nupkg` and `.snupkg` files attached
+- it creates a GitHub Release with `.nupkg` and `.snupkg` files attached, using `dev-docs/releases/<version>.md` as the release body
 - it runs a separate `publish-nuget` job that publishes the package artifacts to nuget.org
 
 For manual `workflow_dispatch`, the workflow currently uses `0.7.0` as the fallback package version. Change that fallback before using manual dispatch for a different version.
