@@ -30,7 +30,7 @@ Source:
 
 Source code:
 
-```fsharp
+```fsharp no-check reason="Mirrors a whole source file's top-of-file module form, which cannot follow the site's F# prelude opens; not independently checkable."
 module RefinedCatalogExample
 
 open Reified

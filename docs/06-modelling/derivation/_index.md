@@ -13,7 +13,7 @@ targetFramework: net8.0
 build reads ordinary F# source, infers a schema from each marked record, and generates normal constructor-last Schema
 DSL code before F# compilation.
 
-```fsharp
+```fsharp no-check reason="Declares its own namespace as the first thing in the file, which cannot follow the site's F# prelude opens; not independently checkable."
 namespace MyApp.Wire
 
 open Reified.DerivedSchema

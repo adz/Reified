@@ -10,7 +10,7 @@ module Data =
         DataField.Create(name, toPattern value, false)
 
     /// <summary>Associates an object field name with <c>Some</c> value, or omits <c>None</c>.</summary>
-    /// <example><code>Data.optionalAssoc "nickname" None // an omitted DataField</code></example>
+    /// <example><code>Data.optionalAssoc "nickname" (None: string option) // an omitted DataField</code></example>
     let inline optionalAssoc (name: string) (value: ^value option) : DataField =
         ensureNonEmptyText (nameof name) name |> ignore
         match value with
@@ -332,7 +332,9 @@ module DataDSL =
         { Name = name; Variations = variations }
 
     /// <summary>Materializes a deterministic Cartesian matrix, limited to 256 cases.</summary>
-    /// <example><code>matrix [ dimension "status" [ variant "active" []; variant "inactive" [ replace "active" false ] ] ] baseline
+    /// <example><code>open Reified.DataDSL
+    /// let baseline = data [ "active" => true ]
+    /// matrix [ dimension "status" [ variant "active" []; variant "inactive" [ replace "active" false ] ] ] baseline
     /// // cases named "status: active" and "status: inactive"</code></example>
     let matrix dimensions baseline =
         if isNull (box dimensions) then nullArg (nameof dimensions)
@@ -363,7 +365,9 @@ module DataDSL =
     let inline private patterns values = values |> List.map toPattern
 
     /// <summary>Matches expected items as an unordered consumed subset.</summary>
-    /// <example><code>Data.tryMatch [ at "items" (containingItems [ "Ada"; "Grace" ]) ] actual
+    /// <example><code>open Reified.DataDSL
+    /// let actual = data [ "items" => [ "Ada"; "Grace"; "Mallory" ] ]
+    /// Data.tryMatch [ at "items" (containingItems [ "Ada"; "Grace" ]) ] actual
     /// // Ok () when both values occur, in either order</code></example>
     let inline containingItems values = DataPattern.CreateListContaining(patterns values)
 
@@ -405,7 +409,9 @@ module DataDSL =
         DataExpectation(DataPath.parse path, None, path)
 
     /// <summary>Checks expectations or raises <c>DataMatchException</c>.</summary>
-    /// <example><code>matching [ at "user.name" "Ada"; absent "error" ] actual
+    /// <example><code>open Reified.DataDSL
+    /// let actual = data [ "user" => data [ "name" => "Ada" ] ]
+    /// matching [ at "user.name" "Ada"; absent "error" ] actual
     /// // returns unit when both expectations hold; otherwise raises DataMatchException</code></example>
     let matching expectations actual =
         match Data.tryMatch expectations actual with

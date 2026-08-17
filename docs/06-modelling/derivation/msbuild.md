@@ -49,7 +49,7 @@ By default output is written below `obj/`, so it should not be committed.
 
 `Wire.fs` must use a namespace and place marked records at namespace level:
 
-```fsharp
+```fsharp no-check reason="Declares its own namespace as the first thing in the file, which cannot follow the site's F# prelude opens; not independently checkable."
 namespace MyApp.Wire
 
 open Reified.DerivedSchema

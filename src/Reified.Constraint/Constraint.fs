@@ -99,12 +99,14 @@ module Constraint =
         constraint'.CheckValue value
 
     /// <summary>Runs a constraint and returns the unchanged value after success.</summary>
-    /// <example><code>value |> Constraint.guard requiredName |> Result.mapError NameRejected</code></example>
+    /// <example><code>let requiredName : Constraint&lt;string&gt; = Constraint.present
+    /// "Alice" |> Constraint.guard requiredName |> Result.mapError Violation.render</code></example>
     let guard (constraint': Constraint<'value>) (value: 'value) : Result<'value, Violation> =
         check constraint' value |> Result.map (fun () -> value)
 
     /// <summary>Returns the constraint's inspectable description.</summary>
-    /// <example><code>(Constraint.inspect requiredName).Expression</code></example>
+    /// <example><code>let requiredName : Constraint&lt;string&gt; = Constraint.present
+    /// (Constraint.inspect requiredName).Expression</code></example>
     let inspect (constraint': Constraint<'value>) : ConstraintDescription =
         ensureConstraint (nameof constraint') constraint'
         constraint'.DescriptionValue
@@ -220,7 +222,7 @@ module Constraint =
     /// arbitrary host-language closure has no logical meaning to translate. No authored code or argument may claim
     /// inspectable logic.
     /// </remarks>
-    /// <example><code>Constraint.custom "must be a valid ISBN" isValidIsbn</code></example>
+    /// <example><code>let isValidIsbn (isbn: string) = isbn.Length = 13 in Constraint.custom "must be a valid ISBN" isValidIsbn</code></example>
     let custom (description: string) (predicate: 'value -> bool) : Constraint<'value> =
         ensureProse (nameof description) description
         ensureFunction (nameof predicate) predicate
@@ -246,7 +248,8 @@ module Constraint =
     /// here; only an author who has a catalogue can name an entry in it.
     /// </para>
     /// </remarks>
-    /// <example><code>Constraint.customLocalized
+    /// <example><code>let isValidIsbn (isbn: string) = isbn.Length = 13
+    /// in Constraint.customLocalized
     ///     "books.isbn.invalid"
     ///     "must be a valid ISBN"
     ///     isValidIsbn</code></example>
@@ -284,7 +287,8 @@ module Constraint =
     /// translator has to supply.
     /// </para>
     /// </remarks>
-    /// <example><code>Constraint.customLocalizedWith
+    /// <example><code>let isValidIsbn (isbn: string) = isbn.Length = 13
+    /// in Constraint.customLocalizedWith
     ///     "books.isbn.invalid"
     ///     "must be a valid ISBN"
     ///     (Map.ofList [ "expectedLength", ConstraintValue.Integer 13L ])
@@ -321,7 +325,7 @@ module Constraint =
     /// The callback's shape is exactly <c>Constraint.check</c> applied to a constraint, so the usual way to
     /// supply a structured reason is to reuse a built-in rather than build a violation by hand.
     /// </remarks>
-    /// <example><code>Constraint.customWith "must be a supported currency" (Constraint.check (Constraint.oneOf supported))</code></example>
+    /// <example><code>let supported = [ "USD"; "EUR" ] in Constraint.customWith "must be a supported currency" (Constraint.check (Constraint.oneOf supported))</code></example>
     let customWith (description: string) (check: 'value -> Result<unit, Violation>) : Constraint<'value> =
         ensureProse (nameof description) description
         ensureFunction (nameof check) check

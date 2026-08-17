@@ -1081,6 +1081,18 @@ module rec Json =
     /// <exception cref="T:System.ArgumentException">Thrown when <paramref name="schema" /> is incomplete.</exception>
     /// <example>
     /// <code>
+    /// open Reified.SchemaDSL
+    /// open Reified.ConstraintDSL
+    ///
+    /// type Customer = { Name: string; Email: string }
+    /// let customerSchema =
+    ///     schema&lt;Customer&gt; {
+    ///         field _.Name { constrain present }
+    ///         field _.Email { constraints [ present; email ] }
+    ///         construct (fun name email -> { Name = name; Email = email })
+    ///     }
+    /// let customer = { Name = "Ada"; Email = "ada@example.org" }
+    ///
     /// let codec = Json.compile customerSchema
     /// let json = Json.serialize codec customer
     /// let roundTripped = Json.deserialize codec json

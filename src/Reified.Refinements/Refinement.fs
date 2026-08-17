@@ -34,8 +34,9 @@ module Refinement =
     /// when the rule is an arbitrary predicate. Both produce an ordinary constraint, so there is no separate
     /// plural or check-taking constructor.
     /// </remarks>
-    /// <example><code>let retryCount =
-    ///     Refinement.define (Constraint.between 0 10) RetryCount _.Value</code></example>
+    /// <example><code>type RetryCount = RetryCount of int
+    /// let retryCount =
+    ///     Refinement.define (Constraint.between 0 10) RetryCount (fun (RetryCount value) -> value)</code></example>
     let define
         (constraint': Constraint<'underlying>)
         (construct: 'underlying -> 'refined)
@@ -47,7 +48,9 @@ module Refinement =
         Refinement(constraint', construct, project)
 
     /// <summary>Constructs a refined value, reporting why the raw value was not admitted.</summary>
-    /// <example><code>value |> Refinement.create retryCount |> Result.mapError InvalidRetryCount</code></example>
+    /// <example><code>type RetryCount = RetryCount of int
+    /// let retryCount = Refinement.define (Constraint.between 0 10) RetryCount (fun (RetryCount value) -> value)
+    /// 3 |> Refinement.create retryCount |> Result.mapError Violation.render</code></example>
     let create (refinement: Refinement<'underlying, 'refined>) (underlying: 'underlying) : Result<'refined, Violation> =
         if isNull (box refinement) then nullArg (nameof refinement)
 
@@ -55,13 +58,17 @@ module Refinement =
         |> Result.map (fun () -> refinement.Construct underlying)
 
     /// <summary>Returns the canonical underlying representation of a refined value.</summary>
-    /// <example><code>RetryCount 3 |> Refinement.underlying retryCount // 3</code></example>
+    /// <example><code>type RetryCount = RetryCount of int
+    /// let retryCount = Refinement.define (Constraint.between 0 10) RetryCount (fun (RetryCount value) -> value)
+    /// RetryCount 3 |> Refinement.underlying retryCount // 3</code></example>
     let underlying (refinement: Refinement<'underlying, 'refined>) (value: 'refined) =
         if isNull (box refinement) then nullArg (nameof refinement)
         refinement.Project value
 
     /// <summary>Returns the constraint the refinement admits by.</summary>
-    /// <example><code>retryCount |> Refinement.constraint' |> Constraint.inspect</code></example>
+    /// <example><code>type RetryCount = RetryCount of int
+    /// let retryCount = Refinement.define (Constraint.between 0 10) RetryCount (fun (RetryCount value) -> value)
+    /// retryCount |> Refinement.constraint' |> Constraint.inspect</code></example>
     let constraint' (refinement: Refinement<'underlying, 'refined>) =
         if isNull (box refinement) then nullArg (nameof refinement)
         refinement.Constraint

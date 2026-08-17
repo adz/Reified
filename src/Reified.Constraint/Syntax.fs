@@ -21,7 +21,7 @@ namespace Reified
 /// <c>Result</c> operations. They let a constraint pipeline retain its input and finish with the application's
 /// error type without adding an Reified.Result dependency.
 /// </para>
-/// <code>
+/// <code data-livedocs="no-check" reason="Illustrates the DSL against a consumer's own error type, which this snippet does not declare.">
 /// module SignupRules =
 ///     open Reified.ConstraintDSL
 ///

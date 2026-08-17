@@ -125,7 +125,8 @@ type field<'model, 'target> internal (name: string, getter: 'model -> 'target) =
     member internal _.Getter = getter
 
     /// <summary>Declares a field, deriving its camel-cased wire name from the property getter.</summary>
-    /// <example><code>field _.Email  // wire name "email"</code></example>
+    /// <example><code>type Signup = { Email: string }
+    /// field (fun (s: Signup) -> s.Email)  // wire name "email"</code></example>
 #if FABLE_COMPILER
     // Fable does not implement Expr.WithValue, so it takes the plain attribute and recompiles the getter.
     new([<ReflectedDefinition>] getter: Expr<'model -> 'target>) =
@@ -280,7 +281,12 @@ type field<'model, 'target> internal (name: string, getter: 'model -> 'target) =
         FieldWorking(source.Initial, source.Schema |> SchemaCore.constrain constraint')
 
     /// <summary>Requires this field's boundary input to be supplied.</summary>
-    /// <example><code>field _.Name { mustSupply }</code></example>
+    /// <example><code>open Reified.SchemaDSL
+    /// type Signup = { Name: string }
+    /// schema&lt;Signup&gt; {
+    ///     field _.Name { mustSupply }
+    ///     construct (fun name -> { Name = name })
+    /// }</code></example>
     [<CustomOperation("mustSupply")>]
     member _.MustSupply(initial: FieldInitial<'model, 'target>) : FieldConfigured<'model, 'target> =
         FieldConfigured(initial, ValueSchema.mustSupply)
@@ -296,7 +302,12 @@ type field<'model, 'target> internal (name: string, getter: 'model -> 'target) =
         FieldWorking(source.Initial, source.Schema |> ValueSchema.mustSupply)
 
     /// <summary>Allows this option-typed field's boundary input to be omitted.</summary>
-    /// <example><code>field _.Nickname { mayOmit }</code></example>
+    /// <example><code>open Reified.SchemaDSL
+    /// type Signup = { Nickname: string option }
+    /// schema&lt;Signup&gt; {
+    ///     field _.Nickname { mayOmit }
+    ///     construct (fun nickname -> { Nickname = nickname })
+    /// }</code></example>
     [<CustomOperation("mayOmit")>]
     member _.MayOmit(source: FieldWorking<'model, 'target, 'current option>) : FieldWorking<'model, 'target, 'current option> =
         FieldWorking(source.Initial, source.Schema |> ValueSchema.mayOmit)
@@ -678,7 +689,8 @@ module SchemaDSL =
     /// is not the camelCased property name, or when the code must also compile under Fable, which cannot run the
     /// quotation the derived form reads. Explicit names are never transformed.
     /// </remarks>
-    /// <example><code>fieldAs "email_address" _.Email</code></example>
+    /// <example><code>type Signup = { Email: string }
+    /// fieldAs "email_address" (fun (s: Signup) -> s.Email)</code></example>
     let fieldAs (name: string) (getter: 'model -> 'value) =
         if isNull name then nullArg (nameof name)
         if isNull (box getter) then nullArg (nameof getter)

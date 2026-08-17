@@ -121,11 +121,11 @@ module MessageDescriptor =
     /// This is identity, not a lookup key. The encoded contextual resource keys a lookup receives come from
     /// <c>Renderer.Advanced.lookupCandidates</c>.
     /// </remarks>
-    /// <example><code>MessageDescriptor.key descriptor // "books.isbn.invalid"</code></example>
+    /// <example><code>let descriptor = MessageDescriptor.Advanced.create "books.isbn.invalid" Map.empty in MessageDescriptor.key descriptor // "books.isbn.invalid"</code></example>
     let key (descriptor: MessageDescriptor) = descriptor.Segments |> String.concat "."
 
     /// <summary>The operands the message interpolates, named for the template.</summary>
-    /// <example><code>MessageDescriptor.arguments descriptor |> Map.tryFind "expectedLength"</code></example>
+    /// <example><code>let descriptor = MessageDescriptor.Advanced.create "books.isbn.invalid" Map.empty in MessageDescriptor.arguments descriptor |> Map.tryFind "expectedLength"</code></example>
     let arguments (descriptor: MessageDescriptor) = descriptor.Values
 
     /// <summary>The parsed, unencoded key segments.</summary>
@@ -209,7 +209,7 @@ module MessageFormatSpec =
     [<RequireQualifiedAccess>]
     module Advanced =
         /// <summary>Builds a specification, returning the validation failure rather than raising.</summary>
-        /// <example><code>MessageFormatSpec.Advanced.tryCreate "must be present" None descriptor</code></example>
+        /// <example><code>let descriptor = MessageDescriptor.Advanced.create "constraint.presence.present" Map.empty in MessageFormatSpec.Advanced.tryCreate "must be present" None descriptor</code></example>
         let tryCreate
             (fallback: string)
             (pluralArgument: string option)
@@ -219,7 +219,7 @@ module MessageFormatSpec =
             |> Result.map (fun () -> ofParts fallback pluralArgument descriptor)
 
         /// <summary>Builds a specification, raising when the plural operand names no argument.</summary>
-        /// <example><code>MessageFormatSpec.Advanced.create "must be at least {expected}" None descriptor</code></example>
+        /// <example><code>let descriptor = MessageDescriptor.Advanced.create "constraint.relation.atLeast" Map.empty in MessageFormatSpec.Advanced.create "must be at least {expected}" None descriptor</code></example>
         let create (fallback: string) (pluralArgument: string option) (descriptor: MessageDescriptor) : MessageFormatSpec =
             match tryCreate fallback pluralArgument descriptor with
             | Ok spec -> spec

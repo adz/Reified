@@ -178,7 +178,7 @@ module ConstraintValue =
     /// cannot recover a <c>Guid</c> or <c>TimeSpan</c> on Fable; this resolves the overload while the type is
     /// still known, so the same constraint describes itself identically on every platform.
     /// </remarks>
-    /// <example><code>ConstraintValue.ofOperand instant // Some (ConstraintValue.DateTimeOffset instant)</code></example>
+    /// <example><code>let instant = System.DateTimeOffset.UtcNow in ConstraintValue.ofOperand instant // Some (ConstraintValue.DateTimeOffset instant)</code></example>
     let inline ofOperand (value: 'value) : ConstraintValue option =
         // `typeof<'value>` is baked in at the call site, where the type is still concrete. A boxed type test
         // cannot do this: Fable erases a Guid to a plain string and a TimeSpan to a number, so `:? Guid` there

@@ -499,7 +499,8 @@ module Renderer =
 
     /// <summary>A renderer backed by any key-to-template lookup.</summary>
     /// <remarks>The portable constructor, and the one Fable applications use.</remarks>
-    /// <example><code>let renderer = Renderer.ofLookup translations.TryFind</code></example>
+    /// <example><code>let translations : Map&lt;string, string&gt; = Map.empty
+    /// let renderer = Renderer.ofLookup translations.TryFind</code></example>
     let ofLookup (lookup: MessageLookup) : Renderer =
         if isNull (box lookup) then
             nullArg (nameof lookup)
@@ -549,7 +550,7 @@ module Renderer =
 
     /// <summary>A renderer backed by a .NET resource manager, using one culture for everything.</summary>
     /// <remarks>The culture drives resource lookup, ordinary plural selection, and number and date formatting.</remarks>
-    /// <example><code>let renderer = Renderer.ofResourceManager resources (CultureInfo "fr-FR")</code></example>
+    /// <example><code>let resources : Resources.ResourceManager = Unchecked.defaultof&lt;_&gt; in let renderer = Renderer.ofResourceManager resources (Globalization.CultureInfo "fr-FR")</code></example>
     let ofResourceManager (resources: Resources.ResourceManager) (culture: Globalization.CultureInfo) : Renderer =
         if isNull culture then nullArg (nameof culture)
         ofCultureFunctions resources (fun () -> culture) (fun () -> culture)
@@ -559,7 +560,7 @@ module Renderer =
     /// The split a UI needs when the interface language and the reader's number and date conventions differ —
     /// English text with German decimal separators, for instance.
     /// </remarks>
-    /// <example><code>Renderer.ofResourceManagerWithCultures resources (CultureInfo "en") (CultureInfo "de-DE")</code></example>
+    /// <example><code>let resources : Resources.ResourceManager = Unchecked.defaultof&lt;_&gt; in Renderer.ofResourceManagerWithCultures resources (Globalization.CultureInfo "en") (Globalization.CultureInfo "de-DE")</code></example>
     let ofResourceManagerWithCultures
         (resources: Resources.ResourceManager)
         (uiCulture: Globalization.CultureInfo)
@@ -575,7 +576,7 @@ module Renderer =
     /// formatting. Both are read per render, so one renderer registered as a singleton follows a per-request
     /// culture. This is the one place ambient culture enters Reified: constraint execution stays effect-free.
     /// </remarks>
-    /// <example><code>let renderer = Renderer.ofCurrentCulture resources</code></example>
+    /// <example><code>let resources : Resources.ResourceManager = Unchecked.defaultof&lt;_&gt; in let renderer = Renderer.ofCurrentCulture resources</code></example>
     let ofCurrentCulture (resources: Resources.ResourceManager) : Renderer =
         ofCultureFunctions
             resources
@@ -750,7 +751,7 @@ module Renderer =
                   PluralArgument = MessageFormatSpec.pluralArgument spec })
 
         /// <summary>Every encoded attribute-noun key, most specific first.</summary>
-        /// <example><code>Renderer.Advanced.attributeCandidates renderer // [ "attribute.signup.postcode"; "attribute.postcode" ]</code></example>
+        /// <example><code>let renderer = Renderer.ofLookup (fun _ -> None) in Renderer.Advanced.attributeCandidates renderer // [ "attribute.signup.postcode"; "attribute.postcode" ]</code></example>
         let attributeCandidates (renderer: Renderer) : string list =
             if isNull renderer then nullArg (nameof renderer)
             attributeKeys renderer

@@ -71,7 +71,8 @@ module SchemaCheck =
     /// Thrown when the check's value type does not match the schema's underlying primitive kind.
     /// </exception>
     /// <example>
-    /// <code>let checkEmail = SchemaCheck.fromUnderlying Constraint.email emailSchema</code>
+    /// <code>let emailSchema = Schema.text |> Schema.constrain Constraint.email
+    /// let checkEmail = SchemaCheck.fromUnderlying Constraint.email emailSchema</code>
     /// </example>
     let fromUnderlying (constraint': Constraint<'primitive>) (schema: Schema<'value>) : 'value -> Result<unit, Violation> =
         if isNull constraint' then
@@ -111,7 +112,8 @@ module SchemaCheck =
     /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="schema" /> is null.</exception>
     /// <exception cref="T:System.ArgumentException">Thrown when <paramref name="schema" /> is not a value schema.</exception>
     /// <example>
-    /// <code>let checkName = SchemaCheck.complete constrainedNameSchema</code>
+    /// <code>let constrainedNameSchema = Schema.text |> Schema.constrain Constraint.present
+    /// let checkName = SchemaCheck.complete constrainedNameSchema</code>
     /// </example>
     let complete (schema: Schema<'value>) : 'value -> Result<unit, Violation> =
         if isNull (box schema) then nullArg (nameof schema)
@@ -125,7 +127,8 @@ module SchemaCheck =
     /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="schema" /> is null.</exception>
     /// <exception cref="T:System.ArgumentException">Thrown when the schema's underlying primitive kind is not text.</exception>
     /// <example>
-    /// <code>let checkEmail = SchemaCheck.text emailSchema</code>
+    /// <code>let emailSchema = Schema.text |> Schema.constrain Constraint.email
+    /// let checkEmail = SchemaCheck.text emailSchema</code>
     /// </example>
     let text (schema: Schema<'value>) : 'value -> Result<unit, Violation> =
         SchemaCore.inspectUnderlying<'value, string> schema |> ignore

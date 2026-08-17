@@ -624,6 +624,17 @@ module JsonSchema =
     /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="schema" /> is null.</exception>
     /// <example>
     /// <code>
+    /// open Reified.SchemaDSL
+    /// open Reified.ConstraintDSL
+    ///
+    /// type Customer = { Name: string; Email: string }
+    /// let customerSchema =
+    ///     schema&lt;Customer&gt; {
+    ///         field _.Name { constrain present }
+    ///         field _.Email { constraints [ present; email ] }
+    ///         construct (fun name email -> { Name = name; Email = email })
+    ///     }
+    ///
     /// let document = JsonSchema.generate customerSchema
     /// // {"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","properties":{...},"required":[...]}
     /// </code>

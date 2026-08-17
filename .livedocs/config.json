@@ -13,6 +13,7 @@
     { "label": "Packages", "href": "notes/packages-and-platforms.html" },
     { "label": "GitHub", "href": "https://github.com/adz/Reified" }
   ],
+  "fSharpPrelude": "open Reified\nopen Reified.Refinements\nopen Reified.Result\nopen Reified.Schema.Json",
   "projects": [
     "src/Reified.Constraint/Reified.Constraint.fsproj",
     "src/Reified.Data/Reified.Data.fsproj",

@@ -240,7 +240,7 @@ module ConstraintAtom =
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module UnsupportedOperation =
     /// <summary>The stable message key for an unsupported operation.</summary>
-    /// <example><code>UnsupportedOperation.key (Relation AtLeast)
+    /// <example><code>UnsupportedOperation.key (UnsupportedOperation.Relation AtLeast)
     /// // "constraint.unsupportedOperand.relation.atLeast"</code></example>
     let key (operation: UnsupportedOperation) : string =
         let prefix = "constraint.unsupportedOperand."
