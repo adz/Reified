@@ -215,21 +215,25 @@ body:has(.reified-landing) #search-ui {
     line-height: 1.65;
 }
 
+/*
+ * The rendered code block (.livedocs-code > pre.code-frame) already draws its own card:
+ * background, border-radius, and negative margins that bleed it to the edge of whatever
+ * prose container it sits in. Wrapping it in a second bordered/padded card here produced
+ * a box-in-a-box with a mismatched gap between them. This wrapper is now just a width
+ * constraint; the code frame supplies the only visible border and background.
+ */
 .docs-home-example {
     max-width: 60rem;
     margin: 0 auto 1.5rem;
-    padding: 1.1rem 1.3rem;
-    border: 1px solid var(--reified-border);
-    border-radius: var(--reified-radius);
-    background: var(--reified-surface);
     text-align: left;
 }
 
-.docs-home-example pre {
-    margin: 0;
-    overflow-x: auto;
-    border: 0;
-    background: transparent;
+.docs-home-example .livedocs-code {
+    margin: 0 !important;
+}
+
+.docs-home-example .code-frame {
+    border: 1px solid var(--reified-border) !important;
 }
 
 .docs-home-example code {
