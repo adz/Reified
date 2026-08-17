@@ -78,13 +78,15 @@ For a tag build:
 - it tests `Reified.slnx` (every package-scoped test project)
 - it derives the package version from the tag by stripping the leading `v`
 - it runs `bash scripts/check-release-notes.sh <version>`, which fails if `dev-docs/releases/<version>.md` is missing
-- it runs `bash scripts/pack.sh -v <version>`
-- it builds the docs site
+- it runs `dotnet livedocs audit --warn-as-error`, builds the docs site, and captures the release capsule
+- it runs `bash scripts/pack.sh -v <version>` **after** the docs steps — `dotnet pack` rebuilds each project fresh for the
+  tagged version, and running it before the docs steps corrupted FsLiveDocs' assembly loading (surfaced as every doc page
+  failing to resolve `Reified.*` types); the docs pipeline must run against the plain `dotnet build` output
 - it uploads package and docs artifacts
 - it creates a GitHub Release with `.nupkg` and `.snupkg` files attached, using `dev-docs/releases/<version>.md` as the release body
 - it runs a separate `publish-nuget` job that publishes the package artifacts to nuget.org
 
-For manual `workflow_dispatch`, the workflow currently uses `0.7.0` as the fallback package version. Change that fallback before using manual dispatch for a different version.
+For manual `workflow_dispatch`, the workflow uses `0.0.0-rcDev` as the fallback package version.
 
 ## NuGet publishing
 
