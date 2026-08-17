@@ -8,6 +8,8 @@
 Declare value and model invariants once. Derive validation, parsing, diagnostics, codecs, contracts, and test data from the same declarations.
 
 [![ci](https://github.com/adz/Reified/actions/workflows/ci.yml/badge.svg)](https://github.com/adz/Reified/actions/workflows/ci.yml)
+[![release](https://github.com/adz/Reified/actions/workflows/release.yml/badge.svg)](https://github.com/adz/Reified/actions/workflows/release.yml)
+[![NuGet](https://img.shields.io/nuget/v/Reified.svg)](https://www.nuget.org/packages/Reified)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 > [!WARNING]
