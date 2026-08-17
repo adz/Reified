@@ -1,0 +1,68 @@
+name: Pages
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - .github/workflows/pages.yml
+      - .livedocs/**
+      - docs/**
+      - src/**
+      - Directory.Build.props
+      - Reified.slnx
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore local tools
+        run: dotnet tool restore
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build docs site
+        run: dotnet livedocs build
+
+      - name: Prepare Pages artifact
+        run: touch output/.nojekyll
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: output
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
