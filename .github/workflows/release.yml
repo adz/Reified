@@ -55,13 +55,8 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         run: bash scripts/check-release-notes.sh "${{ steps.version.outputs.package_version }}"
 
-      - name: Report runner resources
-        run: |
-          nproc
-          free -h
-
       - name: Audit documentation
-        run: dotnet livedocs audit --warn-as-error --verbosity debug --interactive false
+        run: dotnet livedocs audit --warn-as-error
 
       - name: Build docs site
         run: dotnet livedocs build --version "${{ steps.version.outputs.package_version }}"
