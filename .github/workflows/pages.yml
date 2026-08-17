@@ -44,6 +44,9 @@ jobs:
       - name: Restore
         run: dotnet restore
 
+      - name: Build
+        run: dotnet build Reified.slnx --configuration Release --no-restore --nologo -v minimal
+
       - name: Build docs site
         run: dotnet livedocs build
 

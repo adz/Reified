@@ -132,6 +132,9 @@ jobs:
       - name: Restore .NET
         run: dotnet restore
 
+      - name: Build
+        run: dotnet build Reified.slnx --configuration Release --no-restore --nologo -v minimal
+
       - name: Audit documentation (examples, modes, compilation, links)
         run: dotnet livedocs audit --warn-as-error
 
