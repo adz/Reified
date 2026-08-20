@@ -26,9 +26,9 @@ type BadgeError =
 /// A badge name must print on one line: 3 to 40 characters.
 let validateBadgeName (name: string) : Result<string, BadgeError> =
     name
-    |> guard (minLength 3)
+    |> Constraint.guard (minLength 3)
     |> orError NameTooShort
-    |> Result.bind (guard (maxLength 40) >> orError NameTooLong)
+    |> Result.bind (Constraint.guard (maxLength 40) >> orError NameTooLong)
 
 // ---------------------------------------------------------------------------
 // 2. result {}: fail-fast sequencing of dependent steps.
@@ -54,7 +54,10 @@ let parseTicketRequest (rawTier: string) (rawQuantity: string) : Result<Tier * i
     result {
         let! tier = parseTier rawTier
         let! quantity = Parse.int rawQuantity |> orError (QuantityNotANumber rawQuantity)
-        do! (quantity >= 1 && quantity <= 6) |> Result.requireTrue (QuantityOutOfRange quantity)
+        do!
+            (quantity >= 1 && quantity <= 6)
+            |> Result.require
+            |> Result.orError (QuantityOutOfRange quantity)
         return tier, quantity
     }
 

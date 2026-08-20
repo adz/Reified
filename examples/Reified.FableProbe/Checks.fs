@@ -136,32 +136,32 @@ module Checks =
         let reserved: Constraint<string> = Constraint.noneOf [ "admin"; "root" ]
         let excluded: Constraint<string list> = Constraint.notContains "internal"
 
-        [ Constraint.test name "Ada"
-          not (Constraint.test name " ")
-          Constraint.test tags [ "a"; "b" ]
-          not (Constraint.test tags [ "a"; "a" ])
-          Constraint.test nickname None
-          Constraint.test nickname (Some "Ada")
-          not (Constraint.test nickname (Some "A"))
-          Constraint.test (Constraint.blank: Constraint<int voption>) ValueNone
-          Constraint.test (Constraint.present: Constraint<int voption>) (ValueSome 1)
-          Constraint.test ttl -1
-          Constraint.test ttl 5
-          not (Constraint.test ttl 0)
+        [ Constraint.satisfies name "Ada"
+          not (Constraint.satisfies name " ")
+          Constraint.satisfies tags [ "a"; "b" ]
+          not (Constraint.satisfies tags [ "a"; "a" ])
+          Constraint.satisfies nickname None
+          Constraint.satisfies nickname (Some "Ada")
+          not (Constraint.satisfies nickname (Some "A"))
+          Constraint.satisfies (Constraint.blank: Constraint<int voption>) ValueNone
+          Constraint.satisfies (Constraint.present: Constraint<int voption>) (ValueSome 1)
+          Constraint.satisfies ttl -1
+          Constraint.satisfies ttl 5
+          not (Constraint.satisfies ttl 0)
           // One code point, two UTF-16 units: JavaScript and .NET must agree.
-          Constraint.test emoji "\U0001F600"
-          Constraint.test Constraint.numeric "345"
-          not (Constraint.test Constraint.numeric "\u0663\u0664\u0665")
+          Constraint.satisfies emoji "\U0001F600"
+          Constraint.satisfies Constraint.numeric "345"
+          not (Constraint.satisfies Constraint.numeric "\u0663\u0664\u0665")
           // Blankness must mean the same thing on both runtimes, or the exported pattern is sound on one and
           // not the other. U+FEFF is the character JavaScript calls whitespace and .NET Core does not.
-          not (Constraint.test (Constraint.present: Constraint<string>) "\ufeff")
-          not (Constraint.test (Constraint.present: Constraint<string>) "\u0085")
-          not (Constraint.test Constraint.trimmed "\ufeffAda")
-          Constraint.test Constraint.trimmed "Ada"
-          Constraint.test reserved "ada"
-          not (Constraint.test reserved "admin")
-          Constraint.test excluded [ "public" ]
-          not (Constraint.test excluded [ "internal" ])
+          not (Constraint.satisfies (Constraint.present: Constraint<string>) "\ufeff")
+          not (Constraint.satisfies (Constraint.present: Constraint<string>) "\u0085")
+          not (Constraint.satisfies Constraint.trimmed "\ufeffAda")
+          Constraint.satisfies Constraint.trimmed "Ada"
+          Constraint.satisfies reserved "ada"
+          not (Constraint.satisfies reserved "admin")
+          Constraint.satisfies excluded [ "public" ]
+          not (Constraint.satisfies excluded [ "internal" ])
           (match Constraint.check name "" with
            | Error violation -> Violation.render violation <> ""
            | Ok() -> false) ]

@@ -109,7 +109,7 @@ rejection.
 **Filter with the real semantics, not a copy of them.** Deciding whether a candidate survives needs a predicate.
 Hand-writing one would restate code-point length counting, the email pattern, and the rest — the exact drift the
 constraint design exists to prevent. Rebuild a live constraint from the atom instead (`CardinalityAtom (Minimum n)`
-→ `Constraint.minLength n`; the algebra is closed, so the mapping is total) and use `Constraint.test`. Real
+→ `Constraint.minLength n`; the algebra is closed, so the mapping is total) and use `Constraint.satisfies`. Real
 semantics, no duplication.
 
 ### Why not generate-and-filter
@@ -137,4 +137,4 @@ length — the bound itself is a valid sample, but it must still satisfy the oth
 - No retry loop anywhere in the generator.
 - A regression test covers both directions: a satisfiable combination generates, and an unsatisfiable one is
   reported.
-- The candidate filter goes through `Constraint.test`, so no constraint semantics are restated in SchemaGen.
+- The candidate filter goes through `Constraint.satisfies`, so no constraint semantics are restated in SchemaGen.

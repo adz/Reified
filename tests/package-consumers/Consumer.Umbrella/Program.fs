@@ -36,7 +36,7 @@ let main _ =
 
     let refined = NonEmptyList.create [ "ada" ]
     let parsed = Parse.int "42"
-    let guarded = Result.requireTrue "unreachable" true
+    let guarded = true |> Result.require |> Result.orError "unreachable"
     let rendered = Data.render (Data.Text "ada")
 
     match roundTripped, refined, parsed, guarded with

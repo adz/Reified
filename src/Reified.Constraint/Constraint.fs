@@ -86,8 +86,8 @@ module Constraint =
 
     /// <summary>Answers whether a value satisfies a constraint, without building a violation.</summary>
     /// <example><code>let retryCount = Constraint.between 0 10
-    /// 3 |> Constraint.test retryCount // true</code></example>
-    let test (constraint': Constraint<'value>) (value: 'value) : bool =
+    /// 3 |> Constraint.satisfies retryCount // true</code></example>
+    let satisfies (constraint': Constraint<'value>) (value: 'value) : bool =
         ensureConstraint (nameof constraint') constraint'
         constraint'.TestValue value
 

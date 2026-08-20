@@ -24,7 +24,7 @@ open Reified
 let retryCount : Constraint<int> =
     Constraint.between 0 10
 
-3 |> Constraint.test retryCount   // true
+3 |> Constraint.satisfies retryCount   // true
 
 42
 |> Constraint.check retryCount

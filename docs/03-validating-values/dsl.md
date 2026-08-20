@@ -71,7 +71,7 @@ This selects a constraint; it does not parse, convert, or refine anything.
 | Format | `email`, `trimmed`, `numeric`, `alphanumeric`, `pattern` |
 | Number | `multipleOf`, `finite`, `finite32` |
 | Opaque | `notWith`, `custom`, `customLocalized`, `customLocalizedWith`, `customWith`, `contramap` |
-| Other | `describe`, `test`, `guard`, `orError`, `mapError` |
+| Other | `describe`, `orError`, `mapError` |
 
 The sign and size names are spellings, not new primitives: `positive` is `greaterThan 0` at the value's own numeric
 type, and `atLeastOne` is `minLength 1`. Each builds the same atom its general form builds, so inspection, export,
@@ -85,7 +85,7 @@ would report 2.
 
 ```fsharp
 let emoji : Constraint<string> = Constraint.length 1
-Constraint.test emoji "\U0001F600"   // true
+Constraint.satisfies emoji "\U0001F600"   // true
 ```
 
 That is the definition users mean by "length", and it is the one JavaScript and .NET can be made to agree on, so
@@ -105,24 +105,25 @@ Some constructors are deliberately absent because they shadow names the same val
 | --- | --- | --- |
 | `all`, `any`, `contains`, `distinct`, `length`, `between` | shadow core F# operations | `Constraint.all`, `Constraint.contains`, … |
 | `check` | shadows `Schema.check` | `Constraint.check` |
+| `test`, `guard` | execution stays qualified, consistent with `check` | `Constraint.satisfies`, `Constraint.guard` |
 
 The omissions are driven by collision alone, which is why `notContains` is exported although `contains` is not — no
-core operation is named `notContains`. `test` has no collision either and is exported.
+core operation is named `notContains`. All constraint *execution* — `Constraint.satisfies`, `Constraint.check`,
+`Constraint.guard`, and `Constraint.inspect` — stays qualified, so `ConstraintDSL` declares constraints and
+`Constraint.*` executes and inspects them.
 
 ## Result adapters
 
-`guard`, `orError`, and `mapError` are small structural adapters matching the corresponding `Result` operations. They
-live here because `Reified.Constraint` does not depend on `Reified.Result`, so a constraint pipeline can retain its input
-and finish with the application's own error type without adding a package reference:
+`orError` and `mapError` are small structural adapters matching the corresponding `Result` operations. They live here
+because `Reified.Constraint` does not depend on `Reified.Result`, so a constraint pipeline can retain its input and
+finish with the application's own error type without adding a package reference:
 
 ```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
 open Reified.ConstraintDSL
 
 let requiredName (value: string) =
-    value |> guard present |> orError NameRequired
+    value |> Constraint.guard present |> orError NameRequired
 
 let quantity value =
-    value |> guard (atLeast 1) |> mapError InvalidQuantity
+    value |> Constraint.guard (atLeast 1) |> mapError InvalidQuantity
 ```
-
-`Result.guard` provides the same value-preserving operation for code that already uses `Reified.Result`.

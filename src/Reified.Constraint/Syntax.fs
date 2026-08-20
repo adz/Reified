@@ -12,14 +12,15 @@ namespace Reified
 /// <para>
 /// Some constructors are deliberately left out because they shadow names the same validation code is likely to
 /// need in scope: <c>contains</c>, <c>distinct</c>, <c>all</c>, <c>any</c>, <c>length</c>, and <c>between</c> shadow
-/// core F# operations, and <c>check</c> shadows <c>Schema.check</c>. Reach for those as <c>Constraint.contains</c>,
-/// <c>Constraint.all</c>, <c>Constraint.check</c>, and so on, even inside a module that has opened this DSL.
-/// <c>test</c> has no such collision and is exported.
+/// core F# operations. Reach for those as <c>Constraint.contains</c>, <c>Constraint.all</c>, and so on, even
+/// inside a module that has opened this DSL. Constraint execution (<c>Constraint.satisfies</c>,
+/// <c>Constraint.check</c>, <c>Constraint.guard</c>) is likewise always qualified: <c>ConstraintDSL</c> declares
+/// constraints, <c>Constraint.*</c> executes and inspects them.
 /// </para>
 /// <para>
-/// <c>guard</c>, <c>orError</c>, and <c>mapError</c> are structural adapters matching the corresponding
-/// <c>Result</c> operations. They let a constraint pipeline retain its input and finish with the application's
-/// error type without adding an Reified.Result dependency.
+/// <c>orError</c> and <c>mapError</c> are structural adapters matching the corresponding <c>Result</c>
+/// operations. They let a constraint pipeline retain its input and finish with the application's error type
+/// without adding an Reified.Result dependency.
 /// </para>
 /// <code data-livedocs="no-check" reason="Illustrates the DSL against a consumer's own error type, which this snippet does not declare.">
 /// module SignupRules =
@@ -27,7 +28,7 @@ namespace Reified
 ///
 ///     let age : Constraint&lt;int&gt; = atLeast 13
 ///     let contact : Constraint&lt;string&gt; = Constraint.all [ present; email ]
-///     let requireContact value = value |> guard contact |> orError EmailRequired
+///     let requireContact value = value |> Constraint.guard contact |> orError EmailRequired
 /// </code>
 /// </remarks>
 module ConstraintDSL =
@@ -166,16 +167,9 @@ module ConstraintDSL =
     /// <summary>Alias for <see cref="M:Reified.Constraint.Constraint.describe" />.</summary>
     let describe = Constraint.describe
 
-    /// <summary>Alias for <see cref="M:Reified.Constraint.Constraint.test" />.</summary>
-    let test = Constraint.test
-
-    /// <summary>Alias for <see cref="M:Reified.Constraint.Constraint.guard" />.</summary>
-    /// <example><code>value |> guard present |> orError NameRequired</code></example>
-    let guard = Constraint.guard
-
     /// <summary>Replaces a failed constraint's violation with the supplied error.</summary>
     /// <remarks>Defined here because Reified.Constraint does not depend on Reified.Result.</remarks>
-    /// <example><code>value |> guard present |> orError NameRequired</code></example>
+    /// <example><code>value |> Constraint.guard present |> orError NameRequired</code></example>
     let inline orError failure result =
         match result with
         | Ok value -> Ok value
@@ -183,7 +177,7 @@ module ConstraintDSL =
 
     /// <summary>Maps a failed constraint's violation with the supplied function.</summary>
     /// <remarks>Defined here because Reified.Constraint does not depend on Reified.Result.</remarks>
-    /// <example><code>value |> guard (greaterThan 0) |> mapError InvalidQuantity</code></example>
+    /// <example><code>value |> Constraint.guard (greaterThan 0) |> mapError InvalidQuantity</code></example>
     let inline mapError mapper result =
         match result with
         | Ok value -> Ok value

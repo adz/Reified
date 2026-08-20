@@ -23,10 +23,10 @@ module ConstraintTests =
         let ``one named constraint answers satisfaction, failure, and the unchanged value`` () =
             let retryCount = Constraint.between 0 10
 
-            test <@ Constraint.test retryCount 3 @>
+            test <@ Constraint.satisfies retryCount 3 @>
             test <@ Constraint.check retryCount 3 = Ok() @>
             test <@ Constraint.guard retryCount 3 = Ok 3 @>
-            test <@ not (Constraint.test retryCount 42) @>
+            test <@ not (Constraint.satisfies retryCount 42) @>
             test <@ Constraint.guard retryCount 42 = Error(violation retryCount 42) @>
 
         [<Fact>]
@@ -34,7 +34,7 @@ module ConstraintTests =
             let agrees (constraint': Constraint<'value>) (values: 'value list) =
                 values
                 |> List.forall (fun value ->
-                    Constraint.test constraint' value = (Constraint.check constraint' value = Ok()))
+                    Constraint.satisfies constraint' value = (Constraint.check constraint' value = Ok()))
 
             let text: Constraint<string> = Constraint.all [ Constraint.present; Constraint.lengthBetween 2 4 ]
 
@@ -80,7 +80,7 @@ module ConstraintTests =
         [<Fact>]
         let ``present and blank are exact complements for every supported shape`` () =
             let complementary (present: Constraint<'value>) (blank: Constraint<'value>) (values: 'value list) =
-                values |> List.forall (fun value -> Constraint.test present value <> Constraint.test blank value)
+                values |> List.forall (fun value -> Constraint.satisfies present value <> Constraint.satisfies blank value)
 
             let complements =
                 [ complementary Constraint.present Constraint.blank [ null; ""; " "; "Ada" ]
@@ -98,8 +98,8 @@ module ConstraintTests =
             let present: Constraint<string> = Constraint.present
             let minLength: Constraint<string> = Constraint.minLength 1
 
-            test <@ not (Constraint.test present " ") @>
-            test <@ Constraint.test minLength " " @>
+            test <@ not (Constraint.satisfies present " ") @>
+            test <@ Constraint.satisfies minLength " " @>
 
         [<Fact>]
         let ``blankness covers every character a JSON Schema validator calls whitespace`` () =
@@ -115,7 +115,7 @@ module ConstraintTests =
                   '\u2008'; '\u2009'; '\u200A'; '\u2028'; '\u2029'; '\u202F'; '\u205F'; '\u3000'
                   '\uFEFF' ]
 
-            test <@ ecmaWhitespace |> List.forall (fun character -> not (Constraint.test present (string character))) @>
+            test <@ ecmaWhitespace |> List.forall (fun character -> not (Constraint.satisfies present (string character))) @>
 
         [<Fact>]
         let ``U+FEFF is blank here although .NET Core does not call it whitespace`` () =
@@ -123,9 +123,9 @@ module ConstraintTests =
             let present: Constraint<string> = Constraint.present
 
             test <@ not (Char.IsWhiteSpace '\uFEFF') @>
-            test <@ not (Constraint.test present "\uFEFF") @>
-            test <@ not (Constraint.test Constraint.trimmed "\uFEFFAda") @>
-            test <@ not (Constraint.test Constraint.trimmed "Ada\uFEFF") @>
+            test <@ not (Constraint.satisfies present "\uFEFF") @>
+            test <@ not (Constraint.satisfies Constraint.trimmed "\uFEFFAda") @>
+            test <@ not (Constraint.satisfies Constraint.trimmed "Ada\uFEFF") @>
 
         [<Fact>]
         let ``the residual divergence only ever lets a value reach the runtime`` () =
@@ -134,20 +134,20 @@ module ConstraintTests =
             let present: Constraint<string> = Constraint.present
 
             test <@ Char.IsWhiteSpace '\u0085' @>
-            test <@ not (Constraint.test present "\u0085") @>
+            test <@ not (Constraint.satisfies present "\u0085") @>
 
         [<Fact>]
         let ``text cardinality counts code points rather than UTF-16 units`` () =
             let single: Constraint<string> = Constraint.length 1
 
             // "\U0001F600" is one code point stored as two UTF-16 units, and JSON Schema counts it once.
-            test <@ Constraint.test single "\U0001F600" @>
+            test <@ Constraint.satisfies single "\U0001F600" @>
             test <@ "\U0001F600".Length = 2 @>
 
         [<Fact>]
         let ``numeric is ASCII digits so the runtime rule and its export agree`` () =
-            test <@ Constraint.test Constraint.numeric "345" @>
-            test <@ not (Constraint.test Constraint.numeric "٣٤٥") @>
+            test <@ Constraint.satisfies Constraint.numeric "345" @>
+            test <@ not (Constraint.satisfies Constraint.numeric "٣٤٥") @>
 
         [<Fact>]
         let ``optional permits absence, blank requires it, and present forbids it`` () =
@@ -155,11 +155,11 @@ module ConstraintTests =
             let blank: Constraint<string option> = Constraint.blank
             let present: Constraint<string option> = Constraint.present
 
-            test <@ Constraint.test optional None @>
-            test <@ Constraint.test optional (Some "Ada") @>
-            test <@ not (Constraint.test optional (Some "A")) @>
-            test <@ Constraint.test blank None && not (Constraint.test blank (Some "Ada")) @>
-            test <@ not (Constraint.test present None) && Constraint.test present (Some "Ada") @>
+            test <@ Constraint.satisfies optional None @>
+            test <@ Constraint.satisfies optional (Some "Ada") @>
+            test <@ not (Constraint.satisfies optional (Some "A")) @>
+            test <@ Constraint.satisfies blank None && not (Constraint.satisfies blank (Some "Ada")) @>
+            test <@ not (Constraint.satisfies present None) && Constraint.satisfies present (Some "Ada") @>
 
         [<Fact>]
         let ``a content constraint fails on null rather than treating absence as satisfaction`` () =
@@ -261,15 +261,15 @@ module ConstraintTests =
             let tags: Constraint<string array> = Constraint.notContains "internal"
             let missing: string array = null
 
-            test <@ not (Constraint.test tags missing) @>
+            test <@ not (Constraint.satisfies tags missing) @>
             test <@ violation tags missing = Atomic(Expected(MembershipAtom(Membership.NotContains(ConstraintValue.Text "internal")), None)) @>
 
         [<Fact>]
         let ``an excluding rule with a nonportable operand stays executable and reports honestly`` () =
             let reference: Constraint<Version> = Constraint.noneOf [ Version(1, 0) ]
 
-            test <@ Constraint.test reference (Version(2, 0)) @>
-            test <@ not (Constraint.test reference (Version(1, 0))) @>
+            test <@ Constraint.satisfies reference (Version(2, 0)) @>
+            test <@ not (Constraint.satisfies reference (Version(1, 0))) @>
             test <@ expression reference = ConstraintExpression.Opaque(OpaqueConstraint.UnsupportedOperand(UnsupportedOperation.Relation Equal)) @>
 
         [<Fact>]
@@ -308,8 +308,8 @@ module ConstraintTests =
             @>
 
             test <@ Constraint.check (Constraint.positive: Constraint<decimal>) 0.5M = Ok() @>
-            test <@ Constraint.test (Constraint.nonNegative: Constraint<int64>) 0L @>
-            test <@ not (Constraint.test (Constraint.negative: Constraint<float>) 0.0) @>
+            test <@ Constraint.satisfies (Constraint.nonNegative: Constraint<int64>) 0L @>
+            test <@ not (Constraint.satisfies (Constraint.negative: Constraint<float>) 0.0) @>
 
         [<Fact>]
         let ``bounds and prose are validated at construction`` () =
@@ -335,7 +335,7 @@ module ConstraintTests =
         let ``all is the satisfied identity for an empty list`` () =
             let identity: Constraint<int> = Constraint.all []
 
-            test <@ Constraint.test identity 1 @>
+            test <@ Constraint.satisfies identity 1 @>
             test <@ Constraint.check identity 1 = Ok() @>
             test <@ expression identity = ConstraintExpression.All [] @>
 
@@ -389,7 +389,7 @@ module ConstraintTests =
             let reserved = Constraint.oneOf [ "admin"; "root" ]
             let constraint' = Constraint.notWith "must not be a reserved name" reserved
 
-            test <@ Constraint.test constraint' "ada" @>
+            test <@ Constraint.satisfies constraint' "ada" @>
             test <@ violation constraint' "admin" = Atomic(Described("must not be a reserved name", None)) @>
 
             match expression constraint' with
@@ -403,8 +403,8 @@ module ConstraintTests =
             let inner: Constraint<string> = Constraint.present
             let constraint' = inner |> Constraint.contramap (fun (value: {| Name: string |}) -> value.Name)
 
-            test <@ Constraint.test constraint' {| Name = "Ada" |} @>
-            test <@ not (Constraint.test constraint' {| Name = " " |}) @>
+            test <@ Constraint.satisfies constraint' {| Name = "Ada" |} @>
+            test <@ not (Constraint.satisfies constraint' {| Name = " " |}) @>
             test <@ expression constraint' = ConstraintExpression.Opaque(OpaqueConstraint.RuntimeProjection(Constraint.inspect inner)) @>
 
         [<Fact>]
@@ -463,7 +463,7 @@ module ConstraintTests =
         [<Fact>]
         let ``floats are not converted through decimal`` () =
             test <@ ConstraintValue.tryCreate 1e30 = Some(ConstraintValue.ofFloat 1e30) @>
-            test <@ Constraint.test (Constraint.lessThan infinity) 1.0 @>
+            test <@ Constraint.satisfies (Constraint.lessThan infinity) 1.0 @>
 
         [<Fact>]
         let ``a portable float keeps structural self-equality for NaN and signed zero`` () =
@@ -514,8 +514,8 @@ module ConstraintTests =
             let expected = Version(1, 0)
             let unsupported = Constraint.equalTo expected
 
-            test <@ Constraint.test unsupported expected @>
-            test <@ not (Constraint.test unsupported (Version(2, 0))) @>
+            test <@ Constraint.satisfies unsupported expected @>
+            test <@ not (Constraint.satisfies unsupported (Version(2, 0))) @>
             test <@ expression unsupported = ConstraintExpression.Opaque(OpaqueConstraint.UnsupportedOperand(UnsupportedOperation.Relation Equal)) @>
             test <@ violation unsupported (Version(2, 0)) = Atomic(UnsupportedOperand(UnsupportedOperation.Relation Equal)) @>
 
@@ -737,8 +737,6 @@ module ConstraintTests =
     // ---------------------------------------------------------------------------------------------------
 
     module Dsl =
-        // `test` is one of the names the DSL deliberately exports, so it shadows Unquote's assertion here. That
-        // is exactly the collision the DSL documents; the alias keeps both available.
         let inline assertThat (assertion: Quotations.Expr<bool>) = test assertion
 
         open Reified.ConstraintDSL
@@ -749,7 +747,7 @@ module ConstraintTests =
             let qualifiedName: Constraint<string> = Constraint.all [ Constraint.present; Constraint.lengthBetween 2 40 ]
 
             assertThat <@ Constraint.inspect dslName = Constraint.inspect qualifiedName @>
-            assertThat <@ Constraint.test dslName "Ada" = Constraint.test qualifiedName "Ada" @>
+            assertThat <@ Constraint.satisfies dslName "Ada" = Constraint.satisfies qualifiedName "Ada" @>
 
         [<Fact>]
         let ``the sign and count names are reachable unqualified`` () =
@@ -781,6 +779,6 @@ module ConstraintTests =
         let ``guard, orError, and mapError finish a constraint pipeline with the application's error`` () =
             let age: Constraint<int> = atLeast 13
 
-            assertThat <@ 16 |> guard age |> orError "too young" = Ok 16 @>
-            assertThat <@ 11 |> guard age |> orError "too young" = Error "too young" @>
-            assertThat <@ 11 |> guard age |> mapError Violation.render = Error "expected a value at least 13, but was 11" @>
+            assertThat <@ 16 |> Constraint.guard age |> orError "too young" = Ok 16 @>
+            assertThat <@ 11 |> Constraint.guard age |> orError "too young" = Error "too young" @>
+            assertThat <@ 11 |> Constraint.guard age |> mapError Violation.render = Error "expected a value at least 13, but was 11" @>

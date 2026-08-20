@@ -9,7 +9,7 @@ open System.Text.RegularExpressions
 /// <remarks>
 /// Internal by design. A constraint is the public reusable value; a bare predicate catalogue beside it would be a
 /// second nearly identical vocabulary for users to choose between, which is what this design removes. Reach for
-/// <c>Constraint.test</c> when only a Boolean answer is needed.
+/// <c>Constraint.satisfies</c> when only a Boolean answer is needed.
 /// </remarks>
 module internal Predicates =
     /// Reified's pragmatic email shape. Its compiled IgnoreCase is inert because the pattern contains no letters,

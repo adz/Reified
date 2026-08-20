@@ -212,7 +212,7 @@ module SchemaValidationTests =
                 field _.Email {
                     withSchema (
                         Schema.text
-                        |> Schema.constrain (Constraint.custom "Email is required." (Constraint.test Constraint.present))
+                        |> Schema.constrain (Constraint.custom "Email is required." (Constraint.satisfies Constraint.present))
                     )
                 }
                 field _.Age {

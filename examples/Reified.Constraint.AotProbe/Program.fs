@@ -23,7 +23,7 @@ let main _ =
     let name: Constraint<string> = Constraint.all [ present; minLength 3 ]
 
     "Ada"
-    |> guard name
+    |> Constraint.guard name
     |> orError "invalid name"
     |> function
         | Ok _ -> 0

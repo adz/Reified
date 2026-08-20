@@ -25,8 +25,8 @@ Existing FsToolkit Result helpers can remain in an application. Both libraries u
 
 | FsToolkit pattern | Reified equivalent |
 | --- | --- |
-| `Result.requireTrue` | `Result.requireTrue` |
-| `Result.requireSome` | `Result.someOr` |
+| `Result.requireTrue` | `Result.require`, then `Result.orError` |
+| `Result.requireSome` | `match ... with Some v -> Ok v | None -> Error ...` (or model the shape as a `Constraint`) |
 | `result { }` | `result { }` |
 | `asyncResult { }`, `taskResult { }` | no equivalent; Reified does not model effects |
 | `List.traverseResultA`, `List.sequenceResultA` | `Result.traverseAll`, `Result.sequenceAll` |

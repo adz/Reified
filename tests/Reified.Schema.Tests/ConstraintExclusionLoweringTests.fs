@@ -77,7 +77,7 @@ module ConstraintExclusionLoweringTests =
             let regex = System.Text.RegularExpressions.Regex expression
 
             [ "Ada"; ""; " "; "  "; "\u0085"; "\uFEFF"; " Ada"; "Ada "; "\uFEFFAda"; "Ada\uFEFF"; "a b" ]
-            |> List.filter (Constraint.test rule)
+            |> List.filter (Constraint.satisfies rule)
             |> List.forall regex.IsMatch
 
         // Resolved outside the quotation: `present` is an inline SRTP value.

@@ -98,8 +98,9 @@ let checkedName : Result<string, Violation> =
     "Ada" |> Constraint.guard name
 ```
 
-`guard` returns the unchanged input after success. `Result.guard` remains the generic adapter for ordinary
-unit-returning functions.
+`guard` returns the unchanged input after success. For a local condition that is not worth naming as a reusable
+`Constraint`, `Result.okIf`/`Result.failIf` with `Result.orError` play the same role — see
+[Creating a Result](/validating-values/result/creating.html).
 
 Map the whole violation once at the application boundary:
 
@@ -129,24 +130,19 @@ Keep the structured value when the application needs to retain, classify, or loc
 ## Check or extract
 
 Constraints preserve shape. `check` answers whether a value satisfies a rule, `guard` hands the same value back so a
-pipeline can continue, and `test` gives a `bool` when a local branch wants nothing structured:
+pipeline can continue, and `satisfies` gives a `bool` when a local branch wants nothing structured:
 
 ```fsharp
 "Ada" |> Constraint.check name   // Result<unit, Violation>
 "Ada" |> Constraint.guard name   // Result<string, Violation>  -- the value, unchanged
-"Ada" |> Constraint.test name    // bool
+"Ada" |> Constraint.satisfies name    // bool
 ```
 
-None of them changes the *type* of the value. Extraction does, and lives on Result instead:
+None of them changes the *type* of the value. Extraction does, and stays an ordinary match or `Option`/`Choice`
+conversion at the call site rather than living in `Constraint` or `Result` — folding "prove a fact" and "extract a
+value" into one function would give a rule whose meaning depended on what the caller wanted back, and nothing
+downstream could read it.
 
-| Prove a fact | Extract a value |
-| --- | --- |
-| `Constraint.present : Constraint<'a option>` | `Result.someOr` |
-| `Constraint.present : Constraint<'a voption>` | `Result.valueSomeOr` |
-| `Constraint.present : Constraint<'a Nullable>` | `Result.nullableOr` |
-| `Constraint.present : Constraint<'a list>` | `Result.headOr` |
-
-The split is what makes one constraint usable by many interpreters. A schema lowers a rule, a generator satisfies it,
+The split is what makes one constraint usable by many interpreters: a schema lowers a rule, a generator satisfies it,
 a document publishes it — and all three need the rule to be a claim *about* a value rather than a transformation of
-one. `someOr` says in its own type that it produces an `'a` from an `'a option`; folding that into `present` would
-give a rule whose meaning depended on what the caller wanted back, and nothing downstream could read it.
+one.

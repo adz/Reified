@@ -34,15 +34,6 @@ Error "index out of range" |> Result.orError NameMissing
 // Error NameMissing
 ```
 
-`okOr` and `errorOr` change the error type while also changing what success means. `okOr` replaces the error on a
-result you only care about the success of; `errorOr` succeeds *with* the error value, for when the failure is the
-thing you wanted.
-
-```fsharp
-Ok 3 |> Result.okOr NameMissing                                // Ok 3
-(Error "boom": Result<int, string>) |> Result.errorOr "was ok" // Ok "boom"
-```
-
 ## Recovering
 
 `orElse` supplies a fallback result when the first one fails. The fallback is an already-computed value.
@@ -74,4 +65,3 @@ convert with `mapError` first so both sides agree.
 | the error is `unit` or an internal detail | `orError` |
 | a fallback value is already to hand | `orElse` |
 | the fallback is expensive or depends on the error | `orElseWith` |
-| the failure is the value you want | `errorOr` |

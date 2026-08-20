@@ -309,8 +309,8 @@ module ApiShapeTests =
 
         test <@ standalone = "Name must be present" @>
         test <@ predicate = "must be present" @>
-        test <@ Constraint.test isbn "1234567890123" @>
-        test <@ Constraint.test isbnWith "1234567890123" @>
+        test <@ Constraint.satisfies isbn "1234567890123" @>
+        test <@ Constraint.satisfies isbnWith "1234567890123" @>
         test <@ Renderer.english |> Renderer.Advanced.format spec = "card has expired" @>
         test <@ advanced |> Renderer.Advanced.format spec = "address.postcode.billing.cardExpired" @>
         test <@ Renderer.Advanced.attributeCandidates advanced |> List.isEmpty |> not @>
@@ -1184,7 +1184,7 @@ module ApiShapeTests =
         constraintMembers
         |> assertContainsAll
             [ // execution
-              "test"
+              "satisfies"
               "check"
               "guard"
               "inspect"
@@ -1268,9 +1268,10 @@ module ApiShapeTests =
             |> Set.filter (fun name -> not (name.Contains "$"))
 
         dslMembers
-        |> assertContainsAll [ "present"; "blank"; "optional"; "minLength"; "notWith"; "test"; "guard"; "orError"; "mapError" ]
+        |> assertContainsAll [ "present"; "blank"; "optional"; "minLength"; "notWith"; "orError"; "mapError" ]
 
-        dslMembers |> assertContainsNone [ "check"; "all"; "any"; "length"; "between"; "contains"; "distinct" ]
+        dslMembers
+        |> assertContainsNone [ "check"; "all"; "any"; "length"; "between"; "contains"; "distinct"; "test"; "guard" ]
 
         // String, Option, ValueOption, Nullable, Result, and sequence predicates are exposed as extension
         // members directly on those types (see PredicateExtensions), not as PredicateModule submodules.
@@ -1288,15 +1289,26 @@ module ApiShapeTests =
               "mapError"
               "orElse"
               "orElseWith"
-              "requireTrue"
               "okIf"
               "failIf"
+              "require"
               "orError"
               "fromTry"
               "fromChoice"
               "toOption"
               "toValueOption"
               "defaultValue"
+              "tap"
+              "tapError"
+              "traverse"
+              "sequence"
+              "traverseAll"
+              "sequenceAll" ]
+
+        resultMembers
+        |> assertContainsNone
+            [ "requireTrue"
+              "guard"
               "someOr"
               "noneOr"
               "valueSomeOr"
@@ -1305,13 +1317,16 @@ module ApiShapeTests =
               "notNullOr"
               "okOr"
               "errorOr"
-              "headOr"
-              "tap"
-              "tapError"
-              "traverse"
-              "sequence"
-              "traverseAll"
-              "sequenceAll" ]
+              "headOr" ]
+
+        // ResultDSL is the deliberately small ergonomic vocabulary: the CE plus the lightweight admission
+        // functions. Generic combinators (map, bind, orElse, tap, traverse, sequence...) stay qualified.
+        let resultDslMembers =
+            moduleTypeFromAssembly "Reified.Result" "Reified.ResultDSL"
+            |> publicStaticMemberNames
+            |> Set.filter (fun name -> not (name.Contains "$"))
+
+        test <@ resultDslMembers = set [ "result"; "okIf"; "failIf"; "require"; "orError"; "mapError" ] @>
 
         // Traversal lives on the Result module itself; the former Collection module is retired.
         assertModuleAbsentFromAssembly "Reified.Result" "Reified.Result.Collection"

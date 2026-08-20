@@ -72,7 +72,7 @@ let validateAge (request: SignupRequest) =
 ```
 
 `guard` returns `Result<'value, Violation>`. Use `Constraint.check` when `Result<unit, Violation>` is enough, and
-`Constraint.test` when a `bool` is.
+`Constraint.satisfies` when a `bool` is.
 
 This tutorial keeps the `Violation` by mapping it into an error case that carries it. Do that when something later
 needs the facts — classifying the failure, rendering it in another language, or showing the value that was rejected.
@@ -95,7 +95,10 @@ Both styles use the same constraint values, so this is a per-call-site choice, n
 ```fsharp
 let validateSignup (request: SignupRequest) =
     result {
-        do! request.AcceptedTerms |> Result.requireTrue TermsNotAccepted
+        do!
+            request.AcceptedTerms
+            |> Result.require
+            |> Result.orError TermsNotAccepted
         let! name = validateName request
         let! email = validateEmail request
         let! age = validateAge request
@@ -104,7 +107,7 @@ let validateSignup (request: SignupRequest) =
 ```
 
 `result { }` stops at the first application error. `AcceptedTerms` is a bare `bool` with no subject value to
-preserve, which is what `Result.requireTrue` is for.
+preserve, which is what `Result.require` is for.
 
 The `request` annotations are load-bearing: `Signup` is declared after `SignupRequest` and shares its field names, so
 F# would otherwise infer the wrong record from `request.Name`.

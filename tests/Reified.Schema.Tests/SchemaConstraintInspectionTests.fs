@@ -87,7 +87,7 @@ module ConstraintInspectionTests =
         let schema = Schema.text |> Schema.constrain contact
 
         assertThat <@ Schema.constraints schema = [ Constraint.inspect contact ] @>
-        assertThat <@ Constraint.test contact "ada@example.com" @>
+        assertThat <@ Constraint.satisfies contact "ada@example.com" @>
 
     [<Fact>]
     let ``constraints attached at every layer stay in authoring order`` () =

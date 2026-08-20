@@ -114,7 +114,7 @@ module InputParseTests =
                 field _.Email {
                     withSchema (
                         Schema.text
-                        |> Schema.constrain (Constraint.custom "Email is required." (fun value -> Constraint.test Constraint.present value))
+                        |> Schema.constrain (Constraint.custom "Email is required." (fun value -> Constraint.satisfies Constraint.present value))
                     )
                 }
                 fieldAs "age" (fun (value: Signup) -> value.Age) {

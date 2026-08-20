@@ -22,7 +22,7 @@ Active sketches:
   Constructing and mapping SQL only — executing it is explicitly out of scope.
 - `schemagen-composes-constraints.md` — `SchemaGen` emits data violating a field's own constraints whenever more
   than one is attached and any of them picks a value. Proposes composing the atoms into one generator, filtering
-  finite candidate sets at construction through `Constraint.test`, and reporting unsatisfiable combinations
+  finite candidate sets at construction through `Constraint.satisfies`, and reporting unsatisfiable combinations
   rather than sampling from them.
 - `contract-as-wire-projection.md` — undecided answer to the parked `.contract` grammar question: keep it as a
   generated, fail-closed wire projection of any schema (review/diff artifact, JSON-Schema-like) rather than a
