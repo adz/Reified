@@ -13,14 +13,10 @@ targetFramework: net8.0
 
 # Result
 
-`Reified.Result` works with the standard F# `Result<'value, 'error>`. It does not wrap or replace that type: a value
-produced by these helpers is an ordinary `Ok` or `Error` that any other F# code can pattern match.
+`Reified.Result` works with the standard F# `Result<'value, 'error>` - ordinary `Ok` or `Error` values that any other F# code can pattern match.
 
-What the package supplies is the vocabulary around it — turning ordinary values into a `Result` carrying your own
-error type, chaining steps that each may fail, replacing one error with another, getting values back out, and two
+What it provides is a module and DSL for working with them - turning ordinary values into a `Result`, chaining steps, replacing one error with another, getting values back out, and two
 computation expressions for writing sequences of fallible steps as straight-line code.
-
-The package is a standalone leaf with no dependency on any other Reified package, and nothing in this section uses one.
 
 ```sh
 dotnet add package Reified.Result
@@ -65,20 +61,20 @@ Every page below builds on this same `parseName`/`parseAge` pair, so the example
 
 ## Pages
 
-- [Creating a Result](/validating-values/result/creating.html) — turn options, nullables, `TryParse` tuples, booleans, and predicates into a
-  `Result` carrying your own error type.
-- [Transforming values](/validating-values/result/transforming.html) — `map` and `bind`, and how a chain of fallible steps composes.
-- [Handling errors](/validating-values/result/handling-errors.html) — change the error type, replace one error with another, and recover.
-- [Extracting values](/validating-values/result/extracting.html) — get back to a plain value, an option, or a default.
+- [Creating a Result](/validating-values/result/creating.html) - turn options, nullables, `TryParse` tuples, booleans, and predicates into a
+  `Result` with your own error type.
+- [Transforming values](/validating-values/result/transforming.html) - `map` and `bind`, and how a chain of fallible steps compose.
+- [Handling errors](/validating-values/result/handling-errors.html) - change the error type, replace one, and recover.
+- [Extracting values](/validating-values/result/extracting.html) - get back to a plain value, an option, or a default.
 - [Working with collections](/validating-values/result/collections.html) — apply a fallible operation across a sequence with `traverse` and
   `sequence`, or collect every failure with `traverseAll` and `sequenceAll`.
-- [Observing a Result](/validating-values/result/observing.html) — log or measure mid-pipeline with `tap` and `tapError`.
-- [The result computation expression](/validating-values/result/result-ce.html) — write dependent steps as straight-line code with `result { }`.
-- [Collecting every error](/validating-values/result/collecting-errors.html) — report all independent failures at once with `result.list { }`
+- [Observing a Result](/validating-values/result/observing.html) - log or measure mid-pipeline with `tap` and `tapError`.
+- [The result computation expression](/validating-values/result/result-ce.html) - write dependent steps as straight-line code with `result { }`.
+- [Collecting every error](/validating-values/result/collecting-errors.html) - report all independent failures at once with `result.list { }`
   and `and!`.
-- [Comparison with FsToolkit.ErrorHandling](/how-it-compares/fstoolkit-comparison.html) — what each library is for, and how they
+- [Comparison with FsToolkit.ErrorHandling](/how-it-compares/fstoolkit-comparison.html) - what each library is for, and how they
   interoperate.
-- [API reference](/api.html) — every function, generated from the source.
+- [API reference](/api.html) - every function, generated from the source.
 
 ## Related
 
