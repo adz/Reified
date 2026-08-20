@@ -26,11 +26,35 @@ Existing FsToolkit Result helpers can remain in an application. Both libraries u
 | FsToolkit pattern | Reified equivalent |
 | --- | --- |
 | `Result.requireTrue` | `Result.require`, then `Result.orError` |
-| `Result.requireSome` | `match ... with Some v -> Ok v | None -> Error ...` (or model the shape as a `Constraint`) |
+| `Result.requireSome` | `Result.fromOption`, then `Result.orError` |
 | `result { }` | `result { }` |
 | `asyncResult { }`, `taskResult { }` | no equivalent; Reified does not model effects |
 | `List.traverseResultA`, `List.sequenceResultA` | `Result.traverseAll`, `Result.sequenceAll` |
 | accumulating validation over boundary fields | a record `schema<'model> { }` interpreted by `Schema.parse` or `Schema.check` |
+
+`Result.requireTrue` and `Result.requireSome` are two-argument functions in FsToolkit: the error comes first, the
+value second. Reified splits that in two, so the error is always attached last with `orError`:
+
+```fsharp
+// FsToolkit
+condition |> Result.requireTrue TermsNotAccepted
+optionalName |> Result.requireSome NameMissing
+
+// Reified
+condition |> Result.require |> Result.orError TermsNotAccepted
+optionalName |> Result.fromOption |> Result.orError NameMissing
+```
+
+With `open Reified.ResultDSL`, the `Result.` prefix on `require` and `orError` drops — `fromOption` stays qualified,
+since `ResultDSL` exports only the CE and the local admission functions (`okIf`, `failIf`, `require`, `orError`,
+`mapError`), not the whole `Result` module:
+
+```fsharp
+open Reified.ResultDSL
+
+condition |> require |> orError TermsNotAccepted
+optionalName |> Result.fromOption |> orError NameMissing
+```
 
 Schema adds one property that Result combinators do not provide: the declaration is inspectable. The same field and
 constraint metadata can parse input, return complete paths, emit JSON Schema/OpenAPI, compile a JSON codec, and drive

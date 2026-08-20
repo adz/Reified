@@ -91,6 +91,18 @@ module Result =
         | Choice1Of2 value -> Ok value
         | Choice2Of2 failure -> Error failure
 
+    /// <summary>Converts an option into a unit-error result. The inverse of <c>toOption</c>.</summary>
+    let fromOption (value: 'value option) : Result<'value, unit> =
+        match value with
+        | Some inner -> Ok inner
+        | None -> Error ()
+
+    /// <summary>Converts a value option into a unit-error result. The inverse of <c>toValueOption</c>.</summary>
+    let fromValueOption (value: 'value voption) : Result<'value, unit> =
+        match value with
+        | ValueSome inner -> Ok inner
+        | ValueNone -> Error ()
+
     /// <summary>Drops the error channel and returns <c>Some</c> for success.</summary>
     let toOption (result: Result<'value, 'error>) : 'value option =
         match result with

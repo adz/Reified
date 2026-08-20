@@ -1,14 +1,14 @@
 ---
 weight: 10
 title: Creating a Result
-description: Turn predicates, booleans, TryParse tuples, and Choice values into a Result carrying your own error type.
+description: Turn predicates, booleans, TryParse tuples, options, and Choice values into a Result carrying your own error type.
 targetFramework: net8.0
 ---
 
 # Creating a Result
 
-Most failures start as something that is not a `Result`: a predicate over a value, a `bool`, a `TryParse` tuple.
-These helpers do the conversion and let you attach your own error type.
+Most failures start as something that is not a `Result`: a predicate over a value, a `bool`, a `TryParse` tuple, an
+option. These helpers do the conversion and let you attach your own error type.
 
 All examples share one error type:
 
@@ -87,6 +87,18 @@ Choice1Of2 42 |> Result.fromChoice           // Ok 42
 Choice2Of2 NameMissing |> Result.fromChoice  // Error NameMissing
 ```
 
+## From an option or value option
+
+`fromOption` and `fromValueOption` are the inverse of `toOption`/`toValueOption`. They fail with `unit`, same as
+`okIf`/`failIf`, so attach the reason with `orError`.
+
+```fsharp
+Some "Ada" |> Result.fromOption |> Result.orError NameMissing   // Ok "Ada"
+None       |> Result.fromOption |> Result.orError NameMissing   // Error NameMissing
+
+ValueSome 36 |> Result.fromValueOption |> Result.orError AgeMissing  // Ok 36
+```
+
 ## Checking without losing the value: reach for Constraint
 
 A reusable rule that proves a fact about a value belongs in `Reified.Constraint`, not in `Result`. `Constraint.guard`
@@ -113,6 +125,7 @@ something worth naming and reusing, use `okIf`/`failIf` with `orError` instead â
 | a `bool` with no subject value | `require`, then `orError` |
 | `bool * 'value` from `TryParse` | `fromTry` |
 | `Choice<'value, 'error>` | `fromChoice` |
+| `'value option` / `'value voption` | `fromOption` / `fromValueOption`, then `orError` |
 | a reusable, inspectable rule | `Constraint.guard`, then `orError` / `mapError` |
 
 Next: [transforming values](/validating-values/result/transforming.html) once you have a `Result`.

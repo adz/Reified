@@ -1295,6 +1295,8 @@ module ApiShapeTests =
               "orError"
               "fromTry"
               "fromChoice"
+              "fromOption"
+              "fromValueOption"
               "toOption"
               "toValueOption"
               "defaultValue"
