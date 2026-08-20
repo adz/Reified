@@ -36,14 +36,22 @@ Existing FsToolkit Result helpers can remain in an application. Both libraries u
 value second. Reified splits that in two, so the error is always attached last with `orError`:
 
 ```fsharp
-// FsToolkit
-condition |> Result.requireTrue TermsNotAccepted
-optionalName |> Result.requireSome NameMissing
+open Reified.Result
+
+type SignupError =
+    | TermsNotAccepted
+    | NameMissing
+
+let acceptedTerms = true
+let submittedName = Some "Ada"
 
 // Reified
-condition |> Result.require |> Result.orError TermsNotAccepted
-optionalName |> Result.fromOption |> Result.orError NameMissing
+acceptedTerms |> Result.require |> Result.orError TermsNotAccepted
+submittedName |> Result.fromOption |> Result.orError NameMissing
 ```
+
+The FsToolkit equivalents read as `acceptedTerms |> Result.requireTrue TermsNotAccepted` and
+`submittedName |> Result.requireSome NameMissing`.
 
 With `open Reified.ResultDSL`, the `Result.` prefix on `require` and `orError` drops — `fromOption` stays qualified,
 since `ResultDSL` exports only the CE and the local admission functions (`okIf`, `failIf`, `require`, `orError`,
@@ -52,8 +60,8 @@ since `ResultDSL` exports only the CE and the local admission functions (`okIf`,
 ```fsharp
 open Reified.ResultDSL
 
-condition |> require |> orError TermsNotAccepted
-optionalName |> Result.fromOption |> orError NameMissing
+acceptedTerms |> require |> orError TermsNotAccepted
+submittedName |> Result.fromOption |> orError NameMissing
 ```
 
 Schema adds one property that Result combinators do not provide: the declaration is inspectable. The same field and

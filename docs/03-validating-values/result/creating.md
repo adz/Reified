@@ -105,7 +105,7 @@ A reusable rule that proves a fact about a value belongs in `Reified.Constraint`
 runs a constraint and hands the original value back on success, so the check can sit in the middle of a pipeline.
 
 ```fsharp
-open Reified.Constraint
+open Reified
 
 let positive : Constraint<int> = Constraint.greaterThan 0
 
