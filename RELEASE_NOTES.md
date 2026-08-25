@@ -1,5 +1,18 @@
 # Release Notes
 
+## 0.3.0 - 2026-08-25
+
+### Lowered the FSharp.Core floor for dotnet8 consumers (fix)
+
+Packages built against the .NET 10 SDK carried an implicit FSharp.Core dependency of 10.1.x, so
+installing Reified on a dotnet8 project failed restore with NU1605 (package downgrade). The
+runtime packages (`Reified`, `Reified.Constraint`, `Reified.Refinements`, `Reified.Parse`,
+`Reified.Result`, `Reified.Data`, `Reified.Schema`, `Reified.Schema.Json`, `Reified.Schema.Http`,
+`Reified.Schema.Testing`) now pin their minimum FSharp.Core dependency to 8.0.100, the version
+that ships with the .NET 8 SDK — the natural floor for a `net8.0`/`netstandard2.1`-targeted
+library. Unpacked build-time-only projects that depend on FSharp.Compiler.Service keep the newer
+floor FSharp.Compiler.Service itself requires; this doesn't affect installed packages.
+
 ## 0.2.0 - 2026-08-25
 
 ### Split from Axial, and renamed to Reified (breaking)

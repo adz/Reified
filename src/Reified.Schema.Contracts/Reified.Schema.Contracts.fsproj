@@ -4,6 +4,11 @@
     <TargetFramework>net8.0</TargetFramework>
     <NoWarn>$(NoWarn);NU1608</NoWarn>
     <IsPackable>false</IsPackable>
+
+    <!-- Not packed (IsPackable=false), so the repo-wide FSharp.Core floor in Directory.Build.props
+         doesn't need to apply here. This project references FSharp.Compiler.Service, which itself
+         requires FSharp.Core >= 10.1.204 - overriding back up avoids a spurious NU1605 downgrade. -->
+    <FSCorePackageVersion>10.1.204</FSCorePackageVersion>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>Reified.Schema.Contracts</AssemblyName>
     <RootNamespace>Reified.Schema.Contracts</RootNamespace>

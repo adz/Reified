@@ -8,6 +8,11 @@
     <RollForward>Major</RollForward>
     <NoWarn>$(NoWarn);NU1608</NoWarn>
     <IsPackable>false</IsPackable>
+
+    <!-- Pulls in Reified.Schema.Contracts, which references FSharp.Compiler.Service (needs
+         FSharp.Core >= 10.1.204). Override the repo-wide dotnet8-friendly floor back up here to
+         avoid a spurious NU1605 downgrade warning. -->
+    <FSCorePackageVersion>10.1.204</FSCorePackageVersion>
   </PropertyGroup>
 
   <ItemGroup>

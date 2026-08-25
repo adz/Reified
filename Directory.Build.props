@@ -4,7 +4,7 @@
 
     <!-- Every package in this repository ships on one release train. The Flow train moved out with
          Flow itself: a tag here says nothing about a version in the Axial repository. -->
-    <ReifiedVersion>0.2.0</ReifiedVersion>
+    <ReifiedVersion>0.3.0</ReifiedVersion>
 
     <Version Condition="'$(Version)' == ''">$(ReifiedVersion)</Version>
     <NuGetAudit>false</NuGetAudit>
@@ -18,6 +18,18 @@
     <FsDocsLicenseLink>https://github.com/adz/Reified/blob/main/LICENSE</FsDocsLicenseLink>
     <FsDocsReleaseNotesLink>https://github.com/adz/Reified/blob/main/RELEASE_NOTES.md</FsDocsReleaseNotesLink>
     <PackageReadmeFile Condition="'$(PackageReadmeFile)' == ''">README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <!-- The .NET 10 SDK's implicit FSharp.Core reference floats to whatever FSharp.Core ships with
+       it (10.1.x), and that becomes the floor NuGet records in every published package. A dotnet8
+       consumer resolving an older FSharp.Core then hits NU1605 (downgrade). Pin explicitly to the
+       oldest FSharp.Core that still supports net8.0/netstandard2.1, so the package floor stays low
+       regardless of which SDK builds it. FSCorePackageVersion is read by
+       Microsoft.FSharp.Core.NetSdk.props, guarded by FSCorePackageVersionSet, so both must be set
+       here (before that file imports) for the override to take. -->
+  <PropertyGroup>
+    <FSCorePackageVersionSet>true</FSCorePackageVersionSet>
+    <FSCorePackageVersion>8.0.100</FSCorePackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
