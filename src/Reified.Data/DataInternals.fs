@@ -13,7 +13,7 @@ type PatternConversion =
     static member ToPattern(value: float) = DataPattern(Exact(Data.From value))
     static member ToPattern(value: Guid) = DataPattern(Exact(Data.From value))
     static member ToPattern(value: DateTimeOffset) = DataPattern(Exact(Data.From value))
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && !FABLE_COMPILER
     static member ToPattern(value: DateOnly) = DataPattern(Exact(Data.From value))
 #endif
 
@@ -34,7 +34,7 @@ type PatternConversion =
     static member ToPattern(values: float list) = PatternConversion.ExactListOf(values, Data.From)
     static member ToPattern(values: Guid list) = PatternConversion.ExactListOf(values, Data.From)
     static member ToPattern(values: DateTimeOffset list) = PatternConversion.ExactListOf(values, Data.From)
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && !FABLE_COMPILER
     static member ToPattern(values: DateOnly list) = PatternConversion.ExactListOf(values, Data.From)
 #endif
 

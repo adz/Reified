@@ -50,7 +50,7 @@ module internal JsonRuntime =
 
     let inline isDigit (b: byte) = b >= byte '0' && b <= byte '9'
 
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && !FABLE_COMPILER
     let private whitespaceSearchValues =
         System.Buffers.SearchValues.Create(" \n\r\t"B)
 #endif
@@ -62,7 +62,7 @@ module internal JsonRuntime =
         if offset >= data.Length || not (isWhitespaceByte data[offset]) then
             src
         else
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && !FABLE_COMPILER
             let remaining = src.RemainingSpan
 
             let nextNonWhitespace =

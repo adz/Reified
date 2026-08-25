@@ -1,7 +1,9 @@
 namespace Reified
 
 open System
+#if !FABLE_COMPILER
 open System.Collections.Specialized
+#endif
 #if FABLE_COMPILER
 open Fable.Core.JsInterop
 #endif
@@ -158,15 +160,12 @@ module internal DataConversions =
         |> Seq.map (fun (name, grouped) -> name, grouped |> Seq.map snd |> Seq.toList)
         |> objectFromGroupedValues
 
+#if !FABLE_COMPILER
     /// <summary>Builds object-shaped structured data from a .NET name-value collection.</summary>
-    /// <remarks>Fable: not available because <c>NameValueCollection</c> is a .NET input type.</remarks>
     let ofNameValueCollection (values: NameValueCollection) : Data =
         if isNull values then
             nullArg (nameof values)
 
-#if FABLE_COMPILER
-        invalidOp "NameValueCollection is a .NET input type and is not available under Fable."
-#else
         values.AllKeys
         |> Seq.map (fun name ->
             let name = ensureName name

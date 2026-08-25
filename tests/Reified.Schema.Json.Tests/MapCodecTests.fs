@@ -9,11 +9,21 @@ open Reified.SchemaDSL
 /// <summary>Covers the compiled JSON codec's handling of <c>Schema.map</c> dictionary value schemas.</summary>
 module MapCodecTests =
     type private Thresholds = { Values: Map<string, decimal> }
+    type private LocaleTag = LocaleTag of string
+    type private LocalizedText = { Values: Map<LocaleTag, string> }
 
     let private thresholdsSchema () =
         schema<Thresholds> {
             field _.Values {
                 withSchema (Schema.mapWith Schema.decimal)
+            }
+            construct (fun values -> { Values = values })
+        }
+
+    let private localizedTextSchema () =
+        schema<LocalizedText> {
+            field _.Values {
+                withSchema (Schema.mapWithKey LocaleTag (fun (LocaleTag value) -> value) Schema.text)
             }
             construct (fun values -> { Values = values })
         }
@@ -41,3 +51,10 @@ module MapCodecTests =
         let codec = Json.compile (thresholdsSchema ())
 
         test <@ Json.deserialize codec "{\"values\":{}}" = { Values = Map.empty } @>
+
+    [<Fact>]
+    let ``round trips a map with transparent string keys`` () =
+        let codec = Json.compile (localizedTextSchema ())
+        let value = { Values = Map.ofList [ LocaleTag "en", "Hello"; LocaleTag "fr", "Bonjour" ] }
+
+        test <@ Json.deserialize codec (Json.serialize codec value) = value @>

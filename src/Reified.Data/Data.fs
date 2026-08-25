@@ -54,7 +54,7 @@ type Data =
     static member From(value: Guid) : Data = Data.Text(value.ToString("D"))
     /// <summary>Converts a timestamp to round-trip ISO text.</summary>
     static member From(value: DateTimeOffset) : Data = Data.Text(value.ToString("O", CultureInfo.InvariantCulture))
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && !FABLE_COMPILER
     /// <summary>Converts a calendar date to ISO text.</summary>
     static member From(value: DateOnly) : Data = Data.Text(value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))
 #endif

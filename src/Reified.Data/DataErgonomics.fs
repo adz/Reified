@@ -55,8 +55,10 @@ module Data =
     /// <summary>Builds object-shaped data from name and value pairs.</summary>
     let ofNameValues = DataConversions.ofNameValues
 
+#if !FABLE_COMPILER
     /// <summary>Builds object-shaped data from a .NET name-value collection.</summary>
     let ofNameValueCollection = DataConversions.ofNameValueCollection
+#endif
 
     /// <summary>Builds structured data from command-line arguments.</summary>
     let ofCliArgs = DataConversions.ofCliArgs

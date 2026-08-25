@@ -300,7 +300,7 @@ module rec Json =
             | true, value -> struct (value, next)
             | false, _ -> decodeFailure (sprintf "invalid uuid value: %s" text)
 
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && !FABLE_COMPILER
     let private dateDecoder: Decoder<DateOnly> =
         fun src ->
             let struct (text, next) = stringDecoder src
@@ -319,7 +319,7 @@ module rec Json =
         | PrimitiveValueKind.Decimal -> box decimalDecoder
         | PrimitiveValueKind.Float -> box floatDecoder
         | PrimitiveValueKind.Bool -> box boolDecoder
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && !FABLE_COMPILER
         | PrimitiveValueKind.Date -> box dateDecoder
 #else
         | PrimitiveValueKind.Date ->
@@ -354,7 +354,7 @@ module rec Json =
             fun src ->
                 let struct (value, next) = boolDecoder src
                 struct (box value, next)
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && !FABLE_COMPILER
         | PrimitiveValueKind.Date ->
             fun src ->
                 let struct (value, next) = dateDecoder src
@@ -386,7 +386,7 @@ module rec Json =
     let private encodeGuid: Encoder<Guid> =
         fun writer value -> writeQuoted writer (value.ToString("D"))
 
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && !FABLE_COMPILER
     let private encodeDate: Encoder<DateOnly> =
         fun writer value -> writeQuoted writer (value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))
 #endif
@@ -400,7 +400,7 @@ module rec Json =
         | PrimitiveValueKind.Decimal -> box (fun (writer: IByteWriter) (value: decimal) -> writer.WriteDecimal value)
         | PrimitiveValueKind.Float -> box (fun (writer: IByteWriter) (value: float) -> writer.WriteFloat value)
         | PrimitiveValueKind.Bool -> box encodeBool
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && !FABLE_COMPILER
         | PrimitiveValueKind.Date -> box encodeDate
 #else
         | PrimitiveValueKind.Date ->
@@ -417,7 +417,7 @@ module rec Json =
         | PrimitiveValueKind.Decimal -> fun writer value -> writer.WriteDecimal(unbox<decimal> value)
         | PrimitiveValueKind.Float -> fun writer value -> writer.WriteFloat(unbox<float> value)
         | PrimitiveValueKind.Bool -> fun writer value -> encodeBool writer (unbox<bool> value)
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && !FABLE_COMPILER
         | PrimitiveValueKind.Date -> fun writer value -> encodeDate writer (unbox<DateOnly> value)
 #else
         | PrimitiveValueKind.Date ->
@@ -946,15 +946,14 @@ module rec Json =
                         box (listDecoder (compileValueDecoder<'item> item)) }
             |> unbox<Decoder<'field>>
         | MapValueDefinition collection ->
-            collection.AcceptItem
-                { new ICollectionItemInterpreter with
-                    member _.Item<'item>(item: ValueSchemaDefinition) =
-                        let decodeEntries = mapDecoder (compileValueDecoder<'item> item)
+            // Map keys may be domain wrappers, not only strings. The collection retains the
+            // reversible key conversion, so use its object decoder rather than rebuilding a
+            // `Map<string, _>` plan here.
+            let objDecoder = compileValueDecoderObj definition
 
-                        box (fun src ->
-                            let struct (entries, next) = decodeEntries src
-                            struct (Map.ofList entries, next)) }
-            |> unbox<Decoder<'field>>
+            fun src ->
+                let struct (value, next) = objDecoder src
+                struct (unbox<'field> value, next)
         | UnionValueDefinition _
         | EnumValueDefinition _
         | OptionValueDefinition _ ->
@@ -986,12 +985,10 @@ module rec Json =
                         box (listEncoder (compileValueEncoder<'item> item)) }
             |> unbox<Encoder<'field>>
         | MapValueDefinition collection ->
-            collection.AcceptItem
-                { new ICollectionItemInterpreter with
-                    member _.Item<'item>(item: ValueSchemaDefinition) =
-                        let encodeEntries = mapEncoder (compileValueEncoder<'item> item)
-                        box (fun (writer: IByteWriter) (value: Map<string, 'item>) -> encodeEntries writer (Map.toList value)) }
-            |> unbox<Encoder<'field>>
+            // See the matching decoder: `Entries` renders non-string map keys for JSON object
+            // property names before the item encoder runs.
+            let objEncoder = compileValueEncoderObj definition
+            fun writer value -> objEncoder writer (box value)
         | RefinedValueDefinition _
         | UnionValueDefinition _
         | EnumValueDefinition _
