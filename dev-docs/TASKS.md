@@ -23,7 +23,7 @@ the `.contract` grammar/generator as wire-tier tooling
 the `Contract<'model>` versioning engine (`Contract.parse`/`Contract.parseVersion`, typed contiguous n-1 → n
 migrations), `Schema.defer` recursion with finite inspection and `$defs`-based JSON Schema output, the
 non-packable `Reified.Schema.Testing` FsCheck adapter (`SchemaGen`), (2026-07-16) multi-version `schemagen`
-generation with the user-facing `docs/08-schema/65-versioned-contracts.md` guide, and (2026-07-17) record-first wire schema
+generation with the user-facing `docs/02-schema/65-versioned-contracts.md` guide, and (2026-07-17) record-first wire schema
 generation (`[<DeriveSchema>]` records through an FCS syntax-only frontend into the shared AST/resolver/emitter,
 `Reified.DerivedSchema` attributes, `.contract` parked as the secondary declaration form).
 

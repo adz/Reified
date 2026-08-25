@@ -1,5 +1,12 @@
 {
   "SchemaVersion": 1,
-  "CurrentVersion": "0.0.0",
-  "Entries": []
+  "CurrentVersion": "0.2.0",
+  "Entries": [
+    {
+      "Version": "0.2.0",
+      "CapsulePath": null,
+      "CapsuleUrl": "https://github.com/adz/Reified/releases/download/v0.2.0/Reified-0.2.0-livedocs.zip",
+      "CapsuleSha256": "c6015351dce01877adf1509737ebfb77ac9de9a4ec73fdc47dc959c996851987"
+    }
+  ]
 }

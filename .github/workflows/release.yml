@@ -5,8 +5,14 @@ on:
     tags:
       - 'v*.*.*'
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing release tag to rebuild and repair (for example, v0.2.0)
+        required: false
+        type: string
 
 permissions:
+  actions: write
   contents: write
 
 env:
@@ -20,6 +26,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_tag || github.ref }}
 
       - name: Set up .NET 10
         uses: actions/setup-dotnet@v4
@@ -45,14 +53,20 @@ jobs:
         id: version
         shell: bash
         run: |
-          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+          if [[ -n "${{ inputs.release_tag }}" ]]; then
+            if [[ ! "${{ inputs.release_tag }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "release_tag must have the form vMAJOR.MINOR.PATCH" >&2
+              exit 1
+            fi
+            echo "package_version=${{ inputs.release_tag }}" | sed 's/package_version=v/package_version=/' >> "$GITHUB_OUTPUT"
+          elif [[ "$GITHUB_REF" == refs/tags/v* ]]; then
             echo "package_version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
           else
             echo "package_version=0.0.0-rcDev" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Check release notes
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/v') || inputs.release_tag != ''
         run: bash scripts/check-release-notes.sh "${{ steps.version.outputs.package_version }}"
 
       - name: Audit documentation
@@ -65,9 +79,11 @@ jobs:
         run: dotnet livedocs capture --version "${{ steps.version.outputs.package_version }}" --output "artifacts/Reified-${{ steps.version.outputs.package_version }}-livedocs.zip"
 
       - name: Pack libraries
+        if: inputs.release_tag == ''
         run: bash scripts/pack.sh -v "${{ steps.version.outputs.package_version }}"
 
       - name: Archive package artifacts
+        if: inputs.release_tag == ''
         uses: actions/upload-artifact@v4
         with:
           name: packages
@@ -96,6 +112,31 @@ jobs:
           files: |
             artifacts/package/*.nupkg
             artifacts/package/*.snupkg
+            artifacts/Reified-${{ steps.version.outputs.package_version }}-livedocs.zip
+
+      - name: Repair documentation asset on an existing GitHub Release
+        if: inputs.release_tag != ''
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ inputs.release_tag }}" "artifacts/Reified-${{ steps.version.outputs.package_version }}-livedocs.zip" --clobber
+
+      - name: Publish release documentation to GitHub Pages
+        if: startsWith(github.ref, 'refs/tags/v') || inputs.release_tag != ''
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${{ steps.version.outputs.package_version }}"
+          capsule="artifacts/Reified-$version-livedocs.zip"
+          release_tag="${{ inputs.release_tag || github.ref_name }}"
+          capsule_url="https://github.com/${{ github.repository }}/releases/download/$release_tag/Reified-$version-livedocs.zip"
+          capsule_sha256="$(sha256sum "$capsule" | cut -d ' ' -f 1)"
+          gh workflow run pages.yml \
+            --ref "${{ github.event.repository.default_branch }}" \
+            -f version="$version" \
+            -f capsule_url="$capsule_url" \
+            -f capsule_sha256="$capsule_sha256"
 
   publish-nuget:
     runs-on: ubuntu-latest

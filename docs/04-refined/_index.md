@@ -1,5 +1,5 @@
 ---
-weight: 6
+weight: 4
 title: Refined
 type: docs
 description: Domain types whose invariant removes work from the code that uses them.

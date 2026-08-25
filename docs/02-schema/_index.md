@@ -3,7 +3,7 @@ title: Schema
 linkTitle: Schema
 description: Parse untrusted input through field constraints and domain constructors, or return path-aware diagnostics.
 type: docs
-weight: 8
+weight: 2
 targetFramework: net8.0
 ---
 

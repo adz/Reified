@@ -12,6 +12,20 @@ Declare value and model invariants once. Derive validation, parsing, diagnostics
 [![NuGet](https://img.shields.io/nuget/v/Reified.svg)](https://www.nuget.org/packages/Reified)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
+## How the packages fit
+
+<div align="center">
+<pre>
+Constraint ─┐
+Parse ──────┤
+Data ───────┼──> Schema ───> Schema.Json
+Refinements ┘             └──> contract tooling
+</pre>
+</div>
+
+Install Schema when structured input must become a model. Constraint, Parse, Data, and Refinements can each be used
+alone without Schema, but they are designed to work together consistently.
+
 ## Why Reified
 
 ### Trust values at the boundary
@@ -132,17 +146,23 @@ Derivation is the preferred approach for DTOs. Keep it to public, permissive bou
 
 ## Packages
 
-Install `Reified` to get the complete library, or install an individual package when you need only one capability.
+Install `Reified` to get the complete runtime set. For the integrated boundary model, start with `Reified.Schema` and
+add its interpreters as needed:
 
 - `Reified` — umbrella package that references all runtime packages
-- `Reified.Constraint` — reusable, inspectable value rules and structured violations
-- `Reified.Refinements` — types that carry an invariant after construction
-- `Reified.Parse` — serialized primitive decoding
-- `Reified.Result` — composition over the standard F# `Result` type
-- `Reified.Data` — portable structured input and test data
 - `Reified.Schema` — structured model admission, diagnostics, inspection, and JSON Schema
 - `Reified.Schema.Json` — compiled JSON codecs
 - `Reified.Schema.Contracts.Build` — MSBuild integration for derived record and wire contracts
+
+Schema builds on focused packages that remain useful by themselves:
+
+- `Reified.Constraint` — reusable, inspectable value rules and structured violations
+- `Reified.Refinements` — types that carry an invariant after construction
+- `Reified.Parse` — serialized primitive decoding
+- `Reified.Data` — portable structured input and test data
+
+`Reified.Result` is independent composition over the standard F# `Result` type. It works with Reified APIs but is not
+part of Schema's dependency chain.
 
 The contract compiler and schema-derived testing adapter are repository tooling, not runtime packages.
 

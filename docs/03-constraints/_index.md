@@ -4,7 +4,7 @@ linkTitle: Constraints
 type: docs
 notoc: true
 description: Define reusable value rules, check typed values, and render structured violations.
-weight: 4
+weight: 3
 targetFramework: net8.0
 ---
 

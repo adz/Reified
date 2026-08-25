@@ -22,7 +22,7 @@ module KeyCatalogueDocTests =
             "..",
             "..",
             "docs",
-            "04-constraints",
+            "03-constraints",
             "40-localization",
             "40-catalogue.md"
         )

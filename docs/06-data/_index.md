@@ -1,5 +1,5 @@
 ---
-weight: 7
+weight: 6
 title: Data
 linkTitle: Data
 type: docs

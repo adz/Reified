@@ -12,6 +12,19 @@ on:
       - Directory.Build.props
       - Reified.slnx
   workflow_dispatch:
+    inputs:
+      version:
+        description: Released semantic version to add to this history build
+        required: false
+        type: string
+      capsule_url:
+        description: HTTPS URL of the released documentation capsule
+        required: false
+        type: string
+      capsule_sha256:
+        description: SHA-256 of the released documentation capsule
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -48,8 +61,17 @@ jobs:
       - name: Build
         run: dotnet build Reified.slnx --configuration Release --no-restore --nologo -v minimal
 
-      - name: Build docs site
-        run: dotnet livedocs build
+      - name: Add the newly released capsule to this history build
+        if: inputs.version != ''
+        run: |
+          dotnet livedocs history-add "${{ inputs.version }}" \
+            --url "${{ inputs.capsule_url }}" \
+            --sha256 "${{ inputs.capsule_sha256 }}" \
+            --interactive false \
+            --banner false
+
+      - name: Build versioned docs site
+        run: dotnet livedocs build-history .livedocs/history.json --interactive false --banner false
 
       - name: Prepare Pages artifact
         run: touch output/.nojekyll

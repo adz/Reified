@@ -10,14 +10,29 @@ menu:
     weight: 1
 ---
 
-Reified is a set of small F# libraries for .NET and Fable. You declare an invariant once — on a value, on a
-field, on a whole model — and the checking, the diagnostics, the codecs, the contract documents, and the test
-data are all read from that one declaration.
+Reified gives F# applications one model for trusted values and structured boundaries on .NET and Fable. Declare an
+invariant once; checking, diagnostics, codecs, contract documents, and test data read the same declaration.
 
 This page walks one complete transaction end to end, then widens out to the pieces it used. Everything on it
 is compiled and executed on every CI run from
 [`examples/Reified.GettingStarted`](https://github.com/adz/Reified/blob/main/examples/Reified.GettingStarted/Program.fs);
 the outputs below are that program's real output.
+
+## How the packages fit
+
+<div class="package-map">
+
+```text
+Constraint ─┐
+Parse ──────┤
+Data ───────┼──> Schema ───> Schema.Json
+Refinements ┘             └──> contract tooling
+```
+
+</div>
+
+Start with Schema when structured input must become a trusted model. Constraint, Parse, Data, and Refinements can each
+be used alone without Schema, but they are designed to work together consistently.
 
 ```bash
 dotnet add package Reified.Schema

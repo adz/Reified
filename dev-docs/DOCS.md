@@ -20,17 +20,18 @@ published URL.
 | Source | Published route | Subject |
 | --- | --- | --- |
 | `docs/01-getting-started/` | `/getting-started/` | End-to-end introduction and routing |
-| `docs/03-result-handling/` | `/result-handling/` | Standard F# `Result` composition |
-| `docs/04-constraints/` | `/constraints/` | Reusable value rules and violations |
+| `docs/02-schema/` | `/schema/` | Structured parsing, JSON codecs, derivation, and versioned contracts |
+| `docs/03-constraints/` | `/constraints/` | Reusable value rules and violations |
+| `docs/04-refined/` | `/refined/` | Invariant-carrying types |
 | `docs/05-parsing/` | `/parsing/` | Serialized primitive decoding |
-| `docs/06-refined/` | `/refined/` | Invariant-carrying types |
-| `docs/07-data/` | `/data/` | Structured data, fixtures, and comparison |
-| `docs/08-schema/` | `/schema/` | Structured parsing, JSON codecs, derivation, and versioned contracts |
+| `docs/06-data/` | `/data/` | Structured data, fixtures, and comparison |
+| `docs/07-result-handling/` | `/result-handling/` | Standard F# `Result` composition |
 | `docs/90-comparisons/` | `/comparisons/` | Comparisons with adjacent libraries |
 | `docs/95-notes/` | `/notes/` | Packages, platforms, benchmarks, and implementation notes |
 
-There is no Values documentation grouping. Result handling, Constraints, Parsing, and Refined are separate top-level
-sections. JSON Codecs belongs inside Schema. HTTP server documentation is not published.
+There is no Values documentation grouping. Schema is the default path after Getting Started. The packages it uses
+remain separate top-level sections, and Result handling is independent. JSON Codecs belongs inside Schema.
+HTTP server documentation is not published.
 
 `docs/index.md` is the homepage. `docs/content/reified-theme.css` styles the generated FsLiveDocs site.
 `.livedocs/config.json` controls the logo, navigation, stylesheet, prelude, and API projects.
@@ -78,10 +79,10 @@ edit can use the audit unless it changes links or layout.
 
 The root `llms.txt` routes agents to focused context. Section-local files live at:
 
-- `docs/03-result-handling/llms.txt`
-- `docs/04-constraints/llms.txt`
-- `docs/07-data/llms.txt`
-- `docs/08-schema/llms.txt`
+- `docs/02-schema/llms.txt`
+- `docs/03-constraints/llms.txt`
+- `docs/06-data/llms.txt`
+- `docs/07-result-handling/llms.txt`
 
 Update these files when their public surface or recommended authoring path changes. Do not add agent-specific pages to
 the user-facing documentation tree.

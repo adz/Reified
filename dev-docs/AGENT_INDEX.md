@@ -89,8 +89,8 @@ exports a type called `X`. See `dev-docs/namespace-flatten.md`.
   `dev-docs/PLAN.md`.
 - Schema input/rules/interpreters: `src/Reified.Schema/{Model,Data,SchemaValidation,RetainedParseResult,Rules}.fs` and
   `tests/Reified.Schema.Tests/*ParseTests.fs`.
-- User-facing docs: `docs/03-result-handling/`, `docs/04-constraints/`, `docs/05-parsing/`, `docs/06-refined/`,
-  `docs/07-data/`, and `docs/08-schema/`. Read `dev-docs/DOCS.md`
+- User-facing docs: `docs/02-schema/`, `docs/03-constraints/`, `docs/04-refined/`, `docs/05-parsing/`,
+  `docs/06-data/`, and `docs/07-result-handling/`. Read `dev-docs/DOCS.md`
   before editing `docs/**`, source comments, generated reference pages, `llms.txt`, or site content.
 - Agent process/docs: `AGENTS.md`, this file, `dev-docs/TASKS.md`, and `dev-docs/PLAN.md`.
 

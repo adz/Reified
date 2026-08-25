@@ -18,8 +18,22 @@ dotnet add package Reified
 `Reified` is an umbrella. It has no code of its own — it just references every runtime package below, so you get the
 whole set and can ignore the rest of this page.
 
-Install one package instead when you want one capability and nothing else. Every package is independently installable
-and depends only on what it needs.
+Schema is the integrated path through the packages:
+
+<div class="package-map">
+
+```text
+Constraint ─┐
+Parse ──────┤
+Data ───────┼──> Schema ───> Schema.Json
+Refinements ┘             └──> contract tooling
+```
+
+</div>
+
+Install `Reified.Schema` when structured input must become a trusted model. Constraint, Parse, Data, and Refinements can
+each be used alone without Schema, but they are designed to work together consistently. Every package depends only on
+what it uses.
 
 ## .NET and Fable
 
@@ -29,13 +43,13 @@ environments that provide the primitives they use.
 
 | Package | What it gives you | Install |
 | --- | --- | --- |
-| `Reified.Result` | `Result` composition and `result { }` | `dotnet add package Reified.Result` |
 | `Reified.Constraint` | Reusable, inspectable value rules and structured violations | `dotnet add package Reified.Constraint` |
 | `Reified.Refinements` | Types that carry an invariant after construction | `dotnet add package Reified.Refinements` |
 | `Reified.Parse` | Serialized primitive decoding | `dotnet add package Reified.Parse` |
 | `Reified.Data` | Source-neutral structured data, human and JSON rendering, native JSON conversion | `dotnet add package Reified.Data` |
 | `Reified.Schema` | Schema declaration, parsing, checking, accumulated errors, inspection, JSON Schema | `dotnet add package Reified.Schema` |
 | `Reified.Schema.Json` | Lossless JSON-to-`Data` parsing and compiled typed JSON codecs | `dotnet add package Reified.Schema.Json` |
+| `Reified.Result` | Independent `Result` composition and `result { }` | `dotnet add package Reified.Result` |
 
 A `netstandard2.1` target by itself does not imply JavaScript support. This list records the packages with a deliberate
 Fable surface and repository coverage to keep it working.

@@ -18,22 +18,22 @@ module ResultDSL =
     /// <summary>The fail-fast <c>result { }</c> computation expression.</summary>
     let result = ResultBuilder()
 
-    /// <summary>Alias for <see cref="M:Reified.Result.Result.okIf" />.</summary>
+    /// <summary>Alias for <see cref="M:Reified.Result.ResultModule.okIf" />.</summary>
     let inline okIf predicate value =
         Result.okIf predicate value
 
-    /// <summary>Alias for <see cref="M:Reified.Result.Result.failIf" />.</summary>
+    /// <summary>Alias for <see cref="M:Reified.Result.ResultModule.failIf" />.</summary>
     let inline failIf predicate value =
         Result.failIf predicate value
 
-    /// <summary>Alias for <see cref="M:Reified.Result.Result.require" />.</summary>
+    /// <summary>Alias for <see cref="M:Reified.Result.ResultModule.require" />.</summary>
     let inline require condition =
         Result.require condition
 
-    /// <summary>Alias for <see cref="M:Reified.Result.Result.orError" />.</summary>
+    /// <summary>Alias for <see cref="M:Reified.Result.ResultModule.orError" />.</summary>
     let inline orError failure result =
         Result.orError failure result
 
-    /// <summary>Alias for <see cref="M:Reified.Result.Result.mapError" />.</summary>
+    /// <summary>Alias for <see cref="M:Reified.Result.ResultModule.mapError" />.</summary>
     let inline mapError mapper result =
         Result.mapError mapper result

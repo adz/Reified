@@ -1,6 +1,6 @@
 ---
 title: Reified
-description: F# libraries for parsing untrusted input into domain models, and for composing failures, on .NET and Fable JavaScript.
+description: One F# model for trusted values and structured boundaries, on .NET and Fable JavaScript.
 body_class: reified-home
 targetFramework: net8.0
 ---
@@ -16,7 +16,7 @@ targetFramework: net8.0
 
 <div class="docs-home-copy" style="max-width: 78ch; margin: 0 auto;">
 
-<span class="eyebrow">F# libraries for .NET and Fable JavaScript</span>
+<span class="eyebrow">One F# model for .NET and Fable JavaScript</span>
 <h1>Encode each invariant once. Enforce it across the project.</h1>
 
 <div class="lede">
@@ -53,6 +53,19 @@ Json.serialize (Json.compile signupSchema) signup
 
 </div>
 
+<div class="docs-home-example" style="max-width: 78ch; margin: 0 auto 2rem;">
+
+```fsharp no-check reason="The homepage excerpt shares signupSchema from the preceding example; the complete program is verified in examples/Reified.GettingStarted."
+JsonSchema.generate signupSchema
+// {"type":"object",
+//  "properties":{"email":{"type":"string"},
+//                "age":{"type":"integer","minimum":13},
+//                "newsletter":{"type":"boolean"}},
+//  "required":["email","age","newsletter"]}
+```
+
+</div>
+
 <p style="max-width: 78ch; margin: 0 auto 0.5rem; text-align: center;">Every failure message, the JSON codec, the
 JSON Schema, and the generated test data come from that one declaration. Nothing above is written twice.</p>
 
@@ -60,23 +73,43 @@ JSON Schema, and the generated test data come from that one declaration. Nothing
 <a class="btn btn-primary" href="getting-started/index.html">Get started &rarr;</a>
 </p>
 
+<div class="docs-home-copy docs-home-package-map" style="max-width: 78ch; margin: 0 auto;">
+
+<h2>How the packages fit</h2>
+
+<div class="package-map">
+
+```text
+Constraint ─┐
+Parse ──────┤
+Data ───────┼──> Schema ───> Schema.Json
+Refinements ┘             └──> contract tooling
+```
+
 </div>
 
-<h2 class="docs-home-section-title">Route by symptom</h2>
+<p>Constraint, Parse, Data, and Refinements can each be used alone without Schema, but they are designed to work
+together consistently.</p>
 
-| Problem | Goes to |
-| --- | --- |
-| Validation boilerplate is everywhere, and invalid values still get through | [Constraints](/constraints/index.html) |
-| The same rule is repeated in a parser, a form, and a test | [Schema](/schema/index.html) |
-| Decoding and validation are separate steps that drift apart | [JSON Codecs](/schema/json-codecs.html) |
-| Constructing structured test data by hand is slow and repetitive | [Data](/data/index.html) |
-| You want one small library, not a framework | [Packages and platforms](/notes/packages-and-platforms.html) |
+</div>
 
-<p style="max-width: 78ch; margin: 2rem auto; text-align: center;">Every package is independently installable
-and runs on .NET and on Fable JavaScript — take one capability or the whole set.
-<a href="notes/packages-and-platforms.html">Packages and platforms &rarr;</a></p>
+<h2 class="docs-home-section-title">Choose your starting point</h2>
+
+<div class="docs-home-routes">
+
+- **Building a structured boundary?** Start with [Schema](/schema/index.html).
+- **Only need one piece?** Choose [Constraints](/constraints/index.html),
+  [Refined](/refined/index.html), [Parsing](/parsing/index.html), or [Data](/data/index.html).
+- **Composing ordinary F# failures?** Use [Result handling](/result-handling/index.html) independently.
+
+</div>
+
+<p style="max-width: 78ch; margin: 2rem auto; text-align: center;">Install one focused package or the complete runtime
+set. <a href="notes/packages-and-platforms.html">Packages and platforms &rarr;</a></p>
 
 <div class="docs-home-meta" style="margin-bottom: 4rem;">
 <a class="docs-chip" href="getting-started/index.html">Getting started</a>
 <a class="docs-chip" href="https://github.com/adz/Reified">GitHub</a>
+</div>
+
 </div>

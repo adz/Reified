@@ -76,11 +76,19 @@ For a tag build:
 - it runs `bash scripts/pack.sh -v <version>` **after** the docs steps — `dotnet pack` rebuilds each project fresh for the
   tagged version, and running it before the docs steps corrupted FsLiveDocs' assembly loading (surfaced as every doc page
   failing to resolve `Reified.*` types); the docs pipeline must run against the plain `dotnet build` output
-- it uploads package and docs artifacts
-- it creates a GitHub Release with `.nupkg` and `.snupkg` files attached, using `dev-docs/releases/<version>.md` as the release body
+- it uploads package and docs workflow artifacts
+- it creates a GitHub Release with `.nupkg`, `.snupkg`, and the immutable FsLiveDocs capsule attached, using
+  `dev-docs/releases/<version>.md` as the release body
+- after the GitHub Release exists, it dispatches the Pages workflow with the capsule URL and SHA-256; Pages adds that
+  capsule to the committed history baseline for the build and publishes the version switcher
 - it runs a separate `publish-nuget` job that publishes the package artifacts to nuget.org
 
-For manual `workflow_dispatch`, the workflow uses `0.0.0-rcDev` as the fallback package version.
+The committed `.livedocs/history.json` is the baseline used by branch and manual Pages builds. After a release, update
+that baseline with the released capsule's immutable GitHub URL and SHA-256 before the next release-preparation commit.
+
+For manual `workflow_dispatch`, leave `release_tag` empty for an `0.0.0-rcDev` verification run. Supplying an existing
+tag such as `v0.2.0` checks out that tag and repairs its GitHub Release assets and versioned documentation without
+publishing packages to NuGet again.
 
 ## NuGet publishing
 

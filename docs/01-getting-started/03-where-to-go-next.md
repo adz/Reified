@@ -9,16 +9,16 @@ targetFramework: net8.0
 
 # Where to go next
 
-Each Reified package is independently installable. Start with the capability that owns the problem you are solving.
+Start with Schema for a whole structured boundary. Otherwise, install the package that provides the API you need.
 
 | Capability | Use it when |
 | --- | --- |
-| [Result handling](/result-handling/index.html) | Fallible functions need sequencing, recovery, or error accumulation over the standard F# `Result` type. |
+| [Schema](/schema/index.html) | A form, request, configuration document, or stored payload must become a model with field-aware diagnostics. |
 | [Constraints](/constraints/index.html) | A typed value must satisfy a reusable rule that also carries inspectable metadata and structured violations. |
-| [Parsing](/parsing/index.html) | Serialized primitive text must become an F# value without losing why conversion failed. |
 | [Refined](/refined/index.html) | Successful admission should be recorded in a type that removes a later branch or makes an operation total. |
+| [Parsing](/parsing/index.html) | Serialized primitive text must become an F# value without losing why conversion failed. |
 | [Data](/data/index.html) | Structured fixtures and produced output need concise construction, editing, and comparison. |
-| [Schema](/schema/index.html) | A whole form, request, configuration document, or stored payload must become a model with field-aware diagnostics. |
+| [Result handling](/result-handling/index.html) | Fallible functions need independent sequencing, recovery, or error accumulation over the standard F# `Result` type. |
 
 Schema also drives the focused wire tools:
 

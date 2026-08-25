@@ -106,6 +106,19 @@ main :not(pre) > code {
     color: var(--reified-text);
 }
 
+.package-map {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.package-map pre {
+    width: fit-content;
+    max-width: 100%;
+    margin: 1.5rem auto;
+    text-align: left;
+}
+
 /* Semantic tooltips use a fixed dark surface in FsLiveDocs. Keep nested prose and
    inline code from inheriting the page theme's foreground and code background. */
 .fsdocs-tip,
@@ -210,6 +223,16 @@ body:has(.reified-landing) #search-ui {
     margin: 0 auto;
 }
 
+.docs-home-package-map {
+    margin-top: 2.5rem !important;
+    text-align: center;
+}
+
+.docs-home-package-map p {
+    max-width: 64ch;
+    margin: 1rem auto 2rem;
+}
+
 .eyebrow {
     display: inline-flex;
     align-items: center;
@@ -297,7 +320,17 @@ body:has(.reified-landing) #search-ui {
 }
 
 .docs-home-section-title {
+    margin-top: 3rem;
     text-align: center;
+}
+
+.docs-home-routes {
+    max-width: 64ch;
+    margin: 1rem auto;
+}
+
+.docs-home-routes li {
+    margin: 0.5rem 0;
 }
 
 .schema-overview-graphic {
