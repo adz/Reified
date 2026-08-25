@@ -47,6 +47,7 @@ module Resolver =
         | Primitive PGuid -> KOther "guid"
         | ListOf _ -> KSized "list"
         | MapOf _ -> KSized "map"
+        | MapOfTransparentKey _ -> KSized "map"
         | LiteralUnion _
         | ExternalEnum _ -> KEnum
         | ExternalTransparent(_, _, payload) -> kindOf payload
@@ -260,6 +261,7 @@ module Resolver =
                             checkOrder field.FieldLine reference
                         | ListOf element
                         | MapOf element -> checkType element
+                        | MapOfTransparentKey(_, _, element) -> checkType element
                         | LiteralUnion cases ->
                             if List.isEmpty cases then
                                 report file.FilePath field.FieldLine "literal unions need at least one case"

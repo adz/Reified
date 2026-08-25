@@ -426,7 +426,7 @@ type Order = { Sku: string }
         test <@ moduleFile.Module = Some "My.Wire" @>
         test <@ moduleFile.Contracts.Head.QualifiedName = "My.Wire.Order" @>
         let emitted = Emitter.emit "Fallback" [ moduleFile ] moduleFile
-        test <@ emitted.Contains "module My.Wire" @>
+        test <@ emitted.Contains "module My.WireSchemas" @>
 
     [<Fact>]
     let ``a project catalogue resolves fully qualified cross-file record references`` () =
@@ -436,6 +436,11 @@ module My.Workflow.Variables
 open Reified.DerivedSchema
 [<DeriveSchema>]
 type Variable = { Key: string }
+
+[<DeriveUnion>]
+type VariableType =
+    | Text
+    | Number
 """
 
         let templatesSource =
@@ -443,7 +448,9 @@ type Variable = { Key: string }
 module My.Workflow.Templates
 open Reified.DerivedSchema
 [<DeriveSchema>]
-type Template = { Variable: My.Workflow.Variables.Variable }
+type Template =
+    { Variable: My.Workflow.Variables.Variable
+      VariableType: My.Workflow.Variables.VariableType }
 """
 
         let sources = [ ("variables.fs", variablesSource); ("templates.fs", templatesSource) ]
@@ -459,8 +466,61 @@ type Template = { Variable: My.Workflow.Variables.Variable }
 
         let template = files |> List.find (fun file -> file.FilePath = "templates.fs")
         let emitted = Emitter.emit "Fallback" files template
-        test <@ emitted.Contains "Schema<Template>" @>
-        test <@ emitted.Contains "My.Workflow.Variables.Variable.schema" @>
+        test <@ emitted.Contains "Schema<My.Workflow.Templates.Template>" @>
+        test <@ emitted.Contains "My.Workflow.VariablesSchemas.Variable.schema" @>
+        test <@ emitted.Contains "My.Workflow.Variables.VariableType.Text" @>
+
+    [<Fact>]
+    let ``transparent string unions may key derived maps`` () =
+        let file =
+            parse
+                """
+module My.Workflow
+
+open Reified.DerivedSchema
+
+type LocaleTag = LocaleTag of string
+
+[<DeriveSchema>]
+type Template = { Values: Map<LocaleTag, string> }
+"""
+
+        let emitted = Emitter.emit "Fallback" [ file ] file
+        test <@ emitted.Contains "Schema.mapWithKey My.Workflow.LocaleTag" @>
+
+    [<Fact>]
+    let ``nested and collection union values receive generated case schemas`` () =
+        let file =
+            parse
+                """
+module My.Workflow
+
+open Reified.DerivedSchema
+
+[<DeriveUnion>]
+type BindingSource =
+    | Literal of value: string
+    | FromTarget of factId: string
+
+[<DeriveUnion>]
+type BindingPolicy =
+    | TemplateOwned of source: BindingSource
+
+[<DeriveSchema>]
+type Template =
+    { Policy: BindingPolicy
+      Sources: Map<string, BindingSource> }
+"""
+
+        let emitted = Emitter.emit "Fallback" [ file ] file
+        let sourceCases = emitted.IndexOf "let private sourceCases"
+        let policyPayload = emitted.IndexOf "let private policyTemplateOwnedPayload"
+
+        test <@ sourceCases >= 0 @>
+        test <@ policyPayload > sourceCases @>
+        test <@ emitted.Contains "let private sourcesCases" @>
+        test <@ emitted.Contains "Schema.unionWith (UnionRepresentation.Internal \"type\") sourceCases" @>
+        test <@ emitted.Contains "Schema.unionWith (UnionRepresentation.Internal \"type\") sourcesCases" @>
 
     [<Fact>]
     let ``generic records and non-records cannot be marked`` () =

@@ -39,6 +39,8 @@ module Schema =
     let option item = SchemaCore.option item
     /// <summary>Describes a string-keyed map using an explicit value schema.</summary>
     let mapWith item = SchemaCore.mapWith item
+    /// <summary>Describes a map whose key type converts to and from JSON object property names.</summary>
+    let mapWithKey parseKey renderKey item = SchemaCore.mapWithKey parseKey renderKey item
     /// <summary>Describes a string-keyed map by resolving its value schema from <typeparamref name="'item" />.</summary>
     let inline map () : Schema<Map<string, ^item>> = mapWith (SchemaDefaults.Resolve())
     /// <summary>Defers a recursive schema reference until an interpreter needs it.</summary>

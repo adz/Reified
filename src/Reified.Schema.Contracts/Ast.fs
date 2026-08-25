@@ -68,6 +68,7 @@ and FieldType =
     | Reference of ContractRef
     | ListOf of FieldType
     | MapOf of FieldType
+    | MapOfTransparentKey of typeName: string * caseName: string * FieldType
     | LiteralUnion of string list
     | UnionBlock of discriminator: string * cases: UnionCaseDecl list
     | ExternalEnum of typeName: string * cases: ExternalEnumCase list

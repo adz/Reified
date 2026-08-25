@@ -155,6 +155,8 @@ module internal SchemaCore =
     let option item = ValueSchema.optionOf item
     /// <summary>Describes a string-keyed map whose values use the supplied schema.</summary>
     let mapWith item = ValueSchema.map item
+    /// <summary>Describes a JSON object whose keys use a total, reversible string conversion.</summary>
+    let mapWithKey parseKey renderKey item = ValueSchema.mapWithKey parseKey renderKey item
     let constrainItems constraint' schema = ValueSchema.constrainItems constraint' schema
     let constrainValues constraint' schema = ValueSchema.constrainValues constraint' schema
     /// <summary>Defers a recursive schema.</summary>

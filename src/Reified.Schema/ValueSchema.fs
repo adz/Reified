@@ -335,15 +335,15 @@ module internal ValueSchema =
     /// <paramref name="itemSchema" />, and interpreters attach diagnostics to entry key paths.
     /// </remarks>
     /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="itemSchema" /> is null.</exception>
-    let map (itemSchema: Schema<'item>) : Schema<Map<string, 'item>> =
+    let mapWithKey (parseKey: string -> 'key) (renderKey: 'key -> string) (itemSchema: Schema<'item>) : Schema<Map<'key, 'item>> =
         if isNull (box itemSchema) then
             nullArg (nameof itemSchema)
 
         let boxEntries (entries: (string * obj) list) : obj =
-            entries |> List.map (fun (key, value) -> key, unbox<'item> value) |> Map.ofList |> box
+            entries |> List.map (fun (key, value) -> parseKey key, unbox<'item> value) |> Map.ofList |> box
 
         let entries (value: obj) : (string * obj) list =
-            value |> unbox<Map<string, 'item>> |> Map.toList |> List.map (fun (key, item) -> key, box item)
+            value |> unbox<Map<'key, 'item>> |> Map.toList |> List.map (fun (key, item) -> renderKey key, box item)
 
         let acceptItem (interpreter: ICollectionItemInterpreter) =
             interpreter.Item<'item> itemSchema.ValueDefinition
@@ -360,6 +360,10 @@ module internal ValueSchema =
               Description = None
               Default = None }
         )
+
+    /// <summary>Describes a JSON object as a dictionary with a reversible, string-like key type.</summary>
+    let map (itemSchema: Schema<'item>) : Schema<Map<string, 'item>> =
+        mapWithKey id id itemSchema
 
     /// <summary>Adds a constraint to every item described by a list schema.</summary>
     let constrainItems (constraint': Constraint<'item>) (schema: Schema<'item list>) : Schema<'item list> =

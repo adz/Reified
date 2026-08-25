@@ -36,6 +36,9 @@ module Emitter =
     let private localName (qualifiedName: string) =
         qualifiedName.Split('.') |> Array.last
 
+    let private unionCaseRef typeName caseName =
+        if localName typeName = caseName then typeName else $"{typeName}.{caseName}"
+
     let private duCaseName (text: string) =
         text.Split([| '-'; '_'; ' ' |], StringSplitOptions.RemoveEmptyEntries)
         |> Array.map pascal
@@ -130,6 +133,7 @@ module Emitter =
         | Reference reference -> refTypeName reference
         | ListOf element -> $"{fsType refTypeName contractTypeName fieldName element} list"
         | MapOf element -> $"Map<string, {fsType refTypeName contractTypeName fieldName element}>"
+        | MapOfTransparentKey(typeName, _, element) -> $"Map<{typeName}, {fsType refTypeName contractTypeName fieldName element}>"
         | LiteralUnion _
         | UnionBlock _ -> caseTypeName contractTypeName fieldName
         | ExternalEnum(typeName, _)
@@ -138,7 +142,7 @@ module Emitter =
 
     /// The base Schema.* expression for a field's type, before decorations. Self-references (same
     /// contract, same version) lower to Schema.defer over the module's own schema binding.
-    let rec private baseValueExpr (refTypeName: ContractRef -> string) (contractName, contractVersion) fieldName fieldType =
+    let rec private baseValueExpr (refSchemaName: ContractRef -> string) (contractName, contractVersion) fieldName fieldType =
         match fieldType with
         | Primitive PText
         | Primitive PEmail -> "Schema.text"
@@ -150,14 +154,18 @@ module Emitter =
         | Primitive PGuid -> "Schema.guid"
         | Reference reference when reference.RefName = contractName && reference.RefVersion = contractVersion ->
             "Schema.defer (fun () -> schema)"
-        | Reference reference -> $"{refTypeName reference}.schema"
-        | ListOf element -> $"Schema.listWith {parenthesize (baseValueExpr refTypeName (contractName, contractVersion) fieldName element)}"
-        | MapOf element -> $"Schema.mapWith {parenthesize (baseValueExpr refTypeName (contractName, contractVersion) fieldName element)}"
+        | Reference reference -> $"{refSchemaName reference}.schema"
+        | ListOf element -> $"Schema.listWith {parenthesize (baseValueExpr refSchemaName (contractName, contractVersion) fieldName element)}"
+        | MapOf element -> $"Schema.mapWith {parenthesize (baseValueExpr refSchemaName (contractName, contractVersion) fieldName element)}"
+        | MapOfTransparentKey(typeName, caseName, element) ->
+            let caseRef = unionCaseRef typeName caseName
+            $"Schema.mapWithKey {caseRef} (function {caseRef} key -> key) {parenthesize (baseValueExpr refSchemaName (contractName, contractVersion) fieldName element)}"
         | LiteralUnion _
         | ExternalEnum _ -> $"Schema.enum {camel fieldName}Cases"
         | ExternalTransparent(typeName, caseName, payload) ->
-            let underlying = baseValueExpr refTypeName (contractName, contractVersion) fieldName payload
-            $"Schema.convert {typeName}.{caseName} (function {typeName}.{caseName} value -> value) {parenthesize underlying}"
+            let underlying = baseValueExpr refSchemaName (contractName, contractVersion) fieldName payload
+            let caseRef = unionCaseRef typeName caseName
+            $"Schema.convert {caseRef} (function {caseRef} value -> value) {parenthesize underlying}"
         | UnionBlock(discriminator, _) -> $"Schema.unionWith (UnionRepresentation.Internal \"{escapeString discriminator}\") {camel fieldName}Cases"
         | ExternalUnion(_, representation, _) ->
             match representation with
@@ -180,8 +188,8 @@ module Emitter =
         | _, (LInt _ | LDecimal _) -> renderNumericLiteral (numericKind fieldType) literal
 
     /// Renders the complete value expression for one field's schema pipe (excluding field-level constraints).
-    let private valueExpr refTypeName (contractName, contractVersion, contractTypeName) (field: FieldDecl) =
-        let mutable expression = baseValueExpr refTypeName (contractName, contractVersion) field.FieldName field.FieldType
+    let private valueExpr refSchemaName (contractName, contractVersion, contractTypeName) (field: FieldDecl) =
+        let mutable expression = baseValueExpr refSchemaName (contractName, contractVersion) field.FieldName field.FieldType
 
         let isOuterConstraint constraint' =
             match constraint' with
@@ -268,6 +276,7 @@ module Emitter =
         | Primitive _ -> true
         | ListOf _
         | MapOf _ -> false
+        | MapOfTransparentKey _ -> false
         | Reference _
         | LiteralUnion _
         | UnionBlock _
@@ -324,9 +333,25 @@ module Emitter =
             match target with
             | None -> typeNameOf reference.RefName reference.RefVersion
             | Some target when target.OwnsType || target.ContractName = "" -> typeNameOf reference.RefName reference.RefVersion
-            | Some target when file.Contracts |> List.exists (fun contract -> contract.QualifiedName = target.QualifiedName) ->
+            | Some target when file.Module.IsNone && file.Contracts |> List.exists (fun contract -> contract.QualifiedName = target.QualifiedName) ->
                 target.ExternalTypeName |> Option.map localName |> Option.defaultValue (typeNameOf reference.RefName reference.RefVersion)
             | Some target -> target.ExternalTypeName |> Option.defaultValue (typeNameOf reference.RefName reference.RefVersion)
+
+        let refSchemaName (reference: ContractRef) =
+            let target =
+                declared
+                |> List.find (fun contract ->
+                    contract.QualifiedName = reference.RefName && contract.Version = reference.RefVersion)
+
+            let source =
+                fileSet
+                |> List.find (fun candidate ->
+                    candidate.Contracts |> List.exists (fun contract -> contract.QualifiedName = target.QualifiedName))
+
+            match target.ExternalTypeName, source.Module with
+            | Some externalTypeName, Some sourceModule when source.FilePath = file.FilePath -> localName externalTypeName
+            | Some externalTypeName, Some sourceModule -> sourceModule + "Schemas." + localName externalTypeName
+            | _ -> refTypeName reference
         let namespaceName = file.Namespace |> Option.defaultValue namespaceName
 
         let builder = StringBuilder()
@@ -343,16 +368,23 @@ module Emitter =
         line "//   Do not edit directly; edit the contract source and regenerate."
         line "// </auto-generated>"
         match file.Module with
-        | Some moduleName -> line $"module {moduleName}"
+        | Some moduleName -> line $"module {moduleName}Schemas"
         | None -> line $"namespace {namespaceName}"
         line ""
         line "open Reified"
 
         for contract in file.Contracts do
             let contractTypeName =
+                if file.Module.IsSome then
+                    typeNameOf contract.QualifiedName contract.Version
+                else
+                    contract.ExternalTypeName
+                    |> Option.map localName
+                    |> Option.defaultValue (typeNameOf contract.QualifiedName contract.Version)
+            let contractModuleName =
                 contract.ExternalTypeName
                 |> Option.map localName
-                |> Option.defaultValue (typeNameOf contract.QualifiedName contract.Version)
+                |> Option.defaultValue contractTypeName
             let contractRef = $"{fileName}, {contract.ContractName}.v{contract.Version}"
 
             let rec hasSelfReference fieldType =
@@ -360,6 +392,7 @@ module Emitter =
                 | Reference reference -> reference.RefName = contract.QualifiedName && reference.RefVersion = contract.Version
                 | ListOf element
                 | MapOf element -> hasSelfReference element
+                | MapOfTransparentKey(_, _, element) -> hasSelfReference element
                 | UnionBlock(_, cases) ->
                     cases |> List.exists (fun case -> case.CaseRef.RefName = contract.QualifiedName && case.CaseRef.RefVersion = contract.Version)
                 | ExternalUnion(_, _, cases) ->
@@ -431,10 +464,125 @@ module Emitter =
             line $"/// Schema and boundary functions for {contractTypeName} ({contractRef})."
             line "[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]"
             line "[<RequireQualifiedAccess>]"
-            line $"module {contractTypeName} ="
+            line $"module {contractModuleName} ="
             line ""
             line "    open Reified.SchemaDSL"
             line "    open Reified.ConstraintDSL"
+
+            // A user-owned union may occur below another union's payload or inside a collection.
+            // Emit the needed case list in this schema module before its enclosing payload refers to it.
+            let emittedNestedUnionCases = Collections.Generic.HashSet<string>()
+
+            let rec emitNestedUnionCases fieldName fieldType =
+                let emitPayloadFields fields =
+                    for payloadField in fields do
+                        emitNestedUnionCases payloadField.ExtFieldName payloadField.ExtFieldType
+
+                let emitUnion helperName typeName cases =
+                    if emittedNestedUnionCases.Add helperName then
+                        for case in cases do
+                            match case.ExtPayload with
+                            | ExternalFields fields ->
+                                emitPayloadFields fields
+                                let helper = camel helperName + case.ExtFsCase + "Payload"
+                                let anonymousType =
+                                    fields
+                                    |> List.map (fun payloadField ->
+                                        let suffix = if payloadField.ExtOptional then " option" else ""
+                                        $"{payloadField.ExtFieldName}: {fsType refTypeName contractTypeName helperName payloadField.ExtFieldType}{suffix}")
+                                    |> String.concat "; "
+
+                                line ""
+                                line $"    let private {helper} ="
+                                line $"        schema<{{| {anonymousType} |}}> {{"
+                                for payloadField in fields do
+                                    let expression = baseValueExpr refSchemaName (contract.QualifiedName, contract.Version) payloadField.ExtFieldName payloadField.ExtFieldType
+                                    let expression = if payloadField.ExtOptional then $"Schema.option ({expression})" else expression
+                                    line $"            fieldAs \"{escapeString payloadField.ExtWireName}\" (fun (value: {{| {anonymousType} |}}) -> value.{payloadField.ExtFieldName}) {{"
+                                    line $"                withSchema ({expression})"
+                                    line "            }"
+                                let parameters = fields |> List.map (fun payloadField -> camel payloadField.ExtFieldName) |> String.concat " "
+                                let assignments = fields |> List.map (fun payloadField -> $"{payloadField.ExtFieldName} = {camel payloadField.ExtFieldName}") |> String.concat "; "
+                                line $"            construct (fun {parameters} -> {{| {assignments} |}})"
+                                line "        }"
+                            | ExternalRecord _
+                            | ExternalEmpty -> ()
+
+                        line ""
+                        line $"    let private {camel helperName}Cases ="
+                        cases
+                        |> List.iteri (fun index case ->
+                            let opener = if index = 0 then "[ " else "  "
+                            let closer = if index = List.length cases - 1 then " ]" else ""
+
+                            match case.ExtPayload with
+                            | ExternalEmpty ->
+                                let predicate =
+                                    if List.length cases = 1 then $"(function {typeName}.{case.ExtFsCase} -> true)"
+                                    else $"(function {typeName}.{case.ExtFsCase} -> true | _ -> false)"
+                                line $"        {opener}UnionCase.empty \"{escapeString case.ExtTag}\" {typeName}.{case.ExtFsCase} {predicate}{closer}"
+                            | ExternalRecord reference ->
+                                let extractor =
+                                    if List.length cases = 1 then $"(function {typeName}.{case.ExtFsCase} payload -> Some payload)"
+                                    else $"(function {typeName}.{case.ExtFsCase} payload -> Some payload | _ -> None)"
+                                line $"        {opener}UnionCase.fields \"{escapeString case.ExtTag}\" {typeName}.{case.ExtFsCase} {extractor} {refSchemaName reference}.schema{closer}"
+                            | ExternalFields fields ->
+                                let helper = camel helperName + case.ExtFsCase + "Payload"
+                                let anonymousType =
+                                    fields
+                                    |> List.map (fun payloadField ->
+                                        let suffix = if payloadField.ExtOptional then " option" else ""
+                                        $"{payloadField.ExtFieldName}: {fsType refTypeName contractTypeName helperName payloadField.ExtFieldType}{suffix}")
+                                    |> String.concat "; "
+                                let arguments = fields |> List.map (fun payloadField -> "payload." + payloadField.ExtFieldName) |> String.concat ", "
+                                let names = fields |> List.map (fun payloadField -> camel payloadField.ExtFieldName) |> String.concat ", "
+                                let construction = $"(fun (payload: {{| {anonymousType} |}}) -> {typeName}.{case.ExtFsCase}({arguments}))"
+                                let pattern = $"{typeName}.{case.ExtFsCase}({names})"
+                                let record = fields |> List.map (fun payloadField -> $"{payloadField.ExtFieldName} = {camel payloadField.ExtFieldName}") |> String.concat "; "
+                                let extractor =
+                                    if List.length cases = 1 then $"(function {pattern} -> Some {{| {record} |}})"
+                                    else $"(function {pattern} -> Some {{| {record} |}} | _ -> None)"
+                                line $"        {opener}UnionCase.fields \"{escapeString case.ExtTag}\" {construction} {extractor} {helper}{closer}")
+
+                match fieldType with
+                | ExternalUnion(typeName, _, cases) -> emitUnion fieldName typeName cases
+                | ListOf element
+                | MapOf element -> emitNestedUnionCases fieldName element
+                | MapOfTransparentKey(_, _, element)
+                | ExternalTransparent(_, _, element) -> emitNestedUnionCases fieldName element
+                | Primitive _
+                | Reference _
+                | LiteralUnion _
+                | UnionBlock _
+                | ExternalEnum _ -> ()
+
+            let rec emitNestedChildren fieldType =
+                match fieldType with
+                | ExternalUnion(_, _, cases) ->
+                    for case in cases do
+                        match case.ExtPayload with
+                        | ExternalFields fields ->
+                            for payloadField in fields do
+                                emitNestedUnionCases payloadField.ExtFieldName payloadField.ExtFieldType
+                        | ExternalRecord _
+                        | ExternalEmpty -> ()
+                | ListOf element
+                | MapOf element
+                | MapOfTransparentKey(_, _, element)
+                | ExternalTransparent(_, _, element) -> emitNestedChildren element
+                | Primitive _
+                | Reference _
+                | LiteralUnion _
+                | UnionBlock _
+                | ExternalEnum _ -> ()
+
+            for field in contract.Fields do
+                match field.FieldType with
+                | ListOf element
+                | MapOf element
+                | MapOfTransparentKey(_, _, element)
+                | ExternalTransparent(_, _, element) -> emitNestedUnionCases field.FieldName element
+                | _ -> emitNestedChildren field.FieldType
 
             for field in caseFields do
                 line ""
@@ -455,7 +603,7 @@ module Emitter =
                             line $"    let private {helper} ="
                             line $"        schema<{{| {anonymousType} |}}> {{"
                             for payloadField in fields do
-                                let expression = baseValueExpr refTypeName (contract.QualifiedName, contract.Version) payloadField.ExtFieldName payloadField.ExtFieldType
+                                let expression = baseValueExpr refSchemaName (contract.QualifiedName, contract.Version) payloadField.ExtFieldName payloadField.ExtFieldType
                                 let expression = if payloadField.ExtOptional then $"Schema.option ({expression})" else expression
                                 line $"            fieldAs \"{escapeString payloadField.ExtWireName}\" (fun (value: {{| {anonymousType} |}}) -> value.{payloadField.ExtFieldName}) {{"
                                 line $"                withSchema ({expression})"
@@ -494,7 +642,7 @@ module Emitter =
                                 $"(function {du}.{duCaseName case.CaseTag} payload -> Some payload | _ -> None)"
 
                         line
-                            $"        {opener}UnionCase.fields \"{escapeString case.CaseTag}\" {du}.{duCaseName case.CaseTag} {extractor} {refTypeName case.CaseRef}.schema{closer}")
+                            $"        {opener}UnionCase.fields \"{escapeString case.CaseTag}\" {du}.{duCaseName case.CaseTag} {extractor} {refSchemaName case.CaseRef}.schema{closer}")
                 | ExternalEnum(typeName, cases) ->
                     cases
                     |> List.iteri (fun index case ->
@@ -521,7 +669,7 @@ module Emitter =
                                     $"(function {typeName}.{case.ExtFsCase} payload -> Some payload | _ -> None)"
 
                             line
-                                $"        {opener}UnionCase.fields \"{escapeString case.ExtTag}\" {typeName}.{case.ExtFsCase} {extractor} {refTypeName reference}.schema{closer}"
+                                $"        {opener}UnionCase.fields \"{escapeString case.ExtTag}\" {typeName}.{case.ExtFsCase} {extractor} {refSchemaName reference}.schema{closer}"
                         | ExternalFields fields ->
                             let helper = camel field.FieldName + case.ExtFsCase + "Payload"
                             let anonymousType =
@@ -572,7 +720,7 @@ module Emitter =
                     line $"            fieldAs \"{escapeString wire}\" {getter} {{"
 
                     if not (canInferField field) then
-                        let value = valueExpr refTypeName (contract.QualifiedName, contract.Version, contractTypeName) field
+                        let value = valueExpr refSchemaName (contract.QualifiedName, contract.Version, contractTypeName) field
                         line $"                withSchema {parenthesize value}"
 
                     if supplies then
@@ -602,7 +750,7 @@ module Emitter =
                 |> List.iteri (fun index field ->
                     let opener = if index = 0 then "{ " else "  "
                     let closer = if index = List.length contract.Fields - 1 then " })" else ""
-                    line $"                {opener}{escapeIdent (fsFieldName field)} = {escapeIdent (camel field.FieldName)}{closer}")
+                    line $"                {opener}{contractTypeName}.{escapeIdent (fsFieldName field)} = {escapeIdent (camel field.FieldName)}{closer}")
 
             line "        }"
 

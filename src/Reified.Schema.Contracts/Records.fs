@@ -129,6 +129,53 @@ module Records =
           UnionCases: SynUnionCase list
           UnionLine: int }
 
+    type private KnownTypes =
+        { Records: Set<string>
+          Unions: Map<string, UnionInfo> }
+
+    let private unionInfo (source: ISourceText) (fsName: string) (wireUnion: SynAttribute option) (cases: SynUnionCase list) line =
+        let _, unionNamedArgs = wireUnion |> Option.map (attributeArgs source) |> Option.defaultValue ([], [])
+        let namedIdent name fallback =
+            unionNamedArgs
+            |> List.tryPick (fun (argumentName, value) ->
+                if argumentName = name then
+                    match value with
+                    | SynExpr.LongIdent(longDotId = longId) -> Some(lastIdent longId)
+                    | SynExpr.Ident ident -> Some ident.idText
+                    | _ -> None
+                else None)
+            |> Option.defaultValue fallback
+        let namedString name fallback =
+            unionNamedArgs
+            |> List.tryPick (fun (argumentName, value) ->
+                match argumentName, value with
+                | argumentName, SynExpr.Const(SynConst.String(text, _, _), _) when argumentName = name -> Some text
+                | _ -> None)
+            |> Option.defaultValue fallback
+        let namedBool name fallback =
+            unionNamedArgs
+            |> List.tryPick (fun (argumentName, value) ->
+                match argumentName, value with
+                | argumentName, SynExpr.Const(SynConst.Bool value, _) when argumentName = name -> Some value
+                | _ -> None)
+            |> Option.defaultValue fallback
+
+        { UnionFsName = fsName
+          IsMarked = wireUnion.IsSome
+          Discriminator =
+            wireUnion
+            |> Option.bind (fun attribute ->
+                match attributeArgs source attribute with
+                | [], _ -> Some "type"
+                | [ LString discriminator ], _ -> Some discriminator
+                | _ -> None)
+          Representation = namedIdent "Representation" "Internal"
+          PayloadField = namedString "PayloadField" "value"
+          PayloadStyle = namedIdent "PayloadStyle" "Named"
+          UnwrapFieldless = namedBool "UnwrapFieldless" true
+          UnionCases = cases
+          UnionLine = line }
+
     let private chainOf (source: ISourceText) (attribute: SynAttribute) (fsName: string) (markedNames: Set<string>) =
         let _, named = attributeArgs source attribute
 
@@ -159,35 +206,43 @@ module Records =
             else
                 fsName, 0 // resolved to latest+0 sentinel below
 
-    let private markedTypePaths (filePath: string) (sourceText: string) =
+    let private knownTypesIn (filePath: string) (sourceText: string) =
         let source = SourceText.ofString sourceText
         let options = { FSharpParsingOptions.Default with SourceFiles = [| filePath |] }
         let result = checker.Value.ParseFile(filePath, source, options) |> Async.RunSynchronously
 
         if result.Diagnostics |> Array.exists (fun diagnostic -> diagnostic.Severity = FSharp.Compiler.Diagnostics.FSharpDiagnosticSeverity.Error) then
-            []
+            { Records = Set.empty; Unions = Map.empty }
         else
             match result.ParseTree with
             | ParsedInput.ImplFile(ParsedImplFileInput(contents = modules)) ->
-                modules
-                |> List.collect (fun (SynModuleOrNamespace(longId, _, _, decls, _, _, _, _, _)) ->
+                let entries =
+                    modules
+                    |> List.collect (fun (SynModuleOrNamespace(longId, _, _, decls, _, _, _, _, _)) ->
                     let container = longId |> List.map _.idText |> String.concat "."
 
                     decls
                     |> List.collect (function
                         | SynModuleDecl.Types(typeDefns, _) ->
                             typeDefns
-                            |> List.choose (fun (SynTypeDefn(SynComponentInfo(attributes, _, _, typeId, _, _, _, _), _, _, _, _, _)) ->
-                                if attributesOf attributes |> List.exists (fun (name, _) -> name = "DeriveSchema") then
-                                    Some(container + "." + (List.last typeId).idText)
-                                else
-                                    None)
+                            |> List.choose (fun (SynTypeDefn(SynComponentInfo(attributes, _, _, typeId, _, _, _, _), typeRepr, _, _, range, _)) ->
+                                let name = container + "." + (List.last typeId).idText
+                                let attrs = attributesOf attributes
+                                let record = attrs |> List.exists (fun (attributeName, _) -> attributeName = "DeriveSchema")
+                                match typeRepr with
+                                | SynTypeDefnRepr.Simple(SynTypeDefnSimpleRepr.Union(_, cases, _), _) ->
+                                    let deriveUnion = attrs |> List.tryPick (fun (attributeName, attribute) -> if attributeName = "DeriveUnion" then Some attribute else None)
+                                    Some(name, Choice2Of2(unionInfo source (List.last typeId).idText deriveUnion cases range.StartLine))
+                                | _ when record -> Some(name, Choice1Of2 ())
+                                | _ -> None)
                         | _ -> []))
-            | _ -> []
+                { Records = entries |> List.choose (function | name, Choice1Of2 () -> Some name | _ -> None) |> Set.ofList
+                  Unions = entries |> List.choose (function | name, Choice2Of2 union -> Some(name, union) | _ -> None) |> Map.ofList }
+            | _ -> { Records = Set.empty; Unions = Map.empty }
 
     /// <summary>Parses one F# source file and lowers its marked records. Returns a contract file whose
     /// <c>Contracts</c> list is empty when the file declares no <c>[&lt;DeriveSchema&gt;]</c> records.</summary>
-    let private parseWithKnownTypes (knownTypes: Set<string>) (naming: SchemaNaming) (filePath: string) (sourceText: string) : Result<ContractFile, ContractDiagnostic list> =
+    let private parseWithKnownTypes (knownTypes: KnownTypes) (naming: SchemaNaming) (filePath: string) (sourceText: string) : Result<ContractFile, ContractDiagnostic list> =
         let source = SourceText.ofString sourceText
         let parsingOptions = { FSharpParsingOptions.Default with SourceFiles = [| filePath |] }
 
@@ -216,6 +271,7 @@ module Records =
         let mutable moduleName: string option = None
         let records = ResizeArray<SynAttribute * string option * SynComponentInfo * SynField list * PreXmlDoc * int>()
         let unions = Collections.Generic.Dictionary<string, UnionInfo>()
+        let aliases = Collections.Generic.Dictionary<string, SynType>()
 
         let inspectTypeDefn (SynTypeDefn(componentInfo, typeRepr, members, _, range, _)) =
             let (SynComponentInfo(attributes, typeParams, _, longId, xmlDoc, _, accessibility, _)) = componentInfo
@@ -285,52 +341,13 @@ module Records =
                     | _, Some _ -> report range.StartLine $"wire DTO '{fsName}' must be public; wire records carry no invariants to protect"
                     | None, None -> records.Add(attribute, schemaConstructor, componentInfo, fields, xmlDoc, range.StartLine)
             | SynTypeDefnRepr.Simple(SynTypeDefnSimpleRepr.Union(_, cases, _), _) ->
-                unions.[fsName] <-
-                    let _, unionNamedArgs = wireUnion |> Option.map (attributeArgs source) |> Option.defaultValue ([], [])
-                    let namedIdent name fallback =
-                        unionNamedArgs
-                        |> List.tryPick (fun (argumentName, value) ->
-                            if argumentName = name then
-                                match value with
-                                | SynExpr.LongIdent(longDotId = longId) -> Some(lastIdent longId)
-                                | SynExpr.Ident ident -> Some ident.idText
-                                | _ -> None
-                            else None)
-                        |> Option.defaultValue fallback
-                    let namedString name fallback =
-                        unionNamedArgs
-                        |> List.tryPick (fun (argumentName, value) ->
-                            match argumentName, value with
-                            | argumentName, SynExpr.Const(SynConst.String(text, _, _), _) when argumentName = name -> Some text
-                            | _ -> None)
-                        |> Option.defaultValue fallback
-                    let namedBool name fallback =
-                        unionNamedArgs
-                        |> List.tryPick (fun (argumentName, value) ->
-                            match argumentName, value with
-                            | argumentName, SynExpr.Const(SynConst.Bool value, _) when argumentName = name -> Some value
-                            | _ -> None)
-                        |> Option.defaultValue fallback
-
-                    { UnionFsName = fsName
-                      IsMarked = wireUnion.IsSome
-                      Discriminator =
-                        wireUnion
-                          |> Option.bind (fun attribute ->
-                            match attributeArgs source attribute with
-                            | [], _ -> Some "type"
-                            | [ LString discriminator ], _ -> Some discriminator
-                            | _ -> None)
-                      Representation = namedIdent "Representation" "Internal"
-                      PayloadField = namedString "PayloadField" "value"
-                      PayloadStyle = namedIdent "PayloadStyle" "Named"
-                      UnwrapFieldless = namedBool "UnwrapFieldless" true
-                      UnionCases = cases
-                      UnionLine = range.StartLine }
+                unions.[fsName] <- unionInfo source fsName wireUnion cases range.StartLine
 
                 if wireSchema.IsSome then
                     report range.StartLine
                         $"'{fsName}' is a union; [<DeriveSchema>] marks records — unions participate as field types (nullary cases as an enum, [<DeriveUnion>] for tagged payloads)"
+            | SynTypeDefnRepr.Simple(SynTypeDefnSimpleRepr.TypeAbbrev(_, abbreviatedType, _), _) ->
+                aliases.[fsName] <- abbreviatedType
             | _ ->
                 if wireSchema.IsSome then
                     report range.StartLine $"[<DeriveSchema>] applies to record types; '{fsName}' is not a record"
@@ -434,6 +451,16 @@ module Records =
                 report line $"'{name}' is not a [<DeriveSchema>] record in this source file"
                 None
 
+        let uniqueKnownPath line kind (paths: seq<string>) name =
+            let paths = paths |> Seq.filter (fun path -> path = name || path.EndsWith("." + name, StringComparison.Ordinal)) |> Seq.distinct |> List.ofSeq
+
+            match paths with
+            | [ path ] -> Some path
+            | [] -> None
+            | _ ->
+                report line $"'{name}' is ambiguous among derived {kind}s; use its fully qualified type path"
+                None
+
         let rec lowerType line (synType: SynType) : FieldType option =
             match synType with
             | SynType.LongIdent longIdent ->
@@ -462,25 +489,42 @@ module Records =
                     let fullName = identText longIdent
 
                     match unions.TryGetValue shortName with
-                    | true, union -> lowerUnion line union
+                    | true, union ->
+                        let typePath =
+                            match moduleName with
+                            | Some prefix -> prefix + "." + union.UnionFsName
+                            | None -> union.UnionFsName
+                        lowerUnion line typePath union
                     | false, _ ->
-                        if markedNames.Contains shortName then
+                        match aliases.TryGetValue shortName with
+                        | true, abbreviatedType -> lowerType line abbreviatedType
+                        | false, _ when markedNames.Contains shortName ->
                             referenceTo line shortName |> Option.map Reference
-                        elif knownTypes.Contains fullName then
-                            Some(Reference { RefName = fullName; RefVersion = 1 })
-                        else
-                            report line $"unknown wire field type '{name}'"
-                            None
+                        | false, _ ->
+                            match uniqueKnownPath line "record" knownTypes.Records fullName with
+                            | Some path -> Some(Reference { RefName = path; RefVersion = 1 })
+                            | None ->
+                                match uniqueKnownPath line "union" knownTypes.Unions.Keys fullName with
+                                | Some path -> lowerUnion line path (Map.find path knownTypes.Unions)
+                                | None ->
+                                    report line $"unknown wire field type '{name}'"
+                                    None
             | SynType.App(typeName = SynType.LongIdent head; typeArgs = args) ->
                 match lastIdent head, args with
                 | "list", [ element ] -> lowerType line element |> Option.map ListOf
                 | "option", [ _ ] ->
                     report line "nested options are not supported; '?' absence is one axis (mark the field itself optional)"
                     None
-                | "Map", [ SynType.LongIdent key; value ] when identText key = "string" ->
-                    lowerType line value |> Option.map MapOf
+                | "Map", [ SynType.LongIdent key; value ] ->
+                    match lowerType line (SynType.LongIdent key) with
+                    | Some(Primitive PText) -> lowerType line value |> Option.map MapOf
+                    | Some(ExternalTransparent(typeName, caseName, Primitive PText)) ->
+                        lowerType line value |> Option.map (fun element -> MapOfTransparentKey(typeName, caseName, element))
+                    | _ ->
+                        report line "wire map keys must be string or a transparent single-case string union"
+                        None
                 | "Map", _ ->
-                    report line "wire map keys are always 'string' (JSON object keys are strings)"
+                    report line "wire maps take a key and a value type"
                     None
                 | name, _ ->
                     report line $"unknown wire field type '{name}'"
@@ -489,10 +533,10 @@ module Records =
                 report line "arrays are not supported in the wire vocabulary; use 'list'"
                 None
             | _ ->
-                report line "unsupported wire field type; the vocabulary is primitives, list, Map<string, _>, option, marked records, and unions"
+                report line "unsupported wire field type; the vocabulary is primitives, list, maps with string-like keys, option, marked records, and unions"
                 None
 
-        and lowerUnion line (union: UnionInfo) : FieldType option =
+        and lowerUnion line (typeName: string) (union: UnionInfo) : FieldType option =
             let caseName (SynUnionCase(ident = SynIdent(ident, _))) = ident.idText
 
             let caseWireName (SynUnionCase(attributes = attributes)) fallback =
@@ -516,7 +560,7 @@ module Records =
             let transparent =
                 match union.UnionCases with
                 | [ SynUnionCase(ident = SynIdent(caseIdent, _); caseType = SynUnionCaseKind.Fields [ SynField(fieldType = fieldType) ]) ] ->
-                    lowerType line fieldType |> Option.map (fun payload -> ExternalTransparent(union.UnionFsName, caseIdent.idText, payload))
+                    lowerType line fieldType |> Option.map (fun payload -> ExternalTransparent(typeName, caseIdent.idText, payload))
                 | _ -> None
 
             match transparent, union.IsMarked, union.Discriminator with
@@ -528,7 +572,7 @@ module Records =
                         let fsCase = caseName case
                         { EnumTag = caseWireName case (wireName naming fsCase); EnumFsCase = fsCase })
 
-                Some(ExternalEnum(union.UnionFsName, cases))
+                Some(ExternalEnum(typeName, cases))
             | _, _, None ->
                 report line
                     $"union '{union.UnionFsName}' has payload cases; mark it [<DeriveUnion \"discriminator\">] with one marked-record payload per case, or make every case nullary for an enum"
@@ -547,15 +591,18 @@ module Records =
                                   ExtFsCase = fsCase
                                   ExtPayload = ExternalEmpty
                                   ExtLine = caseRange.StartLine }
-                        | SynUnionCaseKind.Fields [ SynField(fieldType = SynType.LongIdent payload) ] when
-                            markedNames.Contains(lastIdent payload)
-                            ->
-                            referenceTo caseRange.StartLine (lastIdent payload)
-                            |> Option.map (fun reference ->
-                                { ExtTag = caseWireName case (wireName naming fsCase)
-                                  ExtFsCase = fsCase
-                                  ExtPayload = ExternalRecord reference
-                                  ExtLine = caseRange.StartLine })
+                        | SynUnionCaseKind.Fields [ SynField(idOpt = None; fieldType = SynType.LongIdent payload) ] ->
+                            match lowerType caseRange.StartLine (SynType.LongIdent payload) with
+                            | Some(Reference reference) ->
+                                Some
+                                    { ExtTag = caseWireName case (wireName naming fsCase)
+                                      ExtFsCase = fsCase
+                                      ExtPayload = ExternalRecord reference
+                                      ExtLine = caseRange.StartLine }
+                            | _ ->
+                                report caseRange.StartLine
+                                    $"case '{fsCase}' of wire union '{union.UnionFsName}' must name every field"
+                                None
                         | SynUnionCaseKind.Fields fields ->
                             let loweredFields =
                                 fields
@@ -608,7 +655,7 @@ module Records =
                         report union.UnionLine $"unknown union representation '{other}'"
                         GeneratedInternal discriminator
 
-                Some(ExternalUnion(union.UnionFsName, representation, cases))
+                Some(ExternalUnion(typeName, representation, cases))
 
         let lowerField (field: SynField) : FieldDecl option =
             let (SynField(attributes, _, idOpt, fieldType, _, xmlDoc, _, range, _)) = field
@@ -746,15 +793,18 @@ module Records =
 
     /// Parses one source file without project-wide references. Prefer <c>parseSet</c> for build generation.
     let parse naming filePath sourceText =
-        parseWithKnownTypes Set.empty naming filePath sourceText
+        parseWithKnownTypes { Records = Set.empty; Unions = Map.empty } naming filePath sourceText
 
     /// Parses a project set. The first pass builds a catalogue keyed by each derived type's fully qualified
     /// namespace/module path; the second pass only accepts cross-file references written with that full path.
     let parseSet naming (sources: (string * string) list) =
         let knownTypes =
             sources
-            |> List.collect (fun (path, text) -> markedTypePaths path text)
-            |> Set.ofList
+            |> List.map (fun (path, text) -> knownTypesIn path text)
+            |> List.fold (fun state current ->
+                { Records = Set.union state.Records current.Records
+                  Unions = Map.fold (fun unions key value -> Map.add key value unions) state.Unions current.Unions })
+                { Records = Set.empty; Unions = Map.empty }
 
         sources
         |> List.map (fun (path, text) -> path, parseWithKnownTypes knownTypes naming path text)

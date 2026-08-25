@@ -8,6 +8,8 @@ open Reified.SchemaDSL
 
 module MapSchemaParseTests =
     type private Thresholds = { Values: Map<string, decimal> }
+    type private LocaleTag = LocaleTag of string
+    type private LocalizedText = { Values: Map<LocaleTag, string> }
 
     let private thresholdsSchema =
         schema<Thresholds> {
@@ -16,6 +18,23 @@ module MapSchemaParseTests =
             }
             construct (fun values -> { Values = values })
         }
+
+    let private localizedTextSchema =
+        schema<LocalizedText> {
+            field _.Values {
+                withSchema (Schema.mapWithKey LocaleTag (fun (LocaleTag key) -> key) Schema.text)
+            }
+            construct (fun values -> { Values = values })
+        }
+
+    [<Fact>]
+    let ``parse builds a map with transparent string keys`` () =
+        let raw =
+            Data.objectOfMap
+                (Map.ofList
+                    [ "values", Data.objectOfMap (Map.ofList [ "en", Data.Text "Hello"; "fr", Data.Text "Bonjour" ]) ])
+
+        test <@ Schema.parse localizedTextSchema raw = Ok { Values = Map.ofList [ LocaleTag "en", "Hello"; LocaleTag "fr", "Bonjour" ] } @>
 
     [<Fact>]
     let ``parse builds a Map from object-shaped structured data`` () =
