@@ -14,14 +14,12 @@ Declare value and model invariants once. Derive validation, parsing, diagnostics
 
 ## How the packages fit
 
-<table align="center">
-<tr><td><pre>
+<pre>
 Constraint ─┐
 Parse ──────┤
 Data ───────┼──> Schema ───> Schema.Json
 Refinements ┘             └──> contract tooling
-</pre></td></tr>
-</table>
+</pre>
 
 Install Schema when structured input must become a model. Constraint, Parse, Data, and Refinements can each be used
 alone without Schema, but they are designed to work together consistently.
