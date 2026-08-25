@@ -14,38 +14,31 @@ Declare value and model invariants once. Derive validation, parsing, diagnostics
 
 ## How the packages fit
 
-<div align="center">
-<pre>
+<table align="center">
+<tr><td><pre>
 Constraint ─┐
 Parse ──────┤
 Data ───────┼──> Schema ───> Schema.Json
 Refinements ┘             └──> contract tooling
-</pre>
-</div>
+</pre></td></tr>
+</table>
 
 Install Schema when structured input must become a model. Constraint, Parse, Data, and Refinements can each be used
 alone without Schema, but they are designed to work together consistently.
 
 ## Why Reified
 
-### Trust values at the boundary
+Reified means “made concrete”: the library turns a model's rules into data that validation, codecs, contracts, and tests can share.
 
-- **Type-safe data refinement and narrowing functions** — define reusable `Constraint<'value>` rules, check them with `Constraint.check`, and construct invariant-carrying values with `Refinement.create` and Reified's refined types.
-- **Hierarchical error accumulation with structured, keyed paths** — `SchemaErrors`, `SchemaIssue`, and `SchemaPath` retain property names and collection indexes for precise API, form, and document errors.
-- **Inspectable constraints rather than predicate-only validation** — built-in constraint metadata drives checking, diagnostics, JSON Schema export, and generation.
-- **Accumulating boundary validation** — report independent field, nested-object, and collection failures together instead of stopping at the first error.
+Most boundary code repeats the same facts in validators, decoders, error handling, API contracts, and tests. Reified
+keeps those facts in one typed declaration and lets each job read from it.
 
-### Keep every interpreter aligned
-
-- **One schema for parsing, validation, JSON codecs, JSON Schema, contracts, and test-data generation** — field names, value shapes, constraints, and constructors stay aligned.
-- **Compiler-directed, type-safe JSON codecs** — compile codecs once from typed schemas without reflection or boxed object-array record construction.
-- **Explicit, evolution-friendly discriminated-union wire formats** — model existing JSON with internal, adjacent, external, or untagged representations; the recommended internal-tag format supports OpenAPI discriminators and mainstream code generation.
-- **Build-time schema derivation for F# records** — `[<DeriveSchema>]` generates ordinary typed schemas at compile time without runtime reflection.
-
-### Run the same model everywhere
-
-- **First-class NativeAOT, trimming, and Fable support through explicit compile-time schemas** — schemas and compiled JSON codecs do not depend on runtime reflection.
-- **Portable structured data for .NET and JavaScript** — use the same `Data`, constraints, schemas, and core assertions on .NET and Fable.
+- **Type-safe data refinement and narrowing functions** — once a value has passed its rules, represent that fact in its type instead of checking it again throughout the application.
+- **Hierarchical error accumulation** — get a structured, keyed diagnostic tree that keeps property names and collection indexes intact, so an API or UI can put each message in the right place.
+- **One definition of the model** — parsing, validation, JSON codecs, JSON Schema, contracts, and generated test data share field names, shapes, and rules.
+- **Compatible discriminated unions** — use a tooling-friendly default for new JSON, or describe the established representation when integrating with an existing serializer.
+- **Schema derivation for boundary records** — generate the declaration at build time when a record already contains the necessary wire-format rules.
+- **First-class AOT compilation and Fable support through explicit schemas** — avoid runtime reflection, run the same model on .NET, and compile it to JavaScript.
 
 ## Declare the rule once
 
