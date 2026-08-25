@@ -29,10 +29,10 @@ module SchemaUnionInlineValueTests =
         }
 
     let private paymentSchema () =
-        Schema.inlineUnion
-            "type"
-            [ UnionCase.create "card" Card (function Card details -> Some details | _ -> None) ((cardSchema ()))
-              UnionCase.create
+        Schema.unionWith
+            (UnionRepresentation.Internal "type")
+            [ UnionCase.fields "card" Card (function Card details -> Some details | _ -> None) ((cardSchema ()))
+              UnionCase.fields
                   "invoice"
                   Invoice
                   (function Invoice details -> Some details | _ -> None)
@@ -54,11 +54,11 @@ module SchemaUnionInlineValueTests =
             |> List.exactlyOne
 
         match payment.Schema.Shape with
-        | SchemaShape.UnionInline union ->
-            test <@ union.DiscriminatorField = "type" @>
+        | SchemaShape.Union union ->
+            test <@ union.Representation = UnionRepresentation.Internal "type" @>
             test <@ union.Cases |> List.map _.Tag = [ "card"; "invoice" ] @>
-            test <@ union.Cases[0].Payload.Fields |> List.map _.Name = [ "number" ] @>
-            test <@ union.Cases[1].Payload.Fields |> List.map _.Name = [ "reference" ] @>
+            test <@ match union.Cases[0].Shape with UnionCaseShape.Fields payload -> payload.Fields |> List.map _.Name = [ "number" ] | _ -> false @>
+            test <@ match union.Cases[1].Shape with UnionCaseShape.Fields payload -> payload.Fields |> List.map _.Name = [ "reference" ] | _ -> false @>
         | _ -> failwith "Expected a union-inline value shape."
 
     [<Fact>]
@@ -92,18 +92,18 @@ module SchemaUnionInlineValueTests =
             }
 
         Assert.Throws<ArgumentException>(fun () ->
-            Schema.inlineUnion
-                "type"
-                [ UnionCase.create "card" Card (function Card details -> Some details | _ -> None) (colliding) ]
+            Schema.unionWith
+                (UnionRepresentation.Internal "type")
+                [ UnionCase.fields "card" Card (function Card details -> Some details | _ -> None) (colliding) ]
             |> ignore)
         |> ignore
 
     [<Fact>]
     let ``unionInline rejects payloads that are not nested model schemas`` () =
         Assert.Throws<ArgumentException>(fun () ->
-            Schema.inlineUnion
-                "type"
-                [ UnionCase.create
+            Schema.unionWith
+                (UnionRepresentation.Internal "type")
+                [ UnionCase.value
                       "invoice"
                       (fun reference -> Invoice { Reference = reference })
                       (function Invoice details -> Some details.Reference | _ -> None)

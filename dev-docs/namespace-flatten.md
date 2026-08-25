@@ -92,8 +92,8 @@ Ordered so each phase builds and tests green on its own, and so the riskiest ren
 - `ApiShapeTests.fs` asserts on compiled type names throughout; every `Reified.Schema.X`
   and `Reified.Constraint.X` string changes.
 - `scripts/docgen/Program.fs` member IDs are all `T:Reified.Schema.*` / `M:Reified.Constraint.*`.
-- Generated reference pages re-slug; they are gitignored, so regenerate rather than edit. The slug
-  assertions in `scripts/validate-docs.sh` and `scripts/validate-product-docs.sh` move with them.
+- Generated reference pages re-slug; they are gitignored, so regenerate rather than edit. Run `dotnet livedocs build`
+  after namespace changes so generated API links and guide links are checked together.
 
 ## Surprises worth keeping
 

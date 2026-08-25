@@ -58,10 +58,12 @@ module Schema =
         (schema: Schema<'value>)
         : Schema<'value> =
         SchemaCore.validate validation schema
-    /// <summary>Describes an externally tagged union.</summary>
-    let union discriminator payload cases = SchemaCore.union discriminator payload cases
-    /// <summary>Describes an internally tagged union.</summary>
-    let inlineUnion discriminator cases = SchemaCore.inlineUnion discriminator cases
+    /// <summary>Describes the recommended internally tagged union using the <c>type</c> discriminator and named fields.</summary>
+    let union cases = SchemaCore.union cases
+
+    /// <summary>Describes a union using an explicit complete wire representation.</summary>
+    let unionWith representation cases = SchemaCore.unionWith representation cases
+
     /// <summary>Describes a scalar enum.</summary>
     let enum cases = SchemaCore.enum cases
 

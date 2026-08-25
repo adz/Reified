@@ -50,13 +50,7 @@ bash scripts/check-schema-ce-errors.sh
 bash scripts/check-fable-js-surface.sh
 bash scripts/run-aot-probe.sh
 bash scripts/run-package-consumers.sh
-bash scripts/validate-docs.sh
-```
-
-For release/deploy checks, also run:
-
-```bash
-npm run build --prefix site
+dotnet livedocs build --version <release-version> --interactive false --banner false
 ```
 
 4. Commit the release-prep changes.

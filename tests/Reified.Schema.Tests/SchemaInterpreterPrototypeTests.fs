@@ -90,8 +90,12 @@ module SchemaInterpreterPrototypes =
                     | SchemaShape.Union union ->
                         union.Cases
                         |> List.collect (fun case ->
-                            match underlyingShape case.Payload with
-                            | SchemaShape.Nested nested -> fieldLines (indent + "  ") nested
+                            match case.Shape with
+                            | UnionCaseShape.Value payload ->
+                                match underlyingShape payload with
+                                | SchemaShape.Nested nested -> fieldLines (indent + "  ") nested
+                                | _ -> []
+                            | UnionCaseShape.Fields nested -> fieldLines (indent + "  ") nested
                             | _ -> [])
                     | _ -> []
 

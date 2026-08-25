@@ -50,6 +50,7 @@ Json.serialize (Json.compile signupSchema) signup
 // {"email":"ada@example.org","age":36,"newsletter":true}
 ```
 
+
 </div>
 
 <p style="max-width: 78ch; margin: 0 auto 0.5rem; text-align: center;">Every failure message, the JSON codec, the
@@ -61,15 +62,14 @@ JSON Schema, and the generated test data come from that one declaration. Nothing
 
 </div>
 
-## Route by symptom
+<h2 class="docs-home-section-title">Route by symptom</h2>
 
 | Problem | Goes to |
 | --- | --- |
-| Validation boilerplate is everywhere, and invalid values still get through | [Validating values](/validating-values/index.html) |
-| The same rule is repeated in a parser, a validator, a form, and a test | [Modelling](/modelling/index.html) |
-| Decoding and validation are separate steps that drift apart | [JSON](/json/index.html) |
-| Client and server disagree about the shape of a request | [HTTP contracts](/http-contracts/index.html) |
-| Constructing test data by hand is slow and repetitive | [Testing](/testing/index.html) |
+| Validation boilerplate is everywhere, and invalid values still get through | [Constraints](/constraints/index.html) |
+| The same rule is repeated in a parser, a form, and a test | [Schema](/schema/index.html) |
+| Decoding and validation are separate steps that drift apart | [JSON Codecs](/schema/json-codecs.html) |
+| Constructing structured test data by hand is slow and repetitive | [Data](/data/index.html) |
 | You want one small library, not a framework | [Packages and platforms](/notes/packages-and-platforms.html) |
 
 <p style="max-width: 78ch; margin: 2rem auto; text-align: center;">Every package is independently installable

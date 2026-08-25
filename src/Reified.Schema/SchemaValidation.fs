@@ -165,7 +165,6 @@ module internal ModelFieldCheck =
             | NestedValueDefinition _
             | ManyValueDefinition _
             | UnionValueDefinition _
-            | UnionInlineValueDefinition _
             | EnumValueDefinition _
             | OptionValueDefinition _
             | MapValueDefinition _ -> valueDefinition.Rules
@@ -180,7 +179,6 @@ module internal ModelFieldCheck =
             | NestedValueDefinition _ -> invalidOp "Nested model value schemas have no underlying primitive kind."
             | ManyValueDefinition _ -> invalidOp "Collection value schemas have no underlying primitive kind."
             | UnionValueDefinition _ -> invalidOp "Union value schemas have no underlying primitive kind."
-            | UnionInlineValueDefinition _ -> invalidOp "Union-inline value schemas have no underlying primitive kind."
             | EnumValueDefinition _ -> invalidOp "Enum value schemas have no underlying primitive kind."
             | OptionValueDefinition _ -> invalidOp "Optional value schemas have no underlying primitive kind."
             | MapValueDefinition _ -> invalidOp "Map value schemas have no underlying primitive kind."
@@ -196,7 +194,6 @@ module internal ModelFieldCheck =
             | NestedValueDefinition _ -> invalidOp "Nested model values have no underlying primitive representation."
             | ManyValueDefinition _ -> invalidOp "Collection values have no underlying primitive representation."
             | UnionValueDefinition _ -> invalidOp "Union values have no underlying primitive representation."
-            | UnionInlineValueDefinition _ -> invalidOp "Union-inline values have no underlying primitive representation."
             | EnumValueDefinition _ -> invalidOp "Enum values have no underlying primitive representation."
             | OptionValueDefinition _ -> invalidOp "Optional values have no underlying primitive representation."
             | MapValueDefinition _ -> invalidOp "Map values have no underlying primitive representation."
@@ -257,9 +254,6 @@ module internal ModelFieldCheck =
             |> SchemaResult.map (fun _ -> value)
         | UnionValueDefinition union ->
             validateUnion path union value
-            |> SchemaResult.map (fun _ -> value)
-        | UnionInlineValueDefinition union ->
-            validateUnionInline path union value
             |> SchemaResult.map (fun _ -> value)
         | EnumValueDefinition enum ->
             validateEnum path enum value
@@ -335,23 +329,28 @@ module internal ModelFieldCheck =
         | [] -> checkMany rules path value
         | diagnostics -> diagnostics |> mergeErrors |> SchemaResult.error
 
-    and private validateUnion path (union: TaggedUnionValueDefinition) value =
-        let payloadName = ExternalFieldName.value union.PayloadField
-        let payloadPath = path @ [ KeyComponent payloadName ]
+    and private validateUnion path (union: UnionValueDefinition) value =
+        let matches =
+            union.Cases
+            |> List.choose (fun case -> case.TryInspect value |> Option.map (fun payload -> case, payload))
 
-        match union.Cases |> List.tryPick (fun case -> case.TryInspect value |> Option.map (fun payload -> case, payload)) with
-        | Some(case, payload) ->
-            validateValue case.Payload [] payloadPath payload
-        | None ->
+        match matches with
+        | [ case, payload ] ->
+            let payloadPath =
+                match union.Representation with
+                | UnionRepresentation.Internal _ -> path
+                | UnionRepresentation.Adjacent(_, payloadField, _) -> path @ [ KeyComponent payloadField ]
+                | UnionRepresentation.External _ -> path @ [ KeyComponent case.Tag ]
+            match case.Payload with
+            | EmptyUnionCase -> SchemaResult.ok value
+            | ValueUnionCase payloadSchema
+            | FieldsUnionCase payloadSchema -> validateValue payloadSchema [] payloadPath payload
+        | [] ->
             SchemaError.Custom("union.case", Some "The value did not match any configured union case.")
             |> diagnosticsAt path
             |> SchemaResult.error
-
-    and private validateUnionInline path (union: InlineTaggedUnionValueDefinition) value =
-        match union.Cases |> List.tryPick (fun case -> case.TryInspect value |> Option.map (fun payload -> case, payload)) with
-        | Some(case, payload) -> validateValue case.Payload [] path payload
-        | None ->
-            SchemaError.Custom("union.case", Some "The value did not match any configured union case.")
+        | _ ->
+            SchemaError.Custom("union.case.ambiguous", Some "The value matched more than one configured union case.")
             |> diagnosticsAt path
             |> SchemaResult.error
 

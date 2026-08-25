@@ -120,7 +120,12 @@ module Records =
 
     type private UnionInfo =
         { UnionFsName: string
+          IsMarked: bool
           Discriminator: string option
+          Representation: string
+          PayloadField: string
+          PayloadStyle: string
+          UnwrapFieldless: bool
           UnionCases: SynUnionCase list
           UnionLine: int }
 
@@ -254,13 +259,45 @@ module Records =
                     | None, None -> records.Add(attribute, schemaConstructor, componentInfo, fields, xmlDoc, range.StartLine)
             | SynTypeDefnRepr.Simple(SynTypeDefnSimpleRepr.Union(_, cases, _), _) ->
                 unions.[fsName] <-
+                    let _, unionNamedArgs = wireUnion |> Option.map (attributeArgs source) |> Option.defaultValue ([], [])
+                    let namedIdent name fallback =
+                        unionNamedArgs
+                        |> List.tryPick (fun (argumentName, value) ->
+                            if argumentName = name then
+                                match value with
+                                | SynExpr.LongIdent(longDotId = longId) -> Some(lastIdent longId)
+                                | SynExpr.Ident ident -> Some ident.idText
+                                | _ -> None
+                            else None)
+                        |> Option.defaultValue fallback
+                    let namedString name fallback =
+                        unionNamedArgs
+                        |> List.tryPick (fun (argumentName, value) ->
+                            match argumentName, value with
+                            | argumentName, SynExpr.Const(SynConst.String(text, _, _), _) when argumentName = name -> Some text
+                            | _ -> None)
+                        |> Option.defaultValue fallback
+                    let namedBool name fallback =
+                        unionNamedArgs
+                        |> List.tryPick (fun (argumentName, value) ->
+                            match argumentName, value with
+                            | argumentName, SynExpr.Const(SynConst.Bool value, _) when argumentName = name -> Some value
+                            | _ -> None)
+                        |> Option.defaultValue fallback
+
                     { UnionFsName = fsName
+                      IsMarked = wireUnion.IsSome
                       Discriminator =
                         wireUnion
-                        |> Option.bind (fun attribute ->
+                          |> Option.bind (fun attribute ->
                             match attributeArgs source attribute with
+                            | [], _ -> Some "type"
                             | [ LString discriminator ], _ -> Some discriminator
                             | _ -> None)
+                      Representation = namedIdent "Representation" "Internal"
+                      PayloadField = namedString "PayloadField" "value"
+                      PayloadStyle = namedIdent "PayloadStyle" "Named"
+                      UnwrapFieldless = namedBool "UnwrapFieldless" true
                       UnionCases = cases
                       UnionLine = range.StartLine }
 
@@ -437,8 +474,15 @@ module Records =
                     | SynUnionCaseKind.Fields [] -> true
                     | _ -> false)
 
-            match union.Discriminator with
-            | None when allNullary ->
+            let transparent =
+                match union.UnionCases with
+                | [ SynUnionCase(ident = SynIdent(caseIdent, _); caseType = SynUnionCaseKind.Fields [ SynField(fieldType = fieldType) ]) ] ->
+                    lowerType line fieldType |> Option.map (fun payload -> ExternalTransparent(union.UnionFsName, caseIdent.idText, payload))
+                | _ -> None
+
+            match transparent, union.IsMarked, union.Discriminator with
+            | Some transparent, false, _ -> Some transparent
+            | _, _, None when allNullary ->
                 let cases =
                     union.UnionCases
                     |> List.map (fun case ->
@@ -446,11 +490,11 @@ module Records =
                         { EnumTag = caseWireName case (wireName naming fsCase); EnumFsCase = fsCase })
 
                 Some(ExternalEnum(union.UnionFsName, cases))
-            | None ->
+            | _, _, None ->
                 report line
                     $"union '{union.UnionFsName}' has payload cases; mark it [<DeriveUnion \"discriminator\">] with one marked-record payload per case, or make every case nullary for an enum"
                 None
-            | Some discriminator ->
+            | _, _, Some discriminator ->
                 let cases =
                     union.UnionCases
                     |> List.choose (fun case ->
@@ -458,6 +502,12 @@ module Records =
                         let fsCase = caseName case
 
                         match caseType with
+                        | SynUnionCaseKind.Fields [] ->
+                            Some
+                                { ExtTag = caseWireName case (wireName naming fsCase)
+                                  ExtFsCase = fsCase
+                                  ExtPayload = ExternalEmpty
+                                  ExtLine = caseRange.StartLine }
                         | SynUnionCaseKind.Fields [ SynField(fieldType = SynType.LongIdent payload) ] when
                             markedNames.Contains(lastIdent payload)
                             ->
@@ -465,14 +515,61 @@ module Records =
                             |> Option.map (fun reference ->
                                 { ExtTag = caseWireName case (wireName naming fsCase)
                                   ExtFsCase = fsCase
-                                  ExtRef = reference
+                                  ExtPayload = ExternalRecord reference
                                   ExtLine = caseRange.StartLine })
+                        | SynUnionCaseKind.Fields fields ->
+                            let loweredFields =
+                                fields
+                                |> List.choose (fun (SynField(attributes, _, idOpt, fieldType, _, _, _, fieldRange, _)) ->
+                                    match idOpt with
+                                    | None ->
+                                        report fieldRange.StartLine $"case '{fsCase}' of wire union '{union.UnionFsName}' must name every field"
+                                        None
+                                    | Some fieldName ->
+                                        let optional, payloadType =
+                                            match fieldType with
+                                            | SynType.App(typeName = SynType.LongIdent head; typeArgs = [ inner ]) when lastIdent head = "option" -> true, inner
+                                            | other -> false, other
+
+                                        lowerType fieldRange.StartLine payloadType
+                                        |> Option.map (fun lowered ->
+                                            let externalName =
+                                                attributesOf attributes
+                                                |> List.tryPick (fun (name, attribute) ->
+                                                    if name = "SchemaName" then
+                                                        match attributeArgs source attribute with
+                                                        | [ LString wire ], _ -> Some wire
+                                                        | _ -> None
+                                                    else None)
+                                                |> Option.defaultValue (wireName naming fieldName.idText)
+
+                                            { ExtFieldName = fieldName.idText
+                                              ExtWireName = externalName
+                                              ExtFieldType = lowered
+                                              ExtOptional = optional }))
+
+                            if List.length loweredFields = List.length fields then
+                                Some
+                                    { ExtTag = caseWireName case (wireName naming fsCase)
+                                      ExtFsCase = fsCase
+                                      ExtPayload = ExternalFields loweredFields
+                                      ExtLine = caseRange.StartLine }
+                            else None
                         | _ ->
                             report caseRange.StartLine
                                 $"case '{fsCase}' of wire union '{union.UnionFsName}' must carry exactly one [<DeriveSchema>] record payload"
                             None)
 
-                Some(ExternalUnion(union.UnionFsName, discriminator, cases))
+                let representation =
+                    match union.Representation with
+                    | "Internal" -> GeneratedInternal discriminator
+                    | "Adjacent" -> GeneratedAdjacent(discriminator, union.PayloadField, union.PayloadStyle)
+                    | "External" -> GeneratedExternal(union.PayloadStyle, union.UnwrapFieldless)
+                    | other ->
+                        report union.UnionLine $"unknown union representation '{other}'"
+                        GeneratedInternal discriminator
+
+                Some(ExternalUnion(union.UnionFsName, representation, cases))
 
         let lowerField (field: SynField) : FieldDecl option =
             let (SynField(attributes, _, idOpt, fieldType, _, xmlDoc, _, range, _)) = field

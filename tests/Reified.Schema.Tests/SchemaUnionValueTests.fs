@@ -24,11 +24,10 @@ module SchemaUnionValueTests =
         }
 
     let private paymentSchema () =
-        Schema.union
-            "type"
-            "value"
-            [ UnionCase.create "card" Card (function Card details -> Some details | _ -> None) ((cardSchema ()))
-              UnionCase.create "invoice" Invoice (function Invoice id -> Some id | _ -> None) Schema.text ]
+        Schema.unionWith
+            (UnionRepresentation.Adjacent("type", "value", UnionPayloadStyle.Named))
+            [ UnionCase.value "card" Card (function Card details -> Some details | _ -> None) ((cardSchema ()))
+              UnionCase.value "invoice" Invoice (function Invoice id -> Some id | _ -> None) Schema.text ]
 
     [<Fact>]
     let ``union value schema exposes discriminator payload and case descriptions`` () =
@@ -47,16 +46,15 @@ module SchemaUnionValueTests =
 
         match payment.Schema.Shape with
         | SchemaShape.Union union ->
-            test <@ union.DiscriminatorField = "type" @>
-            test <@ union.PayloadField = "value" @>
+            test <@ union.Representation = UnionRepresentation.Adjacent("type", "value", UnionPayloadStyle.Named) @>
             test <@ union.Cases |> List.map _.Tag = [ "card"; "invoice" ] @>
 
-            match union.Cases[0].Payload.Shape with
-            | SchemaShape.Nested model -> test <@ model.Fields |> List.map _.Name = [ "number" ] @>
+            match union.Cases[0].Shape with
+            | UnionCaseShape.Value { Shape = SchemaShape.Nested model } -> test <@ model.Fields |> List.map _.Name = [ "number" ] @>
             | _ -> failwith "Expected card payload to be a nested model."
 
-            match union.Cases[1].Payload.Shape with
-            | SchemaShape.Primitive PrimitiveValueKind.Text -> ()
+            match union.Cases[1].Shape with
+            | UnionCaseShape.Value { Shape = SchemaShape.Primitive PrimitiveValueKind.Text } -> ()
             | _ -> failwith "Expected invoice payload to be text."
         | _ -> failwith "Expected a union value shape."
 

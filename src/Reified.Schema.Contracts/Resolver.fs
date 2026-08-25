@@ -35,7 +35,7 @@ module Resolver =
         | KUnion
         | KReference
 
-    let private kindOf fieldType =
+    let rec private kindOf fieldType =
         match fieldType with
         | Primitive PText
         | Primitive PEmail -> KText
@@ -49,6 +49,7 @@ module Resolver =
         | MapOf _ -> KSized "map"
         | LiteralUnion _
         | ExternalEnum _ -> KEnum
+        | ExternalTransparent(_, _, payload) -> kindOf payload
         | UnionBlock _
         | ExternalUnion _ -> KUnion
         | Reference _ -> KReference
@@ -309,6 +310,7 @@ module Resolver =
 
                             for tag, _ in cases |> List.countBy _.EnumTag |> List.filter (fun (_, count) -> count > 1) do
                                 report file.FilePath field.FieldLine $"duplicate wire tag \"{tag}\" in enum union '{typeName}'"
+                        | ExternalTransparent(_, _, payload) -> checkType payload
                         | ExternalUnion(typeName, _, cases) ->
                             if List.isEmpty cases then
                                 report file.FilePath field.FieldLine $"wire union '{typeName}' needs at least one case"
@@ -317,11 +319,15 @@ module Resolver =
                                 report file.FilePath field.FieldLine $"duplicate wire tag '{tag}' in wire union '{typeName}'"
 
                             for case in cases do
-                                resolveReference file.FilePath case.ExtLine case.ExtRef
-                                checkOrder case.ExtLine case.ExtRef
+                                match case.ExtPayload with
+                                | ExternalRecord reference ->
+                                    resolveReference file.FilePath case.ExtLine reference
+                                    checkOrder case.ExtLine reference
 
-                                if case.ExtRef.RefName = contract.ContractName && case.ExtRef.RefVersion = contract.Version then
-                                    report file.FilePath case.ExtLine "recursive union payloads are not supported; use a recursive field reference"
+                                    if reference.RefName = contract.ContractName && reference.RefVersion = contract.Version then
+                                        report file.FilePath case.ExtLine "recursive union payloads are not supported; use a recursive field reference"
+                                | ExternalFields fields -> fields |> List.iter (fun payloadField -> checkType payloadField.ExtFieldType)
+                                | ExternalEmpty -> ()
 
                     checkType field.FieldType
 

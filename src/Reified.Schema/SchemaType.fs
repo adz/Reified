@@ -60,7 +60,7 @@ module UnionCase =
     /// Thrown when <paramref name="tag" />, <paramref name="construct" />, <paramref name="tryPayload" />, or
     /// <paramref name="payload" /> is null.
     /// </exception>
-    let create tag (construct: 'payload -> 'union) (tryPayload: 'union -> 'payload option) (payload: Schema<'payload>) : UnionCase<'union> =
+    let private createValueCase tag (construct: 'payload -> 'union) (tryPayload: 'union -> 'payload option) (payload: Schema<'payload>) : UnionCase<'union> =
         if isNull tag then
             nullArg (nameof tag)
 
@@ -75,10 +75,34 @@ module UnionCase =
 
         UnionCase(
             { Tag = ExternalFieldName.create tag |> ExternalFieldName.value
-              Payload = payload.ValueDefinition
+              Payload = ValueUnionCase payload.ValueDefinition
               Construct = fun value -> value |> unbox<'payload> |> construct |> box
               TryInspect = fun value -> value |> unbox<'union> |> tryPayload |> Option.map box }
         )
+
+    /// <summary>Describes one payload-less case in a tagged union.</summary>
+    /// <remarks>The case remains part of the tagged object when it belongs to a mixed union; it is not lowered to a string.</remarks>
+    let empty tag (value: 'union) (isCase: 'union -> bool) : UnionCase<'union> =
+        if isNull tag then
+            nullArg (nameof tag)
+
+        if isNull (box isCase) then
+            nullArg (nameof isCase)
+
+        UnionCase(
+            { Tag = ExternalFieldName.create tag |> ExternalFieldName.value
+              Payload = EmptyUnionCase
+              Construct = fun _ -> box value
+              TryInspect = fun candidate -> if candidate |> unbox<'union> |> isCase then Some(box ()) else None }
+        )
+
+    /// <summary>Describes a case with one arbitrary value payload.</summary>
+    let value tag construct tryPayload payload = createValueCase tag construct tryPayload payload
+
+    /// <summary>Describes a case whose payload schema is a record model and therefore has authored fields.</summary>
+    let fields tag (construct: 'payload -> 'union) (tryPayload: 'union -> 'payload option) (payload: Schema<'payload>) : UnionCase<'union> =
+        let case = createValueCase tag construct tryPayload payload
+        UnionCase({ case.Definition with Payload = FieldsUnionCase payload.ValueDefinition })
 
 /// <summary>Functions for defining explicit payload-less enum schema cases.</summary>
 [<RequireQualifiedAccess>]

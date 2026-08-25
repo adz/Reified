@@ -63,10 +63,14 @@ Refer to [`dev-docs/PLAN.md`](dev-docs/PLAN.md) for architectural direction and
 
 ## Doc Workflow
 
-- Treat `docs/*/reference/**`, `docs/examples/README.md`, and versioned docs as generated outputs or generator-backed outputs. The root `llms.txt` and the four product ones (`docs/result/`, `docs/values/`, `docs/data/`, `docs/schema/`) are hand-written entry points.
-- When changing an API, update the source comments and the doc generator inputs first, then regenerate the docs. Do not hand-edit generated reference pages as the primary fix.
-- When a user-facing guide needs to cite a new or renamed API, update the source comments and reference pages in the same pass, then run the generators immediately.
-- For small checkbox tasks, regenerate directly affected docs as needed but defer `bash scripts/validate-docs.sh` until the phase end or a release/deploy checkpoint. `dev-docs/**` idea/planning notes do not require validation. For release/deploy checks, also run `npm run build` in `site`.
+- Treat `output/`, `.livedocs/cache/`, and rendered API pages as generated outputs. The Markdown under `docs/`, the root
+  `llms.txt`, source XML comments, and runnable examples are sources.
+- When changing an API, update source comments and relevant guides first, then run `dotnet livedocs build`. Do not
+  hand-edit generated output as the primary fix.
+- Result handling, Constraints, Parsing, Refined, Data, and Schema are separate top-level documentation sections.
+  JSON Codecs belongs under Schema; do not recreate a Values grouping or publish HTTP server guides.
+- For small code-only tasks, defer a full documentation build until the phase boundary. Run it immediately after
+  cross-section moves, public route changes, or layout changes.
 
 ## Versioning and Compatibility
 
@@ -78,7 +82,10 @@ Refer to [`dev-docs/PLAN.md`](dev-docs/PLAN.md) for architectural direction and
 
 ## Documentation Integrity
 
-- **Validate At Phase Or Release Boundaries:** For small checkbox tasks, defer `bash scripts/validate-docs.sh` until phase end or a release/deploy checkpoint, even after changes to user-facing docs, generated docs, public API signatures, XML comments, doc generator inputs, docs examples, reference docs, `llms.txt`, or site content. Regenerate affected generated docs during the task. `dev-docs/**` idea/planning notes and code-only changes with no public-doc impact do not require validation. Use `bash scripts/preview-docs.sh` only when a live server is needed for browser review or screenshots.
-- **Preview Lifecycle:** `bash scripts/preview-docs.sh` stops cleanly on `SIGHUP`, `TERM`, or `INT`. It can also be stopped by creating `$REIFIED_DOCS_PREVIEW_STOP_FILE`, which defaults to `/tmp/reified-docs-preview.stop`.
+- **Validate At Phase Or Release Boundaries:** For small code-only tasks, defer a full documentation build until the
+  phase boundary. Run `dotnet livedocs build` immediately after user-facing route, navigation, layout, public API,
+  source-comment, example, `llms.txt`, or agent-page changes. `dev-docs/**` idea notes do not require validation.
+- **Preview Lifecycle:** Use `dotnet livedocs watch --port 5000` when browser review is needed. Stop it with `TERM` or
+  `INT` after review.
 - **Link Integrity:** Ensure that all cross-references between guides and reference pages are valid. Broken links degrade the experience for both humans and AI agents.
 - **Code Highlighting:** Ensure all code examples are wrapped in triple-backticks with the `fsharp` language hint for proper syntax highlighting.

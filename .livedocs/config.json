@@ -5,7 +5,7 @@
   "logoPath": "content/img/reified-mark-light.svg",
   "logoDarkPath": "content/img/reified-mark-dark.svg",
   "showSiteName": true,
-  "stylesheet": "content/reified-docs.css",
+  "stylesheet": "content/reified-theme.css",
   "themes": ["light", "dark"],
   "navigation": [
     { "label": "Docs", "href": "index.html" },
@@ -20,10 +20,9 @@
     "src/Reified.Parse/Reified.Parse.fsproj",
     "src/Reified.Refinements/Reified.Refinements.fsproj",
     "src/Reified.Result/Reified.Result.fsproj",
+    "src/Reified.Schema/Reified.Schema.fsproj",
     "src/Reified.Schema.Contracts/Reified.Schema.Contracts.fsproj",
-    "src/Reified.Schema.Http/Reified.Schema.Http.fsproj",
     "src/Reified.Schema.Json/Reified.Schema.Json.fsproj",
-    "src/Reified.Schema.Testing/Reified.Schema.Testing.fsproj",
-    "src/Reified.Schema/Reified.Schema.fsproj"
+    "src/Reified.Schema.Testing/Reified.Schema.Testing.fsproj"
   ]
 }

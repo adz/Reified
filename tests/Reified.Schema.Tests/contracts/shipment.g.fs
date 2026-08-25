@@ -106,8 +106,8 @@ module Shipment =
           EnumCase.create "same-day" ShipmentPriority.SameDay ]
 
     let private deliveryCases =
-        [ UnionCase.create "pickup" DeliveryMethod.Pickup (function DeliveryMethod.Pickup payload -> Some payload | _ -> None) PickupPoint.schema
-          UnionCase.create "courier" DeliveryMethod.Courier (function DeliveryMethod.Courier payload -> Some payload | _ -> None) CourierDelivery.schema ]
+        [ UnionCase.fields "pickup" DeliveryMethod.Pickup (function DeliveryMethod.Pickup payload -> Some payload | _ -> None) PickupPoint.schema
+          UnionCase.fields "courier" DeliveryMethod.Courier (function DeliveryMethod.Courier payload -> Some payload | _ -> None) CourierDelivery.schema ]
 
     /// The schema declared by shipment.fs (Shipment.v2).
     let schema : Schema<Shipment> =
@@ -136,7 +136,7 @@ module Shipment =
                 withSchema (Schema.enum priorityCases |> Schema.withDefault ShipmentPriority.Express)
             }
             fieldAs "delivery" (fun (value: Shipment) -> value.Delivery) {
-                withSchema (Schema.inlineUnion "kind" deliveryCases)
+                withSchema (Schema.unionWith (UnionRepresentation.Internal "kind") deliveryCases)
             }
             fieldAs "origin" (fun (value: Shipment) -> value.Origin) {
                 withSchema (Schema.option PickupPoint.schema)

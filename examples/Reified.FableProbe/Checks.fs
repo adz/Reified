@@ -62,6 +62,14 @@ module Checks =
     let buildSchemaPlanSummary () =
         Schema.compilePlan (SummaryFactory<SchemaContact>()) contactSchema
 
+    /// Keeps the resolved union-representation vocabulary on the cross-target compilation surface.
+    let runUnionRepresentationSurface () =
+        UnionRepresentations.recommended = UnionRepresentation.Internal "type"
+        && UnionRepresentations.fsharpSystemTextJsonDefault
+           = UnionRepresentation.Adjacent("Case", "Fields", UnionPayloadStyle.Positional)
+        && UnionRepresentations.fsharpSystemTextJsonExternalNamed
+           = UnionRepresentation.External(UnionPayloadStyle.NamedWithUnwrappedSingle, true)
+
     /// Exercises the type-directed constraint catalogue under Fable. The SRTP dispatchers behind `present`,
     /// `blank`, the cardinality family, and `optional` are the part of the design most at risk on this target,
     /// and code-point text sizing must agree with .NET on supplementary characters.

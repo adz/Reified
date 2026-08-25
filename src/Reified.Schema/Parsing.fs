@@ -74,7 +74,6 @@ module internal SchemaParsing =
             | NestedValueDefinition _
             | ManyValueDefinition _
             | UnionValueDefinition _
-            | UnionInlineValueDefinition _
             | EnumValueDefinition _
             | OptionValueDefinition _
             | MapValueDefinition _ -> valueDefinition.Rules
@@ -103,7 +102,6 @@ module internal SchemaParsing =
             | NestedValueDefinition _ -> invalidOp "Nested model value schemas have no underlying primitive kind."
             | ManyValueDefinition _ -> invalidOp "Collection value schemas have no underlying primitive kind."
             | UnionValueDefinition _ -> invalidOp "Union value schemas have no underlying primitive kind."
-            | UnionInlineValueDefinition _ -> invalidOp "Union-inline value schemas have no underlying primitive kind."
             | EnumValueDefinition _ -> invalidOp "Enum value schemas have no underlying primitive kind."
             | OptionValueDefinition _ -> invalidOp "Optional value schemas have no underlying primitive kind."
             | MapValueDefinition _ -> invalidOp "Map value schemas have no underlying primitive kind."
@@ -119,7 +117,6 @@ module internal SchemaParsing =
             | NestedValueDefinition _
             | ManyValueDefinition _
             | UnionValueDefinition _
-            | UnionInlineValueDefinition _
             | EnumValueDefinition _
             | OptionValueDefinition _
             | MapValueDefinition _ -> Ok value
@@ -193,7 +190,6 @@ module internal SchemaParsing =
         | NestedValueDefinition _
         | ManyValueDefinition _
         | UnionValueDefinition _
-        | UnionInlineValueDefinition _
         | EnumValueDefinition _
         | MapValueDefinition _ -> parsePresentValue options valueSchema fieldRules path raw
 
@@ -207,8 +203,7 @@ module internal SchemaParsing =
 
             match valueSchema.Shape with
             | NestedValueDefinition(nestedModel, _) -> parseObject options path nestedModel fields
-            | UnionValueDefinition union -> parseUnion options path union fields
-            | UnionInlineValueDefinition union -> parseUnionInline options path union fields
+            | UnionValueDefinition union -> parseUnion options path union (Data.Object(Map.toList fields))
             | MapValueDefinition collection -> parseMap options path collection rules fields
             | LazyValueDefinition _ -> parseValue options valueSchema fieldRules path (Data.Object(Map.toList fields))
             | RefinedValueDefinition(raw, _) ->
@@ -217,10 +212,7 @@ module internal SchemaParsing =
                     parseObject options path nestedModel fields
                     |> Result.bind (constructValue path valueSchema)
                 | UnionValueDefinition union ->
-                    parseUnion options path union fields
-                    |> Result.bind (constructValue path valueSchema)
-                | UnionInlineValueDefinition union ->
-                    parseUnionInline options path union fields
+                    parseUnion options path union (Data.Object(Map.toList fields))
                     |> Result.bind (constructValue path valueSchema)
                 | MapValueDefinition collection ->
                     parseMap options path collection rules fields
@@ -243,7 +235,6 @@ module internal SchemaParsing =
             match valueSchema.Shape with
             | NestedValueDefinition _
             | UnionValueDefinition _
-            | UnionInlineValueDefinition _
             | MapValueDefinition _ -> errorAt path SchemaError.ExpectedObject
             | ManyValueDefinition collection -> parseMany options path collection rules rawItems
             | LazyValueDefinition _ -> parseValue options valueSchema fieldRules path (Data.List rawItems)
@@ -260,7 +251,6 @@ module internal SchemaParsing =
                     |> Result.bind (constructValue path valueSchema)
                 | NestedValueDefinition _
                 | UnionValueDefinition _
-                | UnionInlineValueDefinition _
                 | MapValueDefinition _ -> errorAt path SchemaError.ExpectedObject
                 | PrimitiveValueDefinition _
                 | RefinedValueDefinition _
@@ -274,9 +264,8 @@ module internal SchemaParsing =
         | Data.Text text ->
             match valueSchema.Shape with
             | NestedValueDefinition _
-            | UnionValueDefinition _
-            | UnionInlineValueDefinition _
             | MapValueDefinition _ -> errorAt path SchemaError.ExpectedObject
+            | UnionValueDefinition union -> parseUnion options path union (Data.Text text)
             | ManyValueDefinition _ -> errorAt path SchemaError.ExpectedMany
             | LazyValueDefinition _ -> parseValue options valueSchema fieldRules path (Data.Text text)
             | OptionValueDefinition _ -> invalidOp "Optional value schemas are parsed before structured data dispatch."
@@ -284,9 +273,9 @@ module internal SchemaParsing =
             | RefinedValueDefinition(raw, _) ->
                 match raw.Shape with
                 | NestedValueDefinition _
-                | UnionValueDefinition _
-                | UnionInlineValueDefinition _
                 | MapValueDefinition _ -> errorAt path SchemaError.ExpectedObject
+                | UnionValueDefinition union ->
+                    parseUnion options path union (Data.Text text) |> Result.bind (constructValue path valueSchema)
                 | ManyValueDefinition _ -> errorAt path SchemaError.ExpectedMany
                 | LazyValueDefinition _ ->
                     parseValue options raw [] path (Data.Text text)
@@ -324,65 +313,116 @@ module internal SchemaParsing =
                         |> Error
                     | Ok checkedPrimitive -> constructValue path valueSchema checkedPrimitive
 
-    and private parseUnion options path (union: TaggedUnionValueDefinition) (fields: Map<string, Data>) =
-        let discriminatorName = ExternalFieldName.value union.DiscriminatorField
-        let payloadName = ExternalFieldName.value union.PayloadField
-        let discriminatorPath = path @ [ KeyComponent discriminatorName ]
-        let payloadPath = path @ [ KeyComponent payloadName ]
+    and private parseUnion options path (union: UnionValueDefinition) raw =
+        let unknown atPath =
+            union.Cases |> List.map _.Tag |> String.concat "|" |> SchemaError.UnknownTag |> errorAt atPath
 
-        match fields |> Map.tryFind discriminatorName with
-        | None -> errorAt discriminatorPath SchemaError.Omitted
-        | Some Data.Null -> errorAt discriminatorPath SchemaError.Blank
-        | Some(Data.Text tag) ->
+        let findCase atPath tag =
             match union.Cases |> List.tryFind (fun case -> case.Tag = tag) with
-            | None ->
-                union.Cases
-                |> List.map _.Tag
-                |> String.concat "|"
-                |> SchemaError.UnknownTag
-                |> errorAt discriminatorPath
-            | Some case ->
-                let parsedPayload =
-                    match fields |> Map.tryFind payloadName with
-                    | Some payloadRaw -> parseValue options case.Payload [] payloadPath payloadRaw
-                    | None ->
-                        match tryDefaultValue case.Payload with
-                        | Some value -> Ok value
-                        | None when isOmittableValue case.Payload -> parseValue options case.Payload [] payloadPath Data.Null
-                        | None -> errorAt payloadPath SchemaError.Omitted
+            | Some case -> Ok case
+            | None -> unknown atPath
 
-                parsedPayload |> Result.map case.Construct
-        | Some(Data.Object _)
-        | Some(Data.List _) -> errorAt discriminatorPath SchemaError.ExpectedScalar
-        | Some(Data.Number token) -> parseUnion options path union (fields |> Map.add discriminatorName (Data.Text token))
-        | Some(Data.Bool value) ->
-            parseUnion options path union (fields |> Map.add discriminatorName (Data.Text(if value then "true" else "false")))
+        let parseModelPositional payloadPath (model: ModelSchemaDefinition<obj>) raw =
+            match raw with
+            | Data.List items when items.Length = model.Fields.Length ->
+                let parsed =
+                    (model.Fields, items)
+                    ||> List.map2 (fun field item ->
+                        let index = int field.Order.Value
+                        parseValue options field.ValueSchema field.Rules (payloadPath @ [ IndexComponent index ]) item)
+                let errors = parsed |> List.choose (function Error error -> Some error | _ -> None)
+                if List.isEmpty errors then
+                    parsed
+                    |> List.choose (function Ok value -> Some value | _ -> None)
+                    |> List.toArray
+                    |> ConstructorApplication.tryApply model.Constructor
+                    |> Result.mapError (fun message -> diagnosticsAt payloadPath (SchemaError.ConstructorFailed message))
+                else Error(mergeErrors errors)
+            | Data.List _ -> errorAt payloadPath (SchemaError.Custom("union.positional.count", Some $"Expected {model.Fields.Length} union field(s)."))
+            | _ -> errorAt payloadPath SchemaError.ExpectedMany
 
-    and private parseUnionInline options path (union: InlineTaggedUnionValueDefinition) (fields: Map<string, Data>) =
-        let discriminatorName = ExternalFieldName.value union.DiscriminatorField
-        let discriminatorPath = path @ [ KeyComponent discriminatorName ]
+        let parseCasePayload style payloadPath case rawPayload =
+            let style =
+                match style, case.Payload with
+                | UnionPayloadStyle.NamedWithUnwrappedSingle, FieldsUnionCase { Shape = NestedValueDefinition(model, _) } when model.Fields.Length = 1 -> UnionPayloadStyle.UnwrappedSingle
+                | UnionPayloadStyle.NamedWithUnwrappedSingle, _ -> UnionPayloadStyle.Named
+                | UnionPayloadStyle.PositionalWithUnwrappedSingle, FieldsUnionCase { Shape = NestedValueDefinition(model, _) } when model.Fields.Length = 1 -> UnionPayloadStyle.UnwrappedSingle
+                | UnionPayloadStyle.PositionalWithUnwrappedSingle, _ -> UnionPayloadStyle.Positional
+                | style, _ -> style
+            match case.Payload with
+            | EmptyUnionCase ->
+                let valid =
+                    match style, rawPayload with
+                    | UnionPayloadStyle.Named, Data.Object []
+                    | UnionPayloadStyle.Positional, Data.List []
+                    | UnionPayloadStyle.UnwrappedSingle, Data.Null -> true
+                    | _ -> false
+                if valid then Ok(case.Construct(box ()))
+                else errorAt payloadPath (SchemaError.Custom("union.empty.payload", Some "The fieldless case payload does not match its configured representation."))
+            | ValueUnionCase payload -> parseValue options payload [] payloadPath rawPayload |> Result.map case.Construct
+            | FieldsUnionCase { Shape = NestedValueDefinition(model, _) } ->
+                let parsed =
+                    match style with
+                    | UnionPayloadStyle.Named ->
+                        match rawPayload with
+                        | Data.Object fields -> parseObject options payloadPath model (Map.ofList fields)
+                        | _ -> errorAt payloadPath SchemaError.ExpectedObject
+                    | UnionPayloadStyle.Positional -> parseModelPositional payloadPath model rawPayload
+                    | UnionPayloadStyle.UnwrappedSingle ->
+                        let field = model.Fields |> List.exactlyOne
+                        parseValue options field.ValueSchema field.Rules payloadPath rawPayload
+                        |> Result.bind (fun value ->
+                            ConstructorApplication.tryApply model.Constructor [| value |]
+                            |> Result.mapError (fun message -> diagnosticsAt payloadPath (SchemaError.ConstructorFailed message)))
+                    | UnionPayloadStyle.NamedWithUnwrappedSingle
+                    | UnionPayloadStyle.PositionalWithUnwrappedSingle -> invalidOp "Adaptive union payload style was not resolved."
+                parsed |> Result.map case.Construct
+            | FieldsUnionCase _ -> invalidOp "Union fields payloads must be nested model schemas."
 
-        match fields |> Map.tryFind discriminatorName with
-        | None -> errorAt discriminatorPath SchemaError.Omitted
-        | Some Data.Null -> errorAt discriminatorPath SchemaError.Blank
-        | Some(Data.Text tag) ->
-            match union.Cases |> List.tryFind (fun case -> case.Tag = tag) with
-            | None ->
-                union.Cases
-                |> List.map _.Tag
-                |> String.concat "|"
-                |> SchemaError.UnknownTag
-                |> errorAt discriminatorPath
-            | Some case ->
-                match case.Payload.Shape with
-                | NestedValueDefinition(nestedModel, _) ->
-                    parseObject options path nestedModel fields |> Result.map case.Construct
-                | _ -> invalidOp "Union-inline case payloads must be nested model schemas."
-        | Some(Data.Object _)
-        | Some(Data.List _) -> errorAt discriminatorPath SchemaError.ExpectedScalar
-        | Some(Data.Number token) -> parseUnionInline options path union (fields |> Map.add discriminatorName (Data.Text token))
-        | Some(Data.Bool value) ->
-            parseUnionInline options path union (fields |> Map.add discriminatorName (Data.Text(if value then "true" else "false")))
+        match union.Representation, raw with
+        | UnionRepresentation.Internal tagField, Data.Object rawFields ->
+            let fields = Map.ofList rawFields
+            let tagPath = path @ [ KeyComponent tagField ]
+            match fields |> Map.tryFind tagField with
+            | None -> errorAt tagPath SchemaError.Omitted
+            | Some Data.Null -> errorAt tagPath SchemaError.Blank
+            | Some(Data.Text tag) ->
+                findCase tagPath tag
+                |> Result.bind (fun case ->
+                    match case.Payload with
+                    | EmptyUnionCase -> Ok(case.Construct(box ()))
+                    | FieldsUnionCase { Shape = NestedValueDefinition(model, _) } -> parseObject options path model fields |> Result.map case.Construct
+                    | _ -> invalidOp "Internal union cases must contain named fields.")
+            | Some _ -> errorAt tagPath SchemaError.ExpectedScalar
+        | UnionRepresentation.Adjacent(tagField, payloadField, style), Data.Object rawFields ->
+            let fields = Map.ofList rawFields
+            let tagPath = path @ [ KeyComponent tagField ]
+            match fields |> Map.tryFind tagField with
+            | Some(Data.Text tag) ->
+                findCase tagPath tag
+                |> Result.bind (fun case ->
+                    match case.Payload, fields |> Map.tryFind payloadField with
+                    | EmptyUnionCase, _ -> Ok(case.Construct(box ()))
+                    | _, Some payload -> parseCasePayload style (path @ [ KeyComponent payloadField ]) case payload
+                    | _, None -> errorAt (path @ [ KeyComponent payloadField ]) SchemaError.Omitted)
+            | None -> errorAt tagPath SchemaError.Omitted
+            | Some Data.Null -> errorAt tagPath SchemaError.Blank
+            | Some _ -> errorAt tagPath SchemaError.ExpectedScalar
+        | UnionRepresentation.External(_, true), Data.Text tag ->
+            findCase path tag
+            |> Result.bind (fun case ->
+                match case.Payload with
+                | EmptyUnionCase -> Ok(case.Construct(box ()))
+                | _ -> unknown path)
+        | UnionRepresentation.External(style, _), Data.Object [ tag, payload ] ->
+            findCase path tag
+            |> Result.bind (fun case -> parseCasePayload style (path @ [ KeyComponent tag ]) case payload)
+        | UnionRepresentation.External _, Data.Object _ ->
+            errorAt path (SchemaError.Custom("union.external", Some "An externally tagged union must contain exactly one case property."))
+        | UnionRepresentation.External _, Data.Text _ -> unknown path
+        | UnionRepresentation.External _, _ -> errorAt path SchemaError.ExpectedObject
+        | UnionRepresentation.Internal _, _
+        | UnionRepresentation.Adjacent _, _ -> errorAt path SchemaError.ExpectedObject
 
     and private parseEnum path (enum: TaggedEnumValueDefinition) (text: string) =
         match enum.Cases |> List.tryFind (fun case -> case.Tag = text) with

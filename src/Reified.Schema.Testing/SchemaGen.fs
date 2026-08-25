@@ -272,13 +272,18 @@ module SchemaGen =
 
     let private buildDefinitions roots =
         let definitions = Collections.Generic.Dictionary<int, SchemaDescription>()
-        let rec value description =
+        let rec value (description: SchemaDescription) =
             match description.Shape with
             | SchemaShape.Deferred(reference, expanded) -> if definitions.TryAdd(reference, expanded) then value expanded
             | SchemaShape.Refined item | SchemaShape.Many item | SchemaShape.Optional item | SchemaShape.MapOf item -> value item
             | SchemaShape.Nested model -> model.Fields |> List.iter (fun field -> value field.Schema)
-            | SchemaShape.Union union -> union.Cases |> List.iter (fun case -> value case.Payload)
-            | SchemaShape.UnionInline union -> union.Cases |> List.iter (fun case -> case.Payload.Fields |> List.iter (fun field -> value field.Schema))
+            | SchemaShape.Union union ->
+                union.Cases
+                |> List.iter (fun case ->
+                    match case.Shape with
+                    | UnionCaseShape.Empty -> ()
+                    | UnionCaseShape.Value payload -> value payload
+                    | UnionCaseShape.Fields payload -> payload.Fields |> List.iter (fun field -> value field.Schema))
             | _ -> ()
         roots |> List.iter value
         definitions
@@ -343,12 +348,63 @@ module SchemaGen =
                     value path size constraints payload |> Result.map (fun present -> Gen.frequency [ 1, Gen.constant Data.Null; 3, present ])
                 | SchemaShape.Enum enum -> Ok(enum.Cases |> List.map _.Tag |> choose |> Gen.map Data.Text)
                 | SchemaShape.Union union ->
+                    let payload style case =
+                        let style =
+                            match style, case.Shape with
+                            | UnionPayloadStyle.NamedWithUnwrappedSingle, UnionCaseShape.Fields model when model.Fields.Length = 1 -> UnionPayloadStyle.UnwrappedSingle
+                            | UnionPayloadStyle.NamedWithUnwrappedSingle, _ -> UnionPayloadStyle.Named
+                            | UnionPayloadStyle.PositionalWithUnwrappedSingle, UnionCaseShape.Fields model when model.Fields.Length = 1 -> UnionPayloadStyle.UnwrappedSingle
+                            | UnionPayloadStyle.PositionalWithUnwrappedSingle, _ -> UnionPayloadStyle.Positional
+                            | style, _ -> style
+                        match case.Shape with
+                        | UnionCaseShape.Empty ->
+                            Ok(Gen.constant (
+                                match style with
+                                | UnionPayloadStyle.Named -> Data.Object []
+                                | UnionPayloadStyle.Positional -> Data.List []
+                                | UnionPayloadStyle.UnwrappedSingle -> Data.Null
+                                | _ -> invalidOp "Adaptive union payload style was not resolved."))
+                        | UnionCaseShape.Value payload -> value path (size / 2) [] payload
+                        | UnionCaseShape.Fields model ->
+                            match style with
+                            | UnionPayloadStyle.Named -> modelValue path (size / 2) model
+                            | UnionPayloadStyle.Positional ->
+                                model.Fields
+                                |> List.map (fun field -> value (field.Name :: path) (size / 2) field.Constraints field.Schema)
+                                |> traverse
+                                |> Result.map (fun generators ->
+                                    let rec sequence remaining =
+                                        gen {
+                                            match remaining with
+                                            | [] -> return []
+                                            | head :: tail ->
+                                                let! item = head
+                                                let! rest = sequence tail
+                                                return item :: rest
+                                        }
+                                    sequence generators |> Gen.map Data.List)
+                            | UnionPayloadStyle.UnwrappedSingle ->
+                                let field = model.Fields |> List.exactlyOne
+                                value (field.Name :: path) (size / 2) field.Constraints field.Schema
+                            | _ -> invalidOp "Adaptive union payload style was not resolved."
+
                     union.Cases
-                    |> List.map (fun case -> value path (size / 2) [] case.Payload |> Result.map (fun payload -> Gen.map (fun raw -> Data.Object [ union.DiscriminatorField, Data.Text case.Tag; union.PayloadField, raw ]) payload))
-                    |> traverse |> Result.map Gen.oneof
-                | SchemaShape.UnionInline union ->
-                    union.Cases
-                    |> List.map (fun case -> modelValue path (size / 2) case.Payload |> Result.map (Gen.map (function Data.Object fields -> Data.Object((union.DiscriminatorField, Data.Text case.Tag) :: fields) | _ -> failwith "model generators produce objects")))
+                    |> List.map (fun case ->
+                        match union.Representation, case.Shape with
+                        | UnionRepresentation.Internal tagField, UnionCaseShape.Empty ->
+                            Ok(Gen.constant (Data.Object [ tagField, Data.Text case.Tag ]))
+                        | UnionRepresentation.Internal tagField, UnionCaseShape.Fields model ->
+                            modelValue path (size / 2) model
+                            |> Result.map (Gen.map (function Data.Object fields -> Data.Object((tagField, Data.Text case.Tag) :: fields) | _ -> failwith "model generators produce objects"))
+                        | UnionRepresentation.Internal _, UnionCaseShape.Value _ -> invalidOp "Internal union value case"
+                        | UnionRepresentation.Adjacent(tagField, _, _), UnionCaseShape.Empty ->
+                            Ok(Gen.constant (Data.Object [ tagField, Data.Text case.Tag ]))
+                        | UnionRepresentation.Adjacent(tagField, payloadField, style), _ ->
+                            payload style case
+                            |> Result.map (Gen.map (fun raw -> Data.Object [ tagField, Data.Text case.Tag; payloadField, raw ]))
+                        | UnionRepresentation.External(_, true), UnionCaseShape.Empty -> Ok(Gen.constant (Data.Text case.Tag))
+                        | UnionRepresentation.External(style, _), _ ->
+                            payload style case |> Result.map (Gen.map (fun raw -> Data.Object [ case.Tag, raw ])))
                     |> traverse |> Result.map Gen.oneof
                 | SchemaShape.Deferred(_, expanded) -> if size <= 0 then modelLeaf path expanded else value path (size / 2) constraints expanded
                 | SchemaShape.Recursive reference ->

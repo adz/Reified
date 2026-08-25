@@ -14,6 +14,71 @@ open Swensen.Unquote
 /// </summary>
 module JsonCodecTests =
 
+    type private MixedCommand =
+        | StopCommand
+        | RenameCommand of RenameFields
+
+    and private RenameFields = { Name: string }
+
+    let private mixedCommandSchema () =
+        let renameFields =
+            schema<RenameFields> {
+                field _.Name
+                construct (fun name -> { Name = name })
+            }
+
+        Schema.union
+            [ UnionCase.empty "stop" StopCommand (function StopCommand -> true | _ -> false)
+              UnionCase.fields
+                  "rename"
+                  RenameCommand
+                  (function RenameCommand fields -> Some fields | _ -> None)
+                  renameFields ]
+
+    let private externalMixedCommandSchema () =
+        let renameFields =
+            schema<RenameFields> {
+                field _.Name
+                construct (fun name -> { Name = name })
+            }
+
+        Schema.unionWith (UnionRepresentation.External(UnionPayloadStyle.Named, true))
+            [ UnionCase.empty "stop" StopCommand (function StopCommand -> true | _ -> false)
+              UnionCase.value
+                  "rename"
+                  RenameCommand
+                  (function RenameCommand fields -> Some fields | _ -> None)
+                  renameFields ]
+
+    [<Fact>]
+    let ``internal mixed unions encode empty cases as tagged objects`` () =
+        let codec = Json.compile (mixedCommandSchema ())
+
+        test <@ Json.serialize codec StopCommand = "{\"type\":\"stop\"}" @>
+        test <@ Json.deserialize codec "{\"type\":\"stop\"}" = StopCommand @>
+        test <@ Json.serialize codec (RenameCommand { Name = "Ada" }) = "{\"type\":\"rename\",\"name\":\"Ada\"}" @>
+
+    [<Fact>]
+    let ``external compatibility unions encode empty strings and single-property payloads`` () =
+        let codec = Json.compile (externalMixedCommandSchema ())
+
+        test <@ Json.serialize codec StopCommand = "\"stop\"" @>
+        test <@ Json.deserialize codec "\"stop\"" = StopCommand @>
+        test <@ Json.serialize codec (RenameCommand { Name = "Ada" }) = "{\"rename\":{\"name\":\"Ada\"}}" @>
+        test <@ Json.deserialize codec "{\"rename\":{\"name\":\"Ada\"}}" = RenameCommand { Name = "Ada" } @>
+
+    [<Fact>]
+    let ``union encoding rejects ambiguous case inspectors`` () =
+        let schema =
+            Schema.union
+                [ UnionCase.empty "first" StopCommand (fun _ -> true)
+                  UnionCase.empty "second" StopCommand (fun _ -> true) ]
+
+        let codec = Json.compile schema
+
+        let error = Assert.Throws<InvalidOperationException>(fun () -> Json.serialize codec StopCommand |> ignore)
+        test <@ error.Message = "More than one union case matched the value being encoded." @>
+
     [<Fact>]
     let ``parseData preserves field order duplicates and number tokens`` () =
         let value = Json.parseData "{\"n\":1.20e+3,\"n\":2,\"text\":\"Ada\",\"items\":[true,null]}"
@@ -146,17 +211,16 @@ module JsonCodecTests =
                 construct (fun reference -> { Reference = reference })
             }
 
-        Schema.union
-            "type"
-            "value"
-            [ UnionCase.create
+        Schema.unionWith
+            (UnionRepresentation.Adjacent("type", "value", UnionPayloadStyle.Named))
+            [ UnionCase.fields
                   "card"
                   Card
                   (function
                   | Card details -> Some details
                   | _ -> None)
                   (cardSchema)
-              UnionCase.create
+              UnionCase.fields
                   "invoice"
                   Invoice
                   (function
@@ -191,16 +255,16 @@ module JsonCodecTests =
                 construct (fun reference -> { Reference = reference })
             }
 
-        Schema.inlineUnion
-            "type"
-            [ UnionCase.create
+        Schema.unionWith
+            (UnionRepresentation.Internal "type")
+            [ UnionCase.fields
                   "card"
                   Card
                   (function
                   | Card details -> Some details
                   | _ -> None)
                   (cardSchema)
-              UnionCase.create
+              UnionCase.fields
                   "invoice"
                   Invoice
                   (function
@@ -484,6 +548,23 @@ module JsonCodecTests =
             Json.serialize codec { Nickname = Some "Lady A"; Name = "Ada"; Age = Some 36; Ratings = [ Some 5; None ] }
 
         test <@ json = "{\"nickname\":\"Lady A\",\"name\":\"Ada\",\"age\":36,\"ratings\":[5,null]}" @>
+
+    [<Fact>]
+    let ``mustSupply encodes a None optional field as an explicit null`` () =
+        let supplied : Schema<OptionalProfile> =
+            schema<OptionalProfile> {
+                field (fun (value: OptionalProfile) -> value.Nickname) {
+                    withSchema (Schema.option Schema.text |> Schema.mustSupply)
+                }
+                field (fun (value: OptionalProfile) -> value.Name)
+                field (fun (value: OptionalProfile) -> value.Age) { withSchema (Schema.option Schema.int) }
+                field (fun (value: OptionalProfile) -> value.Ratings) { withSchema (Schema.listWith (Schema.option Schema.int)) }
+                construct (fun nickname name age ratings ->
+                    { Nickname = nickname; Name = name; Age = age; Ratings = ratings })
+            }
+
+        let json = Json.serialize (Json.compile supplied) { Nickname = None; Name = "Ada"; Age = None; Ratings = [] }
+        test <@ json = "{\"nickname\":null,\"name\":\"Ada\",\"ratings\":[]}" @>
 
     [<Fact>]
     let ``decodes absent and null optional fields to None`` () =

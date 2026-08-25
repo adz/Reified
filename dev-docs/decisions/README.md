@@ -116,13 +116,12 @@ adapters live in the [Axial repository](https://github.com/adz/Axial) along with
   `Axial.Schema.JsonSchema` was a separate package the Fable project did not reference, and stayed broken from the
   day that package was folded into `Reified.Schema` until the surface check was restored.
 
-## 2026-08-03: Result and Values are separate documentation areas
+## 2026-08-25: Value capabilities have separate documentation areas
 
-- **Result is a peer product, not a member of Values.** They answer different questions: Result composes failures,
-  the Values packages admit values. Presenting Result inside Values was tried and rejected — it reproduced the
-  meta-package framing the split removed.
-- **Values is navigation only.** No `Reified.Values` package or namespace will be created.
-  `validate-values-docs.sh` fails if any rendered page tells a reader to install one.
+- **Result handling, Constraints, Parsing, and Refined are separate top-level sections.** They answer different
+  questions and map directly to independently installable packages.
+- **There is no Values navigation grouping, package, or namespace.** A grouping that is not a capability should not
+  hide the package boundary or imply a meta-package.
 - `Reified.Constraint.Violation` is not advertised on the Result reference page. Result is a standalone leaf with
   no Constraint dependency, so naming a type from another product there was simply wrong.
 - Search vocabulary is unaffected: package tags and descriptions keep "error-handling" and "validation" where they

@@ -25,10 +25,8 @@ type SchemaShape =
     | Nested of model: ModelDescription
     /// <summary>A collection value whose items share the supplied item description.</summary>
     | Many of item: SchemaDescription
-    /// <summary>A tagged union value with explicit discriminator, payload field, and case descriptions.</summary>
+    /// <summary>A union with one resolved wire representation and semantic case descriptions.</summary>
     | Union of union: UnionDescription
-    /// <summary>An internally-tagged union value whose case payload fields sit beside the discriminator field.</summary>
-    | UnionInline of union: UnionInlineDescription
     /// <summary>A bare-string enum value with explicit case tags.</summary>
     | Enum of enum: EnumDescription
     /// <summary>An optional value whose present payload is described by the supplied payload description.</summary>
@@ -81,42 +79,28 @@ and ModelDescription =
         Description: string option
     }
 
-/// <summary>Describes one case in a tagged union value schema.</summary>
+/// <summary>Describes the semantic payload shape of one union case.</summary>
+and UnionCaseShape =
+    | Empty
+    | Value of payload: SchemaDescription
+    | Fields of payload: ModelDescription
+
+/// <summary>Describes one case in a union value schema.</summary>
 and UnionCaseDescription =
     {
         /// <summary>The raw discriminator tag for this union case.</summary>
         Tag: string
-        /// <summary>The schema description of this case's payload.</summary>
-        Payload: SchemaDescription
+        /// <summary>The case's semantic payload shape.</summary>
+        Shape: UnionCaseShape
     }
 
 /// <summary>Describes a tagged union value schema.</summary>
 and UnionDescription =
     {
-        /// <summary>The structured data field name that carries the case tag.</summary>
-        DiscriminatorField: string
-        /// <summary>The structured data field name that carries the case payload.</summary>
-        PayloadField: string
+        /// <summary>The complete resolved wire representation.</summary>
+        Representation: UnionRepresentation
         /// <summary>The union cases in declaration order.</summary>
         Cases: UnionCaseDescription list
-    }
-
-/// <summary>Describes one case in an internally-tagged union value schema.</summary>
-and UnionInlineCaseDescription =
-    {
-        /// <summary>The raw discriminator tag for this union case.</summary>
-        Tag: string
-        /// <summary>The field descriptions of this case's spliced-in payload.</summary>
-        Payload: ModelDescription
-    }
-
-/// <summary>Describes an internally-tagged union value schema.</summary>
-and UnionInlineDescription =
-    {
-        /// <summary>The structured data field name that carries the case tag.</summary>
-        DiscriminatorField: string
-        /// <summary>The union cases in declaration order.</summary>
-        Cases: UnionInlineCaseDescription list
     }
 
 /// <summary>Describes one case in a bare-string enum value schema.</summary>
@@ -187,19 +171,17 @@ module Inspect =
                     | ManyValueDefinition collection -> SchemaShape.Many(describeValueDefinition collection.Item)
                     | UnionValueDefinition union ->
                         SchemaShape.Union
-                            { DiscriminatorField = ExternalFieldName.value union.DiscriminatorField
-                              PayloadField = ExternalFieldName.value union.PayloadField
-                              Cases = union.Cases |> List.map (fun case -> { Tag = case.Tag; Payload = describeValueDefinition case.Payload }) }
-                    | UnionInlineValueDefinition union ->
-                        SchemaShape.UnionInline
-                            { DiscriminatorField = ExternalFieldName.value union.DiscriminatorField
+                            { Representation = union.Representation
                               Cases =
                                 union.Cases
                                 |> List.map (fun case ->
-                                    match case.Payload.Shape with
-                                    | NestedValueDefinition(nested, _) ->
-                                        { Tag = case.Tag; Payload = { Fields = nested.Fields |> List.map describeFieldDescriptor; Description = nested.Description } }
-                                    | _ -> invalidOp "Union-inline case payloads must be nested model schemas.") }
+                                    match case.Payload with
+                                    | EmptyUnionCase -> { Tag = case.Tag; Shape = UnionCaseShape.Empty }
+                                    | ValueUnionCase payload -> { Tag = case.Tag; Shape = UnionCaseShape.Value(describeValueDefinition payload) }
+                                    | FieldsUnionCase { Shape = NestedValueDefinition(nested, _) } ->
+                                        { Tag = case.Tag
+                                          Shape = UnionCaseShape.Fields { Fields = nested.Fields |> List.map describeFieldDescriptor; Description = nested.Description } }
+                                    | FieldsUnionCase _ -> invalidOp "Union fields payloads must be nested model schemas.") }
                     | EnumValueDefinition enum -> SchemaShape.Enum { Cases = enum.Cases |> List.map (fun case -> { Tag = case.Tag }) }
                     | OptionValueDefinition optional -> SchemaShape.Optional(describeValueDefinition optional.Payload)
                     | MapValueDefinition collection -> SchemaShape.MapOf(describeValueDefinition collection.Item)

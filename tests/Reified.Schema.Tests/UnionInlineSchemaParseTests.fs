@@ -17,6 +17,10 @@ module UnionInlineSchemaParseTests =
 
     type private Checkout = { Payment: Payment }
 
+    type private Command =
+        | Stop
+        | InvoiceCommand of InvoiceDetails
+
     let private cardSchema () =
         schema<CardDetails> {
             field _.Number {
@@ -32,10 +36,10 @@ module UnionInlineSchemaParseTests =
         }
 
     let private paymentValue () =
-        Schema.inlineUnion
-            "type"
-            [ UnionCase.create "card" Card (function Card details -> Some details | _ -> None) ((cardSchema ()))
-              UnionCase.create
+        Schema.unionWith
+            (UnionRepresentation.Internal "type")
+            [ UnionCase.fields "card" Card (function Card details -> Some details | _ -> None) ((cardSchema ()))
+              UnionCase.fields
                   "invoice"
                   Invoice
                   (function Invoice details -> Some details | _ -> None)
@@ -92,3 +96,21 @@ module UnionInlineSchemaParseTests =
         let result = Schema.check (checkoutSchema ()) model
 
         test <@ result = Ok model @>
+
+    [<Fact>]
+    let ``mixed unions keep empty cases inside the tagged object`` () =
+        let commandSchema =
+            Schema.union
+                [ UnionCase.empty "stop" Stop (function Stop -> true | _ -> false)
+                  UnionCase.fields
+                      "invoice"
+                      InvoiceCommand
+                      (function InvoiceCommand details -> Some details | _ -> None)
+                      (invoiceSchema ()) ]
+
+        test <@ Schema.parse commandSchema (Data.objectOfMap (Map.ofList [ "type", Data.Text "stop" ])) = Ok Stop @>
+
+        match (Inspect.schema commandSchema).Shape with
+        | SchemaShape.Union union ->
+            test <@ union.Cases |> List.map (fun case -> case.Tag, case.Shape) |> List.map (fun (tag, shape) -> tag, shape <> UnionCaseShape.Empty) = [ "stop", false; "invoice", true ] @>
+        | other -> failwithf "Expected an internal union, got %A" other

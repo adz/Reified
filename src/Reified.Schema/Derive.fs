@@ -5,6 +5,20 @@ namespace Reified.DerivedSchema
 
 open System
 
+/// <summary>Selects a complete generated union wire representation.</summary>
+type UnionRepresentationKind =
+    | Internal = 0
+    | Adjacent = 1
+    | External = 2
+
+/// <summary>Selects how generated case fields are nested by adjacent or external representations.</summary>
+type UnionPayloadStyleKind =
+    | Named = 0
+    | Positional = 1
+    | UnwrappedSingle = 2
+    | NamedWithUnwrappedSingle = 3
+    | PositionalWithUnwrappedSingle = 4
+
 /// <summary>Marks a plain record for schema derivation: <c>schemagen</c> generates its permissive schema.
 /// The advice is to put this on wire DTOs — records that carry no invariants of their own. The attributes
 /// in this namespace are inert metadata: they are read from source text at generation time, never by
@@ -27,13 +41,18 @@ type SchemaNameAttribute(name: string) =
     inherit Attribute()
     member _.Name = name
 
-/// <summary>Marks a discriminated union as an internally tagged union in the derived schema. Every case
-/// must carry exactly one <c>[&lt;DeriveSchema&gt;]</c> record payload; the discriminator is the given
-/// external field name.</summary>
+/// <summary>Marks a discriminated union for generated Schema support. The parameterless form uses the
+/// recommended internal <c>type</c> discriminator; named properties select explicit adjacent or external
+/// compatibility representations. General-union fields must be named.</summary>
 [<AttributeUsage(AttributeTargets.Class ||| AttributeTargets.Struct)>]
 type DeriveUnionAttribute(discriminator: string) =
     inherit Attribute()
     member _.Discriminator = discriminator
+    member val Representation = UnionRepresentationKind.Internal with get, set
+    member val PayloadField = "value" with get, set
+    member val PayloadStyle = UnionPayloadStyleKind.Named with get, set
+    member val UnwrapFieldless = true with get, set
+    new() = DeriveUnionAttribute("type")
 
 /// <summary>Marks the static member the derived schema calls to assemble the record, instead of a
 /// record literal. Put it on one static member of a <c>[&lt;DeriveSchema&gt;]</c> record that takes the

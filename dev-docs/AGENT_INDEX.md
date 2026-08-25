@@ -68,8 +68,8 @@ exports a type called `X`. See `dev-docs/namespace-flatten.md`.
   `tests/Reified.Package.Tests/PackageGraphTests.fs`, `scripts/pack.sh`, and `tests/package-consumers/**`.
 - Public API surface: `tests/Reified.ApiShape.Tests/ApiShapeTests.fs` and `dev-docs/API_BASELINE.md`. Adding or
   renaming a public module means editing that suite in the same change.
-- The public first impression: `docs/getting-started.md` (the repo-wide page, `/getting-started/`) and
-  `docs/index.md` (the landing page). The code on the getting-started page comes from
+- The public first impression: `docs/01-getting-started/_index.md` (`/getting-started/`) and `docs/index.md` (the
+  landing page). The code on the getting-started page comes from
   `examples/Reified.GettingStarted/Program.fs`, which CI compiles and runs — change the example and the page
   together, and paste the program's real output rather than writing expected output by hand.
 - Fable JavaScript support: `examples/Reified.FableProbe/**` and `scripts/check-fable-js-surface.sh`. The probe
@@ -89,8 +89,8 @@ exports a type called `X`. See `dev-docs/namespace-flatten.md`.
   `dev-docs/PLAN.md`.
 - Schema input/rules/interpreters: `src/Reified.Schema/{Model,Data,SchemaValidation,RetainedParseResult,Rules}.fs` and
   `tests/Reified.Schema.Tests/*ParseTests.fs`.
-- User-facing docs: one area per top-nav product — `docs/result/`, `docs/values/`, `docs/data/`, `docs/schema/`.
-  Values covers Constraint, Refinements, and Parse and is navigation only. Read `dev-docs/DOCS.md`
+- User-facing docs: `docs/03-result-handling/`, `docs/04-constraints/`, `docs/05-parsing/`, `docs/06-refined/`,
+  `docs/07-data/`, and `docs/08-schema/`. Read `dev-docs/DOCS.md`
   before editing `docs/**`, source comments, generated reference pages, `llms.txt`, or site content.
 - Agent process/docs: `AGENTS.md`, this file, `dev-docs/TASKS.md`, and `dev-docs/PLAN.md`.
 
@@ -98,16 +98,10 @@ exports a type called `X`. See `dev-docs/namespace-flatten.md`.
 
 Default `rg` ignores generated/vendor-heavy paths through `.rgignore`:
 
-- `docs/result/reference/**`
-- `docs/values/reference/**`
-- `docs/data/reference/**`
-- `docs/schema/reference/**`
-- `site/content/reference/**`
-- `site/_vendor/**`
-- `site/public/**`
+- `output/**`
+- `.livedocs/cache/**`
 - `BenchmarkDotNet.Artifacts/**`
 - `.fsdocs/**`
-- `output/**`
 
 Search these with `rg -u` or an explicit target only when the task is about generated output, reference docs, site
 artifacts, or build artifacts.
@@ -118,7 +112,6 @@ artifacts, or build artifacts.
 - Schema CE type-state changes: `bash scripts/check-schema-ce-errors.sh` (fixtures in `tests/compile-fail/schema-ce`).
 - Fable-visible changes: `bash scripts/check-fable-js-surface.sh` (needs `dotnet tool restore` and Node).
 - Focused .NET tests: `dotnet test <project> --nologo -v minimal`.
-- Public API/doc generator impact: update source comments or generator inputs first, regenerate affected docs, and defer
-  `bash scripts/validate-docs.sh` until a phase or release checkpoint unless the task asks for full validation.
-- Release/deploy doc checkpoint: `bash scripts/validate-docs.sh`, then `npm run build` in `site`.
-- Live docs preview only when browser review is needed: `bash scripts/preview-docs.sh`.
+- Public API/doc impact: update source comments and guides, then run `dotnet livedocs build`.
+- Documentation audit: `dotnet livedocs audit --warn-as-error`.
+- Live preview: `dotnet livedocs watch --port 5000`.

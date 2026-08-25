@@ -1,100 +1,87 @@
 # Reified Documentation Guide
 
-Source of truth for Hugo + Docsy maintenance and documentation style.
+This file is the source of truth for the FsLiveDocs documentation structure and writing style.
 
 ## Audience and voice
 
-Write for pragmatic F# devs solving dependency, async, and typed-failure problems.
+Write for pragmatic F# developers working with typed failures, value rules, structured input, and wire formats.
 
-- Skip category theory.
-- Explain trade-offs vs `Async<Result<_,_>>` or FsToolkit.
 - Prefer concise, code-first examples.
-- Use direct, instructive language.
-- Start with the user's problem, not the abstraction.
-- Stay factual and avoid marketing, filler, or internal narrative.
+- Start with the problem or operation, not category theory or product promotion.
+- Name the API, behavior, and trade-off directly.
+- Keep paragraphs short and use examples where prose would otherwise become abstract.
+- Do not mention unpublished status. Use versionless `dotnet add package` commands.
 
-## Hugo workflow
+## Documentation structure
 
-- The short Reified index lives at `/docs/index.md`.
-- Data guides and generated reference live under `/docs/data`.
-- Schema guides and generated reference live under `/docs/schema`.
-- Result guides and generated reference live under `/docs/result`.
-- Values guides (Constraint, Refinements, Parse) and generated reference live under `/docs/values`.
-- The Hugo site source lives in `/site`.
-- Content is synced from `/docs` to `/site/content` via `scripts/populate-hugo-content.sh`.
-- The site uses Hugo with the Docsy theme.
+The handwritten guides live under `docs/`. Numeric source prefixes control navigation order but do not appear in the
+published URL.
 
-## Docs Source Of Truth
+| Source | Published route | Subject |
+| --- | --- | --- |
+| `docs/01-getting-started/` | `/getting-started/` | End-to-end introduction and routing |
+| `docs/03-result-handling/` | `/result-handling/` | Standard F# `Result` composition |
+| `docs/04-constraints/` | `/constraints/` | Reusable value rules and violations |
+| `docs/05-parsing/` | `/parsing/` | Serialized primitive decoding |
+| `docs/06-refined/` | `/refined/` | Invariant-carrying types |
+| `docs/07-data/` | `/data/` | Structured data, fixtures, and comparison |
+| `docs/08-schema/` | `/schema/` | Structured parsing, JSON codecs, derivation, and versioned contracts |
+| `docs/90-comparisons/` | `/comparisons/` | Comparisons with adjacent libraries |
+| `docs/95-notes/` | `/notes/` | Packages, platforms, benchmarks, and implementation notes |
 
-The docs system has two different kinds of pages:
+There is no Values documentation grouping. Result handling, Constraints, Parsing, and Refined are separate top-level
+sections. JSON Codecs belongs inside Schema. HTTP server documentation is not published.
 
-There are four product documentation areas, one per top-nav entry:
+`docs/index.md` is the homepage. `docs/content/reified-theme.css` styles the generated FsLiveDocs site.
+`.livedocs/config.json` controls the logo, navigation, stylesheet, prelude, and API projects.
 
-- hand-written Result guides and its API member pages live in `docs/result/`
-- hand-written Values guides (Constraint, Refinements, Parse) and their API member pages live in `docs/values/`
-- hand-written Data guides and its API member pages live in `docs/data/`
-- hand-written Schema guides and its API member pages live in `docs/schema/`
+## Source and generated output
 
-Values is a navigation grouping over three independently installable packages. There is no `Reified.Values` package,
-so no page may tell a reader to install one.
+Handwritten Markdown, source XML comments, and runnable examples are sources. `output/`, `.livedocs/cache/`, and the
+rendered API reference are generated.
 
-The API member pages are generated from the XML doc comments in `src/`. When you change public API wording, update the code comments first and then regenerate the reference pages.
+Long-form API introductions live under `docs/api/`. Name each Markdown file after the generated entity ID, for
+example `docs/api/Reified.Schema.md` for the `Schema` module and ``docs/api/Reified.Schema`1.md`` for
+`Schema<'model>`. FsLiveDocs replaces that entity's short summary with the Markdown before rendering its members.
 
-The pipeline is:
+When a public API changes:
 
-1. Edit the public XML doc comments in `src/`.
-2. Run `bash scripts/validate-result-docs.sh`, `bash scripts/validate-values-docs.sh`,
-   `bash scripts/validate-data-docs.sh`, or `bash scripts/validate-schema-docs.sh` for the affected product.
-3. Review regenerated reference pages with `bash scripts/preview-docs.sh` when browser inspection or screenshots are needed.
-4. Update the hand-written guides in `docs/` as needed.
+1. Update its XML comment and example in `src/`.
+2. Update handwritten guides and the relevant section-local `llms.txt` or agent page.
+3. Run `dotnet livedocs build --interactive false --banner false`.
+4. Review the generated page in `output/` when layout or navigation changed.
 
-Do not hand-edit the generated API member pages unless you are fixing a generated-doc bug. If the source comments change, the generated markdown should change with them.
+Do not hand-edit `output/` as the primary fix.
 
-### Generated content
+## Validation and preview
 
-- The "Runnable Examples" page is generated from real code in `/examples/`.
-- Use `scripts/generate-example-docs.sh` to refresh it.
-- Do not edit `site/content/docs/examples/_index.md` directly; it is managed by the population script.
-- The API reference member pages under `docs/result/reference/`, `docs/values/reference/`, `docs/data/reference/`, and `docs/schema/reference/` are generated from the XML docs in `src/`.
-- Update the generator in `scripts/docgen/Program.fs` when the reference structure changes, then rerun
-  `bash scripts/generate-api-docs.sh`. Page groups are routed to a product area there: `result` to `docs/result/`,
-  `constraint`/`refined`/`parse` to `docs/values/`, and so on.
-- The reference index pages and guide pages are hand-written markdown in `docs/`.
+- `dotnet livedocs audit --warn-as-error` checks F# blocks and documentation coverage.
+- `dotnet livedocs build` audits and renders the static site to `output/`.
+- `dotnet livedocs watch --port 5000` serves a rebuilding preview at `http://localhost:5000`.
+- Release workflows pass the release tag through `--version`; installation examples remain versionless.
 
-### Validate, preview, and deploy
+Run a full build after cross-section moves, route changes, stylesheet changes, or a phase/release checkpoint. A prose-only
+edit can use the audit unless it changes links or layout.
 
-Run `bash scripts/validate-result-docs.sh`, `bash scripts/validate-values-docs.sh`,
-`bash scripts/validate-data-docs.sh`, or `bash scripts/validate-schema-docs.sh` for routine product documentation
-validation. Each command builds only that
-product's reference inputs and any examples, regenerates its API pages, syncs Hugo content, and performs a static
-render. Run `bash scripts/validate-docs.sh` at a cross-product phase or release boundary.
+## Authoring rules
 
-Run `bash scripts/preview-docs.sh` for a local live-reload server at `http://localhost:3000` when you need browser review or screenshots. The preview hashes the source, project, and generator inputs and reuses generated docs when those inputs are unchanged. On a cache miss, it builds the shared docs project graph once, then generates runnable examples and API reference pages concurrently. Use `--force-generate` to ignore the cache or `--no-generate` to start from the existing generated docs without checking generator inputs. Stop the preview with `SIGHUP`, `TERM`, `INT`, or by creating `$REIFIED_DOCS_PREVIEW_STOP_FILE` (default `/tmp/reified-docs-preview.stop`).
-
-Use `bash scripts/build-docs-site.sh` only when preparing or checking deployment output. It builds all projects and writes the deployable site to `/output`, so it is heavier than the normal validation path.
-
-## Documentation rules
-
-- Structure API pages around the package and module hierarchy.
-- Use F# code blocks with syntax highlighting (` ```fsharp `).
-- Include "Source-Lifted Notes" for implementation-derived insights.
-- Use small, credible examples before semantic deep-dives.
-- Prefer plain descriptions of what code does. Technical terms are useful when they make the explanation shorter or
-  more exact. Explain a term such as "bind" the first time it appears instead of replacing it with vague wording.
-- When a computation expression is introduced, follow any statement that it "binds" a type with two small examples:
-  first show what `let!`, `do!`, `return!`, and any builder-specific keyword do; then repeat the example with type
-  annotations on the right-hand expressions and the names bound on the left.
+- Use fenced code blocks with the `fsharp` language hint for F# examples.
+- Let FsLiveDocs verify executable examples. Add `no-check` only with a precise reason.
+- Use root-relative published links such as `/schema/quickstart.html`, never numeric source paths in site links.
+- Keep source filenames numerically prefixed except `_index.md`, `llms.txt`, and generated/reference material.
+- Make section indexes ordinary documentation pages with standard sidebars. Only the repository homepage uses the
+  full-bleed `.reified-landing` layout.
 - Add an XML doc comment with an example to every public function.
-- Avoid FAQ-style rhetorical questions.
-- Avoid justifying why a section exists.
-- Avoid promises about future features as an excuse for current gaps.
+- Avoid FAQ-style rhetorical questions, filler, and promises about future features.
 
-## LLM and Agent Optimization
+## LLM and agent entry points
 
-We maintain specific files to optimize the experience for AI agents (Claude, Gemini, Codex) used by our library users.
+The root `llms.txt` routes agents to focused context. Section-local files live at:
 
-- `llms.txt`: A short product index served at the site root.
-- `docs/result/llms.txt`, `docs/values/llms.txt`, `docs/data/llms.txt`, and `docs/schema/llms.txt`: product-local machine-readable context.
-- `docs/result/agent.md`, `docs/values/agent.md`, `docs/data/agent.md`, and `docs/schema/agent.md`: product-local user-facing guidance for AI agents.
+- `docs/03-result-handling/llms.txt`
+- `docs/04-constraints/llms.txt`
+- `docs/07-data/llms.txt`
+- `docs/08-schema/llms.txt`
 
-When the public API changes, ensure both of these files are updated to reflect the current idiomatic "Golden Path."
+Result handling, Constraints, Data, and Schema also have a `100-agent.md` page. Update these files when their public
+surface or recommended authoring path changes.

@@ -1,0 +1,27 @@
+# Reified.Constraint
+
+- `Reified.Constraint` owns `Constraint<'value>`, `Violation`, `ConstraintAtom`, and the `ConstraintDescription` read model.
+- A constraint is a reusable description of acceptable typed values; `Constraint.check` runs it.
+- `Constraint.satisfies` answers `bool`; `Constraint.check` returns a structured violation; `Constraint.guard` keeps the input.
+- Constraints never parse, normalize, or replace values.
+- Interpreted constructors carry a `ConstraintAtom` that drives execution, description, and violations together.
+- `Constraint.custom`, `customWith`, `notWith`, and `contramap` are opaque: they run normally but cannot be exported as
+  portable enforcement.
+- Annotate reusable bindings when type-directed catalogue selection would otherwise be ambiguous.
+- `Violation` is plain comparable data. It carries no closure, renderer, culture, or application context.
+- `Violation.render` is the English default; `Violation.message` and `fullMessage` use a `Renderer`.
+- `Renderer.ofLookup` is portable. Resource-manager constructors are .NET-only and absent under Fable.
+- One constraint value can be checked directly, passed to `Refinement.define`, or attached with `Schema.constrain`.
+- The package returns the standard F# `Result` and does not depend on `Reified.Result`.
+
+Golden path:
+
+```fsharp
+open Reified
+
+let quantity : Constraint<int> =
+    Constraint.between 1 999
+
+Constraint.guard quantity 12
+// Ok 12
+```

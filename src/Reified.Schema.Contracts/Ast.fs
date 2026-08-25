@@ -36,17 +36,34 @@ type ExternalEnumCase =
     { EnumTag: string
       EnumFsCase: string }
 
-/// <summary>One case of a user-owned internally tagged union: wire tag, the F# case name, and the
-/// referenced payload contract.</summary>
-type ExternalUnionCase =
+/// <summary>One named field carried directly by a user-owned union case.</summary>
+type ExternalUnionField =
+    { ExtFieldName: string
+      ExtWireName: string
+      ExtFieldType: FieldType
+      ExtOptional: bool }
+
+/// <summary>The payload shape of one user-owned internally tagged union case.</summary>
+and ExternalUnionPayload =
+    | ExternalEmpty
+    | ExternalRecord of ContractRef
+    | ExternalFields of ExternalUnionField list
+
+/// <summary>One case of a user-owned internally tagged union.</summary>
+and ExternalUnionCase =
     { ExtTag: string
       ExtFsCase: string
-      ExtRef: ContractRef
+      ExtPayload: ExternalUnionPayload
       ExtLine: int }
+
+and ExternalUnionRepresentation =
+    | GeneratedInternal of discriminator: string
+    | GeneratedAdjacent of discriminator: string * payloadField: string * payloadStyle: string
+    | GeneratedExternal of payloadStyle: string * unwrapFieldless: bool
 
 /// <summary>A field's declared type. The <c>External*</c> shapes are produced only by the record frontend:
 /// they reference user-owned F# union types instead of generating case types.</summary>
-type FieldType =
+and FieldType =
     | Primitive of PrimitiveType
     | Reference of ContractRef
     | ListOf of FieldType
@@ -54,7 +71,8 @@ type FieldType =
     | LiteralUnion of string list
     | UnionBlock of discriminator: string * cases: UnionCaseDecl list
     | ExternalEnum of typeName: string * cases: ExternalEnumCase list
-    | ExternalUnion of typeName: string * discriminator: string * cases: ExternalUnionCase list
+    | ExternalTransparent of typeName: string * caseName: string * payload: FieldType
+    | ExternalUnion of typeName: string * representation: ExternalUnionRepresentation * cases: ExternalUnionCase list
 
 /// <summary>One portable constraint retained by the shared generation pipeline.</summary>
 type ConstraintDecl =

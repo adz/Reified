@@ -10,6 +10,46 @@ open Reified
 open System
 open System.Collections.Generic
 
+/// <summary>Controls how a case's authored fields are represented inside adjacent or external tagging.</summary>
+[<RequireQualifiedAccess>]
+type UnionPayloadStyle =
+    | Named
+    | Positional
+    | UnwrappedSingle
+    | NamedWithUnwrappedSingle
+    | PositionalWithUnwrappedSingle
+
+/// <summary>A complete, inspectable union wire representation.</summary>
+[<RequireQualifiedAccess>]
+type UnionRepresentation =
+    | Internal of tagField: string
+    | Adjacent of tagField: string * payloadField: string * payloadStyle: UnionPayloadStyle
+    | External of payloadStyle: UnionPayloadStyle * unwrapFieldless: bool
+
+/// <summary>Common complete representations for recommended authoring and serializer-compatible lifting.</summary>
+[<RequireQualifiedAccess>]
+module UnionRepresentations =
+    /// <summary>Reified's recommended internally tagged, named-field representation.</summary>
+    let recommended = UnionRepresentation.Internal "type"
+
+    /// <summary>FSharp.SystemTextJson's default <c>Case</c>/<c>Fields</c> positional representation.</summary>
+    let fsharpSystemTextJsonDefault =
+        UnionRepresentation.Adjacent("Case", "Fields", UnionPayloadStyle.Positional)
+
+    /// <summary>The recommended FSharp.SystemTextJson internal-tag plus named-fields profile.</summary>
+    let fsharpSystemTextJsonInternalNamed = UnionRepresentation.Internal "type"
+
+    /// <summary>FSharp.SystemTextJson external tags with named multi-field payloads and unwrapped fieldless/single-field cases.</summary>
+    let fsharpSystemTextJsonExternalNamed =
+        UnionRepresentation.External(UnionPayloadStyle.NamedWithUnwrappedSingle, true)
+
+    /// <summary>Reified's former adjacent <c>{ type, value }</c> representation.</summary>
+    let reifiedAdjacent =
+        UnionRepresentation.Adjacent("type", "value", UnionPayloadStyle.Named)
+
+    /// <summary>A compact external representation with fieldless cases encoded as strings.</summary>
+    let compactExternal = UnionRepresentation.External(UnionPayloadStyle.Named, true)
+
 [<ReferenceEquality>]
 type internal ConstructorApplication<'model> =
     { ArgumentCount: int
@@ -219,10 +259,8 @@ and internal ValueSchemaShape =
     | NestedValueDefinition of nested: ModelSchemaDefinition<obj> * source: obj
     /// <summary>A collection value whose items are each described by the same item value schema.</summary>
     | ManyValueDefinition of CollectionValueDefinition
-    /// <summary>A tagged union value whose case payloads are each described by explicit value schemas.</summary>
-    | UnionValueDefinition of TaggedUnionValueDefinition
-    /// <summary>An internally-tagged union value whose case payloads are spliced beside the discriminator field.</summary>
-    | UnionInlineValueDefinition of InlineTaggedUnionValueDefinition
+    /// <summary>A union with one resolved wire representation and explicit semantic case payload shapes.</summary>
+    | UnionValueDefinition of UnionValueDefinition
     /// <summary>A bare-string enum value for payload-less union cases.</summary>
     | EnumValueDefinition of TaggedEnumValueDefinition
     /// <summary>An optional value: absent input is a legal <c>None</c>, present input parses through the payload schema.</summary>
@@ -305,23 +343,19 @@ and [<ReferenceEquality>] internal MapValueDefinition =
       /// </summary>
       AcceptItem: ICollectionItemInterpreter -> obj }
 
+and internal UnionCasePayloadDefinition =
+    | EmptyUnionCase
+    | ValueUnionCase of ValueSchemaDefinition
+    | FieldsUnionCase of ValueSchemaDefinition
+
 and [<ReferenceEquality>] internal UnionCaseValueDefinition =
     { Tag: string
-      Payload: ValueSchemaDefinition
+      Payload: UnionCasePayloadDefinition
       Construct: obj -> obj
       TryInspect: obj -> obj option }
 
-and [<ReferenceEquality>] internal TaggedUnionValueDefinition =
-    { DiscriminatorField: ExternalFieldName
-      PayloadField: ExternalFieldName
-      Cases: UnionCaseValueDefinition list }
-
-/// <summary>
-/// A tagged union case whose payload is spliced beside the discriminator field rather than nested under a
-/// separate payload field. The payload must be a nested model value schema so its fields are known upfront.
-/// </summary>
-and [<ReferenceEquality>] internal InlineTaggedUnionValueDefinition =
-    { DiscriminatorField: ExternalFieldName
+and [<ReferenceEquality>] internal UnionValueDefinition =
+    { Representation: UnionRepresentation
       Cases: UnionCaseValueDefinition list }
 
 and [<ReferenceEquality>] internal EnumCaseValueDefinition = { Tag: string; Value: obj }
@@ -340,7 +374,7 @@ and [<ReferenceEquality>] internal ModelSchemaDefinition<'model> =
       Fields: FieldDescriptor<'model> list
       Description: string option }
 
-/// <summary>Describes one tagged union case for <c>Schema.union</c>.</summary>
+/// <summary>Describes one tagged union case for <c>Schema.union</c> and its compatibility variants.</summary>
 [<Sealed>]
 type UnionCase<'union> internal (definition: UnionCaseValueDefinition) =
     member internal _.Definition = definition

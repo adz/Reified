@@ -1,6 +1,7 @@
 namespace Reified.Tests
 
 open Reified
+open Reified.Schema.Json
 
 open Reified.Tests.Generated
 open Swensen.Unquote
@@ -307,3 +308,27 @@ module GeneratedContractTests =
         match parsed with
         | Ok v1 -> test <@ v1.Name = "Ada" @>
         | Error diagnostics -> failwithf "Expected a v1 parse, got %A" diagnostics
+
+    [<Fact>]
+    let ``generated union compatibility profiles preserve their exact JSON shapes`` () =
+        let codec = Json.compile UnionCompatibilityEnvelope.schema
+        let value =
+            { WorkflowId = WorkflowId "wf-1"
+              Recommended = RecommendedCommand.Move(1, 2)
+              FSharpSystemTextJson = FSharpSystemTextJsonCommand.Translate(3, 4)
+              CompactExternal = CompactExternalCommand.Rename "Ada" }
+
+        let json = Json.serialize codec value
+        test <@ json = "{\"workflowId\":\"wf-1\",\"recommended\":{\"type\":\"move\",\"x\":1,\"y\":2},\"fSharpSystemTextJson\":{\"Case\":\"Translate\",\"Fields\":[3,4]},\"compactExternal\":{\"rename\":\"Ada\"}}" @>
+        test <@ Json.deserialize codec json = value @>
+
+        let multi = { value with CompactExternal = CompactExternalCommand.Resize(10, 20) }
+        let multiJson = Json.serialize codec multi
+        test <@ multiJson.EndsWith "\"compactExternal\":{\"resize\":{\"width\":10,\"height\":20}}}" @>
+        test <@ Json.deserialize codec multiJson = multi @>
+
+        let document = JsonSchema.generate UnionCompatibilityEnvelope.schema
+        test <@ document.Contains "\"Case\"" @>
+        test <@ document.Contains "\"Fields\"" @>
+        test <@ document.Contains "\"prefixItems\"" @>
+        test <@ document.Contains "\"minItems\":2" @>

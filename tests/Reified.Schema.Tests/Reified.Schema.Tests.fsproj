@@ -55,6 +55,8 @@
     <Compile Include="contracts/profile.g.fs" />
     <Compile Include="contracts/shipment.fs" />
     <Compile Include="contracts/shipment.g.fs" />
+    <Compile Include="contracts/union-compat.fs" />
+    <Compile Include="contracts/union-compat.g.fs" />
     <Compile Include="GeneratedContractTests.fs" />
   </ItemGroup>
 

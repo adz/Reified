@@ -96,14 +96,14 @@ module Payment =
     open Reified.ConstraintDSL
 
     let private sourceCases =
-        [ UnionCase.create "card" PaymentSource.Card (function PaymentSource.Card payload -> Some payload | _ -> None) Card.schema
-          UnionCase.create "invoice" PaymentSource.Invoice (function PaymentSource.Invoice payload -> Some payload | _ -> None) Invoice.schema ]
+        [ UnionCase.fields "card" PaymentSource.Card (function PaymentSource.Card payload -> Some payload | _ -> None) Card.schema
+          UnionCase.fields "invoice" PaymentSource.Invoice (function PaymentSource.Invoice payload -> Some payload | _ -> None) Invoice.schema ]
 
     /// The schema declared by payment.contract (Payment.v1).
     let schema : Schema<Payment> =
         schema<Payment> {
             fieldAs "source" (fun (value: Payment) -> value.Source) {
-                withSchema (Schema.inlineUnion "kind" sourceCases)
+                withSchema (Schema.unionWith (UnionRepresentation.Internal "kind") sourceCases)
             }
             construct (fun source ->
                 { Source = source })

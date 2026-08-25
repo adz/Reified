@@ -22,9 +22,9 @@ module KeyCatalogueDocTests =
             "..",
             "..",
             "docs",
-            "03-validating-values",
-            "localization",
-            "catalogue.md"
+            "04-constraints",
+            "40-localization",
+            "40-catalogue.md"
         )
         |> Path.GetFullPath
 

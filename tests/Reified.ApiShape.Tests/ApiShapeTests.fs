@@ -573,6 +573,8 @@ module ApiShapeTests =
         let fieldOrderType = typeof<FieldOrder>
         let schemaModule = moduleType schemaType "Reified.Schema"
         let fieldModule = moduleType fieldType "Reified.Field"
+        let unionCaseModule = moduleType schemaType "Reified.UnionCase"
+        let unionRepresentationsModule = moduleType schemaType "Reified.UnionRepresentations"
         let schemaAssembly = schemaType.Assembly
         let references = referencedAssemblyNames schemaAssembly
         let publicConstructors =
@@ -666,7 +668,35 @@ module ApiShapeTests =
               "constrainAll"
               "mustSupply"
               "mayOmit"
-              "supply" ]
+              "supply"
+              "union"
+              "unionWith"
+              "enum" ]
+        schemaMembers
+        |> assertContainsNone [ "adjacentUnion"; "inlineUnion"; "externalUnion" ]
+        unionCaseModule
+        |> publicStaticMemberNames
+        |> assertContainsAll [ "empty"; "value"; "fields" ]
+        unionCaseModule
+        |> publicStaticMemberNames
+        |> assertContainsNone [ "create" ]
+        unionRepresentationsModule
+        |> publicStaticMemberNames
+        |> assertContainsAll
+            [ "recommended"
+              "fsharpSystemTextJsonDefault"
+              "fsharpSystemTextJsonInternalNamed"
+              "fsharpSystemTextJsonExternalNamed"
+              "reifiedAdjacent"
+              "compactExternal" ]
+        typeof<UnionPayloadStyle>
+        |> publicUnionCaseNames
+        |> (=) (set [ "Named"; "Positional"; "UnwrappedSingle"; "NamedWithUnwrappedSingle"; "PositionalWithUnwrappedSingle" ])
+        |> (fun equal -> test <@ equal @>)
+        typeof<UnionRepresentation>
+        |> publicUnionCaseNames
+        |> (=) (set [ "Internal"; "Adjacent"; "External" ])
+        |> (fun equal -> test <@ equal @>)
         primitiveValueKindType
         |> publicUnionCaseNames
         |> assertContainsAll [ "Text"; "Int"; "Decimal"; "Bool"; "Date"; "DateTime"; "Guid" ]

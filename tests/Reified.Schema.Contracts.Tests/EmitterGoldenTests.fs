@@ -45,6 +45,7 @@ module EmitterGoldenTests =
     [<InlineData("category.contract", "category.g.fs")>]
     [<InlineData("profile.contract", "profile.g.fs")>]
     [<InlineData("shipment.fs", "shipment.g.fs")>]
+    [<InlineData("union-compat.fs", "union-compat.g.fs")>]
     let ``the emitter reproduces every checked-in golden file byte for byte`` (contractName: string) (goldenName: string) =
         let file = parseCorpusFile contractName
         let emitted = Emitter.emit "Reified.Tests.Generated" [ file ] file

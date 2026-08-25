@@ -26,7 +26,7 @@ an explicit quotation compiles but throws, because the quotation then carries no
 
 On .NET the constructor uses `ReflectedDefinition(includeValue = true)`, so the quotation carries the
 already-compiled getter and `WithValue` hands it straight back. Nothing is evaluated at run time and no reflection
-is performed, which is what keeps the AOT and trimming guarantees in `docs/schema/aot-trimming-fable.md` true.
+is performed, which is what keeps the AOT and trimming guarantees in `docs/95-notes/82-aot-trimming-fable.md` true.
 
 Fable does not implement `Expr.WithValue`. Using `includeValue = true` there fails to compile:
 
@@ -47,7 +47,7 @@ Two Fable traps worth knowing before editing that branch:
   `(arg) => { const newEnv = new Map(capturedEnv); ...; return evaluate(expr.body, newEnv); }`, so every call
   allocates a `Map` and re-walks the expression tree. A schema getter runs per parsed and per encoded value, so
   that would put an interpreter on the hot path — exactly what the guarantee in
-  `docs/schema/aot-trimming-fable.md` rules out.
+  `docs/95-notes/82-aot-trimming-fable.md` rules out.
 
   Instead the property name recovered above is closed over and read directly, through the same
   `[<Fable.Core.Emit("$0[$1]")>]` pattern `Reified.Data`'s JSON interop uses. The emitted JavaScript is

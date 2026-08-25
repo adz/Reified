@@ -474,25 +474,31 @@ module JsonSchema =
                 let cases =
                     union.Cases
                     |> List.map (fun case ->
-                        let payload = valueKeywords [] case.Payload |> String.concat ","
-
-                        sprintf
-                            "{\"type\":\"object\",\"properties\":{\"%s\":{\"const\":%s},\"%s\":{%s}},\"required\":[\"%s\",\"%s\"]}"
-                            (escape union.DiscriminatorField)
-                            (literal case.Tag)
-                            (escape union.PayloadField)
-                            payload
-                            (escape union.DiscriminatorField)
-                            (escape union.PayloadField))
+                        match union.Representation with
+                        | UnionRepresentation.Internal tagField ->
+                            match case.Shape with
+                            | UnionCaseShape.Empty -> inlineCaseKeywords tagField case.Tag None
+                            | UnionCaseShape.Fields fields -> inlineCaseKeywords tagField case.Tag (Some fields)
+                            | UnionCaseShape.Value _ -> invalidOp "Internal unions cannot contain value payload cases."
+                        | UnionRepresentation.Adjacent(tagField, payloadField, style) ->
+                            let tagProperty = sprintf "\"%s\":{\"const\":%s}" (escape tagField) (literal case.Tag)
+                            match case.Shape with
+                            | UnionCaseShape.Empty ->
+                                sprintf "{\"type\":\"object\",\"properties\":{%s},\"required\":[\"%s\"]}" tagProperty (escape tagField)
+                            | shape ->
+                                let payload = unionPayloadKeywords style shape |> String.concat ","
+                                sprintf "{\"type\":\"object\",\"properties\":{%s,\"%s\":{%s}},\"required\":[\"%s\",\"%s\"]}" tagProperty (escape payloadField) payload (escape tagField) (escape payloadField)
+                        | UnionRepresentation.External(style, unwrapFieldless) ->
+                            match case.Shape with
+                            | UnionCaseShape.Empty when unwrapFieldless -> sprintf "{\"const\":%s}" (literal case.Tag)
+                            | shape ->
+                                let payload = unionPayloadKeywords style shape |> String.concat ","
+                                sprintf
+                                    "{\"type\":\"object\",\"properties\":{\"%s\":{%s}},\"required\":[\"%s\"],\"additionalProperties\":false}"
+                                    (escape case.Tag)
+                                    payload
+                                    (escape case.Tag))
                     |> String.concat ","
-
-                [ sprintf "\"oneOf\":[%s]" cases ]
-            | SchemaShape.UnionInline union ->
-                let cases =
-                    union.Cases
-                    |> List.map (fun case -> inlineCaseKeywords union.DiscriminatorField case.Tag case.Payload)
-                    |> String.concat ","
-
                 [ sprintf "\"oneOf\":[%s]" cases ]
             | SchemaShape.Enum enum ->
                 let tags = enum.Cases |> List.map (fun case -> literal case.Tag) |> String.concat ","
@@ -519,7 +525,6 @@ module JsonSchema =
         | SchemaShape.Nested _
         | SchemaShape.Many _
         | SchemaShape.Union _
-        | SchemaShape.UnionInline _
         | SchemaShape.Enum _
         | SchemaShape.MapOf _ -> false
         | SchemaShape.Recursive _ -> false
@@ -537,11 +542,11 @@ module JsonSchema =
         | Some _ -> false
         | None -> not (isOptionalDescription field.Schema) || explicitlySupplied
 
-    and private inlineCaseKeywords (discriminatorField: string) (tag: string) (model: ModelDescription) =
+    and private inlineCaseKeywords (discriminatorField: string) (tag: string) (model: ModelDescription option) =
         let discriminatorProperty = sprintf "\"%s\":{\"const\":%s}" (escape discriminatorField) (literal tag)
 
         let payloadProperties =
-            model.Fields
+            model |> Option.map _.Fields |> Option.defaultValue []
             |> List.map (fun field ->
                 sprintf "\"%s\":{%s}" (escape field.Name) (valueKeywords field.Constraints field.Schema |> String.concat ","))
 
@@ -549,13 +554,43 @@ module JsonSchema =
 
         let required =
             escape discriminatorField
-            :: (model.Fields
+            :: ((model |> Option.map _.Fields |> Option.defaultValue [])
                 |> List.filter fieldIsRequired
                 |> List.map (fun field -> escape field.Name))
             |> List.map (sprintf "\"%s\"")
             |> String.concat ","
 
         sprintf "{\"type\":\"object\",\"properties\":{%s},\"required\":[%s]}" properties required
+
+    and private unionPayloadKeywords style shape =
+        let style =
+            match style, shape with
+            | UnionPayloadStyle.NamedWithUnwrappedSingle, UnionCaseShape.Fields model when model.Fields.Length = 1 -> UnionPayloadStyle.UnwrappedSingle
+            | UnionPayloadStyle.NamedWithUnwrappedSingle, _ -> UnionPayloadStyle.Named
+            | UnionPayloadStyle.PositionalWithUnwrappedSingle, UnionCaseShape.Fields model when model.Fields.Length = 1 -> UnionPayloadStyle.UnwrappedSingle
+            | UnionPayloadStyle.PositionalWithUnwrappedSingle, _ -> UnionPayloadStyle.Positional
+            | style, _ -> style
+        match shape with
+        | UnionCaseShape.Empty ->
+            match style with
+            | UnionPayloadStyle.Named -> [ "\"type\":\"object\""; "\"maxProperties\":0" ]
+            | UnionPayloadStyle.Positional -> [ "\"type\":\"array\""; "\"maxItems\":0" ]
+            | UnionPayloadStyle.UnwrappedSingle -> [ "\"type\":\"null\"" ]
+            | _ -> invalidOp "Adaptive union payload style was not resolved."
+        | UnionCaseShape.Value payload -> valueKeywords [] payload
+        | UnionCaseShape.Fields model ->
+            match style with
+            | UnionPayloadStyle.Named -> modelKeywords model
+            | UnionPayloadStyle.Positional ->
+                let items = model.Fields |> List.map (fun field -> sprintf "{%s}" (valueKeywords field.Constraints field.Schema |> String.concat ","))
+                [ "\"type\":\"array\""
+                  sprintf "\"prefixItems\":[%s]" (String.concat "," items)
+                  sprintf "\"minItems\":%d" model.Fields.Length
+                  sprintf "\"maxItems\":%d" model.Fields.Length ]
+            | UnionPayloadStyle.UnwrappedSingle ->
+                let field = model.Fields |> List.exactlyOne
+                valueKeywords field.Constraints field.Schema
+            | _ -> invalidOp "Adaptive union payload style was not resolved."
 
     and private modelKeywords (model: ModelDescription) =
         let properties =
@@ -587,7 +622,7 @@ module JsonSchema =
     let private deferredDefinitions (roots: SchemaDescription list) =
         let found = System.Collections.Generic.Dictionary<int, SchemaDescription>()
 
-        let rec visitValue description =
+        let rec visitValue (description: SchemaDescription) =
             match description.Shape with
             | SchemaShape.Deferred(reference, value) ->
                 if not (found.ContainsKey reference) then
@@ -598,8 +633,13 @@ module JsonSchema =
             | SchemaShape.Optional value
             | SchemaShape.MapOf value -> visitValue value
             | SchemaShape.Nested model -> visitModel model
-            | SchemaShape.Union union -> union.Cases |> List.iter (fun case -> visitValue case.Payload)
-            | SchemaShape.UnionInline union -> union.Cases |> List.iter (fun case -> visitModel case.Payload)
+            | SchemaShape.Union union ->
+                union.Cases
+                |> List.iter (fun case ->
+                    match case.Shape with
+                    | UnionCaseShape.Empty -> ()
+                    | UnionCaseShape.Value payload -> visitValue payload
+                    | UnionCaseShape.Fields fields -> visitModel fields)
             | SchemaShape.Primitive _
             | SchemaShape.Enum _
             | SchemaShape.Recursive _ -> ()

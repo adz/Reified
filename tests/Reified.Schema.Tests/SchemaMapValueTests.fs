@@ -29,7 +29,6 @@ module SchemaMapValueTests =
         | NestedValueDefinition _
         | ManyValueDefinition _
         | UnionValueDefinition _
-        | UnionInlineValueDefinition _
         | EnumValueDefinition _
         | OptionValueDefinition _ -> failwith "Expected a map value schema."
 

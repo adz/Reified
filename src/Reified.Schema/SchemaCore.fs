@@ -165,9 +165,10 @@ module internal SchemaCore =
     let refine refinement schema = ValueSchema.refine refinement schema
     let validate validation schema = ValueSchema.validate validation schema
     /// <summary>Describes a tagged union.</summary>
-    let union discriminator payload cases = ValueSchema.union discriminator payload cases
-    /// <summary>Describes an internally tagged union.</summary>
-    let inlineUnion discriminator cases = ValueSchema.unionInline discriminator cases
+    let union cases = ValueSchema.union cases
+
+    let unionWith representation cases = ValueSchema.unionWith representation cases
+
     /// <summary>Describes a payload-less tagged enum.</summary>
     let enum cases = ValueSchema.enumOf cases
     /// <summary>Appends one portable constraint.</summary>

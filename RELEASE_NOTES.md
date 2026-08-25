@@ -1,6 +1,6 @@
 # Release Notes
 
-## Unreleased
+## 0.2.0 - 2026-08-25
 
 ### Split from Axial, and renamed to Reified (breaking)
 

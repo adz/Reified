@@ -26,6 +26,12 @@ let main _ =
 
     printfn "Schema record plan: ok"
 
+    require
+        (Checks.runUnionRepresentationSurface ())
+        "Union representation metadata differed across targets."
+
+    printfn "Union representations: ok"
+
     let roundTripped = Checks.runCodecRoundTrip ()
 
     require

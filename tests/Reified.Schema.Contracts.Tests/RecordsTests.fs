@@ -236,11 +236,129 @@ type Signup = { Plan: Plan; Source: Source }
         | other -> failwithf "Expected an enum, got %A" other
 
         match (fields |> List.find (fun f -> f.FieldName = "Source")).FieldType with
-        | ExternalUnion(typeName, discriminator, cases) ->
+        | ExternalUnion(typeName, GeneratedInternal discriminator, cases) ->
             test <@ typeName = "Source" @>
             test <@ discriminator = "kind" @>
-            test <@ cases |> List.map (fun c -> c.ExtTag, c.ExtFsCase, c.ExtRef.RefName) = [ "byCard", "ByCard", "Card"; "byInvoice", "ByInvoice", "Invoice" ] @>
+            test <@ cases |> List.map (fun c -> c.ExtTag, c.ExtFsCase, match c.ExtPayload with ExternalRecord reference -> Some reference.RefName | _ -> None) = [ "byCard", "ByCard", Some "Card"; "byInvoice", "ByInvoice", Some "Invoice" ] @>
         | other -> failwithf "Expected a tagged union, got %A" other
+
+    [<Fact>]
+    let ``parameterless derived unions default to type and admit fieldless cases`` () =
+        let file =
+            parse
+                """
+namespace My.Wire
+
+open Reified.DerivedSchema
+
+[<DeriveSchema>]
+type Volume = { Amount: decimal }
+
+[<DeriveUnion>]
+type Command =
+    | Stop
+    | Volume of Volume
+
+[<DeriveSchema>]
+type Envelope = { Command: Command }
+"""
+
+        let field =
+            file.Contracts
+            |> List.find (fun contract -> contract.ContractName = "Envelope")
+            |> _.Fields
+            |> List.exactlyOne
+
+        match field.FieldType with
+        | ExternalUnion("Command", GeneratedInternal "type", cases) ->
+            test <@ cases |> List.map (fun case -> case.ExtTag, match case.ExtPayload with ExternalRecord reference -> Some reference.RefName | _ -> None) = [ "stop", None; "volume", Some "Volume" ] @>
+
+            let emitted = Emitter.emit "Fallback" [ file ] file
+            test <@ emitted.Contains "UnionCase.empty \"stop\" Command.Stop" @>
+            test <@ emitted.Contains "Schema.unionWith (UnionRepresentation.Internal \"type\")" @>
+        | other -> failwithf "Expected the default internal union, got %A" other
+
+    [<Fact>]
+    let ``derived unions lower directly named case fields to typed payload schemas`` () =
+        let file =
+            parse
+                """
+namespace My.Wire
+
+open Reified.DerivedSchema
+
+[<DeriveUnion>]
+type Command =
+    | Stop
+    | Volume of amount: decimal
+    | Move of x: int * y: int
+
+[<DeriveSchema>]
+type Envelope = { Command: Command }
+"""
+
+        let field = file.Contracts |> List.exactlyOne |> _.Fields |> List.exactlyOne
+
+        match field.FieldType with
+        | ExternalUnion("Command", GeneratedInternal "type", cases) ->
+            match cases |> List.map _.ExtPayload with
+            | [ ExternalEmpty; ExternalFields [ amount ]; ExternalFields [ x; y ] ] ->
+                test <@ amount.ExtWireName = "amount" && amount.ExtFieldType = Primitive PDecimal @>
+                test <@ (x.ExtWireName, y.ExtWireName) = ("x", "y") @>
+            | payloads -> failwithf "Unexpected payloads: %A" payloads
+
+            let emitted = Emitter.emit "Fallback" [ file ] file
+            test <@ emitted.Contains "schema<{| amount: decimal |}>" @>
+            test <@ emitted.Contains "schema<{| x: int; y: int |}>" @>
+            test <@ emitted.Contains "Command.Volume(payload.amount)" @>
+        | other -> failwithf "Expected a direct-field internal union, got %A" other
+
+    [<Fact>]
+    let ``an unmarked single-case union is a transparent value`` () =
+        let file =
+            parse
+                """
+namespace My.Wire
+
+open Reified.DerivedSchema
+
+type Command = Volume of decimal
+
+[<DeriveSchema>]
+type Envelope = { Command: Command }
+"""
+        let field = file.Contracts |> List.exactlyOne |> _.Fields |> List.exactlyOne
+        match field.FieldType with
+        | ExternalTransparent("Command", "Volume", Primitive PDecimal) -> ()
+        | other -> failwithf "Expected a transparent value, got %A" other
+
+    [<Fact>]
+    let ``derived unions resolve explicit compatibility representations`` () =
+        let parseRepresentation attribute =
+            let file =
+                parse
+                    $"""
+namespace My.Wire
+
+open Reified.DerivedSchema
+
+[<{attribute}>]
+type Command = Volume of amount: decimal
+
+[<DeriveSchema>]
+type Envelope = {{ Command: Command }}
+"""
+            match (file.Contracts |> List.exactlyOne |> _.Fields |> List.exactlyOne).FieldType with
+            | ExternalUnion(_, representation, _) -> representation, Emitter.emit "Fallback" [ file ] file
+            | other -> failwithf "Expected a generated union, got %A" other
+
+        let external, externalCode = parseRepresentation "DeriveUnion(Representation = UnionRepresentationKind.External, PayloadStyle = UnionPayloadStyleKind.UnwrappedSingle, UnwrapFieldless = false)"
+        let adjacent, adjacentCode = parseRepresentation "DeriveUnion(Representation = UnionRepresentationKind.Adjacent, PayloadField = \"fields\", PayloadStyle = UnionPayloadStyleKind.Positional)"
+
+        test <@ external = GeneratedExternal("UnwrappedSingle", false) @>
+        test <@ externalCode.Contains "UnionRepresentation.External(UnionPayloadStyle.UnwrappedSingle, false)" @>
+        test <@ adjacent = GeneratedAdjacent("type", "fields", "Positional") @>
+        test <@ adjacentCode.Contains "UnionRepresentation.Adjacent(\"type\", \"fields\", UnionPayloadStyle.Positional)" @>
 
     [<Fact>]
     let ``unsupported field types are rejected with guidance`` () =
@@ -361,12 +479,13 @@ open Reified.DerivedSchema
 [<DeriveUnion "kind">]
 type Source =
     | Inline of string
+    | Other
 
 [<DeriveSchema>]
 type Order = { Source: Source }
 """
 
-        test <@ badUnionPayload |> List.exists (fun m -> m.Contains "exactly one [<DeriveSchema>] record payload") @>
+        test <@ badUnionPayload |> List.exists (fun m -> m.Contains "must name every field") @>
 
     [<Fact>]
     let ``a self-referencing record emits a deferred schema`` () =

@@ -32,11 +32,10 @@ module UnionSchemaParseTests =
         }
 
     let private paymentValue () =
-        Schema.union
-            "type"
-            "value"
-            [ UnionCase.create "card" Card (function Card details -> Some details | _ -> None) ((cardSchema ()))
-              UnionCase.create "invoice" Invoice (function Invoice reference -> Some reference | _ -> None) RefinedSchemas.nonBlankString ]
+        Schema.unionWith
+            (UnionRepresentation.Adjacent("type", "value", UnionPayloadStyle.Named))
+            [ UnionCase.value "card" Card (function Card details -> Some details | _ -> None) ((cardSchema ()))
+              UnionCase.value "invoice" Invoice (function Invoice reference -> Some reference | _ -> None) RefinedSchemas.nonBlankString ]
 
     let private checkoutSchema () =
         schema<Checkout> {

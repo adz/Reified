@@ -24,6 +24,7 @@ dotnet add package Reified.Schema
 dotnet add package Reified.Schema.Json
 ```
 
+
 Start with an ordinary record. Nothing about it is Reified-specific:
 
 ```fsharp
@@ -32,6 +33,7 @@ type Signup =
       Age: int
       Newsletter: bool }
 ```
+
 
 Declare how untrusted input becomes one:
 
@@ -50,6 +52,7 @@ let signupSchema =
     }
 ```
 
+
 Feed it something realistic. `Data` is a source-neutral input tree, so the same schema reads a form post, a
 query string, JSON, or configuration:
 
@@ -63,6 +66,7 @@ let input =
 Schema.parse signupSchema input
 // Ok { Email = "ada@example.org"; Age = 36; Newsletter = true }
 ```
+
 
 `"36"` arrived as text and landed as an `int`. No `Signup` exists unless every field and the constructor
 succeeded, so downstream code does not have to wonder whether validation ran.
@@ -82,11 +86,13 @@ match Schema.parse signupSchema input with
         printfn "%s: %s" (SchemaPath.format issue.Path) (SchemaError.render issue.Error)
 ```
 
+
 ```text
 age: Expected a value at least 13, but was 11.
 email: Expected an email address, but was ada.
 newsletter: This value was omitted.
 ```
+
 
 Every independent field is checked, so one parse reports every problem rather than the first. The paths come
 from the structure of the declaration — application code never repeats field names alongside the checks.
@@ -103,6 +109,7 @@ let codec = Json.compile signupSchema     // compile once, typically at startup
 Json.serialize codec { Email = "ada@example.org"; Age = 36; Newsletter = true }
 // {"email":"ada@example.org","age":36,"newsletter":true}
 ```
+
 
 There is no second description of the wire shape to keep in step, and no runtime reflection: the codec is
 compiled from the schema's typed field plan, so it works under NativeAOT, trimming, and Fable.
@@ -138,11 +145,12 @@ let retryCount : Constraint<int> = Constraint.between 0 10
 // Error "expected a value between 0 and 10, but was 42"
 ```
 
+
 Nobody wrote that failure sentence separately. A `Constraint` carries its own description, and a `Violation`
 carries the rule that failed and the offending value as data — so the message cannot fall out of step with the
 check, and it can be localized or reformatted without touching the rule.
 
-→ [Constraint](/validating-values/constraint.html)
+→ [Constraint](/constraints/constraint.html)
 
 ## Attach the rule to a type
 
@@ -156,10 +164,11 @@ Refine.nonBlankString "Ada"    // Ok (NonBlankString "Ada")
 Refine.nonBlankString "  "     // Error ...
 ```
 
+
 Downstream code takes `NonBlankString` and stops re-checking. Your own domain types work the same way —
 `CustomerId`, `Email`, `WorkspaceName` — each defined over a constraint and constructed through it.
 
-→ [Refined values](/domain-types/index.html)
+→ [Refined values](/refined/index.html)
 
 ## Back to the model
 
@@ -178,11 +187,12 @@ let registrationSchema =
     }
 ```
 
+
 The `Owner` field carries no rules of its own: every refined type has exactly one schema, and the field
 resolves it from the type. Use a constraint on the field when the rule belongs to *this boundary*; use a
 refined type when it belongs to the domain.
 
-→ [Modelling with Schema](/modelling/quickstart.html)
+→ [Schema quickstart](/schema/quickstart.html)
 
 ## Everything else is derived from that declaration
 
@@ -197,6 +207,7 @@ JsonSchema.generate signupSchema
 //  "required":["email","age","newsletter"]}
 ```
 
+
 `"minimum": 13` was not written twice — it is the `atLeast 13` from the declaration, read for a different
 purpose. The same declaration does four more jobs: checking a value you already hold, accepting payloads from
 older versions, describing the model to a form, and generating test data that obeys the rules.
@@ -208,7 +219,7 @@ older versions, describing the model to a form, and generating test data that ob
 There is no exception model and no framework result type. `Schema.parse` returns
 `Result<'model, SchemaErrors>`; a value check returns `Result<'value, Violation>`. Both errors are data you can
 match on, group by path, translate, or serialize into a problem-details response.
-[`Reified.Result`](/validating-values/result/index.html) adds the composition — `result { }` for fail-fast sequencing, accumulating
+[`Reified.Result`](/result-handling/index.html) adds the composition — `result { }` for fail-fast sequencing, accumulating
 builders for collecting every error at once — over the standard `Result` type rather than replacing it.
 
 ## The words this documentation uses
@@ -227,8 +238,9 @@ area as a whole. When the distinction matters, it will be one of the three above
 
 ## Where to go next
 
-The library is three groups: rules that live in values, boundaries that produce models, and failures and
-fixtures as ordinary values. Each page below states what it is for, so you can start from the job you have.
+Continue with Schema for structured boundary models, or choose another focused capability from the library map.
+
+→ [Continue with Schema](/schema/index.html)
 
 → [Where to go next](/getting-started/where-to-go-next.html)
 
@@ -238,9 +250,8 @@ fixtures as ordinary values. Each page below states what it is for, so you can s
 dotnet add package Reified
 ```
 
-That is the whole set: value rules, refined types, parsing, `Result` composition, data, and Schema with its JSON
-codecs. On .NET 8 it also brings the HTTP contract package; a `netstandard2.1` consumer gets the rest. Every package is also independently installable if you want one capability on its own — see
+
+That installs the complete runtime set. Every package is also independently installable if you want one capability
+on its own — see
 [Packages and platforms](/notes/packages-and-platforms.html) for the list, what each one gives you, and which run on
 Fable as well as .NET.
-
-Reified is pre-1.0 and has not been published to NuGet yet, so that line does not resolve for now.

@@ -12,9 +12,6 @@ Declare value and model invariants once. Derive validation, parsing, diagnostics
 [![NuGet](https://img.shields.io/nuget/v/Reified.svg)](https://www.nuget.org/packages/Reified)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-> [!WARNING]
-> Reified is pre-1.0 and has not been published to NuGet yet. APIs change without deprecation cycles.
-
 ## Declare the rule once
 
 Most validation stacks keep the rule and its message in separate places. Reified makes a constraint inspectable data, so checking, diagnostics, export, and generation read the same declaration.
@@ -130,23 +127,19 @@ The contract compiler and schema-derived testing adapter are repository tooling,
 
 `Reified.Schema.Contracts.Build` is not in the umbrella. MSBuild targets do not travel through a transitive package reference, so a project that derives schemas at build time references it directly.
 
-## Install
-
-Reified packages have not been published yet.
-
 ## Documentation and examples
 
-Start with **[Getting started](docs/getting-started.md)** — one complete transaction from untrusted input to a
+Start with **[Getting started](docs/01-getting-started/_index.md)** — one complete transaction from untrusted input to a
 typed model and a derived JSON codec. Its code is compiled and executed on every CI run from
 [`examples/Reified.GettingStarted`](examples/Reified.GettingStarted/Program.fs).
 
-- [Constraint](docs/values/constraint/_index.md)
-- [Values quickstart](docs/values/quickstart.md)
-- [Refined domain values](docs/values/refined/domain-values.md)
-- [Schema quickstart](docs/schema/quickstart.md)
-- [JSON codecs](docs/schema/json-codec.md)
-- [Versioned contracts](docs/schema/contracts.md)
-- [Runnable Schema examples](docs/schema/examples.md)
+- [Constraint](docs/04-constraints/21-constraint.md)
+- [Constraints quickstart](docs/04-constraints/10-quickstart.md)
+- [Refined domain values](docs/06-refined/40-domain-values.md)
+- [Schema quickstart](docs/08-schema/10-quickstart.md)
+- [JSON codecs](docs/08-schema/50-json-codecs.md)
+- [Versioned contracts](docs/08-schema/65-versioned-contracts.md)
+- [Runnable Schema examples](docs/08-schema/85-examples.md)
 
 ## Axial integration
 

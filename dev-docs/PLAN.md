@@ -31,7 +31,7 @@ fixed as 0.3.3 — see `dev-docs/decisions/README.md`). Both versions are on NuG
 The homepage and header logo were also broken right after the migration: `.livedocs/config.json` had no logo
 configured at all, and the stylesheet was untouched Hugo/Docsy CSS that doesn't match FsLiveDocs' real
 DaisyUI/Tailwind markup, so essentially none of it applied. Fixed 2026-08-17: logo config added, and
-`docs/content/reified-docs.css` rewritten against the actual generated DOM (see Axial's equivalent stylesheet for
+`docs/content/reified-theme.css` rewritten against the actual generated DOM (see Axial's equivalent stylesheet for
 the working pattern this follows) with Reified's own light/dark identity.
 
 ## Current Direction
@@ -39,10 +39,9 @@ the working pattern this follows) with Reified's own light/dark identity.
 Reified describes; it does not run. Effects left with Flow when the repository split, so everything here is a
 value: a rule, a shape, a diagnostic, a contract. The public surface has two identities:
 
-- **Values**: four focused packages — ordinary `Result` and `result { }` in `Reified.Result`; reusable, inspectable
-  value constraints in `Reified.Constraint` (returns the standard F# `Result` type, no dependency on
-  `Reified.Result`); primitive parsing in the independent `Reified.Parse`; and refined domain values in
-  `Reified.Refinements` (depends only on `Reified.Constraint`).
+- **Focused values and failures**: ordinary `Result` composition in `Reified.Result`; reusable constraints in
+  `Reified.Constraint`; primitive parsing in `Reified.Parse`; and invariant-carrying types in
+  `Reified.Refinements`. Each has its own documentation section.
 - **Schema**: structured input, accumulated path-aware errors, model construction, codecs, contracts, and boundary
   interpreters.
 
@@ -96,7 +95,7 @@ remain wire-tier records; domain models stay hand-written F# rather than becomin
 The public schema-authoring vocabulary keeps `field` plus the field-block operations.
 `Schema.text`, `Schema.int`, `Schema.decimal`, `Schema.bool`,
 `Schema.date`, `Schema.dateTime`, and `Schema.guid` are the primitive `Schema<'value>` values, and composites
-(`Schema.list<'item>()`, `Schema.option`, `Schema.map<'item>()`, `Schema.union`, `Schema.inlineUnion`, `Schema.enum`, `Schema.defer`)
+(`Schema.list<'item>()`, `Schema.option`, `Schema.map<'item>()`, `Schema.union`, `Schema.unionWith`, `Schema.enum`, `Schema.defer`)
 and refined/domain schemas fill `withSchema` inside a field block. Do not introduce competing primitive aliases such as `string`, `integer`,
 `boolean`, `uuid`, `dateOnly`, or `Field.text`; the `Value` module is internal implementation, not public vocabulary.
 
