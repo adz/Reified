@@ -12,6 +12,19 @@ Declare value and model invariants once. Derive validation, parsing, diagnostics
 [![NuGet](https://img.shields.io/nuget/v/Reified.svg)](https://www.nuget.org/packages/Reified)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
+## Why Reified
+
+- **Type-safe data refinement and narrowing functions** — define reusable `Constraint<'value>` rules, check them with `Constraint.check`, and construct invariant-carrying values with `Refinement.create` and Reified's refined types.
+- **Hierarchical error accumulation with structured, keyed paths** — `SchemaErrors`, `SchemaIssue`, and `SchemaPath` retain property names and collection indexes for precise API, form, and document errors.
+- **First-class NativeAOT, trimming, and Fable support through explicit compile-time schemas** — schemas and compiled JSON codecs do not depend on runtime reflection.
+- **One schema for parsing, validation, JSON codecs, JSON Schema, contracts, and test-data generation** — field names, value shapes, constraints, and constructors stay aligned.
+- **Compiler-directed, type-safe JSON codecs** — compile codecs once from typed schemas without reflection or boxed object-array record construction.
+- **Inspectable constraints rather than predicate-only validation** — built-in constraint metadata drives checking, diagnostics, JSON Schema export, and generation.
+- **Accumulating boundary validation** — report independent field, nested-object, and collection failures together instead of stopping at the first error.
+- **Explicit, evolution-friendly discriminated-union wire formats** — model existing JSON with internal, adjacent, external, or untagged representations; the recommended internal-tag format supports OpenAPI discriminators and mainstream code generation.
+- **Build-time schema derivation for F# records** — `[<DeriveSchema>]` generates ordinary typed schemas at compile time without runtime reflection.
+- **Portable structured data for .NET and JavaScript** — use the same `Data`, constraints, schemas, and core assertions on .NET and Fable.
+
 ## Declare the rule once
 
 Most validation stacks keep the rule and its message in separate places. Reified makes a constraint inspectable data, so checking, diagnostics, export, and generation read the same declaration.
