@@ -63,12 +63,25 @@ jobs:
 
       - name: Add the newly released capsule to this history build
         if: inputs.version != ''
+        shell: bash
         run: |
-          dotnet livedocs history-add "${{ inputs.version }}" \
-            --url "${{ inputs.capsule_url }}" \
-            --sha256 "${{ inputs.capsule_sha256 }}" \
-            --interactive false \
-            --banner false
+          version="${{ inputs.version }}"
+          capsule_url="${{ inputs.capsule_url }}"
+          capsule_sha256="${{ inputs.capsule_sha256 }}"
+          existing="$(jq -r --arg version "$version" '.Entries[] | select(.Version == $version) | [.CapsuleUrl, .CapsuleSha256] | @tsv' .livedocs/history.json)"
+
+          if [[ -z "$existing" ]]; then
+            dotnet livedocs history-add "$version" \
+              --url "$capsule_url" \
+              --sha256 "$capsule_sha256" \
+              --interactive false \
+              --banner false
+          elif [[ "$existing" != "$capsule_url"$'\t'"$capsule_sha256" ]]; then
+            echo "History already contains $version with a different capsule URL or checksum." >&2
+            exit 1
+          else
+            echo "History already contains the verified $version capsule."
+          fi
 
       - name: Build versioned docs site
         run: dotnet livedocs build-history .livedocs/history.json --interactive false --banner false
