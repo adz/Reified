@@ -80,8 +80,8 @@ let main argv =
                 usage ()
             else
                 let parsed =
-                    [ for path in contractInputs -> path, Parser.parse path (File.ReadAllText path)
-                      for path in sourceInputs -> path, Records.parse naming path (File.ReadAllText path) ]
+                    [ yield! [ for path in contractInputs -> path, Parser.parse path (File.ReadAllText path) ]
+                      yield! Records.parseSet naming [ for path in sourceInputs -> path, File.ReadAllText path ] ]
 
                 let parseErrors =
                     parsed

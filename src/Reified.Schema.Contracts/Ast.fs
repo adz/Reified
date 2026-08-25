@@ -117,6 +117,9 @@ type FieldDecl =
 /// it differs from the conventional generated name.</summary>
 type ContractDecl =
     { ContractName: string
+      /// Stable project-wide identity. Record-derived contracts use the fully qualified F# type path;
+      /// textual contracts use <c>ContractName</c>.
+      QualifiedName: string
       Version: int
       Doc: string list
       Annotations: Annotation list
@@ -133,6 +136,8 @@ type ContractDecl =
 type ContractFile =
     { FilePath: string
       Namespace: string option
+      /// The source file's direct file-level module, when it has one.
+      Module: string option
       Contracts: ContractDecl list }
 
 /// <summary>A line-precise parse or resolution problem.</summary>

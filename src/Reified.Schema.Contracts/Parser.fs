@@ -391,6 +391,7 @@ module Parser =
                         | [ TPunct "}" ] ->
                             contracts.Add
                                 { ContractName = name
+                                  QualifiedName = name
                                   Version = version
                                   Doc = doc
                                   Annotations = annotations
@@ -432,4 +433,4 @@ module Parser =
         if errors.Count > 0 then
             Error(List.ofSeq errors)
         else
-            Ok { FilePath = filePath; Namespace = None; Contracts = List.ofSeq contracts }
+            Ok { FilePath = filePath; Namespace = None; Module = None; Contracts = List.ofSeq contracts }

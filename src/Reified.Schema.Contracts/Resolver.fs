@@ -151,7 +151,7 @@ module Resolver =
                 if List.isEmpty contract.Fields then
                     report file.FilePath contract.ContractLine "contracts need at least one field"
 
-                match registry.TryGetValue contract.ContractName with
+                match registry.TryGetValue contract.QualifiedName with
                 | true, declared ->
                     let existingFile, existingLine, existingVersion =
                         declared |> Seq.maxBy (fun (_, _, version) -> version)
@@ -171,7 +171,7 @@ module Resolver =
                     else
                         declared.Add(file.FilePath, contract.ContractLine, contract.Version)
                 | false, _ ->
-                    registry.[contract.ContractName] <- ResizeArray [ file.FilePath, contract.ContractLine, contract.Version ]
+                    registry.[contract.QualifiedName] <- ResizeArray [ file.FilePath, contract.ContractLine, contract.Version ]
 
         // Superseded versions generate version-suffixed type and module names (`ConfigV1`); those names
         // must not collide with another declared contract.
@@ -207,9 +207,9 @@ module Resolver =
                     let declaredInFile =
                         file.Contracts
                         |> List.exists (fun candidate ->
-                            candidate.ContractName = reference.RefName && candidate.Version = reference.RefVersion)
+                            candidate.QualifiedName = reference.RefName && candidate.Version = reference.RefVersion)
 
-                    let isSelf = reference.RefName = contract.ContractName && reference.RefVersion = contract.Version
+                    let isSelf = reference.RefName = contract.QualifiedName && reference.RefVersion = contract.Version
 
                     if declaredInFile && not isSelf && not (declaredSoFar.Contains(reference.RefName, reference.RefVersion)) then
                         report file.FilePath line
@@ -302,7 +302,7 @@ module Resolver =
                                 resolveReference file.FilePath case.CaseLine case.CaseRef
                                 checkOrder case.CaseLine case.CaseRef
 
-                                if case.CaseRef.RefName = contract.ContractName && case.CaseRef.RefVersion = contract.Version then
+                                if case.CaseRef.RefName = contract.QualifiedName && case.CaseRef.RefVersion = contract.Version then
                                     report file.FilePath case.CaseLine "recursive union-block payloads are not supported; use a recursive field reference"
                         | ExternalEnum(typeName, cases) ->
                             if List.isEmpty cases then
@@ -324,7 +324,7 @@ module Resolver =
                                     resolveReference file.FilePath case.ExtLine reference
                                     checkOrder case.ExtLine reference
 
-                                    if reference.RefName = contract.ContractName && reference.RefVersion = contract.Version then
+                                    if reference.RefName = contract.QualifiedName && reference.RefVersion = contract.Version then
                                         report file.FilePath case.ExtLine "recursive union payloads are not supported; use a recursive field reference"
                                 | ExternalFields fields -> fields |> List.iter (fun payloadField -> checkType payloadField.ExtFieldType)
                                 | ExternalEmpty -> ()
@@ -390,6 +390,6 @@ module Resolver =
                         | Some message -> report file.FilePath field.FieldLine message
                         | None -> ()
 
-                declaredSoFar.Add(contract.ContractName, contract.Version) |> ignore
+                declaredSoFar.Add(contract.QualifiedName, contract.Version) |> ignore
 
         List.ofSeq diagnostics

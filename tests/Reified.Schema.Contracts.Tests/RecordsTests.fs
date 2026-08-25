@@ -38,7 +38,8 @@ type Order = { Sku: string; Quantity: int }
             test <@ contract.ContractName = "Order" @>
             test <@ contract.Version = 1 @>
             test <@ not contract.OwnsType @>
-            test <@ contract.ExternalTypeName = Some "Order" @>
+            test <@ contract.QualifiedName = "My.Wire.Order" @>
+            test <@ contract.ExternalTypeName = Some "My.Wire.Order" @>
             test <@ contract.Fields |> List.map _.FieldName = [ "Sku"; "Quantity" ] @>
             test <@ contract.Fields |> List.map FieldDecl.wireName = [ "sku"; "quantity" ] @>
         | contracts -> failwithf "Expected one contract, got %A" contracts
@@ -197,7 +198,7 @@ type Order = { Sku: string; Quantity: int }
 """
 
         let contracts = file.Contracts
-        test <@ contracts |> List.map (fun c -> c.ContractName, c.Version, c.ExternalTypeName) = [ "Order", 1, Some "LegacyOrder"; "Order", 2, Some "Order" ] @>
+        test <@ contracts |> List.map (fun c -> c.ContractName, c.Version, c.ExternalTypeName) = [ "Order", 1, Some "My.Wire.LegacyOrder"; "Order", 2, Some "My.Wire.Order" ] @>
 
     [<Fact>]
     let ``nullary unions lower to enums and tagged unions to inline unions`` () =
@@ -239,7 +240,7 @@ type Signup = { Plan: Plan; Source: Source }
         | ExternalUnion(typeName, GeneratedInternal discriminator, cases) ->
             test <@ typeName = "Source" @>
             test <@ discriminator = "kind" @>
-            test <@ cases |> List.map (fun c -> c.ExtTag, c.ExtFsCase, match c.ExtPayload with ExternalRecord reference -> Some reference.RefName | _ -> None) = [ "byCard", "ByCard", Some "Card"; "byInvoice", "ByInvoice", Some "Invoice" ] @>
+            test <@ cases |> List.map (fun c -> c.ExtTag, c.ExtFsCase, match c.ExtPayload with ExternalRecord reference -> Some reference.RefName | _ -> None) = [ "byCard", "ByCard", Some "My.Wire.Card"; "byInvoice", "ByInvoice", Some "My.Wire.Invoice" ] @>
         | other -> failwithf "Expected a tagged union, got %A" other
 
     [<Fact>]
@@ -271,7 +272,7 @@ type Envelope = { Command: Command }
 
         match field.FieldType with
         | ExternalUnion("Command", GeneratedInternal "type", cases) ->
-            test <@ cases |> List.map (fun case -> case.ExtTag, match case.ExtPayload with ExternalRecord reference -> Some reference.RefName | _ -> None) = [ "stop", None; "volume", Some "Volume" ] @>
+            test <@ cases |> List.map (fun case -> case.ExtTag, match case.ExtPayload with ExternalRecord reference -> Some reference.RefName | _ -> None) = [ "stop", None; "volume", Some "My.Wire.Volume" ] @>
 
             let emitted = Emitter.emit "Fallback" [ file ] file
             test <@ emitted.Contains "UnionCase.empty \"stop\" Command.Stop" @>
@@ -383,7 +384,7 @@ type Order =
         test <@ messages |> List.exists (fun m -> m.Contains "unsupported wire field type") @>
 
     [<Fact>]
-    let ``marked records must be public namespace-level records`` () =
+    let ``marked records may live directly in a file-level module but not a nested module`` () =
         let privateRecord =
             parseErrors
                 """
@@ -411,8 +412,8 @@ module Inner =
 
         test <@ nested |> List.exists (fun m -> m.Contains "namespace level") @>
 
-        let topLevelModule =
-            parseErrors
+        let moduleFile =
+            parse
                 """
 module My.Wire
 
@@ -422,7 +423,44 @@ open Reified.DerivedSchema
 type Order = { Sku: string }
 """
 
-        test <@ topLevelModule |> List.exists (fun m -> m.Contains "namespace declaration") @>
+        test <@ moduleFile.Module = Some "My.Wire" @>
+        test <@ moduleFile.Contracts.Head.QualifiedName = "My.Wire.Order" @>
+        let emitted = Emitter.emit "Fallback" [ moduleFile ] moduleFile
+        test <@ emitted.Contains "module My.Wire" @>
+
+    [<Fact>]
+    let ``a project catalogue resolves fully qualified cross-file record references`` () =
+        let variablesSource =
+            """
+module My.Workflow.Variables
+open Reified.DerivedSchema
+[<DeriveSchema>]
+type Variable = { Key: string }
+"""
+
+        let templatesSource =
+            """
+module My.Workflow.Templates
+open Reified.DerivedSchema
+[<DeriveSchema>]
+type Template = { Variable: My.Workflow.Variables.Variable }
+"""
+
+        let sources = [ ("variables.fs", variablesSource); ("templates.fs", templatesSource) ]
+
+        let files =
+            Records.parseSet SchemaNaming.CamelCase sources
+            |> List.map (fun (_, result) ->
+                match result with
+                | Ok file -> file
+                | Error diagnostics -> failwithf "Expected a clean parse, got %A" diagnostics)
+
+        test <@ Resolver.resolve files = [] @>
+
+        let template = files |> List.find (fun file -> file.FilePath = "templates.fs")
+        let emitted = Emitter.emit "Fallback" files template
+        test <@ emitted.Contains "Schema<Template>" @>
+        test <@ emitted.Contains "My.Workflow.Variables.Variable.schema" @>
 
     [<Fact>]
     let ``generic records and non-records cannot be marked`` () =

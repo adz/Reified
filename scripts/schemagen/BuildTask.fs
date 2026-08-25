@@ -83,8 +83,8 @@ type GenerateSchemas() =
                     this.Fail "ReifiedContractNamespace must be set when ReifiedContract items are declared."
                 else
                     let parsed =
-                        [ for path in contractPaths -> path, Parser.parse path (File.ReadAllText path)
-                          for path in sourcePaths -> path, Records.parse schemaNaming path (File.ReadAllText path) ]
+                        [ yield! [ for path in contractPaths -> path, Parser.parse path (File.ReadAllText path) ]
+                          yield! Records.parseSet schemaNaming [ for path in sourcePaths -> path, File.ReadAllText path ] ]
 
                     let parseErrors =
                         parsed

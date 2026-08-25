@@ -159,9 +159,35 @@ module Records =
             else
                 fsName, 0 // resolved to latest+0 sentinel below
 
+    let private markedTypePaths (filePath: string) (sourceText: string) =
+        let source = SourceText.ofString sourceText
+        let options = { FSharpParsingOptions.Default with SourceFiles = [| filePath |] }
+        let result = checker.Value.ParseFile(filePath, source, options) |> Async.RunSynchronously
+
+        if result.Diagnostics |> Array.exists (fun diagnostic -> diagnostic.Severity = FSharp.Compiler.Diagnostics.FSharpDiagnosticSeverity.Error) then
+            []
+        else
+            match result.ParseTree with
+            | ParsedInput.ImplFile(ParsedImplFileInput(contents = modules)) ->
+                modules
+                |> List.collect (fun (SynModuleOrNamespace(longId, _, _, decls, _, _, _, _, _)) ->
+                    let container = longId |> List.map _.idText |> String.concat "."
+
+                    decls
+                    |> List.collect (function
+                        | SynModuleDecl.Types(typeDefns, _) ->
+                            typeDefns
+                            |> List.choose (fun (SynTypeDefn(SynComponentInfo(attributes, _, _, typeId, _, _, _, _), _, _, _, _, _)) ->
+                                if attributesOf attributes |> List.exists (fun (name, _) -> name = "DeriveSchema") then
+                                    Some(container + "." + (List.last typeId).idText)
+                                else
+                                    None)
+                        | _ -> []))
+            | _ -> []
+
     /// <summary>Parses one F# source file and lowers its marked records. Returns a contract file whose
     /// <c>Contracts</c> list is empty when the file declares no <c>[&lt;DeriveSchema&gt;]</c> records.</summary>
-    let parse (naming: SchemaNaming) (filePath: string) (sourceText: string) : Result<ContractFile, ContractDiagnostic list> =
+    let private parseWithKnownTypes (knownTypes: Set<string>) (naming: SchemaNaming) (filePath: string) (sourceText: string) : Result<ContractFile, ContractDiagnostic list> =
         let source = SourceText.ofString sourceText
         let parsingOptions = { FSharpParsingOptions.Default with SourceFiles = [| filePath |] }
 
@@ -187,6 +213,7 @@ module Records =
         // ---- walk the tree ----
 
         let mutable namespaceName: string option = None
+        let mutable moduleName: string option = None
         let records = ResizeArray<SynAttribute * string option * SynComponentInfo * SynField list * PreXmlDoc * int>()
         let unions = Collections.Generic.Dictionary<string, UnionInfo>()
 
@@ -346,26 +373,33 @@ module Records =
                                         report typeRange.StartLine
                                             $"wire DTO '{(List.last longId).idText}' is in namespace '{thisNamespace}', but this file's wire schemas generate into '{first}'; keep one namespace per wire file"
                             | _ -> ()
-                | SynModuleOrNamespaceKind.NamedModule
-                | SynModuleOrNamespaceKind.AnonModule ->
-                    let hasMarked =
-                        decls
-                        |> List.exists (fun decl ->
-                            match decl with
-                            | SynModuleDecl.Types(typeDefns, _) ->
-                                typeDefns
-                                |> List.exists (fun (SynTypeDefn(SynComponentInfo(attributes, _, _, _, _, _, _, _), _, _, _, _, _)) ->
-                                    attributesOf attributes |> List.exists (fun (name, _) -> name = "DeriveSchema"))
-                            | _ -> false)
+                | SynModuleOrNamespaceKind.NamedModule ->
+                    let thisModule = longId |> List.map _.idText |> String.concat "."
 
-                    if hasMarked then
-                        report range.StartLine
-                            "wire DTO files use a namespace declaration, not a top-level module, so the generated sibling file can share the namespace"
+                    match namespaceName, moduleName with
+                    | None, None ->
+                        moduleName <- Some thisModule
+                        List.iter (inspectDecl false) decls
+                    | _, Some first when first = thisModule -> List.iter (inspectDecl false) decls
+                    | _ -> report range.StartLine "a derived source file declares one namespace or one file-level module"
+                | SynModuleOrNamespaceKind.AnonModule ->
+                    report range.StartLine "derived records need a namespace or a file-level module"
 
         // ---- pass 2: lower marked records in declaration order ----
 
         let markedNames =
             records |> Seq.map (fun (_, _, SynComponentInfo(longId = longId), _, _, _) -> (List.last longId).idText) |> Set.ofSeq
+
+        let container =
+            match moduleName, namespaceName with
+            | Some moduleName, None -> Some moduleName
+            | None, namespaceName -> namespaceName
+            | _ -> None
+
+        let qualifiedNames =
+            markedNames
+            |> Seq.map (fun name -> name, (container |> Option.map (fun prefix -> prefix + "." + name) |> Option.defaultValue name))
+            |> Map.ofSeq
 
         let chains =
             records
@@ -393,9 +427,11 @@ module Records =
 
         let referenceTo line (name: string) : ContractRef option =
             match Map.tryFind name resolvedChains with
-            | Some(chain, version) -> Some { RefName = chain; RefVersion = version }
+            | Some(chain, version) ->
+                let identity = container |> Option.map (fun prefix -> prefix + "." + chain) |> Option.defaultValue chain
+                Some { RefName = identity; RefVersion = version }
             | None ->
-                report line $"'{name}' is not a [<DeriveSchema>] record in this file; wire references stay within one file"
+                report line $"'{name}' is not a [<DeriveSchema>] record in this source file"
                 None
 
         let rec lowerType line (synType: SynType) : FieldType option =
@@ -423,12 +459,15 @@ module Records =
                     None
                 | name ->
                     let shortName = lastIdent longIdent
+                    let fullName = identText longIdent
 
                     match unions.TryGetValue shortName with
                     | true, union -> lowerUnion line union
                     | false, _ ->
                         if markedNames.Contains shortName then
                             referenceTo line shortName |> Option.map Reference
+                        elif knownTypes.Contains fullName then
+                            Some(Reference { RefName = fullName; RefVersion = 1 })
                         else
                             report line $"unknown wire field type '{name}'"
                             None
@@ -685,12 +724,13 @@ module Records =
                 let chain, version = Map.find fsName resolvedChains
 
                 { ContractName = chain
+                  QualifiedName = container |> Option.map (fun prefix -> prefix + "." + chain) |> Option.defaultValue chain
                   Version = version
                   Doc = docLines xmlDoc
                   Annotations = []
                   Fields = fields |> List.choose lowerField
                   OwnsType = false
-                  ExternalTypeName = Some fsName
+                  ExternalTypeName = Some(Map.find fsName qualifiedNames)
                   Constructor = schemaConstructor
                   ContractLine = headerLine })
             |> List.ofSeq
@@ -701,4 +741,20 @@ module Records =
             Ok
                 { FilePath = filePath
                   Namespace = namespaceName
+                  Module = moduleName
                   Contracts = contracts }
+
+    /// Parses one source file without project-wide references. Prefer <c>parseSet</c> for build generation.
+    let parse naming filePath sourceText =
+        parseWithKnownTypes Set.empty naming filePath sourceText
+
+    /// Parses a project set. The first pass builds a catalogue keyed by each derived type's fully qualified
+    /// namespace/module path; the second pass only accepts cross-file references written with that full path.
+    let parseSet naming (sources: (string * string) list) =
+        let knownTypes =
+            sources
+            |> List.collect (fun (path, text) -> markedTypePaths path text)
+            |> Set.ofList
+
+        sources
+        |> List.map (fun (path, text) -> path, parseWithKnownTypes knownTypes naming path text)
