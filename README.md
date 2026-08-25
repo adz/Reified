@@ -14,15 +14,23 @@ Declare value and model invariants once. Derive validation, parsing, diagnostics
 
 ## Why Reified
 
+### Trust values at the boundary
+
 - **Type-safe data refinement and narrowing functions** — define reusable `Constraint<'value>` rules, check them with `Constraint.check`, and construct invariant-carrying values with `Refinement.create` and Reified's refined types.
 - **Hierarchical error accumulation with structured, keyed paths** — `SchemaErrors`, `SchemaIssue`, and `SchemaPath` retain property names and collection indexes for precise API, form, and document errors.
-- **First-class NativeAOT, trimming, and Fable support through explicit compile-time schemas** — schemas and compiled JSON codecs do not depend on runtime reflection.
-- **One schema for parsing, validation, JSON codecs, JSON Schema, contracts, and test-data generation** — field names, value shapes, constraints, and constructors stay aligned.
-- **Compiler-directed, type-safe JSON codecs** — compile codecs once from typed schemas without reflection or boxed object-array record construction.
 - **Inspectable constraints rather than predicate-only validation** — built-in constraint metadata drives checking, diagnostics, JSON Schema export, and generation.
 - **Accumulating boundary validation** — report independent field, nested-object, and collection failures together instead of stopping at the first error.
+
+### Keep every interpreter aligned
+
+- **One schema for parsing, validation, JSON codecs, JSON Schema, contracts, and test-data generation** — field names, value shapes, constraints, and constructors stay aligned.
+- **Compiler-directed, type-safe JSON codecs** — compile codecs once from typed schemas without reflection or boxed object-array record construction.
 - **Explicit, evolution-friendly discriminated-union wire formats** — model existing JSON with internal, adjacent, external, or untagged representations; the recommended internal-tag format supports OpenAPI discriminators and mainstream code generation.
 - **Build-time schema derivation for F# records** — `[<DeriveSchema>]` generates ordinary typed schemas at compile time without runtime reflection.
+
+### Run the same model everywhere
+
+- **First-class NativeAOT, trimming, and Fable support through explicit compile-time schemas** — schemas and compiled JSON codecs do not depend on runtime reflection.
 - **Portable structured data for .NET and JavaScript** — use the same `Data`, constraints, schemas, and core assertions on .NET and Fable.
 
 ## Declare the rule once

@@ -2,9 +2,9 @@
   "siteName": "Reified",
   "repoUrl": "https://github.com/adz/Reified",
   "logoText": "Rf",
-  "logoPath": "content/img/reified-mark-light.svg",
-  "logoDarkPath": "content/img/reified-mark-dark.svg",
-  "showSiteName": true,
+  "logoPath": "content/img/reified-logo-light.svg",
+  "logoDarkPath": "content/img/reified-logo-dark.svg",
+  "showSiteName": false,
   "stylesheet": "content/reified-theme.css",
   "themes": ["light", "dark"],
   "navigation": [
