@@ -127,19 +127,12 @@ The contract compiler and schema-derived testing adapter are repository tooling,
 
 `Reified.Schema.Contracts.Build` is not in the umbrella. MSBuild targets do not travel through a transitive package reference, so a project that derives schemas at build time references it directly.
 
-## Documentation and examples
+## Documentation
 
-Start with **[Getting started](docs/01-getting-started/_index.md)** — one complete transaction from untrusted input to a
-typed model and a derived JSON codec. Its code is compiled and executed on every CI run from
-[`examples/Reified.GettingStarted`](examples/Reified.GettingStarted/Program.fs).
-
-- [Constraint](docs/04-constraints/21-constraint.md)
-- [Constraints quickstart](docs/04-constraints/10-quickstart.md)
-- [Refined domain values](docs/06-refined/40-domain-values.md)
-- [Schema quickstart](docs/08-schema/10-quickstart.md)
-- [JSON codecs](docs/08-schema/50-json-codecs.md)
-- [Versioned contracts](docs/08-schema/65-versioned-contracts.md)
-- [Runnable Schema examples](docs/08-schema/85-examples.md)
+- [Documentation](https://adz.github.io/Reified/)
+- [Getting started](https://adz.github.io/Reified/getting-started/)
+- [Schema and JSON](https://adz.github.io/Reified/schema/)
+- [API reference](https://adz.github.io/Reified/api.html)
 
 ## Axial integration
 

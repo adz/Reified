@@ -47,7 +47,7 @@ example `docs/api/Reified.Schema.md` for the `Schema` module and ``docs/api/Reif
 When a public API changes:
 
 1. Update its XML comment and example in `src/`.
-2. Update handwritten guides and the relevant section-local `llms.txt` or agent page.
+2. Update handwritten guides and the relevant section-local `llms.txt`.
 3. Run `dotnet livedocs build --interactive false --banner false`.
 4. Review the generated page in `output/` when layout or navigation changed.
 
@@ -83,5 +83,5 @@ The root `llms.txt` routes agents to focused context. Section-local files live a
 - `docs/07-data/llms.txt`
 - `docs/08-schema/llms.txt`
 
-Result handling, Constraints, Data, and Schema also have a `100-agent.md` page. Update these files when their public
-surface or recommended authoring path changes.
+Update these files when their public surface or recommended authoring path changes. Do not add agent-specific pages to
+the user-facing documentation tree.
