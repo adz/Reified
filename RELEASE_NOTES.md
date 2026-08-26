@@ -1,5 +1,12 @@
 # Release Notes
 
+## 0.4.0 - 2026-08-27
+
+### Schema derivation
+
+- Derived unions now generate one shared schema per union instead of duplicating schemas at each use site.
+- Generated union payload schemas use concise private named records and omit redundant primitive schema declarations.
+
 ## 0.3.0 - 2026-08-25
 
 ### Schema derivation and codecs

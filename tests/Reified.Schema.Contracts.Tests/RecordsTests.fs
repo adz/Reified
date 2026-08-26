@@ -309,8 +309,11 @@ type Envelope = { Command: Command }
             | payloads -> failwithf "Unexpected payloads: %A" payloads
 
             let emitted = Emitter.emit "Fallback" [ file ] file
-            test <@ emitted.Contains "schema<{| amount: decimal |}>" @>
-            test <@ emitted.Contains "schema<{| x: int; y: int |}>" @>
+            test <@ emitted.Contains "type private VolumePayload" @>
+            test <@ emitted.Contains "schema<VolumePayload>" @>
+            test <@ emitted.Contains "type private MovePayload" @>
+            test <@ emitted.Contains "schema<MovePayload>" @>
+            test <@ emitted.Contains "fieldAs \"amount\" _.amount" @>
             test <@ emitted.Contains "Command.Volume(payload.amount)" @>
         | other -> failwithf "Expected a direct-field internal union, got %A" other
 
@@ -471,6 +474,50 @@ type Template =
         test <@ emitted.Contains "My.Workflow.Variables.VariableType.Text" @>
 
     [<Fact>]
+    let ``cross-file union references share the schema generated at the first declaration site`` () =
+        let sourceFile =
+            """
+module My.Workflow.Variables
+open Reified.DerivedSchema
+
+[<DeriveUnion>]
+type BindingSource =
+    | Literal of value: string
+    | FromTarget of factId: string
+
+[<DeriveSchema>]
+type Variable = { Source: BindingSource }
+"""
+
+        let consumerFile =
+            """
+module My.Workflow.Templates
+open Reified.DerivedSchema
+
+[<DeriveSchema>]
+type Template =
+    { Primary: My.Workflow.Variables.BindingSource
+      Alternatives: My.Workflow.Variables.BindingSource list }
+"""
+
+        let files =
+            Records.parseSet SchemaNaming.CamelCase [ "variables.fs", sourceFile; "templates.fs", consumerFile ]
+            |> List.map (fun (_, result) ->
+                match result with
+                | Ok file -> file
+                | Error diagnostics -> failwithf "Expected a clean parse, got %A" diagnostics)
+
+        let source = files |> List.find (fun file -> file.FilePath = "variables.fs")
+        let consumer = files |> List.find (fun file -> file.FilePath = "templates.fs")
+        let sourceOutput = Emitter.emit "Fallback" files source
+        let consumerOutput = Emitter.emit "Fallback" files consumer
+
+        test <@ sourceOutput.Split("module BindingSource =").Length - 1 = 1 @>
+        test <@ consumerOutput.Split("module BindingSource =").Length - 1 = 0 @>
+        test <@ consumerOutput.Contains "withSchema My.Workflow.VariablesSchemas.BindingSource.schema" @>
+        test <@ consumerOutput.Contains "withSchema (Schema.listWith My.Workflow.VariablesSchemas.BindingSource.schema)" @>
+
+    [<Fact>]
     let ``transparent string unions may key derived maps`` () =
         let file =
             parse
@@ -513,14 +560,18 @@ type Template =
 """
 
         let emitted = Emitter.emit "Fallback" [ file ] file
-        let sourceCases = emitted.IndexOf "let private sourceCases"
-        let policyPayload = emitted.IndexOf "let private policyTemplateOwnedPayload"
 
-        test <@ sourceCases >= 0 @>
-        test <@ policyPayload > sourceCases @>
-        test <@ emitted.Contains "let private sourcesCases" @>
-        test <@ emitted.Contains "Schema.unionWith (UnionRepresentation.Internal \"type\") sourceCases" @>
-        test <@ emitted.Contains "Schema.unionWith (UnionRepresentation.Internal \"type\") sourcesCases" @>
+        test <@ emitted.Split("module BindingSource =").Length - 1 = 1 @>
+        test <@ emitted.Split("module BindingPolicy =").Length - 1 = 1 @>
+        test <@ emitted.Contains "let schema : Schema<My.Workflow.BindingSource>" @>
+        test <@ emitted.Contains "type private LiteralPayload" @>
+        test <@ emitted.Contains "fieldAs \"value\" _.value" @>
+        test <@ not (emitted.Contains "schema<{|") @>
+        test <@ not (emitted.Contains "withSchema (Schema.text)") @>
+        test <@ emitted.Contains "withSchema (BindingSource.schema)" @>
+        test <@ emitted.Contains "withSchema (Schema.mapWith BindingSource.schema)" @>
+        test <@ not (emitted.Contains "sourceCases") @>
+        test <@ not (emitted.Contains "sourcesCases") @>
 
     [<Fact>]
     let ``generic records and non-records cannot be marked`` () =
