@@ -19,6 +19,7 @@ module SchemaNestedValueTests =
         match schema.Definition with
         | ModelDefinition model -> model
         | PendingDefinition -> failwith "Expected public schema API to create a model definition."
+        | ValueDefinition _ -> failwith "Expected a model definition, got a value definition."
 
     let private buildAddressSchema () =
         schema<Address> {
@@ -129,4 +130,7 @@ module SchemaNestedValueTests =
         | RefinedValueDefinition _
         | ManyValueDefinition _
         | UnionValueDefinition _
-        | OptionValueDefinition _ -> failwith "Expected a nested model value schema."
+        | EnumValueDefinition _
+        | OptionValueDefinition _
+        | MapValueDefinition _
+        | LazyValueDefinition _ -> failwith "Expected a nested model value schema."

@@ -27,16 +27,16 @@ module EmitterGoldenTests =
         | Ok file -> file
         | Error diagnostics -> failwithf "Corpus file %s failed to parse: %A" name diagnostics
 
+    let private corpusFiles () =
+        Directory.EnumerateFiles(corpusDirectory (), "*.*")
+        |> Seq.filter (fun path -> path.EndsWith ".contract" || (path.EndsWith ".fs" && not (path.EndsWith ".g.fs")))
+        |> Seq.sort
+        |> Seq.map (Path.GetFileName >> parseCorpusFile)
+        |> List.ofSeq
+
     [<Fact>]
     let ``the corpus resolves cleanly as one generation set`` () =
-        let files =
-            Directory.EnumerateFiles(corpusDirectory (), "*.*")
-            |> Seq.filter (fun path -> path.EndsWith ".contract" || (path.EndsWith ".fs" && not (path.EndsWith ".g.fs")))
-            |> Seq.sort
-            |> Seq.map (Path.GetFileName >> parseCorpusFile)
-            |> List.ofSeq
-
-        test <@ Resolver.resolve files = [] @>
+        test <@ Resolver.resolve (corpusFiles ()) = [] @>
 
     [<Theory>]
     [<InlineData("geo.contract", "geo.g.fs")>]
@@ -48,7 +48,7 @@ module EmitterGoldenTests =
     [<InlineData("union-compat.fs", "union-compat.g.fs")>]
     let ``the emitter reproduces every checked-in golden file byte for byte`` (contractName: string) (goldenName: string) =
         let file = parseCorpusFile contractName
-        let emitted = Emitter.emit "Reified.Tests.Generated" [ file ] file
+        let emitted = Emitter.emit "Reified.Tests.Generated" (corpusFiles ()) file
 
         let golden =
             (File.ReadAllText(Path.Combine(corpusDirectory (), goldenName))).Replace("\r\n", "\n")

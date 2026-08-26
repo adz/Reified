@@ -39,7 +39,17 @@ module Schema =
     let option item = SchemaCore.option item
     /// <summary>Describes a string-keyed map using an explicit value schema.</summary>
     let mapWith item = SchemaCore.mapWith item
-    /// <summary>Describes a map whose key type converts to and from JSON object property names.</summary>
+    /// <summary>Describes a map whose key type converts to and from object property names.</summary>
+    /// <param name="parseKey">Converts an input property name to a model key.</param>
+    /// <param name="renderKey">Converts a model key to an output property name.</param>
+    /// <param name="item">The schema for each map value.</param>
+    /// <returns>A schema for a map with converted keys.</returns>
+    /// <example>
+    /// <code>
+    /// type LocaleTag = LocaleTag of string
+    /// let schema = Schema.mapWithKey LocaleTag (fun (LocaleTag value) -&gt; value) Schema.text
+    /// </code>
+    /// </example>
     let mapWithKey parseKey renderKey item = SchemaCore.mapWithKey parseKey renderKey item
     /// <summary>Describes a string-keyed map by resolving its value schema from <typeparamref name="'item" />.</summary>
     let inline map () : Schema<Map<string, ^item>> = mapWith (SchemaDefaults.Resolve())

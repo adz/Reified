@@ -30,7 +30,8 @@ module SchemaMapValueTests =
         | ManyValueDefinition _
         | UnionValueDefinition _
         | EnumValueDefinition _
-        | OptionValueDefinition _ -> failwith "Expected a map value schema."
+        | OptionValueDefinition _
+        | LazyValueDefinition _ -> failwith "Expected a map value schema."
 
     [<Fact>]
     let ``a map value schema built from Schema.mapWith is not a refined or primitive value schema`` () =

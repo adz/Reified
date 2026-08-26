@@ -81,7 +81,7 @@ module UnionCompatibilityEnvelope =
     let schema : Schema<UnionCompatibilityEnvelope> =
         schema<UnionCompatibilityEnvelope> {
             fieldAs "workflowId" (fun (value: UnionCompatibilityEnvelope) -> value.WorkflowId) {
-                withSchema (Schema.convert WorkflowId.WorkflowId (function WorkflowId.WorkflowId value -> value) Schema.text)
+                withSchema (Schema.convert WorkflowId (function WorkflowId value -> value) Schema.text)
             }
             fieldAs "recommended" (fun (value: UnionCompatibilityEnvelope) -> value.Recommended) {
                 withSchema (Schema.unionWith (UnionRepresentation.Internal "type") recommendedCases)
@@ -93,10 +93,10 @@ module UnionCompatibilityEnvelope =
                 withSchema (Schema.unionWith (UnionRepresentation.External(UnionPayloadStyle.NamedWithUnwrappedSingle, true)) compactExternalCases)
             }
             construct (fun workflowId recommended fSharpSystemTextJson compactExternal ->
-                { WorkflowId = workflowId
-                  Recommended = recommended
-                  FSharpSystemTextJson = fSharpSystemTextJson
-                  CompactExternal = compactExternal })
+                { UnionCompatibilityEnvelope.WorkflowId = workflowId
+                  UnionCompatibilityEnvelope.Recommended = recommended
+                  UnionCompatibilityEnvelope.FSharpSystemTextJson = fSharpSystemTextJson
+                  UnionCompatibilityEnvelope.CompactExternal = compactExternal })
         }
 
     /// Checks a draft built with an ordinary record literal.

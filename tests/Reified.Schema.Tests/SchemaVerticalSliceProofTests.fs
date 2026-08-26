@@ -26,6 +26,7 @@ module SchemaVerticalSliceProofTests =
         match schema.Definition with
         | ModelDefinition model -> model
         | PendingDefinition -> failwith "Expected public schema API to create a model definition."
+        | ValueDefinition _ -> failwith "Expected a model definition, got a value definition."
 
     /// Typed per-field decode/encode hook standing in for a real byte-level JSON codec, matching the shape proven in
     /// `SchemaCompiledRecordPlanProofTests`.

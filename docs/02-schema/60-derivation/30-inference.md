@@ -15,9 +15,9 @@ inspect types at runtime.
 
 A derivable record must be:
 
-- public and declared at namespace level;
+- public and declared directly in a namespace or file-level module;
 - non-generic;
-- in a file with one namespace for generated declarations; and
+- in a file with one namespace or one file-level module for generated declarations; and
 - marked with `[<DeriveSchema>]`.
 
 Every record field becomes one schema field in declaration order. By default the generated `construct` expression
@@ -42,16 +42,20 @@ F# compilation fail rather than allowing the schema to drift.
 | `'a option` | optional field using the inferred `'a` schema |
 | `'a list` | `Schema.listWith` the inferred element schema |
 | `Map<string, 'a>` | `Schema.mapWith` the inferred value schema |
+| `Map<'key, 'a>` where `'key` is a single-case union over `string` | `Schema.mapWithKey` using the union case as the reversible property-name conversion |
 | another marked record in the same file | that record's generated schema |
+| a fully qualified marked record in another project source file | that record's generated schema |
 | a nullary discriminated union | enum schema; case names become tags |
 | a `[<DeriveUnion>]` union | internally tagged union using `type`, with fieldless, directly named, and marked-record payload cases |
 | a `[<DeriveUnion "field">]` union | the same internally tagged union with a custom discriminator |
 
 The wire vocabulary is intentionally closed. Arrays, tuples, generic records, nested options, floating-point types,
-non-string map keys, other integer widths, and unknown application types produce generation diagnostics. Use `list`,
-`decimal`, `int`, or an explicitly mapped domain boundary instead of silently changing wire semantics.
+map keys other than strings and transparent single-case string unions, other integer widths, and unknown application
+types produce generation diagnostics. Use `list`, `decimal`, `int`, or an explicitly mapped domain boundary instead
+of silently changing wire semantics.
 
-Marked-record references stay within one source file so generation and F# compile ordering remain deterministic.
+Cross-file record and union references must use their fully qualified F# type paths. `schemagen` builds a project-wide
+catalogue before generating companions; an ambiguous short name is rejected rather than resolved by compile order.
 
 ## Names
 
@@ -87,7 +91,8 @@ type Signup = { Plan: Plan }
 Tags follow the naming policy and can be overridden with `[<SchemaName>]` on a case.
 
 Payload unions opt into generation with `[<DeriveUnion>]`. A fieldless case may be mixed with directly named case
-fields or cases carrying one marked record from the same file:
+fields or cases carrying a marked record. Derived unions may also appear below another union payload or inside a list
+or map:
 
 ```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
 [<DeriveSchema>]

@@ -19,7 +19,7 @@ module PickupPoint =
         schema<PickupPoint> {
             fieldAs "code" (fun (value: PickupPoint) -> value.Code)
             construct (fun code ->
-                { Code = code })
+                { PickupPoint.Code = code })
         }
         |> Schema.describe "A named pickup location."
 
@@ -44,7 +44,7 @@ module CourierDelivery =
         schema<CourierDelivery> {
             fieldAs "trackingUrl" (fun (value: CourierDelivery) -> value.TrackingUrl)
             construct (fun trackingUrl ->
-                { TrackingUrl = trackingUrl })
+                { CourierDelivery.TrackingUrl = trackingUrl })
         }
         |> Schema.describe "A courier delivery with tracking."
 
@@ -78,9 +78,9 @@ module ShipmentV1 =
                 withSchema (Schema.mapWith Schema.int)
             }
             construct (fun reference notifyEmail items ->
-                { Reference = reference
-                  NotifyEmail = notifyEmail
-                  Items = items })
+                { ShipmentV1.Reference = reference
+                  ShipmentV1.NotifyEmail = notifyEmail
+                  ShipmentV1.Items = items })
         }
         |> Schema.describe "A shipment as first stored."
 
@@ -146,15 +146,15 @@ module Shipment =
                 constrain (atLeast 1)
             }
             construct (fun reference notifyEmail items tags weightKg priority delivery origin boxes ->
-                { Reference = reference
-                  NotifyEmail = notifyEmail
-                  Items = items
-                  Tags = tags
-                  WeightKg = weightKg
-                  Priority = priority
-                  Delivery = delivery
-                  Origin = origin
-                  Boxes = boxes })
+                { Shipment.Reference = reference
+                  Shipment.NotifyEmail = notifyEmail
+                  Shipment.Items = items
+                  Shipment.Tags = tags
+                  Shipment.WeightKg = weightKg
+                  Shipment.Priority = priority
+                  Shipment.Delivery = delivery
+                  Shipment.Origin = origin
+                  Shipment.Boxes = boxes })
         }
         |> Schema.describe "A shipment with delivery method, priority, and weight."
 

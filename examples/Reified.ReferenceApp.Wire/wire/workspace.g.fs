@@ -26,8 +26,8 @@ module WorkspaceCardV1 =
             }
             fieldAs "owner" (fun (value: WorkspaceCardV1) -> value.Owner)
             construct (fun name owner ->
-                { Name = name
-                  Owner = owner })
+                { WorkspaceCardV1.Name = name
+                  WorkspaceCardV1.Owner = owner })
         }
         |> Schema.describe "A workspace card as first exported: one owner string of the form \"Name <email>\"."
 

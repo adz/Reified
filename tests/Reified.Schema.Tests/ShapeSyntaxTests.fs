@@ -192,8 +192,8 @@ module ShapeSyntaxTests =
 
     [<Fact>]
     let ``type-directed list and map schemas resolve their member schema`` () =
-        let emails = Schema.list<Email>()
-        let contacts = Schema.map<Email>()
+        let emails: Schema<Email list> = Schema.list ()
+        let contacts: Schema<Map<string, Email>> = Schema.map ()
         let emailInput = (Data.List [ Data.Text "ada@example.com" ])
         let contactInput = (Data.objectOfMap (Map.ofList [ "primary", Data.Text "ada@example.com" ]))
 
@@ -202,8 +202,8 @@ module ShapeSyntaxTests =
 
     [<Fact>]
     let ``nested constraints apply to list items and map values`` () =
-        let names = Schema.list<string>() |> SchemaDSL.constrainItems (Constraint.minLength 2)
-        let labels = Schema.map<string>() |> SchemaDSL.constrainValues (Constraint.minLength 2)
+        let names: Schema<string list> = Schema.list () |> SchemaDSL.constrainItems (Constraint.minLength 2)
+        let labels: Schema<Map<string, string>> = Schema.map () |> SchemaDSL.constrainValues (Constraint.minLength 2)
         let nameInput = (Data.List [ Data.Text "x" ])
         let labelInput = (Data.objectOfMap (Map.ofList [ "short", Data.Text "x" ]))
 

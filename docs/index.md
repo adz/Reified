@@ -14,10 +14,11 @@ targetFramework: net8.0
 <img class="hero-lockup" data-theme-variant="dark" style="display: none;" src="content/img/reified-logo-dark.svg" alt="Reified" width="226" height="64" />
 </div>
 
-<div class="docs-home-copy" style="max-width: 78ch; margin: 0 auto;">
+<div class="docs-home-copy" style="max-width: 85ch; margin: 0 auto;">
 
 <span class="eyebrow">One F# model for .NET and Fable JavaScript</span>
-<h1>Encode each invariant once. Enforce it across the project.</h1>
+<h1>Encode invariants once.<br/>
+Enforce project wide.</h1>
 
 <div class="lede">
 <p>Declare a rule once — on a value, a field, or a whole model — and the checking, the diagnostics, the JSON codec, the contract document, and the test data are all read from that one declaration.</p>

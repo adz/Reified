@@ -1012,6 +1012,7 @@ module ApiShapeTests =
             test <@ values = [ box "Ada"; box 37; box true ] @>
             test <@ ConstructorApplication.apply model.Constructor (values |> List.toArray) = source @>
         | PendingDefinition -> failwith "Expected public schema API to create a model definition."
+        | ValueDefinition _ -> failwith "Expected a model definition, got a value definition."
 
 
     [<Fact>]
@@ -1035,6 +1036,7 @@ module ApiShapeTests =
             test <@ values = [ box "Ada"; box 37; box true ] @>
             test <@ ConstructorApplication.apply model.Constructor (values |> List.toArray) = source @>
         | PendingDefinition -> failwith "Expected public schema API to create a model definition."
+        | ValueDefinition _ -> failwith "Expected a model definition, got a value definition."
 
 
     [<Fact>]
@@ -1077,6 +1079,7 @@ module ApiShapeTests =
                       PrimitiveValueDefinition PrimitiveValueKind.Guid ]
             @>
         | PendingDefinition -> failwith "Expected public schema API to create a model definition."
+        | ValueDefinition _ -> failwith "Expected a model definition, got a value definition."
 
 
     [<Fact>]
@@ -1098,6 +1101,7 @@ module ApiShapeTests =
                 test <@ model.Fields |> List.map (fun field -> FieldOrder.value field.Order) = [ 0; 1 ] @>
                 ConstructorApplication.apply constructor [| box "Ada"; box 37 |]
             | PendingDefinition -> failwith "Expected schema definition to carry a constructor application."
+            | ValueDefinition _ -> failwith "Expected a model definition, got a value definition."
 
         test <@ constructed = { Name = "Ada"; Age = 37 } @>
         raises<ArgumentException> <@ ConstructorApplication.apply application [| box "Ada" |] |> ignore @>

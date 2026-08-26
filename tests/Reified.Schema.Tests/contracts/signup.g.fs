@@ -70,13 +70,13 @@ module Signup =
                 withSchema (Schema.option Geo.schema)
             }
             construct (fun email displayName age plan tags limits location ->
-                { Email = email
-                  DisplayName = displayName
-                  Age = age
-                  Plan = plan
-                  Tags = tags
-                  Limits = limits
-                  Location = location })
+                { Signup.Email = email
+                  Signup.DisplayName = displayName
+                  Signup.Age = age
+                  Signup.Plan = plan
+                  Signup.Tags = tags
+                  Signup.Limits = limits
+                  Signup.Location = location })
         }
         |> Schema.describe "A new account request."
 

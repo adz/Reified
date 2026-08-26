@@ -179,6 +179,7 @@ module SchemaCompiledRecordPlanProofTests =
         match schema.Definition with
         | ModelDefinition model -> model
         | PendingDefinition -> failwith "Expected public schema API to create a model definition."
+        | ValueDefinition _ -> failwith "Expected a model definition, got a value definition."
 
     [<Fact>]
     let ``flat record schema lowers to a compiled plan with ordered fields, cached UTF-8 names, and typed hooks`` () =

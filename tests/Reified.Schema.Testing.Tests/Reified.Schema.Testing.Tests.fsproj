@@ -3,6 +3,8 @@
     <TargetFramework>net10.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <GenerateProgramFile>false</GenerateProgramFile>
+    <!-- The xUnit assembly has no entry point; recursive-schema fixtures deliberately defer their self-reference. -->
+    <NoWarn>$(NoWarn);FS0040;FS0988</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />

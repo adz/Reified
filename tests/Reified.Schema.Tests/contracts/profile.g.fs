@@ -34,8 +34,8 @@ module ProfileV1 =
                 constrain email
             }
             construct (fun name email ->
-                { Name = name
-                  Email = email })
+                { ProfileV1.Name = name
+                  ProfileV1.Email = email })
         }
         |> Schema.describe "A user profile as first stored."
 
@@ -79,9 +79,9 @@ module Profile =
                 withSchema (Schema.bool |> Schema.withDefault false)
             }
             construct (fun name email marketingOptIn ->
-                { Name = name
-                  Email = email
-                  MarketingOptIn = marketingOptIn })
+                { Profile.Name = name
+                  Profile.Email = email
+                  Profile.MarketingOptIn = marketingOptIn })
         }
         |> Schema.describe "A user profile with an explicit marketing consent decision."
 

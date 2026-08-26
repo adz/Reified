@@ -22,6 +22,7 @@ module SchemaConstructorGetterAlignmentTests =
         match schema.Definition with
         | ModelDefinition model -> model
         | PendingDefinition -> failwith "Expected public schema API to create a model definition."
+        | ValueDefinition _ -> failwith "Expected a model definition, got a value definition."
 
     [<Fact>]
     let ``shape aligns each field's getter with its constructor argument position`` () =

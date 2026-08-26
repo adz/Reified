@@ -11,20 +11,20 @@ module MapSchemaParseTests =
     type private LocaleTag = LocaleTag of string
     type private LocalizedText = { Values: Map<LocaleTag, string> }
 
-    let private thresholdsSchema =
+    let private thresholdsSchema () =
         schema<Thresholds> {
-            field _.Values {
+            field (fun (model: Thresholds) -> model.Values) {
                 withSchema (Schema.mapWith (Schema.decimal |> Schema.mustSupply))
             }
-            construct (fun values -> { Values = values })
+            construct (fun values -> ({ Values = values }: Thresholds))
         }
 
-    let private localizedTextSchema =
+    let private localizedTextSchema () =
         schema<LocalizedText> {
-            field _.Values {
+            field (fun (model: LocalizedText) -> model.Values) {
                 withSchema (Schema.mapWithKey LocaleTag (fun (LocaleTag key) -> key) Schema.text)
             }
-            construct (fun values -> { Values = values })
+            construct (fun values -> ({ Values = values }: LocalizedText))
         }
 
     [<Fact>]
@@ -34,7 +34,7 @@ module MapSchemaParseTests =
                 (Map.ofList
                     [ "values", Data.objectOfMap (Map.ofList [ "en", Data.Text "Hello"; "fr", Data.Text "Bonjour" ]) ])
 
-        test <@ Schema.parse localizedTextSchema raw = Ok { Values = Map.ofList [ LocaleTag "en", "Hello"; LocaleTag "fr", "Bonjour" ] } @>
+        test <@ Schema.parse (localizedTextSchema ()) raw = Ok { Values = Map.ofList [ LocaleTag "en", "Hello"; LocaleTag "fr", "Bonjour" ] } @>
 
     [<Fact>]
     let ``parse builds a Map from object-shaped structured data`` () =
@@ -42,7 +42,7 @@ module MapSchemaParseTests =
             Data.objectOfMap (Map.ofList [ "values", Data.objectOfMap (Map.ofList [ "low", Data.Text "1.5"; "high", Data.Text "9.5" ]) ]
             )
 
-        let parsed = Schema.parseRetainingInput thresholdsSchema raw
+        let parsed = Schema.parseRetainingInput (thresholdsSchema ()) raw
 
         test <@ parsed.Result = Ok { Values = Map.ofList [ "low", 1.5M; "high", 9.5M ] } @>
 
@@ -50,7 +50,7 @@ module MapSchemaParseTests =
     let ``parse builds an empty Map from an empty object`` () =
         let raw = Data.objectOfMap (Map.ofList [ "values", Data.Object [] ])
 
-        let parsed = Schema.parseRetainingInput thresholdsSchema raw
+        let parsed = Schema.parseRetainingInput (thresholdsSchema ()) raw
 
         test <@ parsed.Result = Ok { Values = Map.empty } @>
 
@@ -58,7 +58,7 @@ module MapSchemaParseTests =
     let ``parse reports expected object when the map field structured data is a scalar`` () =
         let raw = Data.objectOfMap (Map.ofList [ "values", Data.Text "not-an-object" ])
 
-        let parsed = Schema.parseRetainingInput thresholdsSchema raw
+        let parsed = Schema.parseRetainingInput (thresholdsSchema ()) raw
 
         test <@ not parsed.IsValid @>
         test <@ parsed.Errors = [ { Path = TestPath.fromLegacy [ PathSegment.Name "values" ]; Error = SchemaError.ExpectedObject } ] @>
@@ -67,7 +67,7 @@ module MapSchemaParseTests =
     let ``parse reports expected object when the map field structured data is a collection`` () =
         let raw = Data.objectOfMap (Map.ofList [ "values", Data.List [ Data.Text "1.5" ] ])
 
-        let parsed = Schema.parseRetainingInput thresholdsSchema raw
+        let parsed = Schema.parseRetainingInput (thresholdsSchema ()) raw
 
         test <@ not parsed.IsValid @>
         test <@ parsed.Errors = [ { Path = TestPath.fromLegacy [ PathSegment.Name "values" ]; Error = SchemaError.ExpectedObject } ] @>
@@ -78,7 +78,7 @@ module MapSchemaParseTests =
             Data.objectOfMap (Map.ofList [ "values", Data.objectOfMap (Map.ofList [ "low", Data.Text "not-a-number" ]) ]
             )
 
-        let parsed = Schema.parseRetainingInput thresholdsSchema raw
+        let parsed = Schema.parseRetainingInput (thresholdsSchema ()) raw
 
         test <@ not parsed.IsValid @>
         test

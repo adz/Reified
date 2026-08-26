@@ -49,7 +49,7 @@ By default output is written below `obj/`, so it should not be committed.
 ```
 
 
-`Wire.fs` must use a namespace and place marked records at namespace level:
+`Wire.fs` may use a namespace or a file-level module. Place marked records directly in that container, not in a nested module:
 
 ```fsharp no-check reason="Declares its own namespace as the first thing in the file, which cannot follow the site's F# prelude opens; not independently checkable."
 namespace MyApp.Wire
@@ -90,7 +90,7 @@ The build writes `Wire.g.fs` beside `Wire.fs` and still manages F# compile order
 
 - **No output:** confirm generation is enabled, the source is a `<Compile>` item, and the record has
   `[<DeriveSchema>]`.
-- **Namespace diagnostic:** marked records must be namespace-level declarations; one generated companion has one
-  namespace.
+- **Container diagnostic:** each derived source file must use one namespace or one file-level module, with marked
+  records declared directly inside it.
 - **Duplicate compile item:** remove a manually listed `.g.fs`; the target inserts it.
 - **A stale checked-in file fails compilation:** rebuild to regenerate it. This failure is intentional drift detection.

@@ -10,6 +10,8 @@
     <FSCorePackageVersion>10.1.204</FSCorePackageVersion>
     <GenerateProgramFile>false</GenerateProgramFile>
     <OutputType>Library</OutputType>
+    <!-- xUnit test assemblies intentionally have no executable entry point. -->
+    <NoWarn>$(NoWarn);FS0988</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

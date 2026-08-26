@@ -14,24 +14,24 @@ module MapCodecTests =
 
     let private thresholdsSchema () =
         schema<Thresholds> {
-            field _.Values {
+            field (fun (model: Thresholds) -> model.Values) {
                 withSchema (Schema.mapWith Schema.decimal)
             }
-            construct (fun values -> { Values = values })
+            construct (fun values -> ({ Values = values }: Thresholds))
         }
 
     let private localizedTextSchema () =
         schema<LocalizedText> {
-            field _.Values {
+            field (fun (model: LocalizedText) -> model.Values) {
                 withSchema (Schema.mapWithKey LocaleTag (fun (LocaleTag value) -> value) Schema.text)
             }
-            construct (fun values -> { Values = values })
+            construct (fun values -> ({ Values = values }: LocalizedText))
         }
 
     [<Fact>]
     let ``round trips a Map field through the compiled codec`` () =
         let codec = Json.compile (thresholdsSchema ())
-        let thresholds = { Values = Map.ofList [ "low", 1.5M; "high", 9.5M ] }
+        let thresholds: Thresholds = { Values = Map.ofList [ "low", 1.5M; "high", 9.5M ] }
 
         let json = Json.serialize codec thresholds
         let roundTripped = Json.deserialize codec json
@@ -42,7 +42,7 @@ module MapCodecTests =
     let ``serializes a Map field as a JSON object`` () =
         let codec = Json.compile (thresholdsSchema ())
 
-        let json = Json.serialize codec { Values = Map.ofList [ "low", 1.5M ] }
+        let json = Json.serialize codec ({ Values = Map.ofList [ "low", 1.5M ] }: Thresholds)
 
         test <@ json.Contains "\"values\":{\"low\":1.5}" @>
 
@@ -50,11 +50,11 @@ module MapCodecTests =
     let ``deserializes an empty JSON object into an empty Map`` () =
         let codec = Json.compile (thresholdsSchema ())
 
-        test <@ Json.deserialize codec "{\"values\":{}}" = { Values = Map.empty } @>
+        test <@ Json.deserialize codec "{\"values\":{}}" = ({ Values = Map.empty }: Thresholds) @>
 
     [<Fact>]
     let ``round trips a map with transparent string keys`` () =
         let codec = Json.compile (localizedTextSchema ())
-        let value = { Values = Map.ofList [ LocaleTag "en", "Hello"; LocaleTag "fr", "Bonjour" ] }
+        let value: LocalizedText = { Values = Map.ofList [ LocaleTag "en", "Hello"; LocaleTag "fr", "Bonjour" ] }
 
         test <@ Json.deserialize codec (Json.serialize codec value) = value @>

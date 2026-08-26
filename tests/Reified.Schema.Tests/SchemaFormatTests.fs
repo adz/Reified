@@ -121,6 +121,7 @@ module SchemaFormatTests =
             test <@ email.ValueSchema.Format = Some SchemaFormat.email @>
             test <@ name.ValueSchema.Format = None @>
         | PendingDefinition -> failwith "Expected public schema API to create a model definition."
+        | ValueDefinition _ -> failwith "Expected a model definition, got a value definition."
 
     [<Fact>]
     let ``SchemaFormat.create validates the format name`` () =

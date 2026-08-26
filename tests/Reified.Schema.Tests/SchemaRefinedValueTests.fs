@@ -136,6 +136,7 @@ module SchemaRefinedValueTests =
             let email = model.Fields |> List.find (fun field -> ExternalFieldName.value field.ExternalName = "email")
             test <@ SchemaRule.trySupply email.ValueSchema.Rules = Some Supply.Supplied @>
         | PendingDefinition -> failwith "Expected public schema API to create a model definition."
+        | ValueDefinition _ -> failwith "Expected a model definition, got a value definition."
 
     [<Fact>]
     let ``model schemas can attach required to a refined field's value schema, matching field _.Email Email.schema { required }`` () =
@@ -162,6 +163,7 @@ module SchemaRefinedValueTests =
             let contact = { Email = Email.create "ada@example.com"; Name = "Ada" }
             test <@ ConstructorApplication.apply model.Constructor [| box contact.Email; box contact.Name |] = contact @>
         | PendingDefinition -> failwith "Expected public schema API to create a model definition."
+        | ValueDefinition _ -> failwith "Expected a model definition, got a value definition."
 
     [<Fact>]
     let ``refined value schemas can layer over every primitive value schema`` () =

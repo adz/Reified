@@ -74,30 +74,30 @@ module SchemaRefinedValueCheckTests =
 
     [<Fact>]
     let ``inspectUnderlying projects a refined value to its primitive representation`` () =
-        let inspect = Email.schema |> Schema.inspectUnderlying<Email, string>
+        let inspect: Email -> string = Email.schema |> Schema.inspectUnderlying
         test <@ inspect (Email.create "ada@example.com") = "ada@example.com" @>
 
-        let inspectAge = Age.schema |> Schema.inspectUnderlying<Age, int>
+        let inspectAge: Age -> int = Age.schema |> Schema.inspectUnderlying
         test <@ inspectAge (Age.create 30) = 30 @>
 
     [<Fact>]
     let ``inspectUnderlying projects layered refined values through every refinement layer`` () =
-        let inspect = NormalizedEmail.schema |> Schema.inspectUnderlying<NormalizedEmail, string>
+        let inspect: NormalizedEmail -> string = NormalizedEmail.schema |> Schema.inspectUnderlying
         test <@ inspect (NormalizedEmail.create (Email.create "ada@example.com")) = "ada@example.com" @>
 
     [<Fact>]
     let ``inspectUnderlying is the identity projection for primitive value schemas`` () =
-        let inspectText = Schema.text |> Schema.inspectUnderlying<string, string>
+        let inspectText: string -> string = Schema.text |> Schema.inspectUnderlying
         test <@ inspectText "Ada" = "Ada" @>
 
-        let inspectInt = Schema.int |> Schema.inspectUnderlying<int, int>
+        let inspectInt: int -> int = Schema.int |> Schema.inspectUnderlying
         test <@ inspectInt 42 = 42 @>
 
     [<Fact>]
     let ``inspectUnderlying rejects projection types that do not match the underlying primitive kind`` () =
-        raises<ArgumentException> <@ Schema.inspectUnderlying<Email, int> Email.schema |> ignore @>
-        raises<ArgumentException> <@ Schema.inspectUnderlying<Age, string> Age.schema |> ignore @>
-        raises<ArgumentNullException> <@ Schema.inspectUnderlying<Email, string> Unchecked.defaultof<Schema<Email>> |> ignore @>
+        raises<ArgumentException> <@ (Schema.inspectUnderlying Email.schema : Email -> int) |> ignore @>
+        raises<ArgumentException> <@ (Schema.inspectUnderlying Age.schema : Age -> string) |> ignore @>
+        raises<ArgumentNullException> <@ (Schema.inspectUnderlying Unchecked.defaultof<Schema<Email>> : Email -> string) |> ignore @>
 
     [<Fact>]
     let ``allConstraints gathers every layer's constraint metadata foundation-first`` () =

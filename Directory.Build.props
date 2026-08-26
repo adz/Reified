@@ -1,6 +1,9 @@
 <Project>
   <PropertyGroup>
     <UseArtifactsOutput>true</UseArtifactsOutput>
+    <TreatWarningsAsErrors Condition="'$(TreatWarningsAsErrors)' == ''">true</TreatWarningsAsErrors>
+    <!-- NativeAOT reports summary warnings for FSharp.Core's own analysis; project source remains warning-fatal. -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);IL2104;IL3053</WarningsNotAsErrors>
 
     <!-- Every package in this repository ships on one release train. The Flow train moved out with
          Flow itself: a tag here says nothing about a version in the Axial repository. -->

@@ -73,6 +73,21 @@ let orderCodec = Json.compile orderSchema
 ```
 
 
+## String-Like Map Keys
+
+JSON object property names are strings, but the model key does not have to be. Use `Schema.mapWithKey` when a key type
+has a total conversion to and from a property name:
+
+```fsharp
+type LocaleTag = LocaleTag of string
+
+let localizedText =
+    Schema.mapWithKey LocaleTag (fun (LocaleTag value) -> value) Schema.text
+```
+
+Boundary parsing and compiled JSON codecs use the same conversion, including under Fable. Build derivation infers this
+schema for a map keyed by a transparent single-case string union.
+
 ## Decode Failures Carry Paths
 
 Decoding trusted input can still meet malformed payloads. Failures raise `JsonCodecException` with a schema-relative

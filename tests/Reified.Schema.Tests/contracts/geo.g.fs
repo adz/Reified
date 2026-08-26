@@ -37,8 +37,8 @@ module Geo =
                 ]
             }
             construct (fun lat lon ->
-                { Lat = lat
-                  Lon = lon })
+                { Geo.Lat = lat
+                  Geo.Lon = lon })
         }
         |> Schema.describe "A geographic coordinate."
 

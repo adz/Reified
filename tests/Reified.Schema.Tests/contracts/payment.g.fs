@@ -30,7 +30,7 @@ module Card =
                 ]
             }
             construct (fun number ->
-                { Number = number })
+                { Card.Number = number })
         }
         |> Schema.describe "A card payment source."
 
@@ -63,7 +63,7 @@ module Invoice =
                 constrain (minLength 1)
             }
             construct (fun reference ->
-                { Reference = reference })
+                { Invoice.Reference = reference })
         }
         |> Schema.describe "An invoice payment source."
 
@@ -106,7 +106,7 @@ module Payment =
                 withSchema (Schema.unionWith (UnionRepresentation.Internal "kind") sourceCases)
             }
             construct (fun source ->
-                { Source = source })
+                { Payment.Source = source })
         }
         |> Schema.describe "A payment method choice."
 

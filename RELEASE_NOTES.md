@@ -2,6 +2,11 @@
 
 ## 0.3.0 - 2026-08-25
 
+### Schema derivation and codecs
+
+- Derived schemas support file-level modules, fully qualified cross-file types, and unions nested in payloads and collections.
+- Transparent single-case string unions can key maps through `Schema.mapWithKey`; compiled JSON codecs round-trip them on .NET and Fable.
+
 ### Lowered the FSharp.Core floor for dotnet8 consumers (fix)
 
 Packages built against the .NET 10 SDK carried an implicit FSharp.Core dependency of 10.1.x, so

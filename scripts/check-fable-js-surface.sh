@@ -16,7 +16,9 @@ rm -rf "$out_dir"
 mkdir -p "$out_dir"
 printf '%s\n' '{ "type": "module" }' > "$out_dir/package.json"
 
-dotnet fable "$project" --lang javascript --outDir "$out_dir"
+# Fable reports target-specific portability diagnostics for intentional .NET/Fable branches as warnings.
+# Keep repository F# builds warning-clean while allowing this probe to compile and execute those branches.
+TreatWarningsAsErrors=false dotnet fable "$project" --lang javascript --outDir "$out_dir"
 
 if [ ! -f "$out_dir/src/Reified.Schema.Json/Json.js" ]; then
   echo "Reified.Schema.Json's Json.fs did not compile into the Fable JavaScript output." >&2

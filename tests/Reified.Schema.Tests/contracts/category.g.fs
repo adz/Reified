@@ -34,8 +34,8 @@ module Category =
                 withSchema (Schema.listWith (Schema.defer (fun () -> schema)) |> Schema.describe "Child categories use the same wire contract.")
             }
             construct (fun name children ->
-                { Name = name
-                  Children = children })
+                { Category.Name = name
+                  Category.Children = children })
         }
         |> Schema.describe "A recursive category tree used to prove self-references in generated schemas."
 

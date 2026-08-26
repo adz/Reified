@@ -20,6 +20,7 @@ module SchemaManyValueTests =
         match schema.Definition with
         | ModelDefinition model -> model
         | PendingDefinition -> failwith "Expected public schema API to create a model definition."
+        | ValueDefinition _ -> failwith "Expected a model definition, got a value definition."
 
     let private buildContactMethodSchema () =
         schema<ContactMethod> {
@@ -107,7 +108,10 @@ module SchemaManyValueTests =
         | RefinedValueDefinition _
         | NestedValueDefinition _
         | UnionValueDefinition _
-        | OptionValueDefinition _ -> failwith "Expected a many/collection value schema."
+        | EnumValueDefinition _
+        | OptionValueDefinition _
+        | MapValueDefinition _
+        | LazyValueDefinition _ -> failwith "Expected a many/collection value schema."
 
     [<Fact>]
     let ``inspection interpreters can walk into each item of a many value schema using getters, without reflection`` () =
@@ -156,9 +160,15 @@ module SchemaManyValueTests =
             | RefinedValueDefinition _
             | ManyValueDefinition _
             | UnionValueDefinition _
-            | OptionValueDefinition _ -> failwith "Expected the many value schema's item to be a nested model value schema."
+            | EnumValueDefinition _
+            | OptionValueDefinition _
+            | MapValueDefinition _
+            | LazyValueDefinition _ -> failwith "Expected the many value schema's item to be a nested model value schema."
         | PrimitiveValueDefinition _
         | RefinedValueDefinition _
         | NestedValueDefinition _
         | UnionValueDefinition _
-        | OptionValueDefinition _ -> failwith "Expected a many/collection value schema."
+        | EnumValueDefinition _
+        | OptionValueDefinition _
+        | MapValueDefinition _
+        | LazyValueDefinition _ -> failwith "Expected a many/collection value schema."

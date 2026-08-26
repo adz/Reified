@@ -5,7 +5,8 @@
     <IsPackable>false</IsPackable>
     <GenerateProgramFile>false</GenerateProgramFile>
     <OutputType>Library</OutputType>
-    <NoWarn>$(NoWarn);FS0988</NoWarn>
+    <!-- Recursive-schema fixtures and generated recursive schemas defer self-reference until interpretation. -->
+    <NoWarn>$(NoWarn);FS0040;FS0988</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

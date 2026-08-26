@@ -43,7 +43,11 @@ module SchemaInterpreterPrototypes =
             | SchemaShape.Nested _ -> "object"
             | SchemaShape.Many _ -> "list"
             | SchemaShape.Union _ -> "union"
+            | SchemaShape.Enum _ -> "enum"
             | SchemaShape.Optional payload -> sprintf "optional %s" (valueSummary payload)
+            | SchemaShape.MapOf _ -> "map"
+            | SchemaShape.Deferred(_, value) -> valueSummary value
+            | SchemaShape.Recursive _ -> "recursive"
             | SchemaShape.Refined _ -> failwith "underlyingShape never returns a refined shape."
 
         // Atoms are shape-neutral, so the documentation interpreter supplies the noun from the surrounding shape.
@@ -141,8 +145,12 @@ module SchemaInterpreterPrototypes =
             | SchemaShape.Primitive PrimitiveValueKind.Guid -> IdentifierBox
             | SchemaShape.Nested model -> Group(fieldsFor model)
             | SchemaShape.Many item -> Repeater(controlFor item)
-            | SchemaShape.Union _ -> Group []
+            | SchemaShape.Union _
+            | SchemaShape.Enum _ -> Group []
             | SchemaShape.Optional payload -> controlFor payload
+            | SchemaShape.MapOf item -> Repeater(controlFor item)
+            | SchemaShape.Deferred(_, value) -> controlFor value
+            | SchemaShape.Recursive _ -> Group []
             | SchemaShape.Refined _ -> failwith "underlyingShape never returns a refined shape."
 
         and private fieldsFor (model: ModelDescription) =

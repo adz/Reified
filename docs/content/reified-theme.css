@@ -52,6 +52,11 @@ body,
     border-color: var(--reified-border) !important;
 }
 
+/* The repository prelude exists to compile examples; it is not user-facing page content. */
+.livedocs-repository-setup {
+    display: none;
+}
+
 /* Content typography ------------------------------------------------------------- */
 
 main #content {
