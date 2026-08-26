@@ -113,7 +113,12 @@ type Checkout = { Payment: Payment }
 ```
 
 
-The generated schema follows the handwritten [union schema rules](/schema/union-schemas.html).
+The generated schema follows the handwritten [union schema rules](/schema/union-schemas.html). Each fully qualified
+union type gets one generated `schema` binding. Records, nested union payloads, lists, maps, and references from other
+source files reuse that binding instead of generating field-named copies. Named union fields use private generated
+payload records; primitive payload fields rely on their canonical schemas, while composite fields retain an explicit
+`withSchema`.
+
 Every direct case field must be named. `Credit of decimal` is rejected instead of publishing the compiler-generated
 wire name `item`.
 

@@ -92,6 +92,19 @@ module ShipmentV1 =
     let parse (input: Data) : Result<ShipmentV1, SchemaErrors> =
         Schema.parse schema input
 
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+[<RequireQualifiedAccess>]
+module DeliveryMethod =
+
+    open Reified.SchemaDSL
+
+    let private cases =
+        [ UnionCase.fields "pickup" DeliveryMethod.Pickup (function DeliveryMethod.Pickup payload -> Some payload | _ -> None) PickupPoint.schema
+          UnionCase.fields "courier" DeliveryMethod.Courier (function DeliveryMethod.Courier payload -> Some payload | _ -> None) CourierDelivery.schema ]
+
+    let schema : Schema<DeliveryMethod> =
+        Schema.unionWith (UnionRepresentation.Internal "kind") cases
+
 /// Schema and boundary functions for Shipment (shipment.fs, Shipment.v2).
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
@@ -104,10 +117,6 @@ module Shipment =
         [ EnumCase.create "standard" ShipmentPriority.Standard
           EnumCase.create "express" ShipmentPriority.Express
           EnumCase.create "same-day" ShipmentPriority.SameDay ]
-
-    let private deliveryCases =
-        [ UnionCase.fields "pickup" DeliveryMethod.Pickup (function DeliveryMethod.Pickup payload -> Some payload | _ -> None) PickupPoint.schema
-          UnionCase.fields "courier" DeliveryMethod.Courier (function DeliveryMethod.Courier payload -> Some payload | _ -> None) CourierDelivery.schema ]
 
     /// The schema declared by shipment.fs (Shipment.v2).
     let schema : Schema<Shipment> =
@@ -136,7 +145,7 @@ module Shipment =
                 withSchema (Schema.enum priorityCases |> Schema.withDefault ShipmentPriority.Express)
             }
             fieldAs "delivery" (fun (value: Shipment) -> value.Delivery) {
-                withSchema (Schema.unionWith (UnionRepresentation.Internal "kind") deliveryCases)
+                withSchema DeliveryMethod.schema
             }
             fieldAs "origin" (fun (value: Shipment) -> value.Origin) {
                 withSchema (Schema.option PickupPoint.schema)

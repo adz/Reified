@@ -23,6 +23,7 @@
   standalone reusable schemas.
 - `Schema.mapWithKey parseKey renderKey itemSchema` describes JSON objects keyed by a type with a reversible string conversion; compiled codecs support it on .NET and Fable.
 - Build derivation accepts namespace-level or file-module-level records, resolves fully qualified cross-file derived types, and supports derived unions nested in payloads and collections.
+- Each fully qualified derived union has one generated schema binding; all fields, nested payloads, collections, and cross-file consumers reference it.
 - A contributed refined type can expose a static canonical `Schema` member, making a plain field declaration enough.
 - `Syntax.schema` is only needed when a recursive binding named `schema` shadows the builder. Keep `field` and
   `construct` unqualified.
