@@ -1,10 +1,15 @@
 # Release Notes
 
-## 0.5.0 - 2026-08-27
+## 0.6.0 - Unreleased
 
-### Fable packages and JSON codecs
+### Fable packages
 
 - Runtime packages include their F# sources and generated package references so Fable projects can consume Reified from NuGet.
+
+## 0.5.0 - 2026-08-27
+
+### JSON codecs
+
 - JSON integer encoding writes directly to UTF-8 buffers, removing per-value temporary arrays; the benchmark suite now covers mixed aggregates, wide records, and large lists.
 
 ## 0.4.0 - 2026-08-27
