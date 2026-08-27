@@ -150,7 +150,11 @@ module ApiShapeTests =
         Field definition
 
     let private schemaFieldDescriptor<'model, 'value> (field: Field<'model, 'value>) : FieldDescriptor<'model> =
-        FieldDescriptorOps.fromField field
+        { FieldDescriptor.ExternalName = field.Definition.ExternalName
+          Order = field.Definition.Order
+          Getter = fun model -> field.Definition.Getter model |> box
+          ValueSchema = field.Definition.ValueSchema
+          Rules = field.Definition.Rules }
 
     let private publicUnionCaseNames (targetType: Type) =
         FSharpType.GetUnionCases(targetType, BindingFlags.Public)

@@ -7,27 +7,6 @@ open Reified
 open System
 open System.Collections.Generic
 
-module internal FieldDescriptorOps =
-    let fromField (field: Field<'model, 'value>) : FieldDescriptor<'model> =
-        if isNull (box field) then
-            nullArg (nameof field)
-
-        { FieldDescriptor.ExternalName = field.Definition.ExternalName
-          Order = field.Definition.Order
-          Getter = fun model -> field.Definition.Getter model |> box
-          ValueSchema = field.Definition.ValueSchema
-          Rules = field.Definition.Rules }
-
-    let fromOrderedField order (field: Field<'model, 'value>) : FieldDescriptor<'model> =
-        if isNull (box field) then
-            nullArg (nameof field)
-
-        { FieldDescriptor.ExternalName = field.Definition.ExternalName
-          Order = FieldOrder.create order
-          Getter = fun model -> field.Definition.Getter model |> box
-          ValueSchema = field.Definition.ValueSchema
-          Rules = field.Definition.Rules }
-
 /// <summary>Functions for inspecting schema field metadata.</summary>
 [<RequireQualifiedAccess>]
 module Field =
