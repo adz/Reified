@@ -255,33 +255,6 @@ module internal ValueSchema =
               Description = None
               Default = None })
 
-    /// <summary>Describes a nested model value from an already built nested model schema.</summary>
-    /// <remarks>
-    /// Nested value schemas let a field carry another trusted model, such as an address nested inside a customer.
-    /// Interpreters that see through primitive and refined value schema layers, such as
-    /// <see cref="M:Reified.Schema.Schema.underlyingPrimitiveKind``1" />, do not see through a nested value schema because a
-    /// nested model has no underlying primitive representation of its own; interpreters that understand nested models,
-    /// such as input parsing, inspect the nested model schema directly instead.
-    /// </remarks>
-    /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="schema" /> is null.</exception>
-    /// <exception cref="T:System.ArgumentException">Thrown when <paramref name="schema" /> is not a completed model schema.</exception>
-    let nested (schema: Schema<'nested>) : Schema<'nested> =
-        if isNull (box schema) then
-            nullArg (nameof schema)
-
-        match schema.Definition with
-        | PendingDefinition -> invalidArg (nameof schema) "Expected a built model schema."
-        | ValueDefinition _ -> invalidArg (nameof schema) "Expected a built model schema, not a value schema."
-        | ModelDefinition model ->
-            Schema(ValueDefinition
-                { Shape = NestedValueDefinition(ModelSchemaErasure.erase model, box schema)
-                  Format = None
-                  Rules = []
-                  Description = None
-
-                  Default = None }
-            )
-
     /// <summary>Describes a collection of values from an already built item value schema.</summary>
     /// <remarks>
     /// <para>
@@ -313,20 +286,6 @@ module internal ValueSchema =
 
               Default = None }
         )
-
-    /// <summary>Describes a collection of nested model values from an already built item model schema.</summary>
-    /// <remarks>
-    /// Many value schemas let a field carry an ordered collection of another trusted model, such as a customer's
-    /// contact methods. Interpreters that see through primitive and refined value schema layers, such as
-    /// <see cref="M:Reified.Schema.Schema.underlyingPrimitiveKind``1" />, do not see through a many value schema because a
-    /// collection has no underlying primitive representation of its own; interpreters that understand collections,
-    /// such as input parsing, inspect the item model schema directly instead.
-    /// </remarks>
-    /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="itemSchema" /> is null.</exception>
-    /// <exception cref="T:System.ArgumentException">Thrown when <paramref name="itemSchema" /> is not a completed model schema.</exception>
-    let many (itemSchema: Schema<'item>) : Schema<'item list> =
-        let itemValueSchema = nested itemSchema
-        manyOf itemValueSchema
 
     /// <summary>Describes a JSON object as a dictionary from an already built item value schema.</summary>
     /// <remarks>

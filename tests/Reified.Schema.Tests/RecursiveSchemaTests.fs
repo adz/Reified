@@ -54,8 +54,7 @@ module RecursiveSchemaTests =
         test <@ (Schema.parse refinedDeferred input) = Ok { Name = "root"; Children = [] } @>
 
     [<Fact>]
-    let ``nested and defer reject value schemas with argument errors`` () =
-        raises<System.ArgumentException> <@ ValueSchema.nested Schema.text @>
+    let ``defer rejects value schemas with an argument error`` () =
         let deferred = ValueSchema.lazyOf (fun () -> Schema.text)
         raises<System.ArgumentException> <@ Schema.parseRetainingInput deferred (Data.Text "value") @>
 
