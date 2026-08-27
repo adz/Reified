@@ -20,6 +20,9 @@ open Swensen.Unquote
 /// very same schema rather than only working for narrower, unrelated examples.
 /// </summary>
 module SchemaVerticalSliceProofTests =
+    let private applyConstructor application arguments =
+        ConstructorApplication.tryApply application arguments |> Result.defaultWith invalidOp
+
     type private Signup = { Email: string; DisplayName: string }
 
     let private modelDefinition (schema: Schema<'model>) =
@@ -191,7 +194,7 @@ module SchemaVerticalSliceProofTests =
         test <@ model.Fields |> List.map (fun field -> ExternalFieldName.value field.ExternalName) = [ "displayName"; "email" ] @>
         test <@ model.Fields |> List.map (fun field -> FieldOrder.value field.Order) = [ 0; 1 ] @>
         test <@ values = [ box "Ada"; box "ada@example.com" ] @>
-        test <@ ConstructorApplication.apply model.Constructor (values |> List.toArray) = source @>
+        test <@ applyConstructor model.Constructor (values |> List.toArray) = source @>
 
         // Metadata inspection: constraint codes and typed metadata are readable straight from the schema definition,
         // without constructing a `Signup` value and without invoking any check or validation interpreter.

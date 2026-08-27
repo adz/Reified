@@ -48,7 +48,7 @@ JSON codecs in `src/Reified.Schema.Json`; both keep the `Reified.Schema` namespa
 2. **`ConstraintMetadata`, `Constraint`** — one constraint = a code (`"minLength"`), typed metadata for
    interpreters, and arguments. Constraints carry no check logic; `SchemaValidation.fs` interprets them.
 3. **`ConstructorApplication<'model>`** — how a model gets built: an argument count plus
-   `ApplyTrusted: obj array -> 'model` and `TryApplyTrusted: obj array -> Result<'model, string>`.
+   `TryApplyTrusted: obj array -> Result<'model, string>`.
    This is the *only* place construction is type-erased, and it is built from typed closures — never
    reflection.
 4. **Value definitions** (`ValueSchemaDefinition`, `ValueSchemaShape`) — the type-erased description of
@@ -137,9 +137,8 @@ changes, so wire names, constraints, docs, parsing, and checking all survive int
 - **One erased view, one typed view.** `FieldDescriptor` serves metadata interpreters; the typed record
   plan serves compilers that need direct construction. Don't invent a third.
 - **The facade is thin.** `SchemaApi.fs` delegates; logic lives in the implementation modules.
-- **What remains of arity code is boring.** The authoring surface has none (the chain peels one
-  curried argument per field); the small `ConstructorApplication.createN` helpers that remain extend by
-  copying the previous arity.
+- **There is no arity-specific constructor catalogue.** The field chain peels one curried argument per field and
+  produces the single constructor application used by interpreters.
 
 ## Where to add things
 

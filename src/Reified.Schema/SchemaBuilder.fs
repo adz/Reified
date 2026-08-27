@@ -533,11 +533,6 @@ module SchemaCeBuilder =
 
             let application =
                 { ArgumentCount = count
-                  ApplyTrusted =
-                    fun arguments ->
-                        match tryApply arguments with
-                        | Ok model -> model
-                        | Error message -> invalidOp message
                   TryApplyTrusted = tryApply }
 
             let compiled =

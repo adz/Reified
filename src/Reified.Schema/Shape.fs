@@ -146,11 +146,6 @@ module internal ShapeOps =
 
             let constructor =
                 { ConstructorApplication.ArgumentCount = definition.Constructor.ArgumentCount
-                  ApplyTrusted =
-                    fun arguments ->
-                        match tryApply arguments with
-                        | Ok domain -> domain
-                        | Error message -> invalidOp message
                   TryApplyTrusted = tryApply }
 
             Schema(

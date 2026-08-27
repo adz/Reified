@@ -18,6 +18,9 @@ open Microsoft.FSharp.Reflection
 open Xunit
 
 module ApiShapeTests =
+    let private applyConstructor application arguments =
+        ConstructorApplication.tryApply application arguments |> Result.defaultWith invalidOp
+
     type private Customer =
         { Name: string
           Age: int }
@@ -984,7 +987,7 @@ module ApiShapeTests =
                 test <@ model.Fields |> List.map (fun field -> FieldOrder.value field.Order) = [ 0; 1 ] @>
                 test <@ model.Fields[0].ValueSchema.Rules |> SchemaRule.descriptions |> List.collect ConstraintDescription.atoms = [ PresenceAtom Present; PresenceAtom Present ] @>
                 test <@ model.Fields[0].Rules = [] @>
-                ConstructorApplication.apply model.Constructor (values |> List.toArray)
+                applyConstructor model.Constructor (values |> List.toArray)
             | _ -> failwith "Expected public schema API to create a model definition."
 
         test <@ constructed = { Name = "Ada"; Age = 37 } @>
@@ -1010,7 +1013,7 @@ module ApiShapeTests =
             test <@ model.Fields |> List.map (fun field -> ExternalFieldName.value field.ExternalName) = [ "name"; "age"; "active" ] @>
             test <@ model.Fields |> List.map (fun field -> FieldOrder.value field.Order) = [ 0; 1; 2 ] @>
             test <@ values = [ box "Ada"; box 37; box true ] @>
-            test <@ ConstructorApplication.apply model.Constructor (values |> List.toArray) = source @>
+            test <@ applyConstructor model.Constructor (values |> List.toArray) = source @>
         | PendingDefinition -> failwith "Expected public schema API to create a model definition."
         | ValueDefinition _ -> failwith "Expected a model definition, got a value definition."
 
@@ -1034,7 +1037,7 @@ module ApiShapeTests =
             test <@ model.Constructor.ArgumentCount = 3 @>
             test <@ model.Fields |> List.map (fun field -> ExternalFieldName.value field.ExternalName) = [ "name"; "age"; "active" ] @>
             test <@ values = [ box "Ada"; box 37; box true ] @>
-            test <@ ConstructorApplication.apply model.Constructor (values |> List.toArray) = source @>
+            test <@ applyConstructor model.Constructor (values |> List.toArray) = source @>
         | PendingDefinition -> failwith "Expected public schema API to create a model definition."
         | ValueDefinition _ -> failwith "Expected a model definition, got a value definition."
 
@@ -1083,34 +1086,18 @@ module ApiShapeTests =
 
 
     [<Fact>]
-    let ``schema definitions carry trusted constructor application`` () =
-        let application = ConstructorApplication.create2 (fun name age -> { Name = name; Age = age })
-        let fields =
-            [ schemaField "age" 1 (fun (customer: Customer) -> customer.Age) |> schemaFieldDescriptor
-              schemaField "name" 0 (fun (customer: Customer) -> customer.Name) |> schemaFieldDescriptor ]
-
-        let definition = ModelSchemaDefinition.create application fields
-        let schema = Schema<Customer>(ModelDefinition definition)
-
-        let constructed =
-            match schema.Definition with
-            | ModelDefinition model ->
-                let constructor = model.Constructor
-                test <@ constructor.ArgumentCount = 2 @>
-                test <@ model.Fields |> List.map (fun field -> ExternalFieldName.value field.ExternalName) = [ "name"; "age" ] @>
-                test <@ model.Fields |> List.map (fun field -> FieldOrder.value field.Order) = [ 0; 1 ] @>
-                ConstructorApplication.apply constructor [| box "Ada"; box 37 |]
-            | PendingDefinition -> failwith "Expected schema definition to carry a constructor application."
-            | ValueDefinition _ -> failwith "Expected a model definition, got a value definition."
-
-        test <@ constructed = { Name = "Ada"; Age = 37 } @>
-        raises<ArgumentException> <@ ConstructorApplication.apply application [| box "Ada" |] |> ignore @>
-        raises<ArgumentNullException> <@ ConstructorApplication.apply application null |> ignore @>
-
-
-    [<Fact>]
     let ``model schema definitions sort fields by explicit field order`` () =
-        let application = ConstructorApplication.create3 (fun name age active -> { Name = name; Age = age; Active = active })
+        let application =
+            let schema =
+                schema<CustomerProfile> {
+                    fieldAs "name" (fun (model: CustomerProfile) -> model.Name)
+                    fieldAs "age" (fun (model: CustomerProfile) -> model.Age)
+                    fieldAs "active" (fun (model: CustomerProfile) -> model.Active)
+                    construct (fun name age active -> { Name = name; Age = age; Active = active })
+                }
+            match schema.Definition with
+            | ModelDefinition model -> model.Constructor
+            | _ -> failwith "Expected a model definition."
         let active = schemaField "active" 2 (fun (model: CustomerProfile) -> model.Active) |> schemaFieldDescriptor
         let age = schemaField "age" 1 (fun (model: CustomerProfile) -> model.Age) |> schemaFieldDescriptor
         let name = schemaField "name" 0 (fun (model: CustomerProfile) -> model.Name) |> schemaFieldDescriptor
@@ -1123,12 +1110,21 @@ module ApiShapeTests =
         test <@ definition.Fields |> List.map (fun field -> ExternalFieldName.value field.ExternalName) = [ "name"; "age"; "active" ] @>
         test <@ definition.Fields |> List.map (fun field -> FieldOrder.value field.Order) = [ 0; 1; 2 ] @>
         test <@ values = [ box "Ada"; box 37; box true ] @>
-        test <@ ConstructorApplication.apply definition.Constructor (values |> List.toArray) = { Name = "Ada"; Age = 37; Active = true } @>
+        test <@ applyConstructor definition.Constructor (values |> List.toArray) = { Name = "Ada"; Age = 37; Active = true } @>
 
 
     [<Fact>]
     let ``model schema definitions reject ambiguous field order`` () =
-        let application = ConstructorApplication.create2 (fun name age -> { Name = name; Age = age })
+        let application =
+            let schema =
+                schema<Customer> {
+                    fieldAs "name" (fun (model: Customer) -> model.Name)
+                    fieldAs "age" (fun (model: Customer) -> model.Age)
+                    construct (fun name age -> { Name = name; Age = age })
+                }
+            match schema.Definition with
+            | ModelDefinition model -> model.Constructor
+            | _ -> failwith "Expected a model definition."
         let duplicateZero =
             [ schemaField "name" 0 (fun (customer: Customer) -> customer.Name) |> schemaFieldDescriptor
               schemaField "age" 0 (fun (customer: Customer) -> customer.Age) |> schemaFieldDescriptor ]
@@ -1141,18 +1137,6 @@ module ApiShapeTests =
         raises<ArgumentException> <@ ModelSchemaDefinition.create application duplicateZero |> ignore @>
         raises<ArgumentException> <@ ModelSchemaDefinition.create application gap |> ignore @>
         raises<ArgumentException> <@ ModelSchemaDefinition.create application tooFew |> ignore @>
-
-
-    [<Fact>]
-    let ``constructor applications support zero one and three trusted arguments`` () =
-        let constant = ConstructorApplication.create0 (fun () -> { Name = "System"; Age = 0 })
-        let named = ConstructorApplication.create1 (fun name -> { Name = name; Age = 0 })
-        let combined = ConstructorApplication.create3 (fun first last age -> { Name = first + " " + last; Age = age })
-
-        test <@ ConstructorApplication.apply constant [||] = { Name = "System"; Age = 0 } @>
-        test <@ ConstructorApplication.apply named [| box "Ada" |] = { Name = "Ada"; Age = 0 } @>
-        test <@ ConstructorApplication.apply combined [| box "Ada"; box "Lovelace"; box 37 |] = { Name = "Ada Lovelace"; Age = 37 } @>
-
 
     [<Fact>]
     let ``external field names preserve exact boundary names and reject unusable names`` () =

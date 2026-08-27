@@ -11,6 +11,9 @@ open Reified.SchemaDSL
 /// implementation would produce a wrong-but-still-typed result instead of a crash.
 /// </summary>
 module SchemaConstructorGetterAlignmentTests =
+    let private applyConstructor application arguments =
+        ConstructorApplication.tryApply application arguments |> Result.defaultWith invalidOp
+
     type private FullName = { First: string; Last: string }
 
     type private Address =
@@ -40,7 +43,7 @@ module SchemaConstructorGetterAlignmentTests =
         test <@ model.Fields |> List.map (fun field -> ExternalFieldName.value field.ExternalName) = [ "first"; "last" ] @>
         test <@ model.Fields |> List.map (fun field -> FieldOrder.value field.Order) = [ 0; 1 ] @>
         test <@ values = [ box "Ada"; box "Lovelace" ] @>
-        test <@ ConstructorApplication.apply model.Constructor (values |> List.toArray) = source @>
+        test <@ applyConstructor model.Constructor (values |> List.toArray) = source @>
 
     [<Fact>]
     let ``shape binds argument position to declaration order, not external field name`` () =
@@ -58,7 +61,7 @@ module SchemaConstructorGetterAlignmentTests =
         test <@ model.Fields |> List.map (fun field -> ExternalFieldName.value field.ExternalName) = [ "last"; "first" ] @>
         test <@ model.Fields |> List.map (fun field -> FieldOrder.value field.Order) = [ 0; 1 ] @>
         test <@ values = [ box "Lovelace"; box "Ada" ] @>
-        test <@ ConstructorApplication.apply model.Constructor (values |> List.toArray) = { First = "Lovelace"; Last = "Ada" } @>
+        test <@ applyConstructor model.Constructor (values |> List.toArray) = { First = "Lovelace"; Last = "Ada" } @>
 
     [<Fact>]
     let ``shape aligns each of three same-typed fields with its constructor argument position`` () =
@@ -81,7 +84,7 @@ module SchemaConstructorGetterAlignmentTests =
         @>
         test <@ model.Fields |> List.map (fun field -> FieldOrder.value field.Order) = [ 0; 1; 2 ] @>
         test <@ values = [ box "221B Baker Street"; box "Flat 2"; box "London" ] @>
-        test <@ ConstructorApplication.apply model.Constructor (values |> List.toArray) = source @>
+        test <@ applyConstructor model.Constructor (values |> List.toArray) = source @>
 
     [<Fact>]
     let ``shape preserves alignment under a reordered declaration`` () =
@@ -106,4 +109,4 @@ module SchemaConstructorGetterAlignmentTests =
         @>
         test <@ model.Fields |> List.map (fun field -> FieldOrder.value field.Order) = [ 0; 1; 2 ] @>
         test <@ values = [ box "London"; box "221B Baker Street"; box "Flat 2" ] @>
-        test <@ ConstructorApplication.apply model.Constructor (values |> List.toArray) = source @>
+        test <@ applyConstructor model.Constructor (values |> List.toArray) = source @>

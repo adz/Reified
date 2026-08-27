@@ -53,7 +53,6 @@ module UnionRepresentations =
 [<ReferenceEquality>]
 type internal ConstructorApplication<'model> =
     { ArgumentCount: int
-      ApplyTrusted: obj array -> 'model
       TryApplyTrusted: obj array -> Result<'model, string> }
 
 module internal ConstructorApplication =
@@ -63,68 +62,6 @@ module internal ConstructorApplication =
 
         if arguments.Length <> expected then
             invalidArg (nameof arguments) $"Expected {expected} constructor argument(s), but received {arguments.Length}."
-
-    let create0 (construct: unit -> 'model) =
-        if isNull (box construct) then
-            nullArg (nameof construct)
-
-        { ArgumentCount = 0
-          ApplyTrusted =
-            fun arguments ->
-                ensureArgumentCount 0 arguments
-                construct ()
-          TryApplyTrusted =
-            fun arguments ->
-                ensureArgumentCount 0 arguments
-                Ok(construct ()) }
-
-    let create1 (construct: 'a -> 'model) =
-        if isNull (box construct) then
-            nullArg (nameof construct)
-
-        { ArgumentCount = 1
-          ApplyTrusted =
-            fun arguments ->
-                ensureArgumentCount 1 arguments
-                construct (unbox<'a> arguments[0])
-          TryApplyTrusted =
-            fun arguments ->
-                ensureArgumentCount 1 arguments
-                Ok(construct (unbox<'a> arguments[0])) }
-
-    let create2 (construct: 'a -> 'b -> 'model) =
-        if isNull (box construct) then
-            nullArg (nameof construct)
-
-        { ArgumentCount = 2
-          ApplyTrusted =
-            fun arguments ->
-                ensureArgumentCount 2 arguments
-                construct (unbox<'a> arguments[0]) (unbox<'b> arguments[1])
-          TryApplyTrusted =
-            fun arguments ->
-                ensureArgumentCount 2 arguments
-                Ok(construct (unbox<'a> arguments[0]) (unbox<'b> arguments[1])) }
-
-    let create3 (construct: 'a -> 'b -> 'c -> 'model) =
-        if isNull (box construct) then
-            nullArg (nameof construct)
-
-        { ArgumentCount = 3
-          ApplyTrusted =
-            fun arguments ->
-                ensureArgumentCount 3 arguments
-                construct (unbox<'a> arguments[0]) (unbox<'b> arguments[1]) (unbox<'c> arguments[2])
-          TryApplyTrusted =
-            fun arguments ->
-                ensureArgumentCount 3 arguments
-                Ok(construct (unbox<'a> arguments[0]) (unbox<'b> arguments[1]) (unbox<'c> arguments[2])) }
-
-    let apply (application: ConstructorApplication<'model>) (arguments: obj array) =
-        if isNull (box application) then
-            nullArg (nameof application)
-
-        application.ApplyTrusted arguments
 
     let tryApply (application: ConstructorApplication<'model>) (arguments: obj array) =
         if isNull (box application) then
@@ -394,7 +331,6 @@ module internal ModelSchemaErasure =
     let erase (definition: ModelSchemaDefinition<'model>) : ModelSchemaDefinition<obj> =
         { Constructor =
             { ArgumentCount = definition.Constructor.ArgumentCount
-              ApplyTrusted = fun arguments -> definition.Constructor.ApplyTrusted arguments |> box
               TryApplyTrusted =
                 fun arguments ->
                     definition.Constructor.TryApplyTrusted arguments

@@ -18,6 +18,9 @@ open Swensen.Unquote
 /// primitive value schema.
 /// </summary>
 module SchemaRefinedValueTests =
+    let private applyConstructor application arguments =
+        ConstructorApplication.tryApply application arguments |> Result.defaultWith invalidOp
+
     /// <summary>A minimal named refined/domain type standing in for a real <c>Email</c>-style value.</summary>
     type private Email =
         private
@@ -161,7 +164,7 @@ module SchemaRefinedValueTests =
             | _ -> failwith "Expected the email field to keep its refined value schema shape."
 
             let contact = { Email = Email.create "ada@example.com"; Name = "Ada" }
-            test <@ ConstructorApplication.apply model.Constructor [| box contact.Email; box contact.Name |] = contact @>
+            test <@ applyConstructor model.Constructor [| box contact.Email; box contact.Name |] = contact @>
         | PendingDefinition -> failwith "Expected public schema API to create a model definition."
         | ValueDefinition _ -> failwith "Expected a model definition, got a value definition."
 
