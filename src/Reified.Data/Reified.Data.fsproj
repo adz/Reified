@@ -5,6 +5,8 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsAotCompatible Condition="'$(TargetFramework)' == 'net8.0'">true</IsAotCompatible>
     <PackageId>Reified.Data</PackageId>
+    <!-- Ships F# sources under fable/ so Fable can compile this; see Directory.Build.targets. -->
+    <IsFableLibrary>true</IsFableLibrary>
     <AssemblyName>Reified.Data</AssemblyName>
     <RootNamespace>Reified</RootNamespace>
     <Authors>Adam Davies</Authors>
