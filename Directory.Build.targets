@@ -34,7 +34,8 @@
       <_FableLine Include="  &lt;/PropertyGroup&gt;" />
       <_FableLine Include="  &lt;ItemGroup&gt;" />
       <!-- Sibling Reified projects become package dependencies at this same version. -->
-      <_FableLine Include="    &lt;PackageReference Include=&quot;%(ProjectReference.Filename)&quot; Version=&quot;$(Version)&quot; /&gt;" />
+      <_FableLine Include="    &lt;PackageReference Include=&quot;%(ProjectReference.Filename)&quot; Version=&quot;$(Version)&quot; /&gt;"
+                  Condition="'%(ProjectReference.Filename)' != ''" />
       <!-- Real package dependencies carry across as they are, minus build-only ones. -->
       <_FableLine Include="    &lt;PackageReference Include=&quot;%(PackageReference.Identity)&quot; Version=&quot;%(PackageReference.Version)&quot; /&gt;"
                   Condition="'%(PackageReference.PrivateAssets)' != 'All' and '%(PackageReference.PrivateAssets)' != 'all'" />
