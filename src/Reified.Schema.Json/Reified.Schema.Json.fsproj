@@ -5,6 +5,8 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsAotCompatible Condition="'$(TargetFramework)' == 'net8.0'">true</IsAotCompatible>
     <PackageId>Reified.Schema.Json</PackageId>
+    <!-- Ships F# sources under fable/ so Fable can compile this; see Directory.Build.props. -->
+    <IsFableLibrary>true</IsFableLibrary>
     <AssemblyName>Reified.Schema.Json</AssemblyName>
     <RootNamespace>Reified.Schema.Json</RootNamespace>
     <Authors>Adam Davies</Authors>

@@ -1,0 +1,61 @@
+<Project>
+
+  <!--
+    Fable compiles a library from its F# sources, not its assembly, because an `inline` member has
+    no body once compiled. A package that ships only lib/ builds fine under `dotnet build` and fails
+    under `dotnet fable` with "Cannot find inline member", a failure that surfaces only in whichever
+    downstream repository targets JavaScript, and only when someone actually runs Fable.
+
+    Fable looks for a `fable/` folder in a package. Projects opt in with IsFableLibrary; how that
+    folder is laid out is declared once, here.
+
+    This lives in .targets rather than .props because .props is imported before the project body,
+    where IsFableLibrary has not been set yet.
+
+    The project file in fable/ is generated rather than copied. Inside a package there are no
+    sibling checkouts, so this project's own ProjectReferences could not resolve; each is emitted as
+    a PackageReference at the version being packed, which Fable satisfies from that package's own
+    fable/ folder. Compile order is F#-significant, so it is taken from @(Compile) verbatim.
+  -->
+
+  <PropertyGroup Condition="'$(IsFableLibrary)' == 'true'">
+    <FableProjectFile>$(BaseIntermediateOutputPath)fable\$(MSBuildProjectFile)</FableProjectFile>
+  </PropertyGroup>
+
+  <Target Name="WriteFableProjectFile"
+          Condition="'$(IsFableLibrary)' == 'true'"
+          BeforeTargets="GenerateNuspec;_GetPackageFiles">
+
+    <ItemGroup>
+      <_FableLine Include="&lt;Project Sdk=&quot;Microsoft.NET.Sdk&quot;&gt;" />
+      <_FableLine Include="  &lt;PropertyGroup&gt;" />
+      <_FableLine Include="    &lt;TargetFramework&gt;netstandard2.1&lt;/TargetFramework&gt;" />
+      <_FableLine Include="    &lt;DisableImplicitFSharpCoreReference&gt;true&lt;/DisableImplicitFSharpCoreReference&gt;" />
+      <_FableLine Include="  &lt;/PropertyGroup&gt;" />
+      <_FableLine Include="  &lt;ItemGroup&gt;" />
+      <!-- Sibling Reified projects become package dependencies at this same version. -->
+      <_FableLine Include="    &lt;PackageReference Include=&quot;%(ProjectReference.Filename)&quot; Version=&quot;$(Version)&quot; /&gt;" />
+      <!-- Real package dependencies carry across as they are, minus build-only ones. -->
+      <_FableLine Include="    &lt;PackageReference Include=&quot;%(PackageReference.Identity)&quot; Version=&quot;%(PackageReference.Version)&quot; /&gt;"
+                  Condition="'%(PackageReference.PrivateAssets)' != 'All' and '%(PackageReference.PrivateAssets)' != 'all'" />
+      <_FableLine Include="  &lt;/ItemGroup&gt;" />
+      <_FableLine Include="  &lt;ItemGroup&gt;" />
+      <_FableLine Include="    &lt;Compile Include=&quot;%(Compile.Identity)&quot; /&gt;" />
+      <_FableLine Include="  &lt;/ItemGroup&gt;" />
+      <_FableLine Include="&lt;/Project&gt;" />
+    </ItemGroup>
+
+    <MakeDir Directories="$(BaseIntermediateOutputPath)fable" />
+    <WriteLinesToFile File="$(FableProjectFile)" Lines="@(_FableLine)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+  </Target>
+
+  <ItemGroup Condition="'$(IsFableLibrary)' == 'true'">
+    <None Include="$(FableProjectFile)" Pack="true" PackagePath="fable\$(MSBuildProjectFile)" Visible="false" />
+    <None Include="**\*.fs;**\*.fsi"
+          Exclude="$(BaseIntermediateOutputPath)**;$(BaseOutputPath)**;bin\**;obj\**;artifacts\**"
+          Pack="true"
+          PackagePath="fable\%(RecursiveDir)%(Filename)%(Extension)"
+          Visible="false" />
+  </ItemGroup>
+
+</Project>
