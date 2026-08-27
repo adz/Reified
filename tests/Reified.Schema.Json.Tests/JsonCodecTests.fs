@@ -105,6 +105,15 @@ module JsonCodecTests =
         let value = [ 1; 2; 3 ]
         test <@ Json.deserialize codec (Json.serialize codec value) = value @>
 
+    [<Fact>]
+    let ``int encoding handles zero signs and limits`` () =
+        let codec = Json.compile (Schema.listWith Schema.int)
+        let values = [ Int32.MinValue; -1; 0; 1; Int32.MaxValue ]
+        let json = "[-2147483648,-1,0,1,2147483647]"
+
+        test <@ Json.serialize codec values = json @>
+        test <@ Json.deserialize codec json = values @>
+
     type private Email = private EmailValue of string
 
     type private Address = { Street: string; City: string }

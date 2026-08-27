@@ -6,7 +6,11 @@ read -r -p "Stop other processes and run the .NET benchmark suite? [y/N] " answe
 
 case "$answer" in
   y|Y|yes|YES)
-    dotnet run --project benchmarks/Reified.Schema.Benchmarks/Reified.Schema.Benchmarks.fsproj --nologo
+    dotnet run \
+      --configuration Release \
+      --project benchmarks/Reified.Schema.Benchmarks/ReifiedBenchmarks.fsproj \
+      -- \
+      "$@"
     ;;
   *)
     echo "Benchmark run cancelled."

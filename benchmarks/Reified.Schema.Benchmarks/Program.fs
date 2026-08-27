@@ -1,4 +1,4 @@
-namespace Reified.Schema.Benchmarks
+namespace ReifiedBenchmarks.Schema
 
 open BenchmarkDotNet.Running
 

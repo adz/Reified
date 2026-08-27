@@ -148,6 +148,18 @@ module internal Buffers =
                 x.InternalCount <- x.InternalCount + bytes.Length
 
             member x.WriteInt(value: int) =
+#if !FABLE_COMPILER
+                let mutable written = 0
+                (x :> IByteWriter).Ensure(11)
+
+                let destination =
+                    System.Span<byte>(x.InternalData, x.InternalCount, x.InternalData.Length - x.InternalCount)
+
+                if Utf8Formatter.TryFormat(value, destination, &written) then
+                    x.InternalCount <- x.InternalCount + written
+                else
+                    (x :> IByteWriter).WriteString(value.ToString(CultureInfo.InvariantCulture))
+#else
                 if value = 0 then
                     (x :> IByteWriter).WriteByte(byte '0')
                 elif value = System.Int32.MinValue then
@@ -173,6 +185,7 @@ module internal Buffers =
                         x.InternalData[x.InternalCount + i] <- digits[pos - 1 - i]
 
                     x.InternalCount <- x.InternalCount + pos
+#endif
 
             member x.WriteInt64(value: int64) =
 #if !FABLE_COMPILER
