@@ -1,5 +1,17 @@
 # Release Notes
 
+## 0.7.0 - 2026-08-28
+
+### Schema generation
+
+- Generated schemas use short type and union-case names when resolution is provably unambiguous, while retaining full qualification when required by shadowing or `[<RequireQualifiedAccess>]`.
+- Generated schemas compile correctly for module-declared types and use more compact source without weakening cross-file name resolution.
+
+### Documentation releases
+
+- GitHub Pages discovers every immutable LiveDocs capsule from GitHub Releases, verifies its digest, and retains the complete version history across later deployments.
+- Release publication retries GitHub asset discovery and requires the dispatched capsule to become the current documentation version.
+
 ## 0.6.1 - 2026-08-28
 
 ### Schema generation
