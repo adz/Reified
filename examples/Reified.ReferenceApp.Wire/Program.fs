@@ -11,7 +11,7 @@ open Reified
 
 open System.Text.Json
 open Reified.ConstraintDSL
-open Reified.Schema.Json
+open Reified
 open Reified.ReferenceApp.Wire
 
 // ---------------------------------------------------------------------------

@@ -44,7 +44,6 @@
     <ProjectReference Include="..\Reified.Result\Reified.Result.fsproj" />
     <ProjectReference Include="..\Reified.Data\Reified.Data.fsproj" />
     <ProjectReference Include="..\Reified.Schema\Reified.Schema.fsproj" />
-    <ProjectReference Include="..\Reified.Schema.Json\Reified.Schema.Json.fsproj" />
   </ItemGroup>
 
   <!-- Reified.Schema.Http is .NET-only, so netstandard2.1 consumers (Fable, older hosts) get the

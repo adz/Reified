@@ -10,7 +10,7 @@
 open Reified
 open Reified.SchemaDSL
 open Reified.ConstraintDSL
-open Reified.Schema.Json
+open Reified
 
 // ---------------------------------------------------------------------------
 // 1. The model: a plain record. Nothing here is Reified-specific.

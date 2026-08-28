@@ -442,19 +442,25 @@ module ApiShapeTests =
 
 
     [<Fact>]
-    let ``codec compiles json codecs from schemas without extra package coupling`` () =
-        moduleTypeFromAssembly "Reified.Schema.Json" "Reified.Schema.Json.Json"
+    let ``schema assembly includes compiled json codecs`` () =
+        let schemaAssembly = Assembly.Load "Reified.Schema"
+
+        moduleTypeFromAssembly "Reified.Schema" "Reified.Json"
         |> publicStaticMemberNames
         |> assertContainsAll
             [ "compile"; "serialize"; "serializeBytes"; "parseData"; "deserialize"; "deserializeBytes"; "tryDeserialize" ]
 
-        // JSON Schema generation ships inside Reified.Schema; the module path stays
-        // Reified.Schema.JsonSchema so no caller changed an open when the package was folded in.
+        test <@ not (isNull (schemaAssembly.GetType("Reified.JsonCodec`1", false))) @>
+        test <@ not (isNull (schemaAssembly.GetType("Reified.JsonCodecException", false))) @>
+        test <@ isNull (schemaAssembly.GetType("Reified.Schema.Json.Json", false)) @>
+
+        // JSON Schema generation and JSON codecs both ship inside Reified.Schema as
+        // modules in the flattened Reified namespace.
         moduleTypeFromAssembly "Reified.Schema" "Reified.JsonSchema"
         |> publicStaticMemberNames
         |> assertContainsAll [ "generate"; "generateValue" ]
 
-        referencedAssemblyNames (Assembly.Load "Reified.Schema.Json")
+        referencedAssemblyNames (Assembly.Load "Reified.Schema")
         |> assertContainsNone [ "Axial.Flow"; "Reified.Flow" ]
 
 
@@ -501,7 +507,6 @@ module ApiShapeTests =
               "Reified.Parse"
               "Reified.Data"
               "Reified.Schema"
-              "Reified.Schema.Json"
               "Reified.Schema.Http" ]
 
         for package in packages do

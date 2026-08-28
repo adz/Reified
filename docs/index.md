@@ -74,26 +74,6 @@ JSON Schema, and the generated test data come from that one declaration. Nothing
 <a class="btn btn-primary" href="getting-started/index.html">Get started &rarr;</a>
 </p>
 
-<div class="docs-home-copy docs-home-package-map" style="max-width: 78ch; margin: 0 auto;">
-
-<h2>How the packages fit</h2>
-
-<div class="package-map">
-
-```text
-Constraint ─┐
-Parse ──────┤
-Data ───────┼──> Schema ───> Schema.Json
-Refinements ┘             └──> contract tooling
-```
-
-</div>
-
-<p>Constraint, Parse, Data, and Refinements can each be used alone without Schema, but they are designed to work
-together consistently.</p>
-
-</div>
-
 <h2 class="docs-home-section-title">Choose your starting point</h2>
 
 <div class="docs-home-routes">
@@ -105,8 +85,7 @@ together consistently.</p>
 
 </div>
 
-<p style="max-width: 78ch; margin: 2rem auto; text-align: center;">Install one focused package or the complete runtime
-set. <a href="notes/packages-and-platforms.html">Packages and platforms &rarr;</a></p>
+<p style="max-width: 78ch; margin: 2rem auto; text-align: center;"><a href="notes/packages-and-platforms.html">Packages and platforms &rarr;</a></p>
 
 <div class="docs-home-meta" style="margin-bottom: 4rem;">
 <a class="docs-chip" href="getting-started/index.html">Getting started</a>

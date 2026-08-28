@@ -41,7 +41,7 @@ the overview, the comments are the ground truth.
 `Data` lives in its own dependency-free package (`src/Reified.Data`).
 
 The JSON Schema interpreter lives in `src/Reified.Schema/JsonSchema.fs`, and the compiled
-JSON codecs in `src/Reified.Schema.Json`; both keep the `Reified.Schema` namespace family.
+JSON codecs in `src/Reified.Schema/{Buffers,JsonRuntime,Json}.fs`.
 
 ## Map of the core files (former Schema.fs), in compile order:
 
@@ -59,7 +59,7 @@ JSON codecs in `src/Reified.Schema.Json`; both keep the `Reified.Schema` namespa
    `ConstructorApplication`. Interpreters that don't need field value types work from this.
 6. **`FieldDefinition<'model,'value>` / `Field<'model,'value>`** — the *typed* view of one field.
 7. **The typed record plan** (`IRecordPlanCompiler`, `IRecordPlanState`, internal `IShapeFields`) — the
-   interpreter-facing typed view retained when a constructor-last shape closes. `Reified.Schema.Json` folds it
+   interpreter-facing typed view retained when a constructor-last shape closes. `Json.compile` folds it
    into direct typed encoders and decoders. Checked constructors use the same compiled path as total constructors.
 8. **`Schema<'model>`** — a sealed wrapper over `SchemaDefinition` (model or value) plus an optional compiled
    record plan.

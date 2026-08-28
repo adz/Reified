@@ -70,7 +70,6 @@ let ``the umbrella lists the settled public runtime packages`` () =
               "Reified.Result"
               "Reified.Data"
               "Reified.Schema"
-              "Reified.Schema.Json"
               "Reified.Schema.Http" ]
 
     test <@ umbrellaReferences () = expected @>

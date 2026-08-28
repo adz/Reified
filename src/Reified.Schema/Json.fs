@@ -1,16 +1,14 @@
-namespace Reified.Schema.Json
-
-open Reified
+namespace Reified
 
 open System
 open System.Globalization
 open System.Text
-open Reified.Schema.Json.JsonRuntime
+open Reified.JsonRuntime
 
 /// <summary>A compiled JSON codec for one schema-described model.</summary>
 /// <remarks>
 /// <para>
-/// Compile once with <see cref="M:Reified.Schema.Json.Json.compile``1" /> and reuse the codec for every value. Compilation
+/// Compile once with <see cref="M:Reified.Json.compile``1" /> and reuse the codec for every value. Compilation
 /// compiles the schema's retained typed shape into a direct record plan — ordered field descriptors, cached wire-name
 /// bytes, and typed field decoders applied to the original curried constructor — so per-value encoding and decoding
 /// use no reflection and no boxed <c>obj array</c> dispatch for record fields.
@@ -1156,7 +1154,7 @@ module rec Json =
     /// <para>
     /// Compile once per schema, typically at startup, and reuse the codec for every value. Constructor-last object
     /// schemas retain a typed record plan, including checked constructors. Constructor failures surface as
-    /// <see cref="T:Reified.Schema.Json.JsonCodecException" /> during decoding.
+    /// <see cref="T:Reified.JsonCodecException" /> during decoding.
     /// </para>
     /// </remarks>
     /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="schema" /> is null.</exception>
@@ -1253,7 +1251,7 @@ module rec Json =
     /// <example><code>Json.parseData "{\"name\":\"Ada\"}"
     /// // Data.Object [ "name", Data.Text "Ada" ]</code></example>
     /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="json" /> is null.</exception>
-    /// <exception cref="T:Reified.Schema.Json.JsonCodecException">Thrown when the input is not one complete JSON value.</exception>
+    /// <exception cref="T:Reified.JsonCodecException">Thrown when the input is not one complete JSON value.</exception>
     let parseData (json: string) : Data =
         if isNull json then
             nullArg (nameof json)
@@ -1262,7 +1260,7 @@ module rec Json =
 
     /// <summary>Deserializes UTF-8 JSON bytes to a trusted model through a compiled codec.</summary>
     /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="codec" /> or <paramref name="bytes" /> is null.</exception>
-    /// <exception cref="T:Reified.Schema.Json.JsonCodecException">Thrown when the JSON does not match the schema's wire shape.</exception>
+    /// <exception cref="T:Reified.JsonCodecException">Thrown when the JSON does not match the schema's wire shape.</exception>
     let deserializeBytes (codec: JsonCodec<'model>) (bytes: byte[]) : 'model =
         if isNull (box codec) then
             nullArg (nameof codec)
@@ -1274,7 +1272,7 @@ module rec Json =
 
     /// <summary>Deserializes a JSON string to a trusted model through a compiled codec.</summary>
     /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="codec" /> or <paramref name="json" /> is null.</exception>
-    /// <exception cref="T:Reified.Schema.Json.JsonCodecException">Thrown when the JSON does not match the schema's wire shape.</exception>
+    /// <exception cref="T:Reified.JsonCodecException">Thrown when the JSON does not match the schema's wire shape.</exception>
     let deserialize (codec: JsonCodec<'model>) (json: string) : 'model =
         if isNull (box codec) then
             nullArg (nameof codec)
@@ -1321,7 +1319,7 @@ module rec Json =
     /// on Fable.
     /// </remarks>
     /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="codec" /> or <paramref name="stream" /> is null.</exception>
-    /// <exception cref="T:Reified.Schema.Json.JsonCodecException">Thrown when the JSON does not match the schema's wire shape.</exception>
+    /// <exception cref="T:Reified.JsonCodecException">Thrown when the JSON does not match the schema's wire shape.</exception>
     let deserializeStreamAsync
         (codec: JsonCodec<'model>)
         (stream: System.IO.Stream)

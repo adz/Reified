@@ -1,7 +1,7 @@
 module Reified.FableProbe.Program
 
 open Reified
-open Reified.Schema.Json
+open Reified
 
 // Runs the same assertions on .NET and on Fable JavaScript. A check that passes here and fails there is the
 // failure this probe exists to catch: Fable erases Guid to a string and TimeSpan to a number, its whitespace

@@ -88,11 +88,10 @@ exact lexical representation. The adapter uses the in-box `System.Text.Json`, so
 
 ## Parse JSON portably
 
-For the same lossless behavior on .NET and Fable, install `Reified.Schema.Json` and parse JSON text with
-`Json.parseData`:
+For the same lossless behavior on .NET and Fable, use `Json.parseData` from the installed `Reified.Schema` package:
 
 ```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-open Reified.Schema.Json
+open Reified
 
 let raw = Json.parseData """{"name":"Ada","score":1.20e+3}"""
 ```

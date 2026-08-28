@@ -11,6 +11,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
-    <ProjectReference Include="..\..\src\Reified.Schema.Json\Reified.Schema.Json.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Reified.Schema/Reified.Schema.fsproj" />
   </ItemGroup>
 </Project>

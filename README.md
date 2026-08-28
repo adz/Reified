@@ -17,8 +17,8 @@ Declare value and model invariants once. Derive validation, parsing, diagnostics
 <pre>
 Constraint ─┐
 Parse ──────┤
-Data ───────┼──> Schema ───> Schema.Json
-Refinements ┘             └──> contract tooling
+Data ───────┼──> Schema ───> contract tooling
+Refinements ┘
 </pre>
 
 Install Schema when structured input must become a model. Constraint, Parse, Data, and Refinements can each be used
@@ -95,7 +95,7 @@ The same `signupSchema` can drive a compiled JSON codec, JSON Schema, form metad
 You do not write a second description of the wire shape. `Json.compile` turns the schema you already have into a codec that both encodes and decodes.
 
 ```fsharp
-open Reified.Schema.Json
+open Reified
 
 let codec = Json.compile signupSchema   // compile once, typically at startup
 
@@ -137,12 +137,10 @@ Derivation is the preferred approach for DTOs. Keep it to public, permissive bou
 
 ## Packages
 
-Install `Reified` to get the complete runtime set. For the integrated boundary model, start with `Reified.Schema` and
-add its interpreters as needed:
+Install `Reified` to get the complete runtime set. For the integrated boundary model, start with `Reified.Schema`:
 
 - `Reified` — umbrella package that references all runtime packages
-- `Reified.Schema` — structured model admission, diagnostics, inspection, and JSON Schema
-- `Reified.Schema.Json` — compiled JSON codecs
+- `Reified.Schema` — structured model admission, diagnostics, inspection, JSON Schema, and compiled JSON codecs
 - `Reified.Schema.Contracts.Build` — MSBuild integration for derived record and wire contracts
 
 Schema builds on focused packages that remain useful by themselves:

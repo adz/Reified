@@ -3,7 +3,7 @@ namespace Reified.FableProbe
 open System
 open Reified
 open Reified.SchemaDSL
-open Reified.Schema.Json
+open Reified
 
 /// The Reified surface that must behave identically on .NET and on Fable JavaScript. Each function returns a
 /// bool so the same assertions run on both targets from `Program.fs`; the Flow benchmarks these checks used to

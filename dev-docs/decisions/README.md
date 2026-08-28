@@ -365,7 +365,7 @@ Rules that hold across the codebase and are not obvious from any single file.
 - **`Schema.check` re-runs field constraints and then re-invokes the constructor.** Its predecessor only re-checked
   per-field constraints and silently skipped the model's own invariant — a `DateRange` with `Start` after `End`
   passed it. The constructor re-check is the point, not a bolt-on.
-- **`Reified.Schema.Json` is part of the supported Fable surface.** The `FABLE_COMPILER` gates are load-bearing and
+- **The `Json` codecs in `Reified.Schema` are part of the supported Fable surface.** The `FABLE_COMPILER` gates are load-bearing and
   every codec optimization must keep the JS branch working. This is what completes the zod comparison: one
   declaration shared between server and browser covers serialization as well as parsing.
 - **`Data.ofJsonElement`/`ofJsonDocument` stay gated to `net8.0 && !FABLE_COMPILER`.** If a netstandard2.1 consumer

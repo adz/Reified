@@ -7,7 +7,7 @@ Speculative sketches live in `dev-docs/current-ideas/`, but this file is the liv
 ## Release Strategy
 
 The boundary stack — `Reified.Result`, `Reified.Constraint`, `Reified.Refinements`, and `Reified.Parse` as focused
-packages, plus `Reified.Schema` and `Reified.Schema.Json` — is the 1.0 gate. The Acceptance Checks in
+packages, plus `Reified.Schema` — including its JSON codecs — is the 1.0 gate. The Acceptance Checks in
 `dev-docs/TASKS.md` are the concrete, checkable form of that gate; there is no separate adoption-target project
 tracked against it. As of 2026-08-14 all eight checks pass, including a docgen xref-rewriting fix
 (`scripts/docgen/Program.fs`) that resolved six broken generated reference links (stale `SchemaCeBuilder`-nested
@@ -109,8 +109,8 @@ Schema must also preserve a high-performance codec lowering path. The inspectabl
 but JSON codecs should not interpret that metadata tree directly on the hot path. A codec interpreter must be able to
 compile schemas into direct record plans: ordered field descriptors, cached wire-name bytes, indexed field slots,
 typed field decoders, and constructor application that does not require per-value reflection or `obj array` dispatch.
-CodecMapper is the performance reference for this shape. This path now ships as `Reified.Schema.Json` (`Json.compile` over the
-retained compiled record plan, benchmarked against `System.Text.Json` in `benchmarks/Reified.Schema.Benchmarks/CodecSuites.fs`);
+CodecMapper is the performance reference for this shape. This path now ships in `Reified.Schema` (`Json.compile` over the retained compiled record plan, benchmarked against
+`System.Text.Json` in `benchmarks/Reified.Schema.Benchmarks/CodecSuites.fs`);
 remaining codec work is optimization and format breadth, not proving the shape.
 
 The built `Schema<'model>` value itself must retain typed constructor and field information sufficient for that codec

@@ -5,7 +5,7 @@ open BenchmarkDotNet.Attributes
 open BenchmarkDotNet.Configs
 open BenchmarkDotNet.Order
 open Reified
-open Reified.Schema.Json
+open Reified
 open Reified.SchemaDSL
 
 module WideModel =

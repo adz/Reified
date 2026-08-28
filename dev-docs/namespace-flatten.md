@@ -18,9 +18,9 @@ Down from four lines to two for the common case.
 These were established by spike; they constrain the design and are not negotiable.
 
 - A namespace spans files and assemblies. A module spans neither (FS0248 within an assembly).
-- FS0247 is per-assembly: `module Reified.Schema` in `Reified.Schema.dll` coexists with
-  `namespace Reified.Schema.Json` in another assembly. It does **not** coexist with
-  `namespace Reified.Schema.Derive` in the same assembly — hence phase 1.
+- FS0247 is per-assembly: `module Reified.Schema` in `Reified.Schema.dll` cannot coexist with a
+  `namespace Reified.Schema.*` in that assembly. This originally forced Derive into `Reified.DerivedSchema`; when
+  JSON codecs later moved into the Schema assembly, their public types and `Json` module moved to `namespace Reified`.
 - Modules cannot be re-exported: no abbreviation, no `AutoOpen`, no alias. Only types can
   (`type X = A.B.C`), and type abbreviations carry DU cases and generics but restate their
   own constraints.
@@ -79,9 +79,8 @@ Ordered so each phase builds and tests green on its own, and so the riskiest ren
 - [x] **Phase 6** — CE machinery into `SchemaFieldSteps` and `SchemaCeBuilder` modules with
       `EditorBrowsable(Never)` and `CompilerMessage(..., 42, IsHidden = true)`. Two modules
       rather than one because `field` sits between them in dependency order and stays at
-      namespace level. `IRecordPlanCompiler` and `IRecordPlanState` deliberately stay out:
-      `Reified.Schema.Json` implements them, so they are an extension point rather than
-      machinery, and hiding them would warn legitimate implementers.
+      namespace level. `IRecordPlanCompiler` and `IRecordPlanState` remained public because the JSON codec was then
+      implemented by a separate assembly; revisit their visibility now that the codec ships in `Reified.Schema`.
 - [x] **Phase 7** — Umbrella `.fsproj` comment, docs, `llms.txt`, docgen inputs, generated
       reference pages.
 - [x] **Phase 8** — Full validation: build, tests, source inventory, Fable surface, docs.

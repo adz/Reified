@@ -1,6 +1,6 @@
 namespace Reified.Schema.Json.Tests
 
-open Reified.Schema.Json
+open Reified
 open Reified
 open Swensen.Unquote
 open Xunit

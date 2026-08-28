@@ -7,7 +7,7 @@ open Reified.Refinements
 open Reified.Result
 open Reified.SchemaDSL
 open Reified.Schema.Http
-open Reified.Schema.Json
+open Reified
 
 type Signup = { Email: string; Age: int }
 

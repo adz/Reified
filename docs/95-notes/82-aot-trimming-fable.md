@@ -36,7 +36,7 @@ The one deliberate exception: `Service<'service>.resolve()` can look up registra
 
 ## Verified In CI
 
-Every push publishes and runs a NativeAOT probe (`bash scripts/run-aot-probe.sh`), which compiles an application
+Every push publishes and runs a NativeAOT probe (`dotnet run --project tools/Reified.Build -- --target NativeAot`), which compiles an application
 exercising flows, schemas, parsing, and services with `PublishAot=true` and executes the native binary. If a change
 introduced reflection the trimmer could not prove safe, CI fails.
 
@@ -44,9 +44,9 @@ introduced reflection the trimmer could not prove safe, CI fails.
 
 The same explicitness is what makes Fable compilation work: `Reified.Result`, `Reified.Constraint`, `Reified.Refinements`, and
 `Reified.Schema` all compile to JavaScript, so a browser front end can parse
-and redisplay through the same schema declaration the server uses. `Reified.Schema.Json` compiles too, so a
+and redisplay through the same schema declaration the server uses. The `Json` codec compiles too, so a
 codec is available on both sides of the wire. CI compiles the Fable JavaScript surface and runs it on Node
-(`bash scripts/check-fable-js-surface.sh`), asserting the same results the same checks produce on .NET —
+(`dotnet run --project tools/Reified.Build -- --target Fable`), asserting the same results the same checks produce on .NET —
 constraint behaviour, operand descriptions, localized rendering, a codec round-trip, and JSON boundaries.
 .NET-only conveniences — such as `Data.ofJsonDocument` and the
 `DateOnly` field type — are compile-time gated so the Fable surface never references them.

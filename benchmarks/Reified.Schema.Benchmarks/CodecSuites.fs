@@ -7,7 +7,7 @@ open BenchmarkDotNet.Configs
 open BenchmarkDotNet.Order
 open Reified
 open Reified.ConstraintDSL
-open Reified.Schema.Json
+open Reified
 open Reified.SchemaDSL
 
 /// The shared benchmark model: a realistic aggregate with primitives, a nested record, and collections.

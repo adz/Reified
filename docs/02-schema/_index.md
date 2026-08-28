@@ -71,25 +71,6 @@ After the quickstart, use these guides as needed:
 Use the [API reference for `Schema`](/api/Reified.Schema.html) when you need the complete constructor and interpreter
 catalogue rather than a guided workflow.
 
-## Packages
-
-| Package | Use it for |
-| --- | --- |
-| `Reified.Schema` | Model schemas, parsing, accumulated errors, inspection, and JSON Schema generation |
-| `Reified.Schema.Json` | Compiled JSON codecs |
-| `Reified.Schema.Contracts.Build` | Build-time derivation from F# records and `.contract` files |
-
-Install the core package and add the focused packages the application uses:
-
-```bash
-dotnet add package Reified.Schema
-dotnet add package Reified.Schema.Json
-```
-
-
-`JsonSchema` is a module in `Reified.Schema`, not a separate package. `Reified.Schema.Testing` is an internal FsCheck
-adapter rather than an installable package; see [Testing schema guarantees](/data/testing-schema-guarantees.html).
-
 Schema controls values produced through Schema. A public F# record can still be constructed directly. Use refined
 fields, a private aggregate, or an opaque `.fsi` interface when other code must rely on the invariant without checking
 it again; [Construction Guarantees](/schema/trusted-construction.html) compares those choices.

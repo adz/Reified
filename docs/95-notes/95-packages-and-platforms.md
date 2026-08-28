@@ -25,8 +25,8 @@ Schema is the integrated path through the packages:
 ```text
 Constraint ─┐
 Parse ──────┤
-Data ───────┼──> Schema ───> Schema.Json
-Refinements ┘             └──> contract tooling
+Data ───────┼──> Schema ───> contract tooling
+Refinements ┘
 ```
 
 </div>
@@ -47,8 +47,7 @@ environments that provide the primitives they use.
 | `Reified.Refinements` | Types that carry an invariant after construction | `dotnet add package Reified.Refinements` |
 | `Reified.Parse` | Serialized primitive decoding | `dotnet add package Reified.Parse` |
 | `Reified.Data` | Source-neutral structured data, human and JSON rendering, native JSON conversion | `dotnet add package Reified.Data` |
-| `Reified.Schema` | Schema declaration, parsing, checking, accumulated errors, inspection, JSON Schema | `dotnet add package Reified.Schema` |
-| `Reified.Schema.Json` | Lossless JSON-to-`Data` parsing and compiled typed JSON codecs | `dotnet add package Reified.Schema.Json` |
+| `Reified.Schema` | Schema declaration, parsing, checking, accumulated errors, inspection, JSON Schema, lossless JSON-to-`Data` parsing, and compiled typed JSON codecs | `dotnet add package Reified.Schema` |
 | `Reified.Result` | Independent `Result` composition and `result { }` | `dotnet add package Reified.Result` |
 
 A `netstandard2.1` target by itself does not imply JavaScript support. This list records the packages with a deliberate

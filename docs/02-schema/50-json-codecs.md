@@ -7,8 +7,8 @@ targetFramework: net8.0
 
 # JSON Codecs
 
-This page shows how `Reified.Schema.Json` turns the schema you already declared into a compiled JSON codec, so trusted
-serialization and boundary parsing come from one declaration.
+The `Json` module turns the schema you already declared into a compiled JSON codec, so trusted serialization and
+boundary parsing come from one declaration. It is included in the `Reified.Schema` package.
 
 Reified has two paths for JSON, and they exist because they optimize for different things:
 
@@ -23,7 +23,7 @@ Reified has two paths for JSON, and they exist because they optimize for differe
 
 ```fsharp
 open Reified
-open Reified.Schema.Json
+open Reified
 open Reified.SchemaDSL
 
 type Address =
@@ -134,7 +134,7 @@ function takes plain positional arguments, so it calls as an ordinary static met
 
 ```csharp
 using Reified.Schema;
-using Reified.Schema.Json;
+using Reified;
 
 JsonCodec<Customer> codec = Json.compile(customerSchema);
 

@@ -16,7 +16,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Reified.Schema\Reified.Schema.fsproj" />
-    <ProjectReference Include="..\..\src\Reified.Schema.Json\Reified.Schema.Json.fsproj" />
     <ProjectReference Include="..\..\src\Reified.Data\Reified.Data.fsproj" />
   </ItemGroup>
 

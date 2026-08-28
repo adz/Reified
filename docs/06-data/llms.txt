@@ -9,4 +9,4 @@
 - On .NET 8+, copy native `JsonElement` and `JsonDocument` values with `Data.ofJsonElement` and
   `Data.ofJsonDocument`. Under Fable, pass a native `JSON.parse` result to `Data.ofJsonValue` when duplicate fields and
   original number-token spelling do not matter.
-- `Reified.Schema.Json.Json.parseData` provides portable, lossless JSON-to-`Data` parsing when Schema.Json is installed.
+- `Reified.Json.parseData` provides portable, lossless JSON-to-`Data` parsing from the `Reified.Schema` package.

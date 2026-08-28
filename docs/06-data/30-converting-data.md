@@ -19,12 +19,12 @@ open Reified.DataDSL
 
 ## Parse JSON text portably
 
-Install `Reified.Schema.Json` when JSON text must be parsed the same way on .NET and Fable. `Json.parseData` reads one
+Install `Reified.Schema` when JSON text must be parsed the same way on .NET and Fable. `Json.parseData` reads one
 complete JSON value into a `Data` tree while preserving object field order, duplicate field names, and number-token
 spelling.
 
 ```fsharp
-open Reified.Schema.Json
+open Reified
 
 let value = Json.parseData """{"amount":1.20e+3,"active":true}"""
 
@@ -77,7 +77,7 @@ let value = JS.JSON.parse """{"name":"Ada","active":true}""" |> Data.ofJsonValue
 
 Native JSON parsing is convenient when its normal JavaScript semantics are acceptable. It discards duplicate object
 fields and converts numbers to JavaScript numbers, so it cannot preserve the original number-token spelling. Use
-`Json.parseData` from `Reified.Schema.Json` when those distinctions matter.
+`Json.parseData` from `Reified.Schema` when those distinctions matter.
 
 ## Convert F# and .NET values
 

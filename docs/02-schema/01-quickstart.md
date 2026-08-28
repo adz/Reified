@@ -108,16 +108,11 @@ indexes, or map keys alongside separate validation expressions. For nesting and 
 
 ### Serialize
 
-`Reified.Schema.Json` compiles the same declaration into a JSON codec. It uses no runtime reflection, so it works under
+The `Json` module compiles the same declaration into a JSON codec. It uses no runtime reflection, so it works under
 NativeAOT, trimming, and Fable.
 
-```bash
-dotnet add package Reified.Schema.Json
-```
-
-
 ```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-open Reified.Schema.Json
+open Reified
 
 let codec = Json.compile signupSchema
 

@@ -37,7 +37,7 @@ bash scripts/check-schema-ce-errors.sh
 => Schema CE invalid transitions and ambiguous refinements produce compile-time errors.
 
 bash scripts/check-fable-js-surface.sh
-=> Fable JavaScript surface compiles, includes Reified.Schema.Json, and agrees with .NET.
+=> Fable JavaScript surface compiles, includes Reified.Schema JSON codecs, and agrees with .NET.
 
 bash scripts/run-aot-probe.sh
 => Exit code 0 for the Result, Constraint, Refinements, and Schema probes.
@@ -128,7 +128,7 @@ covers the named modules, types, and members users and examples are expected to 
 
 - `Constraint`, `Violation`, `Renderer`, `Catalogue`, `MessageDescriptor`, and the atom vocabulary
 - `Schema`, `Field`, `Inspect` and its description types, `JsonSchema`, `ExternalFieldName`, `FieldOrder`, `Supply`
-- `Reified.Schema.Json`'s `Json` module
+- `Reified.Schema`'s `Json` module
 - `Reified.Schema.Http`'s `BoundaryInput`, `ProblemDetails`, `Endpoint`, `OpenApi`, and their record types
 - `Result`, `ResultBuilder`, `Refine`, `Refinement`, and the refined types
 - the leaf-package dependency graph: Schema never references Result, Refinements never references Result, and

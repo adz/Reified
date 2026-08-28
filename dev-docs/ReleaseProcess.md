@@ -23,7 +23,6 @@ from it. The set is:
 - `Reified.Result`
 - `Reified.Data`
 - `Reified.Schema`
-- `Reified.Schema.Json`
 - `Reified.Schema.Http`
 - `Reified.Schema.Contracts.Build`
 - `Reified` — the umbrella, which carries no assembly and only depends on the runtime packages above

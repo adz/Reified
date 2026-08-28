@@ -11,7 +11,7 @@ toolchain; use them to compare paths and allocations, not as cross-machine perfo
 
 The suites live in
 [benchmarks/Reified.Schema.Benchmarks/CodecSuites.fs](https://github.com/adz/Reified/blob/main/benchmarks/Reified.Schema.Benchmarks/CodecSuites.fs).
-[scripts/run-benchmarks.sh](https://github.com/adz/Reified/blob/main/scripts/run-benchmarks.sh) prompts before starting
+The `Benchmarks` FAKE target starts
 a Release run and forwards any BenchmarkDotNet arguments.
 
 ## Setup
@@ -31,14 +31,14 @@ longer run shows otherwise.
 
 ## JSON codec
 
-The codec suite measures `Reified.Schema.Json` on the same aggregate and representation as `System.Text.Json`: string
+The codec suite measures `Reified.Schema`'s `Json` codec on the same aggregate and representation as `System.Text.Json`: string
 against string, and UTF-8 bytes against UTF-8 bytes. The model has seven primitive fields, one nested record, two
 collections, and boundary constraints on name and age.
 
 Run them:
 
 ```bash
-./scripts/run-benchmarks.sh --job short --filter "*"
+BENCHMARK_ARGS='--job short --filter *' dotnet run --project tools/Reified.Build -- --target Benchmarks
 ```
 
 | Operation | Reified mean / allocated | `System.Text.Json` mean / allocated |

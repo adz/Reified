@@ -13,7 +13,6 @@
     <ProjectReference Include="..\..\src\Reified.Constraint\Reified.Constraint.fsproj" />
     <ProjectReference Include="..\..\src\Reified.Data\Reified.Data.fsproj" />
     <ProjectReference Include="..\..\src\Reified.Schema\Reified.Schema.fsproj" />
-    <ProjectReference Include="..\..\src\Reified.Schema.Json\Reified.Schema.Json.fsproj" />
   </ItemGroup>
 
 </Project>

@@ -65,6 +65,9 @@
     <Compile Include="RefinedSchemas.fs" />
     <Compile Include="Inspection.fs" />
     <Compile Include="JsonSchema.fs" />
+    <Compile Include="Buffers.fs" />
+    <Compile Include="JsonRuntime.fs" />
+    <Compile Include="Json.fs" />
   </ItemGroup>
 
 </Project>

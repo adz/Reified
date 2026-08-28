@@ -25,8 +25,8 @@ the outputs below are that program's real output.
 ```text
 Constraint ─┐
 Parse ──────┤
-Data ───────┼──> Schema ───> Schema.Json
-Refinements ┘             └──> contract tooling
+Data ───────┼──> Schema ───> contract tooling
+Refinements ┘
 ```
 
 </div>
@@ -34,9 +34,10 @@ Refinements ┘             └──> contract tooling
 Use Schema when structured input must become a trusted model. Constraint, Parse, Data, and Refinements can each
 be used alone without Schema, but they are designed to work together consistently.
 
+Install the complete runtime set for this walkthrough:
+
 ```bash
-dotnet add package Reified.Schema
-dotnet add package Reified.Schema.Json
+dotnet add package Reified
 ```
 
 
@@ -117,7 +118,7 @@ And now the declaration pays for itself. The same `signupSchema`, read by a diff
 codec:
 
 ```fsharp
-open Reified.Schema.Json
+open Reified
 
 let codec = Json.compile signupSchema     // compile once, typically at startup
 
@@ -259,14 +260,5 @@ Continue with Schema for structured boundary models, or choose another focused c
 
 → [Where to go next](/getting-started/where-to-go-next.html)
 
-## Installing
-
-```sh
-dotnet add package Reified
-```
-
-
-That installs the complete runtime set. Every package is also independently installable if you want one capability
-on its own — see
-[Packages and platforms](/notes/packages-and-platforms.html) for the list, what each one gives you, and which run on
-Fable as well as .NET.
+The focused packages are independently installable when you need only one capability. See
+[Packages and platforms](/notes/packages-and-platforms.html) for the complete inventory and platform support.

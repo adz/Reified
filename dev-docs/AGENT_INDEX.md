@@ -40,10 +40,9 @@ exports a type called `X`. See `dev-docs/namespace-flatten.md`.
   only on `Reified.Constraint`. A type ships only if it makes a partial operation total or removes a branch from consumers;
   validation-shaped concepts are constraints in `Reified.Constraint` instead.
 - `Reified.Schema` (`src/Reified.Schema/`): schema declaration (`Schema` module), parsing and checking (`Schema.parse`,
-  `Schema.parseRetainingInput`, `Schema.check`), inspection (`Inspect`), contracts,
+  `Schema.parseRetainingInput`, `Schema.check`), inspection (`Inspect`), contracts, compiled JSON codecs (`Json`),
   and refined schema adapters (`RefinedSchemas`) in one package. Depends on `Reified.Data`, `Reified.Constraint`, and
   `Reified.Refinements` (never `Reified.Result`). Schema owns path-aware accumulated errors.
-- `Reified.Schema.Json` (`src/Reified.Schema.Json/`): compiled JSON codecs. Depends on `Reified.Schema`.
 - `Reified.Schema.Http` (`src/Reified.Schema.Http/`): host-neutral HTTP boundary support — query/form structured data
   (`BoundaryInput`), RFC 9457 problem details from parse diagnostics, and OpenAPI 3.1 documents assembled from
   `EndpointSpec` values. Depends on `Reified.Schema` only, and never on the effect system. The host adapters that

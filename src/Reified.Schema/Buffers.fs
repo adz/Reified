@@ -1,4 +1,4 @@
-namespace Reified.Schema.Json
+namespace Reified
 
 open Reified
 

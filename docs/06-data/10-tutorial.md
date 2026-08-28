@@ -141,7 +141,7 @@ nameCases |> List.map (fun case -> case.Name, Data.tryFindPath "name" case.Value
 
 ```fsharp
 let response =
-    Reified.Schema.Json.Json.parseData
+    Reified.Json.parseData
         """{
           "customer": {
             "id": "c-123",

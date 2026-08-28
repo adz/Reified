@@ -198,7 +198,7 @@ module internal DataConversions =
     /// <summary>Copies a value returned by JavaScript <c>JSON.parse</c> into structured data.</summary>
     /// <remarks>
     /// JavaScript parsing has already discarded duplicate object fields and the original spelling of number tokens.
-    /// Use <c>Reified.Schema.Json.Json.parseData</c> when those distinctions must be retained.
+    /// Use <c>Reified.Json.parseData</c> when those distinctions must be retained.
     /// </remarks>
     let rec ofJsonValue (value: obj) : Data =
         if isNull value then

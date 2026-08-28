@@ -31,7 +31,6 @@
     <ProjectReference Include="..\..\src\Reified.Schema\Reified.Schema.fsproj" />
     <!-- Loaded by name through Assembly.Load, so the reference must be explicit: the reflection-based
          assertions cannot find an assembly nothing put in the output directory. -->
-    <ProjectReference Include="..\..\src\Reified.Schema.Json\Reified.Schema.Json.fsproj" />
     <ProjectReference Include="..\..\src\Reified.Schema.Http\Reified.Schema.Http.fsproj" />
   </ItemGroup>
 

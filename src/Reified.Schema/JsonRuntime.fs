@@ -1,6 +1,4 @@
-namespace Reified.Schema.Json
-
-open Reified
+namespace Reified
 
 open System.Text
 

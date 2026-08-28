@@ -3,7 +3,7 @@ namespace Reified.Tests
 open Reified
 open Reified.Refinements
 open Reified.SchemaDSL
-open Reified.Schema.Json
+open Reified
 open Swensen.Unquote
 open Xunit
 

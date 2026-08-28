@@ -1,7 +1,7 @@
 namespace Reified.Tests
 
 open Reified
-open Reified.Schema.Json
+open Reified
 
 open Reified.Tests.Generated
 open Swensen.Unquote

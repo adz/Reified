@@ -28,7 +28,6 @@
     <Project Path="src/Reified.Constraint/Reified.Constraint.fsproj" />
     <Project Path="src/Reified.Parse/Reified.Parse.fsproj" />
     <Project Path="src/Reified.Refinements/Reified.Refinements.fsproj" />
-    <Project Path="src/Reified.Schema.Json/Reified.Schema.Json.fsproj" />
     <Project Path="src/Reified.Schema/Reified.Schema.fsproj" />
     <Project Path="src/Reified.Schema.Http/Reified.Schema.Http.fsproj" />
     <Project Path="src/Reified.Schema.Contracts/Reified.Schema.Contracts.fsproj" />

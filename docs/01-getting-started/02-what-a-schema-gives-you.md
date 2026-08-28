@@ -72,7 +72,7 @@ the first place, see [Trusted construction](/schema/trusted-construction.html).
 ## Read and write JSON
 
 ```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-open Reified.Schema.Json
+open Reified
 
 let codec = Json.compile signupSchema     // compile once, typically at startup
 

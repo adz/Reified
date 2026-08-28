@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!-- Compiled twice: by the solution for .NET, and by `dotnet fable` for JavaScript
-       (scripts/check-fable-js-surface.sh). netstandard2.1 is what the Fable-supported packages target. -->
+       (the `Fable` FAKE target). netstandard2.1 is what the Fable-supported packages target. -->
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;net10.0</TargetFrameworks>
     <OutputType>Exe</OutputType>
@@ -17,7 +17,6 @@
     <ProjectReference Include="..\..\src\Reified.Constraint\Reified.Constraint.fsproj" />
     <ProjectReference Include="..\..\src\Reified.Data\Reified.Data.fsproj" />
     <ProjectReference Include="..\..\src\Reified.Schema\Reified.Schema.fsproj" />
-    <ProjectReference Include="..\..\src\Reified.Schema.Json\Reified.Schema.Json.fsproj" />
   </ItemGroup>
 
   <ItemGroup>
