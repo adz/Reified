@@ -488,27 +488,36 @@ module Records =
                     let shortName = lastIdent longIdent
                     let fullName = identText longIdent
 
-                    match unions.TryGetValue shortName with
-                    | true, union ->
-                        let typePath =
-                            match moduleName with
-                            | Some prefix -> prefix + "." + union.UnionFsName
-                            | None -> union.UnionFsName
-                        lowerUnion line typePath union
-                    | false, _ ->
-                        match aliases.TryGetValue shortName with
-                        | true, abbreviatedType -> lowerType line abbreviatedType
-                        | false, _ when markedNames.Contains shortName ->
-                            referenceTo line shortName |> Option.map Reference
-                        | false, _ ->
-                            match uniqueKnownPath line "record" knownTypes.Records fullName with
-                            | Some path -> Some(Reference { RefName = path; RefVersion = 1 })
+                    let crossFileLookup () =
+                        match uniqueKnownPath line "record" knownTypes.Records fullName with
+                        | Some path -> Some(Reference { RefName = path; RefVersion = 1 })
+                        | None ->
+                            match uniqueKnownPath line "union" knownTypes.Unions.Keys fullName with
+                            | Some path -> lowerUnion line path (Map.find path knownTypes.Unions)
                             | None ->
-                                match uniqueKnownPath line "union" knownTypes.Unions.Keys fullName with
-                                | Some path -> lowerUnion line path (Map.find path knownTypes.Unions)
-                                | None ->
-                                    report line $"unknown wire field type '{name}'"
-                                    None
+                                report line $"unknown wire field type '{name}'"
+                                None
+
+                    // A dotted, fully qualified name (e.g. "My.Other.Status") always names a specific
+                    // cross-file type; it must never be truncated to its last segment and matched against
+                    // this file's own local unions/aliases/marked types, or a same-named local declaration
+                    // would silently shadow the type the user actually wrote.
+                    if fullName <> shortName then
+                        crossFileLookup ()
+                    else
+                        match unions.TryGetValue shortName with
+                        | true, union ->
+                            let typePath =
+                                match moduleName with
+                                | Some prefix -> prefix + "." + union.UnionFsName
+                                | None -> union.UnionFsName
+                            lowerUnion line typePath union
+                        | false, _ ->
+                            match aliases.TryGetValue shortName with
+                            | true, abbreviatedType -> lowerType line abbreviatedType
+                            | false, _ when markedNames.Contains shortName ->
+                                referenceTo line shortName |> Option.map Reference
+                            | false, _ -> crossFileLookup ()
             | SynType.App(typeName = SynType.LongIdent head; typeArgs = args) ->
                 match lastIdent head, args with
                 | "list", [ element ] -> lowerType line element |> Option.map ListOf

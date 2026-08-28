@@ -366,6 +366,44 @@ module Emitter =
             | UnionBlock _
             | ExternalEnum _ -> []
 
+        let rec referencesIn fieldType =
+            match fieldType with
+            | Reference reference -> [ reference ]
+            | ListOf element
+            | MapOf element
+            | MapOfTransparentKey(_, _, element)
+            | ExternalTransparent(_, _, element) -> referencesIn element
+            | UnionBlock(_, cases) -> cases |> List.map _.CaseRef
+            | ExternalUnion(_, _, cases) ->
+                cases
+                |> List.collect (fun case ->
+                    match case.ExtPayload with
+                    | ExternalRecord reference -> [ reference ]
+                    | ExternalFields fields -> fields |> List.collect (fun field -> referencesIn field.ExtFieldType)
+                    | ExternalEmpty -> [])
+            | Primitive _
+            | LiteralUnion _
+            | ExternalEnum _ -> []
+
+        let rawNamespaceOf (typeName: string) =
+            let index = typeName.LastIndexOf '.'
+            if index > 0 then Some(typeName.Substring(0, index)) else None
+
+        let schemaScope reference =
+            let target =
+                declared
+                |> List.find (fun contract ->
+                    contract.QualifiedName = reference.RefName && contract.Version = reference.RefVersion)
+
+            let source =
+                fileSet
+                |> List.find (fun candidate ->
+                    candidate.Contracts |> List.exists (fun contract -> contract.QualifiedName = target.QualifiedName))
+
+            match source.Module with
+            | Some sourceModule when source.FilePath <> file.FilePath -> Some(sourceModule + "Schemas")
+            | _ -> None
+
         // A union schema is owned by its first use in project compile order. Nested unions are collected with
         // their enclosing field, so every later use can reference one stable generated binding.
         let unionOwners =
@@ -391,6 +429,13 @@ module Emitter =
                 match source.Module with
                 | Some sourceModule -> sourceModule + "Schemas." + moduleName + ".schema"
                 | None -> typeName + ".schema"
+
+        let unionSchemaScope typeName =
+            let source, _ = Map.find typeName unionOwners
+
+            match source.Module with
+            | Some sourceModule when source.FilePath <> file.FilePath -> Some(sourceModule + "Schemas")
+            | _ -> None
 
         let namespaceName = file.Namespace |> Option.defaultValue namespaceName
 
@@ -458,7 +503,7 @@ module Emitter =
                         | ExternalRecord _
                         | ExternalEmpty -> ()
 
-                    let unionTypeName = typeName
+                    let unionTypeName = localName typeName
                     let unionModuleName = localName typeName
                     line ""
                     line "[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]"
@@ -513,21 +558,21 @@ module Emitter =
                         match case.ExtPayload with
                         | ExternalEmpty ->
                             let predicate =
-                                if List.length cases = 1 then $"(function {typeName}.{case.ExtFsCase} -> true)"
-                                else $"(function {typeName}.{case.ExtFsCase} -> true | _ -> false)"
-                            line $"        {opener}UnionCase.empty \"{escapeString case.ExtTag}\" {typeName}.{case.ExtFsCase} {predicate}{closer}"
+                                if List.length cases = 1 then $"(function {unionTypeName}.{case.ExtFsCase} -> true)"
+                                else $"(function {unionTypeName}.{case.ExtFsCase} -> true | _ -> false)"
+                            line $"        {opener}UnionCase.empty \"{escapeString case.ExtTag}\" {unionTypeName}.{case.ExtFsCase} {predicate}{closer}"
                         | ExternalRecord reference ->
                             let extractor =
-                                if List.length cases = 1 then $"(function {typeName}.{case.ExtFsCase} payload -> Some payload)"
-                                else $"(function {typeName}.{case.ExtFsCase} payload -> Some payload | _ -> None)"
-                            line $"        {opener}UnionCase.fields \"{escapeString case.ExtTag}\" {typeName}.{case.ExtFsCase} {extractor} {refSchemaName reference}.schema{closer}"
+                                if List.length cases = 1 then $"(function {unionTypeName}.{case.ExtFsCase} payload -> Some payload)"
+                                else $"(function {unionTypeName}.{case.ExtFsCase} payload -> Some payload | _ -> None)"
+                            line $"        {opener}UnionCase.fields \"{escapeString case.ExtTag}\" {unionTypeName}.{case.ExtFsCase} {extractor} {refSchemaName reference}.schema{closer}"
                         | ExternalFields fields ->
                             let payloadType = case.ExtFsCase + "CasePayload"
                             let helper = camel payloadType
                             let arguments = fields |> List.map (fun field -> "payload." + field.ExtFieldName) |> String.concat ", "
                             let names = fields |> List.map (fun field -> camel field.ExtFieldName) |> String.concat ", "
-                            let construction = $"(fun (payload: {payloadType}) -> {typeName}.{case.ExtFsCase}({arguments}))"
-                            let pattern = $"{typeName}.{case.ExtFsCase}({names})"
+                            let construction = $"(fun (payload: {payloadType}) -> {unionTypeName}.{case.ExtFsCase}({arguments}))"
+                            let pattern = $"{unionTypeName}.{case.ExtFsCase}({names})"
                             let record = fields |> List.map (fun field -> $"{field.ExtFieldName} = {camel field.ExtFieldName}") |> String.concat "; "
                             let extractor =
                                 if List.length cases = 1 then $"(function {pattern} -> Some {{ {record} }})"
@@ -543,9 +588,36 @@ module Emitter =
                             $"UnionRepresentation.External(UnionPayloadStyle.{style}, {unwrap})"
 
                     line ""
-                    line $"    let schema : Schema<{typeName}> ="
+                    line $"    let schema : Schema<{unionTypeName}> ="
                     line $"        Schema.unionWith ({representationExpression}) cases"
                 | _ -> ()
+
+        let contractTypeNameOf (contract: ContractDecl) =
+            if file.Module.IsSome then
+                typeNameOf contract.QualifiedName contract.Version
+            else
+                contract.ExternalTypeName
+                |> Option.map localName
+                |> Option.defaultValue (typeNameOf contract.QualifiedName contract.Version)
+
+        let contractModuleNameOf (contract: ContractDecl) =
+            contract.ExternalTypeName
+            |> Option.map localName
+            |> Option.defaultValue (contractTypeNameOf contract)
+
+        // Names this file already binds at top level, independent of any `open`: every union module this
+        // file owns (emitUnionSchema emits them here), and every contract's own generated module. A cross-file
+        // scope that happens to export one of these same short names would silently shadow it (or be shadowed
+        // by it) once opened, so these names are folded into the ambiguity check below alongside cross-scope
+        // collisions.
+        let locallyOccupiedNames =
+            let unionModuleNames =
+                unionOwners
+                |> Map.toList
+                |> List.choose (fun (typeName, (source, _)) ->
+                    if source.FilePath = file.FilePath then Some(localName typeName) else None)
+
+            Set.ofList (unionModuleNames @ (file.Contracts |> List.map contractModuleNameOf))
 
         for contract in file.Contracts do
             for field in contract.Fields do
@@ -554,18 +626,62 @@ module Emitter =
                     | ExternalUnion(typeName, _, _) -> emitUnionSchema typeName
                     | _ -> ()
 
-            let contractTypeName =
-                if file.Module.IsSome then
-                    typeNameOf contract.QualifiedName contract.Version
-                else
-                    contract.ExternalTypeName
-                    |> Option.map localName
-                    |> Option.defaultValue (typeNameOf contract.QualifiedName contract.Version)
-            let contractModuleName =
-                contract.ExternalTypeName
-                |> Option.map localName
-                |> Option.defaultValue contractTypeName
+            let contractTypeName = contractTypeNameOf contract
+            let contractModuleName = contractModuleNameOf contract
             let contractRef = $"{fileName}, {contract.ContractName}.v{contract.Version}"
+            let schemaTypeName = localName contractTypeName
+
+            // Every cross-file name this contract would otherwise open unqualified, paired with the scope
+            // it comes from. Two different scopes contending for the same short name would silently shadow
+            // one another once opened (F# does not error on ambiguous opens), so any such name is detected
+            // here and forced back to full qualification instead of being risked.
+            let recordNameBindings =
+                contract.Fields
+                |> List.collect (fun field -> referencesIn field.FieldType)
+                |> List.map (fun reference -> refSchemaName reference |> localName, schemaScope reference)
+
+            let unionNameBindings =
+                contract.Fields
+                |> List.collect (fun field -> externalUnionsIn field.FieldType)
+                |> List.choose (function
+                    | ExternalUnion(typeName, _, _) -> Some(localName typeName, unionSchemaScope typeName)
+                    | _ -> None)
+
+            // Enum references are excluded here: their raw namespace is opened locally at the point of use
+            // (see the ExternalEnum case below), so they never compete for a module-level open and cannot
+            // collide with anything else opened into this module.
+            let allNameBindings = recordNameBindings @ unionNameBindings
+
+            let ambiguousNames =
+                let scopedOccurrences =
+                    allNameBindings
+                    |> List.choose (fun (name, scope) -> scope |> Option.map (fun scope -> name, scope))
+                    |> List.distinct
+
+                let ambiguousAcrossScopes =
+                    scopedOccurrences
+                    |> List.countBy fst
+                    |> List.choose (fun (name, count) -> if count > 1 then Some name else None)
+
+                let ambiguousAgainstLocal =
+                    scopedOccurrences
+                    |> List.map fst
+                    |> List.filter locallyOccupiedNames.Contains
+
+                Set.ofList (ambiguousAcrossScopes @ ambiguousAgainstLocal)
+
+            let referencedSchemaScopes =
+                allNameBindings
+                |> List.choose (fun (name, scope) -> if Set.contains name ambiguousNames then None else scope)
+                |> List.distinct
+
+            let compactRefSchemaName reference =
+                let name = refSchemaName reference |> localName
+                if Set.contains name ambiguousNames then refSchemaName reference else name
+
+            let compactUnionSchemaName typeName =
+                let name = localName typeName
+                if Set.contains name ambiguousNames then unionSchemaName typeName else name + ".schema"
 
             // User-owned record fields are referenced verbatim; generated records normalize to PascalCase.
             let fsFieldName (field: FieldDecl) =
@@ -629,6 +745,8 @@ module Emitter =
             line "    open Reified.SchemaDSL"
             line "    open Reified.ConstraintDSL"
             line $"    open type {contractTypeName}"
+            for scope in referencedSchemaScopes do
+                line $"    open {scope}"
 
             for field in caseFields do
                 line ""
@@ -659,13 +777,26 @@ module Emitter =
                                 $"(function {du}.{duCaseName case.CaseTag} payload -> Some payload | _ -> None)"
 
                         line
-                            $"        {opener}UnionCase.fields \"{escapeString case.CaseTag}\" {du}.{duCaseName case.CaseTag} {extractor} {refSchemaName case.CaseRef}.schema{closer}")
+                            $"        {opener}UnionCase.fields \"{escapeString case.CaseTag}\" {du}.{duCaseName case.CaseTag} {extractor} {compactRefSchemaName case.CaseRef}.schema{closer}")
                 | ExternalEnum(typeName, cases) ->
+                    let enumTypeName = localName typeName
+
+                    // Opened right here, scoped to just this binding, rather than at module level: the
+                    // enum's raw namespace is hand-written source this tool never fully parses, so it may
+                    // hold other public names we don't know about. Confining the open to this one let-binding
+                    // means the only thing it can possibly shadow is the enum cases below, not the rest of
+                    // the generated module.
+                    match rawNamespaceOf typeName with
+                    | Some ns ->
+                        line $"        open {ns}"
+                        line ""
+                    | None -> ()
+
                     cases
                     |> List.iteri (fun index case ->
                         let opener = if index = 0 then "[ " else "  "
                         let closer = if index = List.length cases - 1 then " ]" else ""
-                        line $"        {opener}EnumCase.create \"{escapeString case.EnumTag}\" {typeName}.{case.EnumFsCase}{closer}")
+                        line $"        {opener}EnumCase.create \"{escapeString case.EnumTag}\" {enumTypeName}.{case.EnumFsCase}{closer}")
                 | _ -> ()
 
             let recursion = if contract.Fields |> List.exists (fun field -> hasSelfReference contract field.FieldType) then " rec" else ""
@@ -686,7 +817,7 @@ module Emitter =
                 else
                     "schema"
 
-            line $"        {schemaBuilder}<{contractTypeName}> {{"
+            line $"        {schemaBuilder}<{schemaTypeName}> {{"
 
             for field in contract.Fields do
                 let wire = FieldDecl.wireName field
@@ -700,7 +831,7 @@ module Emitter =
                     line $"            fieldAs \"{escapeString wire}\" {getter} {{"
 
                     if not (canInferField field) then
-                        let value = valueExpr refSchemaName unionSchemaName (contract.QualifiedName, contract.Version, contractTypeName) field
+                        let value = valueExpr compactRefSchemaName compactUnionSchemaName (contract.QualifiedName, contract.Version, schemaTypeName) field
                         line $"                withSchema {parenthesize value}"
 
                     if supplies then
@@ -739,12 +870,12 @@ module Emitter =
             | doc -> line $"        |> Schema.describe \"{escapeString (joinedDoc doc)}\""
 
             line ""
-            line $"    /// Validates an ordinary record-literal draft of {contractTypeName}."
-            line $"    let validate (draft: {contractTypeName}) : Result<{contractTypeName}, SchemaErrors> ="
+            line $"    /// Validates an ordinary record-literal draft of {schemaTypeName}."
+            line $"    let validate (draft: {schemaTypeName}) : Result<{schemaTypeName}, SchemaErrors> ="
             line "        Schema.check schema draft"
             line ""
-            line $"    /// Parses structured boundary data into {contractTypeName}."
-            line $"    let parse (input: Data) : Result<{contractTypeName}, SchemaErrors> ="
+            line $"    /// Parses structured boundary data into {schemaTypeName}."
+            line $"    let parse (input: Data) : Result<{schemaTypeName}, SchemaErrors> ="
             line "        Schema.parse schema input"
 
             // The latest version of a multi-version chain gets the Contract wiring. Migrations stay
@@ -768,7 +899,7 @@ module Emitter =
                     line $"        (migrateV{step}ToV{step + 1}: {fromType} -> Result<{toType}, MigrationError>)"
 
                 line "        (source: VersionSource)"
-                line $"        : Contract<{contractTypeName}> ="
+                line $"        : Contract<{schemaTypeName}> ="
                 line $"        Contract.create \"{escapeString contract.ContractName}\" {contract.Version} schema"
 
                 for step in contract.Version - 1 .. -1 .. oldestVersion do

@@ -13,29 +13,30 @@ module WorkspaceCardV1 =
 
     open Reified.SchemaDSL
     open Reified.ConstraintDSL
+    open type WorkspaceCardV1
 
     /// The schema declared by workspace.fs (WorkspaceCard.v1).
-    let schema : Schema<WorkspaceCardV1> =
+    let schema =
         schema<WorkspaceCardV1> {
-            fieldAs "name" (fun (value: WorkspaceCardV1) -> value.Name) {
+            fieldAs "name" _.Name {
                 withSchema (Schema.text |> Schema.describe "Display name of the workspace.")
                 constraints [
                     minLength 1
                     maxLength 60
                 ]
             }
-            fieldAs "owner" (fun (value: WorkspaceCardV1) -> value.Owner)
+            fieldAs "owner" _.Owner
             construct (fun name owner ->
-                { WorkspaceCardV1.Name = name
-                  WorkspaceCardV1.Owner = owner })
+                { Name = name
+                  Owner = owner })
         }
         |> Schema.describe "A workspace card as first exported: one owner string of the form \"Name <email>\"."
 
-    /// Checks a draft built with an ordinary record literal.
+    /// Validates an ordinary record-literal draft of WorkspaceCardV1.
     let validate (draft: WorkspaceCardV1) : Result<WorkspaceCardV1, SchemaErrors> =
         Schema.check schema draft
 
-    /// Parses structured boundary data through the schema.
+    /// Parses structured boundary data into WorkspaceCardV1.
     let parse (input: Data) : Result<WorkspaceCardV1, SchemaErrors> =
         Schema.parse schema input
 
@@ -46,6 +47,7 @@ module WorkspaceCard =
 
     open Reified.SchemaDSL
     open Reified.ConstraintDSL
+    open type WorkspaceCard
 
     let private visibilityCases =
         [ EnumCase.create "private" Visibility.Private
@@ -53,34 +55,33 @@ module WorkspaceCard =
           EnumCase.create "org-wide" Visibility.OrgWide ]
 
     /// The schema declared by workspace.fs (WorkspaceCard.v2).
-    let schema : Schema<WorkspaceCard> =
+    let schema =
         schema<WorkspaceCard> {
-            fieldAs "name" (fun (value: WorkspaceCard) -> value.Name) {
+            fieldAs "name" _.Name {
                 withSchema (Schema.text |> Schema.describe "Display name of the workspace.")
                 constraints [
                     minLength 1
                     maxLength 60
                 ]
             }
-            fieldAs "owner_email" (fun (value: WorkspaceCard) -> value.OwnerEmail) {
+            fieldAs "owner_email" _.OwnerEmail {
                 constrain email
             }
-            fieldAs "visibility" (fun (value: WorkspaceCard) -> value.Visibility) {
+            fieldAs "visibility" _.Visibility {
                 withSchema (Schema.enum visibilityCases |> Schema.withDefault Visibility.Private)
             }
-            fieldAs "members" (fun (value: WorkspaceCard) -> value.Members) {
-                withSchema (Schema.listWith Schema.text)
+            fieldAs "members" _.Members {
                 constrain Constraint.distinct
             }
             construct (fun name ownerEmail visibility members -> WorkspaceCard.create name ownerEmail visibility members)
         }
         |> Schema.describe "A workspace card with a dedicated owner email, visibility, and member emails."
 
-    /// Checks a draft built with an ordinary record literal.
+    /// Validates an ordinary record-literal draft of WorkspaceCard.
     let validate (draft: WorkspaceCard) : Result<WorkspaceCard, SchemaErrors> =
         Schema.check schema draft
 
-    /// Parses structured boundary data through the schema.
+    /// Parses structured boundary data into WorkspaceCard.
     let parse (input: Data) : Result<WorkspaceCard, SchemaErrors> =
         Schema.parse schema input
 

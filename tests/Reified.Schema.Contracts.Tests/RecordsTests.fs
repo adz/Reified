@@ -19,6 +19,97 @@ module RecordsTests =
         | Error diagnostics -> diagnostics |> List.map _.Message
 
     [<Fact>]
+    let ``same-named cross-file schemas fall back to full qualification instead of ambiguous opens`` () =
+        let fileA =
+            """
+module My.A
+open Reified.DerivedSchema
+
+[<DeriveSchema>]
+type Status = { Code: string }
+"""
+
+        let fileB =
+            """
+module My.B
+open Reified.DerivedSchema
+
+[<DeriveSchema>]
+type Status = { Message: string }
+"""
+
+        let consumer =
+            """
+module My.Consumer
+open Reified.DerivedSchema
+
+[<DeriveSchema>]
+type Combined =
+    { A: My.A.Status
+      B: My.B.Status }
+"""
+
+        let files =
+            Records.parseSet SchemaNaming.CamelCase [ "a.fs", fileA; "b.fs", fileB; "c.fs", consumer ]
+            |> List.map (fun (_, result) ->
+                match result with
+                | Ok file -> file
+                | Error diagnostics -> failwithf "Expected a clean parse, got %A" diagnostics)
+
+        let c = files |> List.find (fun file -> file.FilePath = "c.fs")
+        let emitted = Emitter.emit "Fallback" files c
+        test <@ not (emitted.Contains "open My.ASchemas") @>
+        test <@ not (emitted.Contains "open My.BSchemas") @>
+        test <@ emitted.Contains "withSchema My.ASchemas.Status.schema" @>
+        test <@ emitted.Contains "withSchema My.BSchemas.Status.schema" @>
+
+    [<Fact>]
+    let ``a qualified cross-file reference is never shadowed by a same-named local union`` () =
+        let otherSource =
+            """
+module My.Other
+open Reified.DerivedSchema
+
+[<DeriveEnum>]
+type Status =
+    | Open
+    | Closed
+"""
+
+        let wireSource =
+            """
+module My.Wire
+open Reified.DerivedSchema
+
+[<DeriveUnion>]
+type Status =
+    | Manual of note: string
+    | Auto
+
+[<DeriveSchema>]
+type Ticket =
+    { Local: Status
+      Remote: My.Other.Status }
+"""
+
+        let files =
+            Records.parseSet SchemaNaming.CamelCase [ "other.fs", otherSource; "wire.fs", wireSource ]
+            |> List.map (fun (_, result) ->
+                match result with
+                | Ok file -> file
+                | Error diagnostics -> failwithf "Expected a clean parse, got %A" diagnostics)
+
+        let wire = files |> List.find (fun file -> file.FilePath = "wire.fs")
+        let emitted = Emitter.emit "Fallback" files wire
+        test <@ emitted.Contains "let private remoteCases =" @>
+        test <@ emitted.Contains "        open My.Other" @>
+        test <@ emitted.Contains "EnumCase.create \"open\" Status.Open" @>
+        test <@ emitted.Contains "EnumCase.create \"closed\" Status.Closed" @>
+        test <@ emitted.Contains "withSchema Status.schema" @>
+        test <@ emitted.Contains "UnionCase.fields \"manual\"" @>
+        test <@ not (emitted.Contains "\n    open My.Other") @>
+
+    [<Fact>]
     let ``a bare marked record lowers to a shape-only version-1 contract`` () =
         let file =
             parse
@@ -469,9 +560,14 @@ type Template =
 
         let template = files |> List.find (fun file -> file.FilePath = "templates.fs")
         let emitted = Emitter.emit "Fallback" files template
-        test <@ emitted.Contains "schema<My.Workflow.Templates.Template>" @>
-        test <@ emitted.Contains "My.Workflow.VariablesSchemas.Variable.schema" @>
-        test <@ emitted.Contains "My.Workflow.Variables.VariableType.Text" @>
+        test <@ emitted.Contains "open My.Workflow.VariablesSchemas" @>
+        test <@ emitted.Contains "schema<Template>" @>
+        test <@ emitted.Contains "withSchema Variable.schema" @>
+        test <@ emitted.Contains "let validate (draft: Template) : Result<Template, SchemaErrors>" @>
+        test <@ emitted.Contains "let parse (input: Data) : Result<Template, SchemaErrors>" @>
+        test <@ not (emitted.Contains "schema<My.Workflow.Templates.Template>") @>
+        test <@ not (emitted.Contains "My.Workflow.VariablesSchemas.Variable.schema") @>
+        test <@ emitted.Contains "VariableType.Text" @>
 
     [<Fact>]
     let ``cross-file union references share the schema generated at the first declaration site`` () =
@@ -514,8 +610,45 @@ type Template =
 
         test <@ sourceOutput.Split("module BindingSource =").Length - 1 = 1 @>
         test <@ consumerOutput.Split("module BindingSource =").Length - 1 = 0 @>
-        test <@ consumerOutput.Contains "withSchema My.Workflow.VariablesSchemas.BindingSource.schema" @>
-        test <@ consumerOutput.Contains "withSchema (Schema.listWith My.Workflow.VariablesSchemas.BindingSource.schema)" @>
+        test <@ consumerOutput.Contains "open My.Workflow.VariablesSchemas" @>
+        test <@ consumerOutput.Contains "withSchema BindingSource.schema" @>
+        test <@ consumerOutput.Contains "withSchema (Schema.listWith BindingSource.schema)" @>
+
+    [<Fact>]
+    let ``a cross-file enum reference opens the declaring namespace`` () =
+        let sharedSource =
+            """
+module My.Workflow.Shared
+open Reified.DerivedSchema
+
+[<DeriveEnum>]
+type Priority =
+    | Low
+    | Medium
+    | High
+"""
+
+        let wireSource =
+            """
+module My.Workflow.Wire
+open Reified.DerivedSchema
+
+[<DeriveSchema>]
+type Task = { Priority: My.Workflow.Shared.Priority }
+"""
+
+        let files =
+            Records.parseSet SchemaNaming.CamelCase [ "shared.fs", sharedSource; "wire.fs", wireSource ]
+            |> List.map (fun (_, result) ->
+                match result with
+                | Ok file -> file
+                | Error diagnostics -> failwithf "Expected a clean parse, got %A" diagnostics)
+
+        let wire = files |> List.find (fun file -> file.FilePath = "wire.fs")
+        let emitted = Emitter.emit "Fallback" files wire
+        test <@ emitted.Contains "open My.Workflow.Shared" @>
+        test <@ emitted.Contains "EnumCase.create \"low\" Priority.Low" @>
+        test <@ not (emitted.Contains "My.Workflow.Shared.Priority.Low") @>
 
     [<Fact>]
     let ``transparent string unions may key derived maps`` () =
@@ -563,7 +696,7 @@ type Template =
 
         test <@ emitted.Split("module BindingSource =").Length - 1 = 1 @>
         test <@ emitted.Split("module BindingPolicy =").Length - 1 = 1 @>
-        test <@ emitted.Contains "let schema : Schema<My.Workflow.BindingSource>" @>
+        test <@ emitted.Contains "let schema : Schema<BindingSource>" @>
         test <@ emitted.Contains "type private LiteralCasePayload" @>
         test <@ emitted.Contains "fieldAs \"value\" _.value" @>
         test <@ not (emitted.Contains "schema<{|") @>
