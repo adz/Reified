@@ -531,8 +531,8 @@ module ApiShapeTests =
         // One opt-in door per package: Reified.SchemaDSL carries the whole schema-definition vocabulary,
         // matching Reified.DataDSL, Reified.ConstraintDSL, and Reified.ResultDSL.
         //
-        // There is still exactly one value-rule vocabulary. Schema publishes no constraint catalogue of its own:
-        // the field-block syntax carries only collection adapters, and supply, which is Schema's concern.
+        // There is still exactly one value-rule vocabulary. Schema publishes no constraint catalogue of its own;
+        // the union case builder shares the record field vocabulary.
         let syntaxMembers =
             moduleTypeFromAssembly "Reified.Schema" "Reified.SchemaDSL"
             |> publicStaticMemberNames
@@ -541,6 +541,8 @@ module ApiShapeTests =
         test
             <@
                 syntaxMembers = set [ "schema"
+                                      "case"
+                                      "tryExtract"
                                       "fieldAs"
                                       "construct"
                                       "constructResult"

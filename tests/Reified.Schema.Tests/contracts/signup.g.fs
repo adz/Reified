@@ -5,6 +5,7 @@
 namespace Reified.Tests.Generated
 
 open Reified
+open Reified.SchemaDSL
 
 /// The "plan" cases of Signup (signup.contract, Signup.v1).
 [<RequireQualifiedAccess>]
@@ -25,24 +26,23 @@ type Signup =
         Location: Geo option
     }
 
-/// Schema and boundary functions for Signup (signup.contract, Signup.v1).
+/// Schema for Signup.
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module Signup =
 
-    open Reified.SchemaDSL
     open Reified.ConstraintDSL
-    open type Signup
+    type private Model = Signup
+    open type Model
 
     let private planCases =
         [ EnumCase.create "free" SignupPlan.Free
           EnumCase.create "pro" SignupPlan.Pro ]
 
-    /// The schema declared by signup.contract (Signup.v1).
     let schema =
-        schema<Signup> {
+        schema<Model> {
             fieldAs "email" _.Email {
-                withSchema (Schema.text |> Schema.describe "Primary contact address.")
+                describe "Primary contact address."
                 constraints [
                     email
                     maxLength 254
@@ -78,10 +78,5 @@ module Signup =
         }
         |> Schema.describe "A new account request."
 
-    /// Validates an ordinary record-literal draft of Signup.
-    let validate (draft: Signup) : Result<Signup, SchemaErrors> =
-        Schema.check schema draft
-
-    /// Parses structured boundary data into Signup.
-    let parse (input: Data) : Result<Signup, SchemaErrors> =
-        Schema.parse schema input
+    let validate = Schema.check schema
+    let parse = Schema.parse schema

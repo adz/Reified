@@ -5,6 +5,7 @@
 namespace Reified.Tests.Generated
 
 open Reified
+open Reified.SchemaDSL
 
 /// A card payment source.
 type Card =
@@ -12,18 +13,17 @@ type Card =
         Number: string
     }
 
-/// Schema and boundary functions for Card (payment.contract, Card.v1).
+/// Schema for Card.
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module Card =
 
-    open Reified.SchemaDSL
     open Reified.ConstraintDSL
-    open type Card
+    type private Model = Card
+    open type Model
 
-    /// The schema declared by payment.contract (Card.v1).
     let schema =
-        schema<Card> {
+        schema<Model> {
             fieldAs "number" _.Number {
                 constraints [
                     minLength 12
@@ -35,13 +35,8 @@ module Card =
         }
         |> Schema.describe "A card payment source."
 
-    /// Validates an ordinary record-literal draft of Card.
-    let validate (draft: Card) : Result<Card, SchemaErrors> =
-        Schema.check schema draft
-
-    /// Parses structured boundary data into Card.
-    let parse (input: Data) : Result<Card, SchemaErrors> =
-        Schema.parse schema input
+    let validate = Schema.check schema
+    let parse = Schema.parse schema
 
 /// An invoice payment source.
 type Invoice =
@@ -49,18 +44,17 @@ type Invoice =
         Reference: string
     }
 
-/// Schema and boundary functions for Invoice (payment.contract, Invoice.v1).
+/// Schema for Invoice.
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module Invoice =
 
-    open Reified.SchemaDSL
     open Reified.ConstraintDSL
-    open type Invoice
+    type private Model = Invoice
+    open type Model
 
-    /// The schema declared by payment.contract (Invoice.v1).
     let schema =
-        schema<Invoice> {
+        schema<Model> {
             fieldAs "reference" _.Reference {
                 constrain (minLength 1)
             }
@@ -69,13 +63,8 @@ module Invoice =
         }
         |> Schema.describe "An invoice payment source."
 
-    /// Validates an ordinary record-literal draft of Invoice.
-    let validate (draft: Invoice) : Result<Invoice, SchemaErrors> =
-        Schema.check schema draft
-
-    /// Parses structured boundary data into Invoice.
-    let parse (input: Data) : Result<Invoice, SchemaErrors> =
-        Schema.parse schema input
+    let validate = Schema.check schema
+    let parse = Schema.parse schema
 
 /// The "source" cases of Payment (payment.contract, Payment.v1).
 [<RequireQualifiedAccess>]
@@ -89,22 +78,20 @@ type Payment =
         Source: PaymentSource
     }
 
-/// Schema and boundary functions for Payment (payment.contract, Payment.v1).
+/// Schema for Payment.
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module Payment =
 
-    open Reified.SchemaDSL
-    open Reified.ConstraintDSL
-    open type Payment
+    type private Model = Payment
+    open type Model
 
     let private sourceCases =
         [ UnionCase.fields "card" PaymentSource.Card (function PaymentSource.Card payload -> Some payload | _ -> None) Card.schema
           UnionCase.fields "invoice" PaymentSource.Invoice (function PaymentSource.Invoice payload -> Some payload | _ -> None) Invoice.schema ]
 
-    /// The schema declared by payment.contract (Payment.v1).
     let schema =
-        schema<Payment> {
+        schema<Model> {
             fieldAs "source" _.Source {
                 withSchema (Schema.unionWith (UnionRepresentation.Internal "kind") sourceCases)
             }
@@ -113,10 +100,5 @@ module Payment =
         }
         |> Schema.describe "A payment method choice."
 
-    /// Validates an ordinary record-literal draft of Payment.
-    let validate (draft: Payment) : Result<Payment, SchemaErrors> =
-        Schema.check schema draft
-
-    /// Parses structured boundary data into Payment.
-    let parse (input: Data) : Result<Payment, SchemaErrors> =
-        Schema.parse schema input
+    let validate = Schema.check schema
+    let parse = Schema.parse schema

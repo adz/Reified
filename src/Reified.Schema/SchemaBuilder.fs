@@ -454,12 +454,19 @@ module SchemaCeBuilder =
             state: IRecordPlanState<'model, 'constructor, 'remaining> *
             order: int ->
                 IRecordPlanState<'model, 'constructor, 'constructed> * int
+        abstract member BuildMapped<'mapped, 'constructor, 'result> :
+            map: ('mapped -> 'model) *
+            factory: IRecordPlanCompiler<'mapped, 'result> *
+            state: IRecordPlanState<'mapped, 'constructor, 'remaining> *
+            order: int ->
+                IRecordPlanState<'mapped, 'constructor, 'constructed> * int
 
     type internal CeFieldsEmpty<'model, 'constructed>() =
         interface ICeFields<'model, 'constructed, 'constructed> with
             member _.GetFields(index) = [], index
             member _.Apply(constructed, _, _) = constructed
             member _.Build(_, state, order) = state, order
+            member _.BuildMapped(_, _, state, order) = state, order
 
     type internal CeFieldsCons<'model, 'field, 'tail, 'constructed>
         (
@@ -492,6 +499,25 @@ module SchemaCeBuilder =
                 let next = factory.OnField(order, typedField, state)
                 tail.Build(factory, next, order + 1)
 
+            member _.BuildMapped<'mapped, 'constructor, 'result>
+                (
+                    map: 'mapped -> 'model,
+                    factory: IRecordPlanCompiler<'mapped, 'result>,
+                    state: IRecordPlanState<'mapped, 'constructor, 'field -> 'tail>,
+                    order: int
+                ) =
+                let mappedField: FieldDefinition<'mapped, 'field> =
+                    { ExternalName = field.ExternalName
+                      Order = FieldOrder.create order
+                      Getter = map >> field.Getter
+                      ValueSchema = field.ValueSchema
+                      Rules = field.Rules }
+
+                let typedField = Field(mappedField)
+
+                let next = factory.OnField(order, typedField, state)
+                tail.BuildMapped<'mapped, 'constructor, 'result>(map, factory, next, order + 1)
+
     [<EditorBrowsable(EditorBrowsableState.Never)>]
     type SchemaPlan<'model, 'expected, 'constructed, 'actual> internal
         (
@@ -513,6 +539,19 @@ module SchemaCeBuilder =
             member _.CompilePlan(factory) =
                 let initial = factory.OnEnd<'constructor>()
                 let completed, _ = fields.Build(factory, initial, 0)
+                factory.OnComplete(constructor, completed, finish)
+
+    type internal CeMappedCompiledRecordPlan<'model, 'mapped, 'constructor, 'constructed>
+        (
+            map: 'mapped -> 'model,
+            constructor: 'constructor,
+            fields: ICeFields<'model, 'constructor, 'constructed>,
+            finish: 'constructed -> Result<'mapped, string>
+        ) =
+        interface ICompiledRecordPlan<'mapped> with
+            member _.CompilePlan(factory) =
+                let initial = factory.OnEnd<'constructor>()
+                let completed, _ = fields.BuildMapped(map, factory, initial, 0)
                 factory.OnComplete(constructor, completed, finish)
 
     [<RequireQualifiedAccess>]
@@ -538,6 +577,45 @@ module SchemaCeBuilder =
             let compiled =
                 CeCompiledRecordPlan<'model, 'constructor, 'constructed>(constructor, fields, finish)
                 :> ICompiledRecordPlan<'model>
+
+            Schema(ModelDefinition(ModelSchemaDefinition.create application descriptors), Some compiled)
+
+        let closeMapped
+            (map: 'mapped -> 'model)
+            (constructor: 'constructor)
+            (fields: ICeFields<'model, 'constructor, 'constructed>)
+            (finish: 'constructed -> Result<'mapped, string>)
+            : Schema<'mapped> =
+            let descriptors, count =
+                fields.GetFields 0
+                |> fun (values, count) ->
+                    values
+                    |> List.map (fun value ->
+                        let field = unbox<FieldDescriptor<'model>> value
+
+                        { FieldDescriptor.ExternalName = field.ExternalName
+                          Order = field.Order
+                          Getter = map >> field.Getter
+                          ValueSchema = field.ValueSchema
+                          Rules = field.Rules }),
+                    count
+
+            let tryApply arguments =
+                ConstructorApplication.ensureArgumentCount count arguments
+                fields.Apply(constructor, arguments, 0) |> finish
+
+            let application =
+                { ArgumentCount = count
+                  TryApplyTrusted = tryApply }
+
+            let compiled =
+                CeMappedCompiledRecordPlan<'model, 'mapped, 'constructor, 'constructed>(
+                    map,
+                    constructor,
+                    fields,
+                    finish
+                )
+                :> ICompiledRecordPlan<'mapped>
 
             Schema(ModelDefinition(ModelSchemaDefinition.create application descriptors), Some compiled)
 
@@ -652,6 +730,128 @@ module SchemaCeBuilder =
 
             SchemaBuilderInternals.close plan.Constructor fields plan.Finish
 
+    [<EditorBrowsable(EditorBrowsableState.Never)>]
+    type UnionCaseExtraction<'union, 'payload> internal (tryPayload: 'union -> 'payload option) =
+        member internal _.TryPayload = tryPayload
+
+    [<EditorBrowsable(EditorBrowsableState.Never)>]
+    type UnionCasePlan<'payload, 'union, 'expected, 'constructed, 'actual> internal
+        (
+            fields: obj,
+            constructor: 'actual,
+            finish: 'constructed -> Result<'union, string>
+        ) =
+        member internal _.Fields = fields
+        member internal _.Constructor = constructor
+        member internal _.Finish = finish
+
+    [<EditorBrowsable(EditorBrowsableState.Never)>]
+    type SelectedUnionCasePlan<'payload, 'union, 'expected, 'constructed, 'actual> internal
+        (
+            extraction: UnionCaseExtraction<'union, 'payload>,
+            plan: UnionCasePlan<'payload, 'union, 'expected, 'constructed, 'actual>
+        ) =
+        member internal _.Extraction = extraction
+        member internal _.Plan = plan
+
+    /// <summary>Builds one named-field union case using the record-schema field vocabulary.</summary>
+    [<EditorBrowsable(EditorBrowsableState.Never)>]
+    type UnionCaseBuilder<'union, 'payload> internal (tag: string) =
+
+        member _.Yield(extraction: UnionCaseExtraction<'union, 'payload>) = extraction
+
+        member inline _.Yield(source: field<'payload, ^value>) : FieldStep<'payload, ^value> =
+            let schema: Schema< ^value> = SchemaDefaults.Resolve()
+            SchemaBuilder<'payload>.DefaultField(source, schema)
+
+        member _.Yield(source: FieldDeclaration<'payload, 'value>) : FieldStep<'payload, 'value> =
+            FieldStep(source.Definition)
+
+        member inline _.Yield
+            (source: RefiningFieldDeclaration<'payload, ^raw, ^target>)
+            : FieldStep<'payload, ^target> =
+            let refinement: Refinement<^raw, ^target> = RefinementDefaults.Resolve()
+            SchemaBuilder<'payload>.RefinedField(source, refinement)
+
+        member inline _.Yield
+            (source: ConfiguredFieldDeclaration<'payload, ^target>)
+            : FieldStep<'payload, ^target> =
+            let schema: Schema< ^target> = SchemaDefaults.Resolve()
+            SchemaBuilder<'payload>.ConfiguredField(source, schema)
+
+        member _.Yield(step: ConstructorStep<'union, 'constructor>) =
+            UnionCasePlan<'payload, 'union, 'union, 'union, 'constructor>(
+                box (CeFieldsEmpty<'payload, 'union>() :> ICeFields<'payload, 'union, 'union>),
+                step.Constructor,
+                Ok
+            )
+
+        member _.Yield(step: CheckedConstructorStep<'union, 'constructor>) =
+            UnionCasePlan<'payload, 'union, Result<'union, string>, Result<'union, string>, 'constructor>(
+                box (
+                    CeFieldsEmpty<'payload, Result<'union, string>>()
+                    :> ICeFields<'payload, Result<'union, string>, Result<'union, string>>
+                ),
+                step.Constructor,
+                id
+            )
+
+        member _.Combine
+            (
+                source: FieldStep<'payload, 'value>,
+                plan: UnionCasePlan<'payload, 'union, 'tail, 'constructed, 'constructor>
+            ) =
+            let tail = unbox<ICeFields<'payload, 'tail, 'constructed>> plan.Fields
+
+            let fields =
+                CeFieldsCons<'payload, 'value, 'tail, 'constructed>(source.Definition, tail)
+                :> ICeFields<'payload, 'value -> 'tail, 'constructed>
+
+            UnionCasePlan<'payload, 'union, 'value -> 'tail, 'constructed, 'constructor>(
+                box fields,
+                plan.Constructor,
+                plan.Finish
+            )
+
+        member _.Combine
+            (
+                extraction: UnionCaseExtraction<'union, 'payload>,
+                plan: UnionCasePlan<'payload, 'union, 'expected, 'constructed, 'constructor>
+            ) =
+            SelectedUnionCasePlan<'payload, 'union, 'expected, 'constructed, 'constructor>(
+                extraction,
+                plan
+            )
+
+        member _.Delay(factory: unit -> 'state) = factory()
+
+        member _.Run
+            (selected: SelectedUnionCasePlan<'payload, 'union, 'constructor, 'constructed, 'constructor>)
+            : UnionCase<'union> =
+            let plan = selected.Plan
+            let tryPayload = selected.Extraction.TryPayload
+
+            let payloadOf value =
+                match tryPayload value with
+                | Some payload -> payload
+                | None -> invalidOp $"Union case '{tag}' inspected a value belonging to another case."
+
+            let payloadFields =
+                unbox<ICeFields<'payload, 'constructor, 'constructed>> plan.Fields
+
+            let caseSchema =
+                SchemaBuilderInternals.closeMapped
+                    payloadOf
+                    plan.Constructor
+                    payloadFields
+                    plan.Finish
+
+            UnionCase.fields
+                tag
+                id
+                (fun value -> tryPayload value |> Option.map (fun _ -> value))
+                caseSchema
+
 open SchemaCeBuilder
 
 
@@ -674,6 +874,25 @@ open SchemaCeBuilder
 module SchemaDSL =
     /// <summary>Record-schema computation expression.</summary>
     let schema<'model> = SchemaBuilder<'model>()
+
+    /// <summary>Starts one named-field union case.</summary>
+    /// <example>
+    /// <code>
+    /// let tryVolumeCase = function Volume amount -&gt; Some amount | _ -&gt; None
+    ///
+    /// case "volume" {
+    ///     tryExtract tryVolumeCase
+    ///     fieldAs "amount" id
+    ///     construct Volume
+    /// }
+    /// </code>
+    /// </example>
+    let case<'union, 'payload> tag = UnionCaseBuilder<'union, 'payload>(tag)
+
+    /// <summary>Selects the union case and exposes its field payload.</summary>
+    let tryExtract (tryPayload: 'union -> 'payload option) =
+        if isNull (box tryPayload) then nullArg (nameof tryPayload)
+        UnionCaseExtraction(tryPayload)
 
     /// <summary>
     /// Declares a field under an explicit wire name, for when the name differs from the property and for

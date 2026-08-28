@@ -5,73 +5,71 @@
 namespace Reified.Tests.Generated
 
 open Reified
+open Reified.SchemaDSL
 
-/// Schema and boundary functions for PickupPoint (shipment.fs, PickupPoint.v1).
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+[<RequireQualifiedAccess>]
+module ShipmentPriority =
+
+    type private Model = ShipmentPriority
+    let schema =
+        Schema.enum [
+            EnumCase.create "standard" Model.Standard
+            EnumCase.create "express" Model.Express
+            EnumCase.create "same-day" Model.SameDay
+        ]
+
+/// Schema for PickupPoint.
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module PickupPoint =
 
-    open Reified.SchemaDSL
-    open Reified.ConstraintDSL
-    open type PickupPoint
+    type private Model = PickupPoint
+    open type Model
 
-    /// The schema declared by shipment.fs (PickupPoint.v1).
     let schema =
-        schema<PickupPoint> {
+        schema<Model> {
             fieldAs "code" _.Code
             construct (fun code ->
                 { Code = code })
         }
         |> Schema.describe "A named pickup location."
 
-    /// Validates an ordinary record-literal draft of PickupPoint.
-    let validate (draft: PickupPoint) : Result<PickupPoint, SchemaErrors> =
-        Schema.check schema draft
+    let validate = Schema.check schema
+    let parse = Schema.parse schema
 
-    /// Parses structured boundary data into PickupPoint.
-    let parse (input: Data) : Result<PickupPoint, SchemaErrors> =
-        Schema.parse schema input
-
-/// Schema and boundary functions for CourierDelivery (shipment.fs, CourierDelivery.v1).
+/// Schema for CourierDelivery.
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module CourierDelivery =
 
-    open Reified.SchemaDSL
-    open Reified.ConstraintDSL
-    open type CourierDelivery
+    type private Model = CourierDelivery
+    open type Model
 
-    /// The schema declared by shipment.fs (CourierDelivery.v1).
     let schema =
-        schema<CourierDelivery> {
+        schema<Model> {
             fieldAs "trackingUrl" _.TrackingUrl
             construct (fun trackingUrl ->
                 { TrackingUrl = trackingUrl })
         }
         |> Schema.describe "A courier delivery with tracking."
 
-    /// Validates an ordinary record-literal draft of CourierDelivery.
-    let validate (draft: CourierDelivery) : Result<CourierDelivery, SchemaErrors> =
-        Schema.check schema draft
+    let validate = Schema.check schema
+    let parse = Schema.parse schema
 
-    /// Parses structured boundary data into CourierDelivery.
-    let parse (input: Data) : Result<CourierDelivery, SchemaErrors> =
-        Schema.parse schema input
-
-/// Schema and boundary functions for ShipmentV1 (shipment.fs, Shipment.v1).
+/// Schema for ShipmentV1.
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module ShipmentV1 =
 
-    open Reified.SchemaDSL
     open Reified.ConstraintDSL
-    open type ShipmentV1
+    type private Model = ShipmentV1
+    open type Model
 
-    /// The schema declared by shipment.fs (Shipment.v1).
     let schema =
-        schema<ShipmentV1> {
+        schema<Model> {
             fieldAs "reference" _.Reference {
-                withSchema (Schema.text |> Schema.describe "Public shipment reference.")
+                describe "Public shipment reference."
                 constrain (pattern "^SH-[0-9]+$")
             }
             fieldAs "notifyEmail" _.NotifyEmail {
@@ -85,47 +83,35 @@ module ShipmentV1 =
         }
         |> Schema.describe "A shipment as first stored."
 
-    /// Validates an ordinary record-literal draft of ShipmentV1.
-    let validate (draft: ShipmentV1) : Result<ShipmentV1, SchemaErrors> =
-        Schema.check schema draft
-
-    /// Parses structured boundary data into ShipmentV1.
-    let parse (input: Data) : Result<ShipmentV1, SchemaErrors> =
-        Schema.parse schema input
+    let validate = Schema.check schema
+    let parse = Schema.parse schema
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module DeliveryMethod =
 
-    open Reified.SchemaDSL
-    open type DeliveryMethod
+    type private Model = DeliveryMethod
+    open type Model
 
-    let private cases =
-        [ UnionCase.fields "pickup" Pickup (function Pickup payload -> Some payload | _ -> None) PickupPoint.schema
-          UnionCase.fields "courier" Courier (function Courier payload -> Some payload | _ -> None) CourierDelivery.schema ]
+    let schema =
+        Schema.unionWith (UnionRepresentation.Internal "kind") [
+            UnionCase.fields "pickup" Pickup (function Pickup payload -> Some payload | _ -> None) PickupPoint.schema
+            UnionCase.fields "courier" Courier (function Courier payload -> Some payload | _ -> None) CourierDelivery.schema
+        ]
 
-    let schema : Schema<DeliveryMethod> =
-        Schema.unionWith (UnionRepresentation.Internal "kind") cases
-
-/// Schema and boundary functions for Shipment (shipment.fs, Shipment.v2).
+/// Schema for Shipment.
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module Shipment =
 
-    open Reified.SchemaDSL
     open Reified.ConstraintDSL
-    open type Shipment
+    type private Model = Shipment
+    open type Model
 
-    let private priorityCases =
-        [ EnumCase.create "standard" ShipmentPriority.Standard
-          EnumCase.create "express" ShipmentPriority.Express
-          EnumCase.create "same-day" ShipmentPriority.SameDay ]
-
-    /// The schema declared by shipment.fs (Shipment.v2).
     let schema =
-        schema<Shipment> {
+        schema<Model> {
             fieldAs "reference" _.Reference {
-                withSchema (Schema.text |> Schema.describe "Public shipment reference.")
+                describe "Public shipment reference."
                 constrain (pattern "^SH-[0-9]+$")
             }
             fieldAs "notify_email" _.NotifyEmail {
@@ -142,7 +128,7 @@ module Shipment =
                 constrain (atLeast 0.5m)
             }
             fieldAs "priority" _.Priority {
-                withSchema (Schema.enum priorityCases |> Schema.withDefault ShipmentPriority.Express)
+                withSchema (ShipmentPriority.schema |> Schema.withDefault ShipmentPriority.Express)
             }
             fieldAs "delivery" _.Delivery {
                 withSchema DeliveryMethod.schema
@@ -151,7 +137,7 @@ module Shipment =
                 withSchema (Schema.option PickupPoint.schema)
             }
             fieldAs "boxes" _.Boxes {
-                withSchema (Schema.int |> Schema.withDefault 1)
+                defaultValue 1
                 constrain (atLeast 1)
             }
             construct (fun reference notifyEmail items tags weightKg priority delivery origin boxes ->
@@ -167,13 +153,8 @@ module Shipment =
         }
         |> Schema.describe "A shipment with delivery method, priority, and weight."
 
-    /// Validates an ordinary record-literal draft of Shipment.
-    let validate (draft: Shipment) : Result<Shipment, SchemaErrors> =
-        Schema.check schema draft
-
-    /// Parses structured boundary data into Shipment.
-    let parse (input: Data) : Result<Shipment, SchemaErrors> =
-        Schema.parse schema input
+    let validate = Schema.check schema
+    let parse = Schema.parse schema
 
     /// Builds the versioned wire contract; supply each n-1 -> n migration and the version-detection source.
     let contract

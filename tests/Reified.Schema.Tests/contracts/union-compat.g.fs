@@ -5,117 +5,126 @@
 namespace Reified.Tests.Generated
 
 open Reified
+open Reified.SchemaDSL
+
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+[<RequireQualifiedAccess>]
+module WorkflowId =
+
+    type private Model = WorkflowId
+    let schema = Schema.convert Model.WorkflowId (function Model.WorkflowId value -> value) Schema.text
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module RecommendedCommand =
 
-    open Reified.SchemaDSL
-    open type RecommendedCommand
+    type private Model = RecommendedCommand
+    open type Model
 
     type private MoveCasePayload = {
         x: int
         y: int
     }
 
-    let private moveCasePayload =
-        schema<MoveCasePayload> {
-            fieldAs "x" _.x
-            fieldAs "y" _.y
-            construct (fun x y -> { x = x; y = y })
-        }
+    let private tryMoveCase = function
+        | Move(x, y) -> Some { x = x; y = y }
+        | _ -> None
 
-    let private cases =
-        [ UnionCase.empty "stop" Stop (function Stop -> true | _ -> false)
-          UnionCase.fields "move" (fun (payload: MoveCasePayload) -> Move(payload.x, payload.y)) (function Move(x, y) -> Some { x = x; y = y } | _ -> None) moveCasePayload ]
-
-    let schema : Schema<RecommendedCommand> =
-        Schema.unionWith (UnionRepresentation.Internal "type") cases
+    let schema =
+        Schema.union [
+            UnionCase.empty "stop" Stop (function Stop -> true | _ -> false)
+            case "move" {
+                tryExtract tryMoveCase
+                fieldAs "x" _.x
+                fieldAs "y" _.y
+                construct (fun x y -> Move(x, y))
+            }
+        ]
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module FSharpSystemTextJsonCommand =
 
-    open Reified.SchemaDSL
-    open type FSharpSystemTextJsonCommand
+    type private Model = FSharpSystemTextJsonCommand
+    open type Model
 
-    type private ScaleCasePayload = { amount: decimal }
-
-    let private scaleCasePayload =
-        schema<ScaleCasePayload> {
-            fieldAs "amount" _.amount
-            construct (fun amount -> { amount = amount })
-        }
+    let private tryScaleCase = function
+        | Scale amount -> Some amount
+        | _ -> None
 
     type private TranslateCasePayload = {
         x: int
         y: int
     }
 
-    let private translateCasePayload =
-        schema<TranslateCasePayload> {
-            fieldAs "x" _.x
-            fieldAs "y" _.y
-            construct (fun x y -> { x = x; y = y })
-        }
+    let private tryTranslateCase = function
+        | Translate(x, y) -> Some { x = x; y = y }
+        | _ -> None
 
-    let private cases =
-        [ UnionCase.empty "Pause" Pause (function Pause -> true | _ -> false)
-          UnionCase.fields "Scale" (fun (payload: ScaleCasePayload) -> Scale(payload.amount)) (function Scale(amount) -> Some { amount = amount } | _ -> None) scaleCasePayload
-          UnionCase.fields "Translate" (fun (payload: TranslateCasePayload) -> Translate(payload.x, payload.y)) (function Translate(x, y) -> Some { x = x; y = y } | _ -> None) translateCasePayload ]
-
-    let schema : Schema<FSharpSystemTextJsonCommand> =
-        Schema.unionWith (UnionRepresentation.Adjacent("Case", "Fields", UnionPayloadStyle.Positional)) cases
+    let schema =
+        Schema.unionWith (UnionRepresentation.Adjacent("Case", "Fields", UnionPayloadStyle.Positional)) [
+            UnionCase.empty "Pause" Pause (function Pause -> true | _ -> false)
+            case "Scale" {
+                tryExtract tryScaleCase
+                fieldAs "amount" id
+                construct Scale
+            }
+            case "Translate" {
+                tryExtract tryTranslateCase
+                fieldAs "x" _.x
+                fieldAs "y" _.y
+                construct (fun x y -> Translate(x, y))
+            }
+        ]
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module CompactExternalCommand =
 
-    open Reified.SchemaDSL
-    open type CompactExternalCommand
+    type private Model = CompactExternalCommand
+    open type Model
 
-    type private RenameCasePayload = { name: string }
-
-    let private renameCasePayload =
-        schema<RenameCasePayload> {
-            fieldAs "name" _.name
-            construct (fun name -> { name = name })
-        }
+    let private tryRenameCase = function
+        | Rename name -> Some name
+        | _ -> None
 
     type private ResizeCasePayload = {
         width: int
         height: int
     }
 
-    let private resizeCasePayload =
-        schema<ResizeCasePayload> {
-            fieldAs "width" _.width
-            fieldAs "height" _.height
-            construct (fun width height -> { width = width; height = height })
-        }
+    let private tryResizeCase = function
+        | Resize(width, height) -> Some { width = width; height = height }
+        | _ -> None
 
-    let private cases =
-        [ UnionCase.empty "cancel" Cancel (function Cancel -> true | _ -> false)
-          UnionCase.fields "rename" (fun (payload: RenameCasePayload) -> Rename(payload.name)) (function Rename(name) -> Some { name = name } | _ -> None) renameCasePayload
-          UnionCase.fields "resize" (fun (payload: ResizeCasePayload) -> Resize(payload.width, payload.height)) (function Resize(width, height) -> Some { width = width; height = height } | _ -> None) resizeCasePayload ]
+    let schema =
+        Schema.unionWith (UnionRepresentation.External(UnionPayloadStyle.NamedWithUnwrappedSingle, true)) [
+            UnionCase.empty "cancel" Cancel (function Cancel -> true | _ -> false)
+            case "rename" {
+                tryExtract tryRenameCase
+                fieldAs "name" id
+                construct Rename
+            }
+            case "resize" {
+                tryExtract tryResizeCase
+                fieldAs "width" _.width
+                fieldAs "height" _.height
+                construct (fun width height -> Resize(width, height))
+            }
+        ]
 
-    let schema : Schema<CompactExternalCommand> =
-        Schema.unionWith (UnionRepresentation.External(UnionPayloadStyle.NamedWithUnwrappedSingle, true)) cases
-
-/// Schema and boundary functions for UnionCompatibilityEnvelope (union-compat.fs, UnionCompatibilityEnvelope.v1).
+/// Schema for UnionCompatibilityEnvelope.
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module UnionCompatibilityEnvelope =
 
-    open Reified.SchemaDSL
-    open Reified.ConstraintDSL
-    open type UnionCompatibilityEnvelope
+    type private Model = UnionCompatibilityEnvelope
+    open type Model
 
-    /// The schema declared by union-compat.fs (UnionCompatibilityEnvelope.v1).
     let schema =
-        schema<UnionCompatibilityEnvelope> {
+        schema<Model> {
             fieldAs "workflowId" _.WorkflowId {
-                withSchema (Schema.convert WorkflowId (function WorkflowId value -> value) Schema.text)
+                withSchema WorkflowId.schema
             }
             fieldAs "recommended" _.Recommended {
                 withSchema RecommendedCommand.schema
@@ -133,10 +142,5 @@ module UnionCompatibilityEnvelope =
                   CompactExternal = compactExternal })
         }
 
-    /// Validates an ordinary record-literal draft of UnionCompatibilityEnvelope.
-    let validate (draft: UnionCompatibilityEnvelope) : Result<UnionCompatibilityEnvelope, SchemaErrors> =
-        Schema.check schema draft
-
-    /// Parses structured boundary data into UnionCompatibilityEnvelope.
-    let parse (input: Data) : Result<UnionCompatibilityEnvelope, SchemaErrors> =
-        Schema.parse schema input
+    let validate = Schema.check schema
+    let parse = Schema.parse schema

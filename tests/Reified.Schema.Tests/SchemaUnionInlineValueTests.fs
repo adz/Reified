@@ -16,6 +16,14 @@ module SchemaUnionInlineValueTests =
 
     type private Checkout = { Payment: Payment }
 
+    type private Command =
+        | Volume of amount: decimal
+        | Stop
+
+    let private tryVolumeCase = function
+        | Volume amount -> Some amount
+        | _ -> None
+
     let private cardSchema () =
         schema<CardDetails> {
             field _.Number
@@ -110,3 +118,31 @@ module SchemaUnionInlineValueTests =
                       Schema.text ]
             |> ignore)
         |> ignore
+
+    [<Fact>]
+    let ``case builder uses a named extractor with total payload field getters`` () =
+        let volumeCase =
+            case "volume" {
+                tryExtract tryVolumeCase
+                fieldAs "amount" id
+                construct Volume
+            }
+
+        let command =
+            Schema.union
+                [ volumeCase
+                  UnionCase.empty "stop" Stop (function Stop -> true | _ -> false) ]
+
+        test <@ Schema.parse command (Data.objectOfMap (Map.ofList [ "type", Data.Text "volume"; "amount", Data.Number "12.5" ])) = Ok(Volume 12.5m) @>
+        test <@ Schema.check command (Volume 12.5m) = Ok(Volume 12.5m) @>
+
+        match Inspect.schema command with
+        | { Shape = SchemaShape.Union union } ->
+            test <@ match union.Cases[0].Shape with UnionCaseShape.Fields payload -> payload.Fields |> List.map _.Name = [ "amount" ] | _ -> false @>
+        | _ -> failwith "Expected a union shape."
+
+        match volumeCase.Definition.Payload with
+        | FieldsUnionCase { Shape = NestedValueDefinition(_, source) } ->
+            let payloadSchema = source :?> Schema<Command>
+            test <@ Option.isSome payloadSchema.RecordPlan @>
+        | _ -> failwith "Expected the case block to retain its typed record plan."

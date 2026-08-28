@@ -5,6 +5,7 @@
 namespace Reified.Tests.Generated
 
 open Reified
+open Reified.SchemaDSL
 
 /// A user profile as first stored.
 type ProfileV1 =
@@ -13,18 +14,17 @@ type ProfileV1 =
         Email: string
     }
 
-/// Schema and boundary functions for ProfileV1 (profile.contract, Profile.v1).
+/// Schema for ProfileV1.
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module ProfileV1 =
 
-    open Reified.SchemaDSL
     open Reified.ConstraintDSL
-    open type ProfileV1
+    type private Model = ProfileV1
+    open type Model
 
-    /// The schema declared by profile.contract (Profile.v1).
     let schema =
-        schema<ProfileV1> {
+        schema<Model> {
             fieldAs "name" _.Name {
                 constraints [
                     minLength 1
@@ -40,13 +40,8 @@ module ProfileV1 =
         }
         |> Schema.describe "A user profile as first stored."
 
-    /// Validates an ordinary record-literal draft of ProfileV1.
-    let validate (draft: ProfileV1) : Result<ProfileV1, SchemaErrors> =
-        Schema.check schema draft
-
-    /// Parses structured boundary data into ProfileV1.
-    let parse (input: Data) : Result<ProfileV1, SchemaErrors> =
-        Schema.parse schema input
+    let validate = Schema.check schema
+    let parse = Schema.parse schema
 
 /// A user profile with an explicit marketing consent decision.
 type Profile =
@@ -56,18 +51,17 @@ type Profile =
         MarketingOptIn: bool
     }
 
-/// Schema and boundary functions for Profile (profile.contract, Profile.v2).
+/// Schema for Profile.
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module Profile =
 
-    open Reified.SchemaDSL
     open Reified.ConstraintDSL
-    open type Profile
+    type private Model = Profile
+    open type Model
 
-    /// The schema declared by profile.contract (Profile.v2).
     let schema =
-        schema<Profile> {
+        schema<Model> {
             fieldAs "name" _.Name {
                 constraints [
                     minLength 1
@@ -78,7 +72,7 @@ module Profile =
                 constrain email
             }
             fieldAs "marketing_opt_in" _.MarketingOptIn {
-                withSchema (Schema.bool |> Schema.withDefault false)
+                defaultValue false
             }
             construct (fun name email marketingOptIn ->
                 { Name = name
@@ -87,13 +81,8 @@ module Profile =
         }
         |> Schema.describe "A user profile with an explicit marketing consent decision."
 
-    /// Validates an ordinary record-literal draft of Profile.
-    let validate (draft: Profile) : Result<Profile, SchemaErrors> =
-        Schema.check schema draft
-
-    /// Parses structured boundary data into Profile.
-    let parse (input: Data) : Result<Profile, SchemaErrors> =
-        Schema.parse schema input
+    let validate = Schema.check schema
+    let parse = Schema.parse schema
 
     /// Builds the versioned wire contract; supply each n-1 -> n migration and the version-detection source.
     let contract

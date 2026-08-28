@@ -7,6 +7,7 @@
 namespace Reified.Tests.Generated
 
 open Reified
+open Reified.SchemaDSL
 
 /// A recursive category tree used to prove self-references in generated schemas.
 type Category =
@@ -17,20 +18,19 @@ type Category =
         Children: Category list
     }
 
-/// Schema and boundary functions for Category (category.contract, Category.v1).
+/// Schema for Category.
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module Category =
 
-    open Reified.SchemaDSL
     open Reified.ConstraintDSL
-    open type Category
+    type private Model = Category
+    open type Model
 
-    /// The schema declared by category.contract (Category.v1).
     let rec schema =
-        SchemaDSL.schema<Category> {
+        SchemaDSL.schema<Model> {
             fieldAs "name" _.Name {
-                withSchema (Schema.text |> Schema.describe "Stable display name.")
+                describe "Stable display name."
                 constrain (minLength 1)
             }
             fieldAs "children" _.Children {
@@ -42,10 +42,5 @@ module Category =
         }
         |> Schema.describe "A recursive category tree used to prove self-references in generated schemas."
 
-    /// Validates an ordinary record-literal draft of Category.
-    let validate (draft: Category) : Result<Category, SchemaErrors> =
-        Schema.check schema draft
-
-    /// Parses structured boundary data into Category.
-    let parse (input: Data) : Result<Category, SchemaErrors> =
-        Schema.parse schema input
+    let validate = Schema.check schema
+    let parse = Schema.parse schema

@@ -106,25 +106,23 @@ type Command =
 
 Application code still uses `amount`, `x`, and `y`. Only the JSON keys retain the compatibility names.
 
-In a handwritten payload schema, call `fieldAs` once per field. Its first argument is the JSON key; its second argument
-reads the meaningful F# field:
+In a handwritten case, call `fieldAs` once per field. Its first argument is the JSON key; its second argument reads the
+meaningful payload field:
 
 ```fsharp no-check reason="The example depends on the application-owned Command union."
-let moveFields =
-    schema<{| x: int; y: int |}> {
-        fieldAs "item1" _.x
-        fieldAs "item2" _.y
-        construct (fun x y -> {| x = x; y = y |})
-    }
+type MovePayload = { x: int; y: int }
+
+let tryMoveCase = function
+    | Move(x, y) -> Some { x = x; y = y }
+    | _ -> None
 
 let moveCase =
-    UnionCase.fields
-        "move"
-        (fun fields -> Move(fields.x, fields.y))
-        (function
-        | Move(x, y) -> Some {| x = x; y = y |}
-        | _ -> None)
-        moveFields
+    case "move" {
+        tryExtract tryMoveCase
+        fieldAs "item1" _.x
+        fieldAs "item2" _.y
+        construct (fun x y -> Move(x, y))
+    }
 ```
 
 

@@ -1,6 +1,8 @@
 # Constructor-last schema authoring: design
 
-Status: sole public authoring surface (`Shape.fs`; chain rework 2026-07-20). Handwritten schemas, schemagen output, tests, examples, and codecs use it. Field count is unbounded.
+Status: sole public record-authoring surface (`Shape.fs`; chain rework 2026-07-20). Handwritten record schemas,
+schemagen output, tests, examples, and codecs use it. The union `case` block reuses the same constructor-last field
+vocabulary after a named function selects one case payload. Field count is unbounded.
 
 ## Target
 

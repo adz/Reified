@@ -5,6 +5,7 @@
 namespace Reified.Tests.Generated
 
 open Reified
+open Reified.SchemaDSL
 
 /// A geographic coordinate.
 type Geo =
@@ -13,18 +14,17 @@ type Geo =
         Lon: decimal
     }
 
-/// Schema and boundary functions for Geo (geo.contract, Geo.v1).
+/// Schema for Geo.
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module Geo =
 
-    open Reified.SchemaDSL
     open Reified.ConstraintDSL
-    open type Geo
+    type private Model = Geo
+    open type Model
 
-    /// The schema declared by geo.contract (Geo.v1).
     let schema =
-        schema<Geo> {
+        schema<Model> {
             fieldAs "lat" _.Lat {
                 constraints [
                     atLeast (-90m)
@@ -43,10 +43,5 @@ module Geo =
         }
         |> Schema.describe "A geographic coordinate."
 
-    /// Validates an ordinary record-literal draft of Geo.
-    let validate (draft: Geo) : Result<Geo, SchemaErrors> =
-        Schema.check schema draft
-
-    /// Parses structured boundary data into Geo.
-    let parse (input: Data) : Result<Geo, SchemaErrors> =
-        Schema.parse schema input
+    let validate = Schema.check schema
+    let parse = Schema.parse schema

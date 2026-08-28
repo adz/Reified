@@ -5,6 +5,11 @@
 ### Schema generation
 
 - Generated record schemas use type-scoped field labels and omit redundant result annotations and canonical list/map schemas.
+- Generated union cases use compact `case` blocks with named extractors and fields instead of one payload schema per branch.
+- Generated schemas use the model's short type name in file-module output and wrap long descriptions without changing their text.
+- Canonical fields apply descriptions, formats, defaults, constraints, and supply rules without a redundant `withSchema`.
+- Generated enum and transparent-wrapper schemas live beside their owning F# type and are reused across generated files.
+- `Reified.SchemaDSL.case` exposes the same compact union-case form for handwritten and ejected schemas.
 - Generated files suppress the expected recursive-schema initialization warning only when they contain a recursive schema.
 
 ## 0.6.0 - 2026-08-27

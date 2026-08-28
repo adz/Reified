@@ -105,16 +105,12 @@ type Ticket =
         test <@ emitted.Contains "EnumCase.create \"open\" My.Other.Status.Open" @>
         test <@ emitted.Contains "EnumCase.create \"closed\" My.Other.Status.Closed" @>
         test <@ emitted.Contains "withSchema Status.schema" @>
-        test <@ emitted.Contains "UnionCase.fields \"manual\"" @>
+        test <@ emitted.Contains "case \"manual\" {" @>
+        test <@ emitted.Contains "tryExtract tryManualCase" @>
         test <@ not (emitted.Contains "open My.Other") @>
 
     [<Fact>]
-    let ``a union schema module always fully qualifies the Schema<T> annotation but shortens case access when safe`` () =
-        // emitUnionSchema is emitted at file top level, never inside a contract's own module - so a type
-        // annotation like `Schema<T>` is never in scope under a short name (verified against the real
-        // assemblies: with a `module X.Y` source file, that is FS0039 "not defined"). Case construction and
-        // matching are different: `open type` exposes a union's own case tags unqualified, verified safe
-        // here since nothing else in this union's own cases collides with "Literal" or "Ambient".
+    let ``a union schema module aliases its raw type and shortens case access when safe`` () =
         let wireSource = """
 module My.Wire
 open Reified.DerivedSchema
@@ -137,11 +133,13 @@ type Ticket = { Source: BindingSource }
 
         let wire = files |> List.find (fun file -> file.FilePath = "wire.fs")
         let emitted = Emitter.emit "Fallback" files wire
-        test <@ emitted.Contains "open type My.Wire.BindingSource" @>
-        test <@ emitted.Contains "Literal(payload.value)" @>
+        test <@ emitted.Contains "open type BindingSource" @>
+        test <@ emitted.Contains "let private tryLiteralCase = function\n        | Literal value -> Some value\n        | _ -> None" @>
+        test <@ emitted.Contains "construct Literal" @>
         test <@ emitted.Contains "Ambient" @>
         test <@ not (emitted.Contains "My.Wire.BindingSource.Literal") @>
-        test <@ emitted.Contains "let schema : Schema<My.Wire.BindingSource>" @>
+        test <@ emitted.Contains "type private BindingSource = global.My.Wire.BindingSource" @>
+        test <@ emitted.Contains "let schema =" @>
 
     [<Fact>]
     let ``zzz union ownership order probe`` () =
@@ -177,6 +175,43 @@ type RecordInB = { Source: My.A.BindingSource }
         let emittedA = Emitter.emit "Fallback" files a
         printfn "%s" emittedA
         test <@ emittedA.Contains "module BindingSource =" @>
+
+    [<Fact>]
+    let ``a declared union emits from its owner even when no local record references it`` () =
+        let valuesSource = """
+module My.Values
+open Reified.DerivedSchema
+
+[<DeriveUnion>]
+type VariableValue =
+    | Literal of text: string
+
+[<DeriveSchema>]
+type Prompt = { Text: string }
+"""
+
+        let consumerSource = """
+module My.Consumer
+open Reified.DerivedSchema
+
+[<DeriveSchema>]
+type Container = { Value: My.Values.VariableValue }
+"""
+
+        let files =
+            Records.parseSet SchemaNaming.CamelCase [ "values.fs", valuesSource; "consumer.fs", consumerSource ]
+            |> List.map (fun (_, result) ->
+                match result with
+                | Ok file -> file
+                | Error diagnostics -> failwithf "Expected a clean parse, got %A" diagnostics)
+
+        let values = files |> List.find (fun file -> file.FilePath = "values.fs")
+        let consumer = files |> List.find (fun file -> file.FilePath = "consumer.fs")
+        let valuesOutput = Emitter.emit "Fallback" files values
+        let consumerOutput = Emitter.emit "Fallback" files consumer
+
+        test <@ valuesOutput.Contains "module VariableValue =" @>
+        test <@ consumerOutput.Contains "withSchema VariableValue.schema" @>
 
     [<Fact>]
     let ``a bare marked record lowers to a shape-only version-1 contract`` () =
@@ -281,7 +316,7 @@ type Profile =
         test <@ Resolver.resolve [ file ] = [] @>
 
         let emitted = Emitter.emit "Fallback" [ file ] file
-        test <@ emitted.Contains "Schema.withFormat (SchemaFormat.create \"email\")" @>
+        test <@ emitted.Contains "format (SchemaFormat.create \"email\")" @>
         test <@ emitted.Contains "constrain present" @>
         test <@ emitted.Contains "constrain (Constraint.length 8)" @>
         test <@ emitted.Contains "constrain (lengthBetween 2 5)" @>
@@ -439,9 +474,9 @@ type Envelope = { Command: Command }
             // (`Volume.schema`); `open type Command` would shadow that reference, so this falls back to
             // full qualification instead of the short form used when there is no such collision.
             test <@ not (emitted.Contains "open type Command") @>
-            test <@ emitted.Contains "UnionCase.empty \"stop\" Command.Stop" @>
-            test <@ emitted.Contains "UnionCase.fields \"volume\" Command.Volume (function Command.Volume payload -> Some payload | _ -> None) Volume.schema" @>
-            test <@ emitted.Contains "Schema.unionWith (UnionRepresentation.Internal \"type\")" @>
+            test <@ emitted.Contains "UnionCase.empty \"stop\" Model.Stop" @>
+            test <@ emitted.Contains "UnionCase.fields \"volume\" Model.Volume (function Model.Volume payload -> Some payload | _ -> None) Volume.schema" @>
+            test <@ emitted.Contains "Schema.union [" @>
         | other -> failwithf "Expected the default internal union, got %A" other
 
     [<Fact>]
@@ -474,13 +509,14 @@ type Envelope = { Command: Command }
             | payloads -> failwithf "Unexpected payloads: %A" payloads
 
             let emitted = Emitter.emit "Fallback" [ file ] file
-            test <@ emitted.Contains "type private VolumeCasePayload = { amount: decimal }" @>
-            test <@ emitted.Contains "schema<VolumeCasePayload>" @>
+            test <@ emitted.Contains "let private tryVolumeCase = function\n        | Volume amount -> Some amount\n        | _ -> None" @>
             test <@ emitted.Contains "type private MoveCasePayload = {\n        x: int\n        y: int\n    }" @>
-            test <@ emitted.Contains "schema<MoveCasePayload>" @>
-            test <@ emitted.Contains "fieldAs \"amount\" _.amount" @>
-            test <@ emitted.Contains "Volume(payload.amount)" @>
-            test <@ not (emitted.Contains "Command.Volume(payload.amount)") @>
+            test <@ emitted.Contains "case \"volume\" {\n                tryExtract tryVolumeCase" @>
+            test <@ emitted.Contains "fieldAs \"amount\" id" @>
+            test <@ emitted.Contains "construct Volume" @>
+            test <@ emitted.Contains "case \"move\" {\n                tryExtract tryMoveCase" @>
+            test <@ emitted.Contains "construct (fun x y -> Move(x, y))" @>
+            test <@ not (emitted.Contains "schema<VolumeCasePayload>") @>
         | other -> failwithf "Expected a direct-field internal union, got %A" other
 
     [<Fact>]
@@ -503,8 +539,10 @@ type Envelope = { Command: Command }
 
         let emitted = Emitter.emit "Fallback" [ file ] file
         test <@ not (emitted.Contains "open type Command") @>
-        test <@ emitted.Contains "UnionCase.empty \"stop\" Command.Stop" @>
-        test <@ emitted.Contains "Command.Volume(payload.amount)" @>
+        test <@ emitted.Contains "type private Model = Command" @>
+        test <@ emitted.Contains "UnionCase.empty \"stop\" Model.Stop" @>
+        test <@ emitted.Contains "let private tryVolumeCase = function\n        | Model.Volume amount -> Some amount\n        | _ -> None" @>
+        test <@ emitted.Contains "construct Model.Volume" @>
 
     [<Fact>]
     let ``a RequireQualifiedAccess union falls back to full qualification, since open type exposes none of its cases`` () =
@@ -530,8 +568,10 @@ type Envelope = { Command: Command }
 
         let emitted = Emitter.emit "Fallback" [ file ] file
         test <@ not (emitted.Contains "open type Command") @>
-        test <@ emitted.Contains "UnionCase.empty \"stop\" Command.Stop" @>
-        test <@ emitted.Contains "Command.Volume(payload.amount)" @>
+        test <@ emitted.Contains "type private Model = Command" @>
+        test <@ emitted.Contains "UnionCase.empty \"stop\" Model.Stop" @>
+        test <@ emitted.Contains "let private tryVolumeCase = function\n        | Model.Volume amount -> Some amount\n        | _ -> None" @>
+        test <@ emitted.Contains "construct Model.Volume" @>
 
     [<Fact>]
     let ``a union whose case tag collides with the Reified vocabulary falls back to full qualification`` () =
@@ -553,7 +593,7 @@ type Envelope = { Command: Command }
 
         let emitted = Emitter.emit "Fallback" [ file ] file
         test <@ not (emitted.Contains "open type Command") @>
-        test <@ emitted.Contains "UnionCase.empty \"schema\" Command.Schema" @>
+        test <@ emitted.Contains "UnionCase.empty \"schema\" Model.Schema" @>
 
     [<Fact>]
     let ``an unmarked single-case union is a transparent value`` () =
@@ -705,16 +745,23 @@ type Template =
 
         test <@ Resolver.resolve files = [] @>
 
+        let variables = files |> List.find (fun file -> file.FilePath = "variables.fs")
         let template = files |> List.find (fun file -> file.FilePath = "templates.fs")
+        let ownerOutput = Emitter.emit "Fallback" files variables
         let emitted = Emitter.emit "Fallback" files template
         test <@ emitted.Contains "open My.Workflow.VariablesSchemas" @>
-        test <@ emitted.Contains "schema<My.Workflow.Templates.Template>" @>
+        test <@ emitted.Contains "type private Template = global.My.Workflow.Templates.Template" @>
+        test <@ emitted.Contains "schema<Template>" @>
         test <@ emitted.Contains "withSchema Variable.schema" @>
-        test <@ emitted.Contains "let validate (draft: My.Workflow.Templates.Template) : Result<My.Workflow.Templates.Template, SchemaErrors>" @>
-        test <@ emitted.Contains "let parse (input: Data) : Result<My.Workflow.Templates.Template, SchemaErrors>" @>
+        test <@ emitted.Contains "let validate = Schema.check schema" @>
+        test <@ emitted.Contains "let parse = Schema.parse schema" @>
         test <@ not (emitted.Contains "My.Workflow.VariablesSchemas.Variable.schema") @>
         // VariableType is declared in variables.fs (which also has a contract of its own), so it is
         // owned there even though nothing in variables.fs itself references it - the consumer just opens it.
+        test <@ ownerOutput.Contains "module VariableType =" @>
+        test <@ ownerOutput.Contains "type private VariableType = global.My.Workflow.Variables.VariableType" @>
+        test <@ ownerOutput.Contains "UnionCase.empty \"text\" Text" @>
+        test <@ not (emitted.Contains "UnionCase.empty \"text\"") @>
         test <@ emitted.Contains "withSchema VariableType.schema" @>
 
     [<Fact>]
@@ -763,7 +810,7 @@ type Template =
         test <@ consumerOutput.Contains "withSchema (Schema.listWith BindingSource.schema)" @>
 
     [<Fact>]
-    let ``a cross-file enum reference is fully qualified`` () =
+    let ``a cross-file enum without a generated owner falls back to the consuming file`` () =
         let sharedSource =
             """
 module My.Workflow.Shared
@@ -794,8 +841,10 @@ type Task = { Priority: My.Workflow.Shared.Priority }
 
         let wire = files |> List.find (fun file -> file.FilePath = "wire.fs")
         let emitted = Emitter.emit "Fallback" files wire
-        test <@ emitted.Contains "EnumCase.create \"low\" My.Workflow.Shared.Priority.Low" @>
-        test <@ not (emitted.Contains "open My.Workflow.Shared") @>
+        test <@ emitted.Contains "module Priority =" @>
+        test <@ emitted.Contains "type private Priority = global.My.Workflow.Shared.Priority" @>
+        test <@ emitted.Contains "EnumCase.create \"low\" Priority.Low" @>
+        test <@ emitted.Contains "withSchema Priority.schema" @>
 
     [<Fact>]
     let ``a RequireQualifiedAccess union declared in another file also falls back to full qualification`` () =
@@ -834,7 +883,7 @@ type Ticket = { Status: My.Other.Status }
         let wire = files |> List.find (fun file -> file.FilePath = "wire.fs")
         let emitted = Emitter.emit "Fallback" files wire
         test <@ not (emitted.Contains "open type My.Other.Status") @>
-        test <@ emitted.Contains "UnionCase.empty \"open\" My.Other.Status.Open" @>
+        test <@ emitted.Contains "UnionCase.empty \"open\" Status.Open" @>
 
     [<Fact>]
     let ``transparent string unions may key derived maps`` () =
@@ -852,7 +901,54 @@ type Template = { Values: Map<LocaleTag, string> }
 """
 
         let emitted = Emitter.emit "Fallback" [ file ] file
-        test <@ emitted.Contains "Schema.mapWithKey My.Workflow.LocaleTag" @>
+        test <@ emitted.Contains "module LocaleTag =" @>
+        test <@ emitted.Contains "type private LocaleTag = global.My.Workflow.LocaleTag" @>
+        test <@ emitted.Contains "let map item = Schema.mapWithKey LocaleTag.LocaleTag" @>
+        test <@ emitted.Contains "withSchema (LocaleTag.map Schema.text)" @>
+
+    [<Fact>]
+    let ``transparent schemas live beside their declaring file and are reused cross-file`` () =
+        let ownerSource =
+            """
+namespace My.Shared
+open Reified.DerivedSchema
+
+type LocaleTag = LocaleTag of string
+
+[<DeriveSchema>]
+type Marker = { Name: string }
+"""
+
+        let consumerSource =
+            """
+namespace My.Consumer
+open Reified.DerivedSchema
+
+[<DeriveSchema>]
+type Catalog =
+    { DefaultLocale: My.Shared.LocaleTag
+      Values: Map<My.Shared.LocaleTag, string> }
+"""
+
+        let files =
+            Records.parseSet SchemaNaming.CamelCase [ "shared.fs", ownerSource; "consumer.fs", consumerSource ]
+            |> List.map (fun (_, result) ->
+                match result with
+                | Ok file -> file
+                | Error diagnostics -> failwithf "Expected a clean parse, got %A" diagnostics)
+
+        let owner = files |> List.find (fun file -> file.FilePath = "shared.fs")
+        let consumer = files |> List.find (fun file -> file.FilePath = "consumer.fs")
+        let ownerOutput = Emitter.emit "Fallback" files owner
+        let consumerOutput = Emitter.emit "Fallback" files consumer
+
+        test <@ ownerOutput.Contains "module LocaleTag =" @>
+        test <@ ownerOutput.Contains "let schema = Schema.convert Model.LocaleTag" @>
+        test <@ ownerOutput.Contains "let map item = Schema.mapWithKey Model.LocaleTag" @>
+        test <@ consumerOutput.Contains "open My.Shared" @>
+        test <@ consumerOutput.Contains "withSchema LocaleTag.schema" @>
+        test <@ consumerOutput.Contains "withSchema (LocaleTag.map Schema.text)" @>
+        test <@ not (consumerOutput.Contains "Schema.convert Model.LocaleTag") @>
 
     [<Fact>]
     let ``nested and collection union values receive generated case schemas`` () =
@@ -882,12 +978,12 @@ type Template =
 
         test <@ emitted.Split("module BindingSource =").Length - 1 = 1 @>
         test <@ emitted.Split("module BindingPolicy =").Length - 1 = 1 @>
-        test <@ emitted.Contains "let schema : Schema<My.Workflow.BindingSource>" @>
-        test <@ emitted.Contains "type private LiteralCasePayload" @>
-        test <@ emitted.Contains "fieldAs \"value\" _.value" @>
+        test <@ emitted.Contains "let schema =" @>
+        test <@ emitted.Contains "let private tryLiteralCase = function\n        | Literal value -> Some value\n        | _ -> None" @>
+        test <@ emitted.Contains "fieldAs \"value\" id" @>
         test <@ not (emitted.Contains "schema<{|") @>
-        test <@ not (emitted.Contains "withSchema (Schema.text)") @>
-        test <@ emitted.Contains "withSchema (BindingSource.schema)" @>
+        test <@ not (emitted.Contains "withSchema Schema.text") @>
+        test <@ emitted.Contains "withSchema BindingSource.schema" @>
         test <@ emitted.Contains "withSchema (Schema.mapWith BindingSource.schema)" @>
         test <@ not (emitted.Contains "sourceCases") @>
         test <@ not (emitted.Contains "sourcesCases") @>
@@ -997,7 +1093,8 @@ type Order = { Sku: string; Quantity: int }
         test <@ Resolver.resolve [ file ] = [] @>
         let emitted = Emitter.emit "Fallback" [ file ] file
         test <@ emitted.Contains "module LegacyOrder" @>
-        test <@ emitted.Contains "schema<LegacyOrder>" @>
+        test <@ emitted.Contains "type private Model = LegacyOrder" @>
+        test <@ emitted.Contains "schema<Model>" @>
         test <@ emitted.Contains "(migrateV1ToV2: LegacyOrder -> Result<Order, MigrationError>)" @>
         test <@ emitted.Contains "|> Contract.supersedes 1 LegacyOrder.schema migrateV1ToV2" @>
         test <@ emitted.Contains "namespace My.Wire" @>

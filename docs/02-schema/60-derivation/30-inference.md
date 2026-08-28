@@ -115,9 +115,13 @@ type Checkout = { Payment: Payment }
 
 The generated schema follows the handwritten [union schema rules](/schema/union-schemas.html). Each fully qualified
 union type gets one generated `schema` binding. Records, nested union payloads, lists, maps, and references from other
-source files reuse that binding instead of generating field-named copies. Named union fields use private generated
-payload records; primitive payload fields rely on their canonical schemas, while composite fields retain an explicit
-`withSchema`.
+source files reuse that binding instead of generating field-named copies. A generated `try<CaseName>Case` function
+selects each direct-field case. Its `case` block names that function with `tryExtract`, then uses the same `fieldAs`,
+`withSchema`, and `construct` vocabulary as a record schema. Multi-field cases use one private payload record so every
+getter remains named and total.
+
+Enum and transparent-wrapper schemas live in the generated file beside their F# type. Other generated files reuse
+bindings such as `VariableType.schema`, `LocaleTag.schema`, and `LocaleTag.map` instead of repeating conversions.
 
 Every direct case field must be named. `Credit of decimal` is rejected instead of publishing the compiler-generated
 wire name `item`.

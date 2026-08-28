@@ -145,6 +145,9 @@ type ContractFile =
       Namespace: string option
       /// The source file's direct file-level module, when it has one.
       Module: string option
+      /// Fully qualified top-level union types declared by this source file. The emitter uses this to
+      /// place reusable enum, wrapper, and general-union schemas beside their exact owner.
+      DeclaredTypes: Set<string>
       Contracts: ContractDecl list }
 
 /// <summary>A line-precise parse or resolution problem.</summary>

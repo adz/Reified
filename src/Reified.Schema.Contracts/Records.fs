@@ -806,6 +806,11 @@ module Records =
                   ContractLine = headerLine })
             |> List.ofSeq
 
+        let declaredTypes =
+            unions.Keys
+            |> Seq.map (fun name -> container |> Option.map (fun prefix -> prefix + "." + name) |> Option.defaultValue name)
+            |> Set.ofSeq
+
         if diagnostics.Count > 0 then
             Error(List.ofSeq diagnostics)
         else
@@ -813,6 +818,7 @@ module Records =
                 { FilePath = filePath
                   Namespace = namespaceName
                   Module = moduleName
+                  DeclaredTypes = declaredTypes
                   Contracts = contracts }
 
     /// Parses one source file without project-wide references. Prefer <c>parseSet</c> for build generation.

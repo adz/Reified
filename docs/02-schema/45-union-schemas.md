@@ -20,44 +20,40 @@ After choosing the shape by hand, `[<DeriveUnion>]` can generate the same schema
 
 ### General unions: `Schema.union`
 
-Consider a union with an empty case and a payload case:
+Consider a union with an empty case and a named payload field:
 
 ```fsharp
-type SetVolumeFields = { Amount: decimal }
-
 type Command =
     | Stop
-    | SetVolume of SetVolumeFields
+    | SetVolume of amount: decimal
 ```
 
+Select the payload case with a function that returns its fields and rejects every other case:
 
-First build the payload's record schema:
-
-```fsharp no-check reason="The example depends on the application-owned SetVolumeFields record."
-let setVolumeFields =
-    schema<SetVolumeFields> {
-        field _.Amount
-        construct (fun amount -> { Amount = amount })
-    }
+```fsharp no-check reason="The example depends on the application-owned Command union."
+let trySetVolumeCase = function
+    | SetVolume amount -> Some amount
+    | _ -> None
 ```
-
 
 Then connect each F# case to `Schema.union`:
 
-```fsharp no-check reason="The example depends on the application-owned Command union and payload schema."
+```fsharp no-check reason="The example depends on the application-owned Command union."
 let commandSchema =
-    Schema.union
-        [ UnionCase.empty "stop" Stop _.IsStop
-          UnionCase.fields
-              "setVolume"
-              SetVolume
-              (function SetVolume fields -> Some fields | _ -> None)
-              setVolumeFields ]
+    Schema.union [
+        UnionCase.empty "stop" Stop (function Stop -> true | _ -> false)
+        case "setVolume" {
+            tryExtract trySetVolumeCase
+            fieldAs "amount" id
+            construct SetVolume
+        }
+    ]
 ```
 
-
-`UnionCase.empty` takes the JSON tag, the value to construct, and a function that recognizes the case.
-`UnionCase.fields` takes the tag, the case constructor, a function that extracts its fields, and the fields' schema.
+`UnionCase.empty` takes the JSON tag, the value to construct, and a function that recognizes the case. A `case` block
+takes the tag, selects its payload with `tryExtract`, then declares named fields and the case constructor with the
+record-schema vocabulary. The extractor returns `None` for every other case; getters inside the block operate only on
+its selected payload.
 
 The schema reads and writes:
 

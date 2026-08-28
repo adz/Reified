@@ -433,4 +433,9 @@ module Parser =
         if errors.Count > 0 then
             Error(List.ofSeq errors)
         else
-            Ok { FilePath = filePath; Namespace = None; Module = None; Contracts = List.ofSeq contracts }
+            Ok
+                { FilePath = filePath
+                  Namespace = None
+                  Module = None
+                  DeclaredTypes = Set.empty
+                  Contracts = List.ofSeq contracts }

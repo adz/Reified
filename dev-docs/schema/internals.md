@@ -29,6 +29,7 @@ the overview, the comments are the ground truth.
 | `ValueSchema.fs` | The internal `ValueSchema` module behind the `Schema.*` value-schema surface. |
 | `SchemaCore.fs` | The internal core module `SchemaApi.fs` re-exports; `closeTotal`/`closeResult`. |
 | `Shape.fs` | The constructor-last authoring surface: `DefineShape`, `ObjectShape`, `Syntax` (module and type), `Schema.admit`. |
+| `SchemaBuilder.fs` | The schema computation expression and generated-friendly union `case` block. Both reuse the typed field plan. |
 | `SchemaValidation.fs` | Constraint interpretation: each portable constraint's runtime meaning. |
 | `RetainedParseResult.fs` | `RetainedParseResult` — parse results plus redisplay data. |
 | `Parsing.fs` | The parse/check interpreter (`SchemaParsing`). |
@@ -117,14 +118,19 @@ a boxed `FieldDefinition<'model,'last>` — the cursor.
 - `Schema.list<'item>()` and `Schema.map<'item>()` use the same resolver. `listWith`/`mapWith` accept an explicit member
   schema for recursion or local configuration. `constrainItems`/`constrainValues` rewrite the nested value definition;
   collection constraints remain on the outer definition.
-- `Reified.Schema.Contracts.Emitter` mirrors handwritten authoring: it emits `field` for canonically resolvable fields,
-  `withSchema` when a field carries an explicit value schema (documentation, defaults, unions, recursion, or generated
-  references), and one `constrain` line or a grouped `constraints` list for non-optional field constraints. Optional constraints stay inside the
-  explicit inner schema because their type is `Constraint<'item>`, not `Constraint<'item option>`.
+- `Reified.Schema.Contracts.Emitter` mirrors handwritten authoring: it emits `field` for canonically resolvable fields
+  with no operations, and applies documentation, formats, defaults, constraints, and supply rules directly to an
+  inferred non-optional primitive/list/map schema. It retains `withSchema` for unions, recursion, generated references,
+  transparent-key maps, and decorated optional inner values. Optional inner constraints have type `Constraint<'item>`,
+  not `Constraint<'item option>`.
 
 `Schema.admit create project draft` composes over the draft's `ModelSchemaDefinition`: field getters
 become `project >> getter`, the constructor becomes `draftCtor >> Result.bind create`. Nothing else
 changes, so wire names, constraints, docs, parsing, and checking all survive into the domain schema.
+
+`case "tag" { tryExtract tryPayloadCase; ... }` applies the same field vocabulary to a union case. The named function
+selects the payload; field getters remain total over that payload; `construct` rebuilds the union value. The builder
+lowers to the existing union descriptions. It adds no reflection or interpreter path.
 
 ## Rules that keep this codebase what it is
 
