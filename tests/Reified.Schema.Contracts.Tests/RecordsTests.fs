@@ -109,11 +109,12 @@ type Ticket =
         test <@ not (emitted.Contains "open My.Other") @>
 
     [<Fact>]
-    let ``a union schema module fully qualifies the raw union type it constructs`` () =
-        // emitUnionSchema is emitted at file top level, never inside a contract's own module (which
-        // gets `open type` for its own type) - so the raw union type it constructs/matches against is
-        // never in scope under any name. Compiled and confirmed against the real assemblies: with a
-        // `module X.Y` (not `namespace`) source file, a short name here is FS0039 "not defined".
+    let ``a union schema module always fully qualifies the Schema<T> annotation but shortens case access when safe`` () =
+        // emitUnionSchema is emitted at file top level, never inside a contract's own module - so a type
+        // annotation like `Schema<T>` is never in scope under a short name (verified against the real
+        // assemblies: with a `module X.Y` source file, that is FS0039 "not defined"). Case construction and
+        // matching are different: `open type` exposes a union's own case tags unqualified, verified safe
+        // here since nothing else in this union's own cases collides with "Literal" or "Ambient".
         let wireSource = """
 module My.Wire
 open Reified.DerivedSchema
@@ -136,9 +137,46 @@ type Ticket = { Source: BindingSource }
 
         let wire = files |> List.find (fun file -> file.FilePath = "wire.fs")
         let emitted = Emitter.emit "Fallback" files wire
-        test <@ emitted.Contains "My.Wire.BindingSource.Literal(payload.value)" @>
-        test <@ emitted.Contains "My.Wire.BindingSource.Ambient" @>
+        test <@ emitted.Contains "open type My.Wire.BindingSource" @>
+        test <@ emitted.Contains "Literal(payload.value)" @>
+        test <@ emitted.Contains "Ambient" @>
+        test <@ not (emitted.Contains "My.Wire.BindingSource.Literal") @>
         test <@ emitted.Contains "let schema : Schema<My.Wire.BindingSource>" @>
+
+    [<Fact>]
+    let ``zzz union ownership order probe`` () =
+        // A declares BindingSource and uses it itself; B also uses it. B is passed first here to see
+        // whether ownership is order-dependent or attributed to the declaring file.
+        let fileA = """
+module My.A
+open Reified.DerivedSchema
+
+[<DeriveUnion>]
+type BindingSource =
+    | Literal of value: string
+
+[<DeriveSchema>]
+type RecordInA = { Source: BindingSource }
+"""
+        let fileB = """
+module My.B
+open Reified.DerivedSchema
+
+[<DeriveSchema>]
+type RecordInB = { Source: My.A.BindingSource }
+"""
+
+        let files =
+            Records.parseSet SchemaNaming.CamelCase [ "b.fs", fileB; "a.fs", fileA ]
+            |> List.map (fun (_, result) ->
+                match result with
+                | Ok file -> file
+                | Error diagnostics -> failwithf "Expected a clean parse, got %A" diagnostics)
+
+        let a = files |> List.find (fun file -> file.FilePath = "a.fs")
+        let emittedA = Emitter.emit "Fallback" files a
+        printfn "%s" emittedA
+        test <@ emittedA.Contains "module BindingSource =" @>
 
     [<Fact>]
     let ``a bare marked record lowers to a shape-only version-1 contract`` () =
@@ -359,7 +397,7 @@ type Signup = { Plan: Plan; Source: Source }
         | other -> failwithf "Expected an enum, got %A" other
 
         match (fields |> List.find (fun f -> f.FieldName = "Source")).FieldType with
-        | ExternalUnion(typeName, GeneratedInternal discriminator, cases) ->
+        | ExternalUnion(typeName, GeneratedInternal discriminator, cases, _) ->
             test <@ typeName = "Source" @>
             test <@ discriminator = "kind" @>
             test <@ cases |> List.map (fun c -> c.ExtTag, c.ExtFsCase, match c.ExtPayload with ExternalRecord reference -> Some reference.RefName | _ -> None) = [ "byCard", "ByCard", Some "My.Wire.Card"; "byInvoice", "ByInvoice", Some "My.Wire.Invoice" ] @>
@@ -393,11 +431,16 @@ type Envelope = { Command: Command }
             |> List.exactlyOne
 
         match field.FieldType with
-        | ExternalUnion("Command", GeneratedInternal "type", cases) ->
+        | ExternalUnion("Command", GeneratedInternal "type", cases, _) ->
             test <@ cases |> List.map (fun case -> case.ExtTag, match case.ExtPayload with ExternalRecord reference -> Some reference.RefName | _ -> None) = [ "stop", None; "volume", Some "My.Wire.Volume" ] @>
 
             let emitted = Emitter.emit "Fallback" [ file ] file
+            // Volume is both a case tag on Command and the sibling record referenced by that very case
+            // (`Volume.schema`); `open type Command` would shadow that reference, so this falls back to
+            // full qualification instead of the short form used when there is no such collision.
+            test <@ not (emitted.Contains "open type Command") @>
             test <@ emitted.Contains "UnionCase.empty \"stop\" Command.Stop" @>
+            test <@ emitted.Contains "UnionCase.fields \"volume\" Command.Volume (function Command.Volume payload -> Some payload | _ -> None) Volume.schema" @>
             test <@ emitted.Contains "Schema.unionWith (UnionRepresentation.Internal \"type\")" @>
         | other -> failwithf "Expected the default internal union, got %A" other
 
@@ -423,7 +466,7 @@ type Envelope = { Command: Command }
         let field = file.Contracts |> List.exactlyOne |> _.Fields |> List.exactlyOne
 
         match field.FieldType with
-        | ExternalUnion("Command", GeneratedInternal "type", cases) ->
+        | ExternalUnion("Command", GeneratedInternal "type", cases, _) ->
             match cases |> List.map _.ExtPayload with
             | [ ExternalEmpty; ExternalFields [ amount ]; ExternalFields [ x; y ] ] ->
                 test <@ amount.ExtWireName = "amount" && amount.ExtFieldType = Primitive PDecimal @>
@@ -436,8 +479,54 @@ type Envelope = { Command: Command }
             test <@ emitted.Contains "type private MoveCasePayload = {\n        x: int\n        y: int\n    }" @>
             test <@ emitted.Contains "schema<MoveCasePayload>" @>
             test <@ emitted.Contains "fieldAs \"amount\" _.amount" @>
-            test <@ emitted.Contains "Command.Volume(payload.amount)" @>
+            test <@ emitted.Contains "Volume(payload.amount)" @>
+            test <@ not (emitted.Contains "Command.Volume(payload.amount)") @>
         | other -> failwithf "Expected a direct-field internal union, got %A" other
+
+    [<Fact>]
+    let ``FullyQualified opts a union out of the short open-type case access`` () =
+        let file =
+            parse
+                """
+namespace My.Wire
+
+open Reified.DerivedSchema
+
+[<DeriveUnion(FullyQualified = true)>]
+type Command =
+    | Stop
+    | Volume of amount: decimal
+
+[<DeriveSchema>]
+type Envelope = { Command: Command }
+"""
+
+        let emitted = Emitter.emit "Fallback" [ file ] file
+        test <@ not (emitted.Contains "open type Command") @>
+        test <@ emitted.Contains "UnionCase.empty \"stop\" Command.Stop" @>
+        test <@ emitted.Contains "Command.Volume(payload.amount)" @>
+
+    [<Fact>]
+    let ``a union whose case tag collides with the Reified vocabulary falls back to full qualification`` () =
+        let file =
+            parse
+                """
+namespace My.Wire
+
+open Reified.DerivedSchema
+
+[<DeriveUnion>]
+type Command =
+    | Schema
+    | Volume of amount: decimal
+
+[<DeriveSchema>]
+type Envelope = { Command: Command }
+"""
+
+        let emitted = Emitter.emit "Fallback" [ file ] file
+        test <@ not (emitted.Contains "open type Command") @>
+        test <@ emitted.Contains "UnionCase.empty \"schema\" Command.Schema" @>
 
     [<Fact>]
     let ``an unmarked single-case union is a transparent value`` () =
@@ -475,7 +564,7 @@ type Command = Volume of amount: decimal
 type Envelope = {{ Command: Command }}
 """
             match (file.Contracts |> List.exactlyOne |> _.Fields |> List.exactlyOne).FieldType with
-            | ExternalUnion(_, representation, _) -> representation, Emitter.emit "Fallback" [ file ] file
+            | ExternalUnion(_, representation, _, _) -> representation, Emitter.emit "Fallback" [ file ] file
             | other -> failwithf "Expected a generated union, got %A" other
 
         let external, externalCode = parseRepresentation "DeriveUnion(Representation = UnionRepresentationKind.External, PayloadStyle = UnionPayloadStyleKind.UnwrappedSingle, UnwrapFieldless = false)"
@@ -597,7 +686,9 @@ type Template =
         test <@ emitted.Contains "let validate (draft: My.Workflow.Templates.Template) : Result<My.Workflow.Templates.Template, SchemaErrors>" @>
         test <@ emitted.Contains "let parse (input: Data) : Result<My.Workflow.Templates.Template, SchemaErrors>" @>
         test <@ not (emitted.Contains "My.Workflow.VariablesSchemas.Variable.schema") @>
-        test <@ emitted.Contains "VariableType.Text" @>
+        // VariableType is declared in variables.fs (which also has a contract of its own), so it is
+        // owned there even though nothing in variables.fs itself references it - the consumer just opens it.
+        test <@ emitted.Contains "withSchema VariableType.schema" @>
 
     [<Fact>]
     let ``cross-file union references share the schema generated at the first declaration site`` () =

@@ -313,7 +313,7 @@ module Resolver =
                             for tag, _ in cases |> List.countBy _.EnumTag |> List.filter (fun (_, count) -> count > 1) do
                                 report file.FilePath field.FieldLine $"duplicate wire tag \"{tag}\" in enum union '{typeName}'"
                         | ExternalTransparent(_, _, payload) -> checkType payload
-                        | ExternalUnion(typeName, _, cases) ->
+                        | ExternalUnion(typeName, _, cases, _) ->
                             if List.isEmpty cases then
                                 report file.FilePath field.FieldLine $"wire union '{typeName}' needs at least one case"
 

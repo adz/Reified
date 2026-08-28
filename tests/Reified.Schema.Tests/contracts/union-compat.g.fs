@@ -11,6 +11,7 @@ open Reified
 module RecommendedCommand =
 
     open Reified.SchemaDSL
+    open type RecommendedCommand
 
     type private MoveCasePayload = {
         x: int
@@ -25,8 +26,8 @@ module RecommendedCommand =
         }
 
     let private cases =
-        [ UnionCase.empty "stop" RecommendedCommand.Stop (function RecommendedCommand.Stop -> true | _ -> false)
-          UnionCase.fields "move" (fun (payload: MoveCasePayload) -> RecommendedCommand.Move(payload.x, payload.y)) (function RecommendedCommand.Move(x, y) -> Some { x = x; y = y } | _ -> None) moveCasePayload ]
+        [ UnionCase.empty "stop" Stop (function Stop -> true | _ -> false)
+          UnionCase.fields "move" (fun (payload: MoveCasePayload) -> Move(payload.x, payload.y)) (function Move(x, y) -> Some { x = x; y = y } | _ -> None) moveCasePayload ]
 
     let schema : Schema<RecommendedCommand> =
         Schema.unionWith (UnionRepresentation.Internal "type") cases
@@ -36,6 +37,7 @@ module RecommendedCommand =
 module FSharpSystemTextJsonCommand =
 
     open Reified.SchemaDSL
+    open type FSharpSystemTextJsonCommand
 
     type private ScaleCasePayload = { amount: decimal }
 
@@ -58,9 +60,9 @@ module FSharpSystemTextJsonCommand =
         }
 
     let private cases =
-        [ UnionCase.empty "Pause" FSharpSystemTextJsonCommand.Pause (function FSharpSystemTextJsonCommand.Pause -> true | _ -> false)
-          UnionCase.fields "Scale" (fun (payload: ScaleCasePayload) -> FSharpSystemTextJsonCommand.Scale(payload.amount)) (function FSharpSystemTextJsonCommand.Scale(amount) -> Some { amount = amount } | _ -> None) scaleCasePayload
-          UnionCase.fields "Translate" (fun (payload: TranslateCasePayload) -> FSharpSystemTextJsonCommand.Translate(payload.x, payload.y)) (function FSharpSystemTextJsonCommand.Translate(x, y) -> Some { x = x; y = y } | _ -> None) translateCasePayload ]
+        [ UnionCase.empty "Pause" Pause (function Pause -> true | _ -> false)
+          UnionCase.fields "Scale" (fun (payload: ScaleCasePayload) -> Scale(payload.amount)) (function Scale(amount) -> Some { amount = amount } | _ -> None) scaleCasePayload
+          UnionCase.fields "Translate" (fun (payload: TranslateCasePayload) -> Translate(payload.x, payload.y)) (function Translate(x, y) -> Some { x = x; y = y } | _ -> None) translateCasePayload ]
 
     let schema : Schema<FSharpSystemTextJsonCommand> =
         Schema.unionWith (UnionRepresentation.Adjacent("Case", "Fields", UnionPayloadStyle.Positional)) cases
@@ -70,6 +72,7 @@ module FSharpSystemTextJsonCommand =
 module CompactExternalCommand =
 
     open Reified.SchemaDSL
+    open type CompactExternalCommand
 
     type private RenameCasePayload = { name: string }
 
@@ -92,9 +95,9 @@ module CompactExternalCommand =
         }
 
     let private cases =
-        [ UnionCase.empty "cancel" CompactExternalCommand.Cancel (function CompactExternalCommand.Cancel -> true | _ -> false)
-          UnionCase.fields "rename" (fun (payload: RenameCasePayload) -> CompactExternalCommand.Rename(payload.name)) (function CompactExternalCommand.Rename(name) -> Some { name = name } | _ -> None) renameCasePayload
-          UnionCase.fields "resize" (fun (payload: ResizeCasePayload) -> CompactExternalCommand.Resize(payload.width, payload.height)) (function CompactExternalCommand.Resize(width, height) -> Some { width = width; height = height } | _ -> None) resizeCasePayload ]
+        [ UnionCase.empty "cancel" Cancel (function Cancel -> true | _ -> false)
+          UnionCase.fields "rename" (fun (payload: RenameCasePayload) -> Rename(payload.name)) (function Rename(name) -> Some { name = name } | _ -> None) renameCasePayload
+          UnionCase.fields "resize" (fun (payload: ResizeCasePayload) -> Resize(payload.width, payload.height)) (function Resize(width, height) -> Some { width = width; height = height } | _ -> None) resizeCasePayload ]
 
     let schema : Schema<CompactExternalCommand> =
         Schema.unionWith (UnionRepresentation.External(UnionPayloadStyle.NamedWithUnwrappedSingle, true)) cases

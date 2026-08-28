@@ -126,6 +126,10 @@ module Records =
           PayloadField: string
           PayloadStyle: string
           UnwrapFieldless: bool
+          /// Opts a union out of the short, `open type`-scoped case access the emitter uses by default,
+          /// for a type whose cases might collide with a hand-written member on the same type that this
+          /// tool never sees. Every reference always fully qualifies the raw type and its cases instead.
+          FullyQualified: bool
           UnionCases: SynUnionCase list
           UnionLine: int }
 
@@ -173,6 +177,7 @@ module Records =
           PayloadField = namedString "PayloadField" "value"
           PayloadStyle = namedIdent "PayloadStyle" "Named"
           UnwrapFieldless = namedBool "UnwrapFieldless" true
+          FullyQualified = namedBool "FullyQualified" false
           UnionCases = cases
           UnionLine = line }
 
@@ -664,7 +669,7 @@ module Records =
                         report union.UnionLine $"unknown union representation '{other}'"
                         GeneratedInternal discriminator
 
-                Some(ExternalUnion(typeName, representation, cases))
+                Some(ExternalUnion(typeName, representation, cases, union.FullyQualified))
 
         let lowerField (field: SynField) : FieldDecl option =
             let (SynField(attributes, _, idOpt, fieldType, _, xmlDoc, _, range, _)) = field

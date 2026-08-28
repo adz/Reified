@@ -138,7 +138,7 @@ module Emitter =
         | UnionBlock _ -> caseTypeName contractTypeName fieldName
         | ExternalEnum(typeName, _)
         | ExternalTransparent(typeName, _, _)
-        | ExternalUnion(typeName, _, _) -> typeName
+        | ExternalUnion(typeName, _, _, _) -> typeName
 
     /// The base Schema.* expression for a field's type, before decorations. Self-references (same
     /// contract, same version) lower to Schema.defer over the module's own schema binding.
@@ -167,7 +167,7 @@ module Emitter =
             let caseRef = unionCaseRef typeName caseName
             $"Schema.convert {caseRef} (function {caseRef} value -> value) {parenthesize underlying}"
         | UnionBlock(discriminator, _) -> $"Schema.unionWith (UnionRepresentation.Internal \"{escapeString discriminator}\") {camel fieldName}Cases"
-        | ExternalUnion(typeName, _, _) -> unionSchemaName typeName
+        | ExternalUnion(typeName, _, _, _) -> unionSchemaName typeName
 
     and private parenthesize (expression: string) =
         if expression.Contains " " then $"({expression})" else expression
@@ -348,7 +348,7 @@ module Emitter =
             | _ -> refTypeName reference
         let rec externalUnionsIn fieldType =
             match fieldType with
-            | ExternalUnion(typeName, representation, cases) as union ->
+            | ExternalUnion(typeName, representation, cases, _) as union ->
                 union
                 :: (cases
                     |> List.collect (fun case ->
@@ -374,7 +374,7 @@ module Emitter =
             | MapOfTransparentKey(_, _, element)
             | ExternalTransparent(_, _, element) -> referencesIn element
             | UnionBlock(_, cases) -> cases |> List.map _.CaseRef
-            | ExternalUnion(_, _, cases) ->
+            | ExternalUnion(_, _, cases, _) ->
                 cases
                 |> List.collect (fun case ->
                     match case.ExtPayload with
@@ -384,6 +384,10 @@ module Emitter =
             | Primitive _
             | LiteralUnion _
             | ExternalEnum _ -> []
+
+        let rawNamespaceOf (typeName: string) =
+            let index = typeName.LastIndexOf '.'
+            if index > 0 then Some(typeName.Substring(0, index)) else None
 
         let schemaScope reference =
             let target =
@@ -400,20 +404,38 @@ module Emitter =
             | Some sourceModule when source.FilePath <> file.FilePath -> Some(sourceModule + "Schemas")
             | _ -> None
 
-        // A union schema is owned by its first use in project compile order. Nested unions are collected with
-        // their enclosing field, so every later use can reference one stable generated binding.
+        // A union schema is owned by the file that declares it, whenever that file emits a schema file of
+        // its own (i.e. has at least one contract to host it alongside). A union-only file never gets a
+        // .g.fs of its own, so falls back to whichever file references it first in project compile order -
+        // that fallback must stay order-independent from the declaring file's perspective, not the other
+        // way around, or the same union could land in a different home on every regeneration.
         let unionOwners =
-            fileSet
-            |> List.collect (fun source ->
-                source.Contracts
-                |> List.collect (fun contract ->
-                    contract.Fields
-                    |> List.collect (fun field -> externalUnionsIn field.FieldType)
-                    |> List.map (fun union -> source, union)))
-            |> List.fold (fun owners (source, union) ->
-                match union with
-                | ExternalUnion(typeName, _, _) when not (Map.containsKey typeName owners) -> Map.add typeName (source, union) owners
-                | _ -> owners) Map.empty
+            let candidates =
+                fileSet
+                |> List.collect (fun source ->
+                    source.Contracts
+                    |> List.collect (fun contract ->
+                        contract.Fields
+                        |> List.collect (fun field -> externalUnionsIn field.FieldType)
+                        |> List.map (fun union -> source, union)))
+
+            let declaringFileOf typeName =
+                match rawNamespaceOf typeName with
+                | None -> None
+                | Some ns ->
+                    fileSet
+                    |> List.tryFind (fun candidate ->
+                        not (List.isEmpty candidate.Contracts) && (candidate.Module |> Option.orElse candidate.Namespace) = Some ns)
+
+            candidates
+            |> List.fold
+                (fun owners (source, union) ->
+                    match union with
+                    | ExternalUnion(typeName, _, _, _) when not (Map.containsKey typeName owners) ->
+                        let owner = declaringFileOf typeName |> Option.defaultValue source
+                        Map.add typeName (owner, union) owners
+                    | _ -> owners)
+                Map.empty
 
         let unionSchemaName typeName =
             let source, _ = Map.find typeName unionOwners
@@ -447,7 +469,7 @@ module Emitter =
             | MapOfTransparentKey(_, _, element) -> hasSelfReference contract element
             | UnionBlock(_, cases) ->
                 cases |> List.exists (fun case -> case.CaseRef.RefName = contract.QualifiedName && case.CaseRef.RefVersion = contract.Version)
-            | ExternalUnion(_, _, cases) ->
+            | ExternalUnion(_, _, cases, _) ->
                 cases
                 |> List.exists (fun case ->
                     match case.ExtPayload with
@@ -486,7 +508,7 @@ module Emitter =
 
             if source.FilePath = file.FilePath && emittedUnionSchemas.Add typeName then
                 match fieldType with
-                | ExternalUnion(_, representation, cases) ->
+                | ExternalUnion(_, representation, cases, fullyQualified) ->
                     // Dependencies must be declared first because F# resolves generated bindings in file order.
                     for case in cases do
                         match case.ExtPayload with
@@ -494,24 +516,56 @@ module Emitter =
                             for field in fields do
                                 for nested in externalUnionsIn field.ExtFieldType do
                                     match nested with
-                                    | ExternalUnion(nestedTypeName, _, _) -> emitUnionSchema nestedTypeName
+                                    | ExternalUnion(nestedTypeName, _, _, _) -> emitUnionSchema nestedTypeName
                                     | _ -> ()
                         | ExternalRecord _
                         | ExternalEmpty -> ()
 
-                    // This module is emitted at file top level - not inside a contract module that gets
-                    // `open type` for its own type - so the raw union type is never in scope. Fully
-                    // qualifying it here is the only always-valid option (see the enum/validate/parse fix
-                    // for the same reasoning: a local `open` isn't legal at every position that would need
-                    // one, and this generated module has no per-binding scope to confine one to anyway).
+                    // This module is emitted at file top level - not inside a contract module - so
+                    // `Schema<{unionTypeName}>` below always needs the full name (verified: `open type`
+                    // does not expose a bare type name for an annotation). Case construction/matching is
+                    // different: `open type` *does* expose a union's own case tags unqualified (verified
+                    // separately), which is safe from this module's own vocabulary (Reified.SchemaDSL's
+                    // exports are all lowercase `let`-bindings; F# case tags must be capitalized, so no
+                    // collision there is possible by grammar). Two things are NOT closed-world safe and are
+                    // checked below: a case tag colliding with the small set of PascalCase names this
+                    // module's own emitted code needs (UnionCase, Schema, UnionRepresentation,
+                    // UnionPayloadStyle), or with the bare module name of another same-file record/union this
+                    // union's own cases reference unqualified (e.g. `Volume.schema` for a case payload of
+                    // record type `Volume` - if a case were ALSO named `Volume`, `open type` would shadow that
+                    // reference). A hand-written extension member on the union elsewhere that this tool never
+                    // parses remains a residual risk `[<DeriveUnion(FullyQualified = true)>]` opts out of.
                     let unionTypeName = typeName
                     let unionModuleName = localName typeName
+
+                    let reservedNames = Set.ofList [ "UnionCase"; "Schema"; "UnionRepresentation"; "UnionPayloadStyle" ]
+
+                    let bareReferencedNames =
+                        (referencesIn fieldType
+                         |> List.choose (fun reference -> if schemaScope reference = None then Some(refSchemaName reference) else None))
+                        @ (externalUnionsIn fieldType
+                           |> List.choose (function
+                               | ExternalUnion(nestedTypeName, _, _, _) when nestedTypeName <> typeName && unionSchemaScope nestedTypeName = None ->
+                                   Some(localName nestedTypeName)
+                               | _ -> None))
+                        |> Set.ofList
+
+                    let occupiedNames = Set.union reservedNames bareReferencedNames
+
+                    let useShortCaseAccess =
+                        not fullyQualified
+                        && cases |> List.forall (fun case -> not (Set.contains case.ExtFsCase occupiedNames))
+
+                    let casePrefix = if useShortCaseAccess then "" else unionTypeName + "."
+
                     line ""
                     line "[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]"
                     line "[<RequireQualifiedAccess>]"
                     line $"module {unionModuleName} ="
                     line ""
                     line "    open Reified.SchemaDSL"
+                    if useShortCaseAccess then
+                        line $"    open type {typeName}"
 
                     for case in cases do
                         match case.ExtPayload with
@@ -559,21 +613,21 @@ module Emitter =
                         match case.ExtPayload with
                         | ExternalEmpty ->
                             let predicate =
-                                if List.length cases = 1 then $"(function {unionTypeName}.{case.ExtFsCase} -> true)"
-                                else $"(function {unionTypeName}.{case.ExtFsCase} -> true | _ -> false)"
-                            line $"        {opener}UnionCase.empty \"{escapeString case.ExtTag}\" {unionTypeName}.{case.ExtFsCase} {predicate}{closer}"
+                                if List.length cases = 1 then $"(function {casePrefix}{case.ExtFsCase} -> true)"
+                                else $"(function {casePrefix}{case.ExtFsCase} -> true | _ -> false)"
+                            line $"        {opener}UnionCase.empty \"{escapeString case.ExtTag}\" {casePrefix}{case.ExtFsCase} {predicate}{closer}"
                         | ExternalRecord reference ->
                             let extractor =
-                                if List.length cases = 1 then $"(function {unionTypeName}.{case.ExtFsCase} payload -> Some payload)"
-                                else $"(function {unionTypeName}.{case.ExtFsCase} payload -> Some payload | _ -> None)"
-                            line $"        {opener}UnionCase.fields \"{escapeString case.ExtTag}\" {unionTypeName}.{case.ExtFsCase} {extractor} {refSchemaName reference}.schema{closer}"
+                                if List.length cases = 1 then $"(function {casePrefix}{case.ExtFsCase} payload -> Some payload)"
+                                else $"(function {casePrefix}{case.ExtFsCase} payload -> Some payload | _ -> None)"
+                            line $"        {opener}UnionCase.fields \"{escapeString case.ExtTag}\" {casePrefix}{case.ExtFsCase} {extractor} {refSchemaName reference}.schema{closer}"
                         | ExternalFields fields ->
                             let payloadType = case.ExtFsCase + "CasePayload"
                             let helper = camel payloadType
                             let arguments = fields |> List.map (fun field -> "payload." + field.ExtFieldName) |> String.concat ", "
                             let names = fields |> List.map (fun field -> camel field.ExtFieldName) |> String.concat ", "
-                            let construction = $"(fun (payload: {payloadType}) -> {unionTypeName}.{case.ExtFsCase}({arguments}))"
-                            let pattern = $"{unionTypeName}.{case.ExtFsCase}({names})"
+                            let construction = $"(fun (payload: {payloadType}) -> {casePrefix}{case.ExtFsCase}({arguments}))"
+                            let pattern = $"{casePrefix}{case.ExtFsCase}({names})"
                             let record = fields |> List.map (fun field -> $"{field.ExtFieldName} = {camel field.ExtFieldName}") |> String.concat "; "
                             let extractor =
                                 if List.length cases = 1 then $"(function {pattern} -> Some {{ {record} }})"
@@ -624,7 +678,7 @@ module Emitter =
             for field in contract.Fields do
                 for union in externalUnionsIn field.FieldType do
                     match union with
-                    | ExternalUnion(typeName, _, _) -> emitUnionSchema typeName
+                    | ExternalUnion(typeName, _, _, _) -> emitUnionSchema typeName
                     | _ -> ()
 
             let contractTypeName = contractTypeNameOf contract
@@ -645,7 +699,7 @@ module Emitter =
                 contract.Fields
                 |> List.collect (fun field -> externalUnionsIn field.FieldType)
                 |> List.choose (function
-                    | ExternalUnion(typeName, _, _) -> Some(localName typeName, unionSchemaScope typeName)
+                    | ExternalUnion(typeName, _, _, _) -> Some(localName typeName, unionSchemaScope typeName)
                     | _ -> None)
 
             // Enum references are excluded here: their raw namespace is opened locally at the point of use

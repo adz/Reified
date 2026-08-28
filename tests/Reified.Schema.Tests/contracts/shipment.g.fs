@@ -98,10 +98,11 @@ module ShipmentV1 =
 module DeliveryMethod =
 
     open Reified.SchemaDSL
+    open type DeliveryMethod
 
     let private cases =
-        [ UnionCase.fields "pickup" DeliveryMethod.Pickup (function DeliveryMethod.Pickup payload -> Some payload | _ -> None) PickupPoint.schema
-          UnionCase.fields "courier" DeliveryMethod.Courier (function DeliveryMethod.Courier payload -> Some payload | _ -> None) CourierDelivery.schema ]
+        [ UnionCase.fields "pickup" Pickup (function Pickup payload -> Some payload | _ -> None) PickupPoint.schema
+          UnionCase.fields "courier" Courier (function Courier payload -> Some payload | _ -> None) CourierDelivery.schema ]
 
     let schema : Schema<DeliveryMethod> =
         Schema.unionWith (UnionRepresentation.Internal "kind") cases

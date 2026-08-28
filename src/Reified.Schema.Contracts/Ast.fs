@@ -73,7 +73,13 @@ and FieldType =
     | UnionBlock of discriminator: string * cases: UnionCaseDecl list
     | ExternalEnum of typeName: string * cases: ExternalEnumCase list
     | ExternalTransparent of typeName: string * caseName: string * payload: FieldType
-    | ExternalUnion of typeName: string * representation: ExternalUnionRepresentation * cases: ExternalUnionCase list
+    | ExternalUnion of
+        typeName: string *
+        representation: ExternalUnionRepresentation *
+        cases: ExternalUnionCase list *
+        /// When true, the emitter always fully qualifies this union's raw type and cases, never using the
+        /// shorter `open type`-scoped form (see [<DeriveUnion(FullyQualified = true)>]).
+        fullyQualified: bool
 
 /// <summary>One portable constraint retained by the shared generation pipeline.</summary>
 type ConstraintDecl =

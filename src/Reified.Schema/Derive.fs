@@ -52,6 +52,13 @@ type DeriveUnionAttribute(discriminator: string) =
     member val PayloadField = "value" with get, set
     member val PayloadStyle = UnionPayloadStyleKind.Named with get, set
     member val UnwrapFieldless = true with get, set
+
+    /// By default, generated case construction and pattern-matching use the union's case tags
+    /// unqualified where schemagen can prove that is safe. Set this to opt a union out of that and
+    /// always fully qualify its raw type and cases instead - reach for it if you attach hand-written
+    /// members to this union type elsewhere that schemagen cannot see and that might collide.
+    member val FullyQualified = false with get, set
+
     new() = DeriveUnionAttribute("type")
 
 /// <summary>Marks the static member the derived schema calls to assemble the record, instead of a
