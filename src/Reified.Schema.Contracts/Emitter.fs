@@ -385,10 +385,6 @@ module Emitter =
             | LiteralUnion _
             | ExternalEnum _ -> []
 
-        let rawNamespaceOf (typeName: string) =
-            let index = typeName.LastIndexOf '.'
-            if index > 0 then Some(typeName.Substring(0, index)) else None
-
         let schemaScope reference =
             let target =
                 declared
@@ -779,18 +775,11 @@ module Emitter =
                         line
                             $"        {opener}UnionCase.fields \"{escapeString case.CaseTag}\" {du}.{duCaseName case.CaseTag} {extractor} {compactRefSchemaName case.CaseRef}.schema{closer}")
                 | ExternalEnum(typeName, cases) ->
-                    let enumTypeName = localName typeName
-
-                    // Opened right here, scoped to just this binding, rather than at module level: the
-                    // enum's raw namespace is hand-written source this tool never fully parses, so it may
-                    // hold other public names we don't know about. Confining the open to this one let-binding
-                    // means the only thing it can possibly shadow is the enum cases below, not the rest of
-                    // the generated module.
-                    match rawNamespaceOf typeName with
-                    | Some ns ->
-                        line $"        open {ns}"
-                        line ""
-                    | None -> ()
+                    // Always fully qualified: F# does not allow a local `open` inside a plain let binding
+                    // (only at module scope or inside a function/module body that already sequences
+                    // declarations), so there is no safe place to open the enum's raw namespace just for
+                    // this binding. Qualifying it here instead is always valid and carries no shadowing risk.
+                    let enumTypeName = typeName
 
                     cases
                     |> List.iteri (fun index case ->
@@ -817,7 +806,7 @@ module Emitter =
                 else
                     "schema"
 
-            line $"        {schemaBuilder}<{schemaTypeName}> {{"
+            line $"        {schemaBuilder}<{contractTypeName}> {{"
 
             for field in contract.Fields do
                 let wire = FieldDecl.wireName field
@@ -871,11 +860,11 @@ module Emitter =
 
             line ""
             line $"    /// Validates an ordinary record-literal draft of {schemaTypeName}."
-            line $"    let validate (draft: {schemaTypeName}) : Result<{schemaTypeName}, SchemaErrors> ="
+            line $"    let validate (draft: {contractTypeName}) : Result<{contractTypeName}, SchemaErrors> ="
             line "        Schema.check schema draft"
             line ""
             line $"    /// Parses structured boundary data into {schemaTypeName}."
-            line $"    let parse (input: Data) : Result<{schemaTypeName}, SchemaErrors> ="
+            line $"    let parse (input: Data) : Result<{contractTypeName}, SchemaErrors> ="
             line "        Schema.parse schema input"
 
             // The latest version of a multi-version chain gets the Contract wiring. Migrations stay
@@ -899,7 +888,7 @@ module Emitter =
                     line $"        (migrateV{step}ToV{step + 1}: {fromType} -> Result<{toType}, MigrationError>)"
 
                 line "        (source: VersionSource)"
-                line $"        : Contract<{schemaTypeName}> ="
+                line $"        : Contract<{contractTypeName}> ="
                 line $"        Contract.create \"{escapeString contract.ContractName}\" {contract.Version} schema"
 
                 for step in contract.Version - 1 .. -1 .. oldestVersion do

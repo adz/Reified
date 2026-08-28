@@ -102,12 +102,11 @@ type Ticket =
         let wire = files |> List.find (fun file -> file.FilePath = "wire.fs")
         let emitted = Emitter.emit "Fallback" files wire
         test <@ emitted.Contains "let private remoteCases =" @>
-        test <@ emitted.Contains "        open My.Other" @>
-        test <@ emitted.Contains "EnumCase.create \"open\" Status.Open" @>
-        test <@ emitted.Contains "EnumCase.create \"closed\" Status.Closed" @>
+        test <@ emitted.Contains "EnumCase.create \"open\" My.Other.Status.Open" @>
+        test <@ emitted.Contains "EnumCase.create \"closed\" My.Other.Status.Closed" @>
         test <@ emitted.Contains "withSchema Status.schema" @>
         test <@ emitted.Contains "UnionCase.fields \"manual\"" @>
-        test <@ not (emitted.Contains "\n    open My.Other") @>
+        test <@ not (emitted.Contains "open My.Other") @>
 
     [<Fact>]
     let ``a bare marked record lowers to a shape-only version-1 contract`` () =
@@ -561,11 +560,10 @@ type Template =
         let template = files |> List.find (fun file -> file.FilePath = "templates.fs")
         let emitted = Emitter.emit "Fallback" files template
         test <@ emitted.Contains "open My.Workflow.VariablesSchemas" @>
-        test <@ emitted.Contains "schema<Template>" @>
+        test <@ emitted.Contains "schema<My.Workflow.Templates.Template>" @>
         test <@ emitted.Contains "withSchema Variable.schema" @>
-        test <@ emitted.Contains "let validate (draft: Template) : Result<Template, SchemaErrors>" @>
-        test <@ emitted.Contains "let parse (input: Data) : Result<Template, SchemaErrors>" @>
-        test <@ not (emitted.Contains "schema<My.Workflow.Templates.Template>") @>
+        test <@ emitted.Contains "let validate (draft: My.Workflow.Templates.Template) : Result<My.Workflow.Templates.Template, SchemaErrors>" @>
+        test <@ emitted.Contains "let parse (input: Data) : Result<My.Workflow.Templates.Template, SchemaErrors>" @>
         test <@ not (emitted.Contains "My.Workflow.VariablesSchemas.Variable.schema") @>
         test <@ emitted.Contains "VariableType.Text" @>
 
@@ -615,7 +613,7 @@ type Template =
         test <@ consumerOutput.Contains "withSchema (Schema.listWith BindingSource.schema)" @>
 
     [<Fact>]
-    let ``a cross-file enum reference opens the declaring namespace`` () =
+    let ``a cross-file enum reference is fully qualified`` () =
         let sharedSource =
             """
 module My.Workflow.Shared
@@ -646,9 +644,8 @@ type Task = { Priority: My.Workflow.Shared.Priority }
 
         let wire = files |> List.find (fun file -> file.FilePath = "wire.fs")
         let emitted = Emitter.emit "Fallback" files wire
-        test <@ emitted.Contains "open My.Workflow.Shared" @>
-        test <@ emitted.Contains "EnumCase.create \"low\" Priority.Low" @>
-        test <@ not (emitted.Contains "My.Workflow.Shared.Priority.Low") @>
+        test <@ emitted.Contains "EnumCase.create \"low\" My.Workflow.Shared.Priority.Low" @>
+        test <@ not (emitted.Contains "open My.Workflow.Shared") @>
 
     [<Fact>]
     let ``transparent string unions may key derived maps`` () =
