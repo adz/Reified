@@ -68,20 +68,20 @@ module Signup =
                 withSchema (Schema.option Geo.schema)
             }
             construct (fun email displayName age plan tags limits location ->
-                { Signup.Email = email
-                  Signup.DisplayName = displayName
-                  Signup.Age = age
-                  Signup.Plan = plan
-                  Signup.Tags = tags
-                  Signup.Limits = limits
-                  Signup.Location = location })
+                { Email = email
+                  DisplayName = displayName
+                  Age = age
+                  Plan = plan
+                  Tags = tags
+                  Limits = limits
+                  Location = location })
         }
         |> Schema.describe "A new account request."
 
-    /// Checks a draft built with an ordinary record literal.
+    /// Validates an ordinary record-literal draft of Signup.
     let validate (draft: Signup) : Result<Signup, SchemaErrors> =
         Schema.check schema draft
 
-    /// Parses structured boundary data through the schema.
+    /// Parses structured boundary data into Signup.
     let parse (input: Data) : Result<Signup, SchemaErrors> =
         Schema.parse schema input

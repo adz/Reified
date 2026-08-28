@@ -37,15 +37,15 @@ module Category =
                 withSchema (Schema.listWith (Schema.defer (fun () -> schema)) |> Schema.describe "Child categories use the same wire contract.")
             }
             construct (fun name children ->
-                { Category.Name = name
-                  Category.Children = children })
+                { Name = name
+                  Children = children })
         }
         |> Schema.describe "A recursive category tree used to prove self-references in generated schemas."
 
-    /// Checks a draft built with an ordinary record literal.
+    /// Validates an ordinary record-literal draft of Category.
     let validate (draft: Category) : Result<Category, SchemaErrors> =
         Schema.check schema draft
 
-    /// Parses structured boundary data through the schema.
+    /// Parses structured boundary data into Category.
     let parse (input: Data) : Result<Category, SchemaErrors> =
         Schema.parse schema input

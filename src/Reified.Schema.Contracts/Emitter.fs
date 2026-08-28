@@ -470,16 +470,20 @@ module Emitter =
                     for case in cases do
                         match case.ExtPayload with
                         | ExternalFields fields ->
-                            let payloadType = case.ExtFsCase + "Payload"
+                            let payloadType = case.ExtFsCase + "CasePayload"
                             let helper = camel payloadType
 
                             line ""
-                            line $"    type private {payloadType} ="
-                            line "        {"
-                            for field in fields do
+                            match fields with
+                            | [ field ] ->
                                 let suffix = if field.ExtOptional then " option" else ""
-                                line $"            {field.ExtFieldName}: {fsType refTypeName unionTypeName case.ExtFsCase field.ExtFieldType}{suffix}"
-                            line "        }"
+                                line $"    type private {payloadType} = {{ {field.ExtFieldName}: {fsType refTypeName unionTypeName case.ExtFsCase field.ExtFieldType}{suffix} }}"
+                            | _ ->
+                                line $"    type private {payloadType} = {{"
+                                for field in fields do
+                                    let suffix = if field.ExtOptional then " option" else ""
+                                    line $"        {field.ExtFieldName}: {fsType refTypeName unionTypeName case.ExtFsCase field.ExtFieldType}{suffix}"
+                                line "    }"
                             line ""
                             line $"    let private {helper} ="
                             line $"        schema<{payloadType}> {{"
@@ -518,7 +522,7 @@ module Emitter =
                                 else $"(function {typeName}.{case.ExtFsCase} payload -> Some payload | _ -> None)"
                             line $"        {opener}UnionCase.fields \"{escapeString case.ExtTag}\" {typeName}.{case.ExtFsCase} {extractor} {refSchemaName reference}.schema{closer}"
                         | ExternalFields fields ->
-                            let payloadType = case.ExtFsCase + "Payload"
+                            let payloadType = case.ExtFsCase + "CasePayload"
                             let helper = camel payloadType
                             let arguments = fields |> List.map (fun field -> "payload." + field.ExtFieldName) |> String.concat ", "
                             let names = fields |> List.map (fun field -> camel field.ExtFieldName) |> String.concat ", "
@@ -726,7 +730,7 @@ module Emitter =
                 |> List.iteri (fun index field ->
                     let opener = if index = 0 then "{ " else "  "
                     let closer = if index = List.length contract.Fields - 1 then " })" else ""
-                    line $"                {opener}{contractTypeName}.{escapeIdent (fsFieldName field)} = {escapeIdent (camel field.FieldName)}{closer}")
+                    line $"                {opener}{escapeIdent (fsFieldName field)} = {escapeIdent (camel field.FieldName)}{closer}")
 
             line "        }"
 
@@ -735,11 +739,11 @@ module Emitter =
             | doc -> line $"        |> Schema.describe \"{escapeString (joinedDoc doc)}\""
 
             line ""
-            line "    /// Checks a draft built with an ordinary record literal."
+            line $"    /// Validates an ordinary record-literal draft of {contractTypeName}."
             line $"    let validate (draft: {contractTypeName}) : Result<{contractTypeName}, SchemaErrors> ="
             line "        Schema.check schema draft"
             line ""
-            line "    /// Parses structured boundary data through the schema."
+            line $"    /// Parses structured boundary data into {contractTypeName}."
             line $"    let parse (input: Data) : Result<{contractTypeName}, SchemaErrors> ="
             line "        Schema.parse schema input"
 

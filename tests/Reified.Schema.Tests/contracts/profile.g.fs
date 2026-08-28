@@ -35,16 +35,16 @@ module ProfileV1 =
                 constrain email
             }
             construct (fun name email ->
-                { ProfileV1.Name = name
-                  ProfileV1.Email = email })
+                { Name = name
+                  Email = email })
         }
         |> Schema.describe "A user profile as first stored."
 
-    /// Checks a draft built with an ordinary record literal.
+    /// Validates an ordinary record-literal draft of ProfileV1.
     let validate (draft: ProfileV1) : Result<ProfileV1, SchemaErrors> =
         Schema.check schema draft
 
-    /// Parses structured boundary data through the schema.
+    /// Parses structured boundary data into ProfileV1.
     let parse (input: Data) : Result<ProfileV1, SchemaErrors> =
         Schema.parse schema input
 
@@ -81,17 +81,17 @@ module Profile =
                 withSchema (Schema.bool |> Schema.withDefault false)
             }
             construct (fun name email marketingOptIn ->
-                { Profile.Name = name
-                  Profile.Email = email
-                  Profile.MarketingOptIn = marketingOptIn })
+                { Name = name
+                  Email = email
+                  MarketingOptIn = marketingOptIn })
         }
         |> Schema.describe "A user profile with an explicit marketing consent decision."
 
-    /// Checks a draft built with an ordinary record literal.
+    /// Validates an ordinary record-literal draft of Profile.
     let validate (draft: Profile) : Result<Profile, SchemaErrors> =
         Schema.check schema draft
 
-    /// Parses structured boundary data through the schema.
+    /// Parses structured boundary data into Profile.
     let parse (input: Data) : Result<Profile, SchemaErrors> =
         Schema.parse schema input
 

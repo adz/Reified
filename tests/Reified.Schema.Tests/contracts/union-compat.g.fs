@@ -12,14 +12,13 @@ module RecommendedCommand =
 
     open Reified.SchemaDSL
 
-    type private MovePayload =
-        {
-            x: int
-            y: int
-        }
+    type private MoveCasePayload = {
+        x: int
+        y: int
+    }
 
-    let private movePayload =
-        schema<MovePayload> {
+    let private moveCasePayload =
+        schema<MoveCasePayload> {
             fieldAs "x" _.x
             fieldAs "y" _.y
             construct (fun x y -> { x = x; y = y })
@@ -27,7 +26,7 @@ module RecommendedCommand =
 
     let private cases =
         [ UnionCase.empty "stop" RecommendedCommand.Stop (function RecommendedCommand.Stop -> true | _ -> false)
-          UnionCase.fields "move" (fun (payload: MovePayload) -> RecommendedCommand.Move(payload.x, payload.y)) (function RecommendedCommand.Move(x, y) -> Some { x = x; y = y } | _ -> None) movePayload ]
+          UnionCase.fields "move" (fun (payload: MoveCasePayload) -> RecommendedCommand.Move(payload.x, payload.y)) (function RecommendedCommand.Move(x, y) -> Some { x = x; y = y } | _ -> None) moveCasePayload ]
 
     let schema : Schema<RecommendedCommand> =
         Schema.unionWith (UnionRepresentation.Internal "type") cases
@@ -38,25 +37,21 @@ module FSharpSystemTextJsonCommand =
 
     open Reified.SchemaDSL
 
-    type private ScalePayload =
-        {
-            amount: decimal
-        }
+    type private ScaleCasePayload = { amount: decimal }
 
-    let private scalePayload =
-        schema<ScalePayload> {
+    let private scaleCasePayload =
+        schema<ScaleCasePayload> {
             fieldAs "amount" _.amount
             construct (fun amount -> { amount = amount })
         }
 
-    type private TranslatePayload =
-        {
-            x: int
-            y: int
-        }
+    type private TranslateCasePayload = {
+        x: int
+        y: int
+    }
 
-    let private translatePayload =
-        schema<TranslatePayload> {
+    let private translateCasePayload =
+        schema<TranslateCasePayload> {
             fieldAs "x" _.x
             fieldAs "y" _.y
             construct (fun x y -> { x = x; y = y })
@@ -64,8 +59,8 @@ module FSharpSystemTextJsonCommand =
 
     let private cases =
         [ UnionCase.empty "Pause" FSharpSystemTextJsonCommand.Pause (function FSharpSystemTextJsonCommand.Pause -> true | _ -> false)
-          UnionCase.fields "Scale" (fun (payload: ScalePayload) -> FSharpSystemTextJsonCommand.Scale(payload.amount)) (function FSharpSystemTextJsonCommand.Scale(amount) -> Some { amount = amount } | _ -> None) scalePayload
-          UnionCase.fields "Translate" (fun (payload: TranslatePayload) -> FSharpSystemTextJsonCommand.Translate(payload.x, payload.y)) (function FSharpSystemTextJsonCommand.Translate(x, y) -> Some { x = x; y = y } | _ -> None) translatePayload ]
+          UnionCase.fields "Scale" (fun (payload: ScaleCasePayload) -> FSharpSystemTextJsonCommand.Scale(payload.amount)) (function FSharpSystemTextJsonCommand.Scale(amount) -> Some { amount = amount } | _ -> None) scaleCasePayload
+          UnionCase.fields "Translate" (fun (payload: TranslateCasePayload) -> FSharpSystemTextJsonCommand.Translate(payload.x, payload.y)) (function FSharpSystemTextJsonCommand.Translate(x, y) -> Some { x = x; y = y } | _ -> None) translateCasePayload ]
 
     let schema : Schema<FSharpSystemTextJsonCommand> =
         Schema.unionWith (UnionRepresentation.Adjacent("Case", "Fields", UnionPayloadStyle.Positional)) cases
@@ -76,25 +71,21 @@ module CompactExternalCommand =
 
     open Reified.SchemaDSL
 
-    type private RenamePayload =
-        {
-            name: string
-        }
+    type private RenameCasePayload = { name: string }
 
-    let private renamePayload =
-        schema<RenamePayload> {
+    let private renameCasePayload =
+        schema<RenameCasePayload> {
             fieldAs "name" _.name
             construct (fun name -> { name = name })
         }
 
-    type private ResizePayload =
-        {
-            width: int
-            height: int
-        }
+    type private ResizeCasePayload = {
+        width: int
+        height: int
+    }
 
-    let private resizePayload =
-        schema<ResizePayload> {
+    let private resizeCasePayload =
+        schema<ResizeCasePayload> {
             fieldAs "width" _.width
             fieldAs "height" _.height
             construct (fun width height -> { width = width; height = height })
@@ -102,8 +93,8 @@ module CompactExternalCommand =
 
     let private cases =
         [ UnionCase.empty "cancel" CompactExternalCommand.Cancel (function CompactExternalCommand.Cancel -> true | _ -> false)
-          UnionCase.fields "rename" (fun (payload: RenamePayload) -> CompactExternalCommand.Rename(payload.name)) (function CompactExternalCommand.Rename(name) -> Some { name = name } | _ -> None) renamePayload
-          UnionCase.fields "resize" (fun (payload: ResizePayload) -> CompactExternalCommand.Resize(payload.width, payload.height)) (function CompactExternalCommand.Resize(width, height) -> Some { width = width; height = height } | _ -> None) resizePayload ]
+          UnionCase.fields "rename" (fun (payload: RenameCasePayload) -> CompactExternalCommand.Rename(payload.name)) (function CompactExternalCommand.Rename(name) -> Some { name = name } | _ -> None) renameCasePayload
+          UnionCase.fields "resize" (fun (payload: ResizeCasePayload) -> CompactExternalCommand.Resize(payload.width, payload.height)) (function CompactExternalCommand.Resize(width, height) -> Some { width = width; height = height } | _ -> None) resizeCasePayload ]
 
     let schema : Schema<CompactExternalCommand> =
         Schema.unionWith (UnionRepresentation.External(UnionPayloadStyle.NamedWithUnwrappedSingle, true)) cases
@@ -133,16 +124,16 @@ module UnionCompatibilityEnvelope =
                 withSchema CompactExternalCommand.schema
             }
             construct (fun workflowId recommended fSharpSystemTextJson compactExternal ->
-                { UnionCompatibilityEnvelope.WorkflowId = workflowId
-                  UnionCompatibilityEnvelope.Recommended = recommended
-                  UnionCompatibilityEnvelope.FSharpSystemTextJson = fSharpSystemTextJson
-                  UnionCompatibilityEnvelope.CompactExternal = compactExternal })
+                { WorkflowId = workflowId
+                  Recommended = recommended
+                  FSharpSystemTextJson = fSharpSystemTextJson
+                  CompactExternal = compactExternal })
         }
 
-    /// Checks a draft built with an ordinary record literal.
+    /// Validates an ordinary record-literal draft of UnionCompatibilityEnvelope.
     let validate (draft: UnionCompatibilityEnvelope) : Result<UnionCompatibilityEnvelope, SchemaErrors> =
         Schema.check schema draft
 
-    /// Parses structured boundary data through the schema.
+    /// Parses structured boundary data into UnionCompatibilityEnvelope.
     let parse (input: Data) : Result<UnionCompatibilityEnvelope, SchemaErrors> =
         Schema.parse schema input

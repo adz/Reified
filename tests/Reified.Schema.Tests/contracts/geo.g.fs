@@ -38,15 +38,15 @@ module Geo =
                 ]
             }
             construct (fun lat lon ->
-                { Geo.Lat = lat
-                  Geo.Lon = lon })
+                { Lat = lat
+                  Lon = lon })
         }
         |> Schema.describe "A geographic coordinate."
 
-    /// Checks a draft built with an ordinary record literal.
+    /// Validates an ordinary record-literal draft of Geo.
     let validate (draft: Geo) : Result<Geo, SchemaErrors> =
         Schema.check schema draft
 
-    /// Parses structured boundary data through the schema.
+    /// Parses structured boundary data into Geo.
     let parse (input: Data) : Result<Geo, SchemaErrors> =
         Schema.parse schema input

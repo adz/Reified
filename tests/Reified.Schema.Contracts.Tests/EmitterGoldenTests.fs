@@ -102,6 +102,8 @@ type Order =
         test <@ emitted.Contains "schema<Order> {" @>
         test <@ emitted.Contains "let schema =" @>
         test <@ emitted.Contains "open type Order" @>
+        test <@ emitted.Contains "/// Validates an ordinary record-literal draft of Order." @>
+        test <@ emitted.Contains "/// Parses structured boundary data into Order." @>
         test <@ emitted.Contains "fieldAs \"sku\" _.Sku" @>
         test <@ emitted.Contains "fieldAs \"quantity\" _.Quantity" @>
         test <@ not (emitted.Contains "withSchema Schema.text") @>

@@ -309,10 +309,10 @@ type Envelope = { Command: Command }
             | payloads -> failwithf "Unexpected payloads: %A" payloads
 
             let emitted = Emitter.emit "Fallback" [ file ] file
-            test <@ emitted.Contains "type private VolumePayload" @>
-            test <@ emitted.Contains "schema<VolumePayload>" @>
-            test <@ emitted.Contains "type private MovePayload" @>
-            test <@ emitted.Contains "schema<MovePayload>" @>
+            test <@ emitted.Contains "type private VolumeCasePayload = { amount: decimal }" @>
+            test <@ emitted.Contains "schema<VolumeCasePayload>" @>
+            test <@ emitted.Contains "type private MoveCasePayload = {\n        x: int\n        y: int\n    }" @>
+            test <@ emitted.Contains "schema<MoveCasePayload>" @>
             test <@ emitted.Contains "fieldAs \"amount\" _.amount" @>
             test <@ emitted.Contains "Command.Volume(payload.amount)" @>
         | other -> failwithf "Expected a direct-field internal union, got %A" other
@@ -564,7 +564,7 @@ type Template =
         test <@ emitted.Split("module BindingSource =").Length - 1 = 1 @>
         test <@ emitted.Split("module BindingPolicy =").Length - 1 = 1 @>
         test <@ emitted.Contains "let schema : Schema<My.Workflow.BindingSource>" @>
-        test <@ emitted.Contains "type private LiteralPayload" @>
+        test <@ emitted.Contains "type private LiteralCasePayload" @>
         test <@ emitted.Contains "fieldAs \"value\" _.value" @>
         test <@ not (emitted.Contains "schema<{|") @>
         test <@ not (emitted.Contains "withSchema (Schema.text)") @>

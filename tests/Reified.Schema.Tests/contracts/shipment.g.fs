@@ -20,15 +20,15 @@ module PickupPoint =
         schema<PickupPoint> {
             fieldAs "code" _.Code
             construct (fun code ->
-                { PickupPoint.Code = code })
+                { Code = code })
         }
         |> Schema.describe "A named pickup location."
 
-    /// Checks a draft built with an ordinary record literal.
+    /// Validates an ordinary record-literal draft of PickupPoint.
     let validate (draft: PickupPoint) : Result<PickupPoint, SchemaErrors> =
         Schema.check schema draft
 
-    /// Parses structured boundary data through the schema.
+    /// Parses structured boundary data into PickupPoint.
     let parse (input: Data) : Result<PickupPoint, SchemaErrors> =
         Schema.parse schema input
 
@@ -46,15 +46,15 @@ module CourierDelivery =
         schema<CourierDelivery> {
             fieldAs "trackingUrl" _.TrackingUrl
             construct (fun trackingUrl ->
-                { CourierDelivery.TrackingUrl = trackingUrl })
+                { TrackingUrl = trackingUrl })
         }
         |> Schema.describe "A courier delivery with tracking."
 
-    /// Checks a draft built with an ordinary record literal.
+    /// Validates an ordinary record-literal draft of CourierDelivery.
     let validate (draft: CourierDelivery) : Result<CourierDelivery, SchemaErrors> =
         Schema.check schema draft
 
-    /// Parses structured boundary data through the schema.
+    /// Parses structured boundary data into CourierDelivery.
     let parse (input: Data) : Result<CourierDelivery, SchemaErrors> =
         Schema.parse schema input
 
@@ -79,17 +79,17 @@ module ShipmentV1 =
             }
             fieldAs "items" _.Items
             construct (fun reference notifyEmail items ->
-                { ShipmentV1.Reference = reference
-                  ShipmentV1.NotifyEmail = notifyEmail
-                  ShipmentV1.Items = items })
+                { Reference = reference
+                  NotifyEmail = notifyEmail
+                  Items = items })
         }
         |> Schema.describe "A shipment as first stored."
 
-    /// Checks a draft built with an ordinary record literal.
+    /// Validates an ordinary record-literal draft of ShipmentV1.
     let validate (draft: ShipmentV1) : Result<ShipmentV1, SchemaErrors> =
         Schema.check schema draft
 
-    /// Parses structured boundary data through the schema.
+    /// Parses structured boundary data into ShipmentV1.
     let parse (input: Data) : Result<ShipmentV1, SchemaErrors> =
         Schema.parse schema input
 
@@ -154,23 +154,23 @@ module Shipment =
                 constrain (atLeast 1)
             }
             construct (fun reference notifyEmail items tags weightKg priority delivery origin boxes ->
-                { Shipment.Reference = reference
-                  Shipment.NotifyEmail = notifyEmail
-                  Shipment.Items = items
-                  Shipment.Tags = tags
-                  Shipment.WeightKg = weightKg
-                  Shipment.Priority = priority
-                  Shipment.Delivery = delivery
-                  Shipment.Origin = origin
-                  Shipment.Boxes = boxes })
+                { Reference = reference
+                  NotifyEmail = notifyEmail
+                  Items = items
+                  Tags = tags
+                  WeightKg = weightKg
+                  Priority = priority
+                  Delivery = delivery
+                  Origin = origin
+                  Boxes = boxes })
         }
         |> Schema.describe "A shipment with delivery method, priority, and weight."
 
-    /// Checks a draft built with an ordinary record literal.
+    /// Validates an ordinary record-literal draft of Shipment.
     let validate (draft: Shipment) : Result<Shipment, SchemaErrors> =
         Schema.check schema draft
 
-    /// Parses structured boundary data through the schema.
+    /// Parses structured boundary data into Shipment.
     let parse (input: Data) : Result<Shipment, SchemaErrors> =
         Schema.parse schema input
 

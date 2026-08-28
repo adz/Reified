@@ -31,15 +31,15 @@ module Card =
                 ]
             }
             construct (fun number ->
-                { Card.Number = number })
+                { Number = number })
         }
         |> Schema.describe "A card payment source."
 
-    /// Checks a draft built with an ordinary record literal.
+    /// Validates an ordinary record-literal draft of Card.
     let validate (draft: Card) : Result<Card, SchemaErrors> =
         Schema.check schema draft
 
-    /// Parses structured boundary data through the schema.
+    /// Parses structured boundary data into Card.
     let parse (input: Data) : Result<Card, SchemaErrors> =
         Schema.parse schema input
 
@@ -65,15 +65,15 @@ module Invoice =
                 constrain (minLength 1)
             }
             construct (fun reference ->
-                { Invoice.Reference = reference })
+                { Reference = reference })
         }
         |> Schema.describe "An invoice payment source."
 
-    /// Checks a draft built with an ordinary record literal.
+    /// Validates an ordinary record-literal draft of Invoice.
     let validate (draft: Invoice) : Result<Invoice, SchemaErrors> =
         Schema.check schema draft
 
-    /// Parses structured boundary data through the schema.
+    /// Parses structured boundary data into Invoice.
     let parse (input: Data) : Result<Invoice, SchemaErrors> =
         Schema.parse schema input
 
@@ -109,14 +109,14 @@ module Payment =
                 withSchema (Schema.unionWith (UnionRepresentation.Internal "kind") sourceCases)
             }
             construct (fun source ->
-                { Payment.Source = source })
+                { Source = source })
         }
         |> Schema.describe "A payment method choice."
 
-    /// Checks a draft built with an ordinary record literal.
+    /// Validates an ordinary record-literal draft of Payment.
     let validate (draft: Payment) : Result<Payment, SchemaErrors> =
         Schema.check schema draft
 
-    /// Parses structured boundary data through the schema.
+    /// Parses structured boundary data into Payment.
     let parse (input: Data) : Result<Payment, SchemaErrors> =
         Schema.parse schema input
