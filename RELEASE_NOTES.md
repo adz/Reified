@@ -1,6 +1,6 @@
 # Release Notes
 
-## 0.6.1 - Unreleased
+## 0.6.1 - 2026-08-28
 
 ### Schema generation
 
