@@ -130,6 +130,10 @@ module Records =
           /// for a type whose cases might collide with a hand-written member on the same type that this
           /// tool never sees. Every reference always fully qualifies the raw type and its cases instead.
           FullyQualified: bool
+          /// True when the union itself carries [<RequireQualifiedAccess>]: `open type` then exposes none
+          /// of its case tags at all (confirmed against the real compiler), so short case access is never
+          /// possible regardless of FullyQualified.
+          IsRequireQualifiedAccess: bool
           UnionCases: SynUnionCase list
           UnionLine: int }
 
@@ -137,7 +141,7 @@ module Records =
         { Records: Set<string>
           Unions: Map<string, UnionInfo> }
 
-    let private unionInfo (source: ISourceText) (fsName: string) (wireUnion: SynAttribute option) (cases: SynUnionCase list) line =
+    let private unionInfo (source: ISourceText) (fsName: string) (wireUnion: SynAttribute option) (isRequireQualifiedAccess: bool) (cases: SynUnionCase list) line =
         let _, unionNamedArgs = wireUnion |> Option.map (attributeArgs source) |> Option.defaultValue ([], [])
         let namedIdent name fallback =
             unionNamedArgs
@@ -178,6 +182,7 @@ module Records =
           PayloadStyle = namedIdent "PayloadStyle" "Named"
           UnwrapFieldless = namedBool "UnwrapFieldless" true
           FullyQualified = namedBool "FullyQualified" false
+          IsRequireQualifiedAccess = isRequireQualifiedAccess
           UnionCases = cases
           UnionLine = line }
 
@@ -237,7 +242,8 @@ module Records =
                                 match typeRepr with
                                 | SynTypeDefnRepr.Simple(SynTypeDefnSimpleRepr.Union(_, cases, _), _) ->
                                     let deriveUnion = attrs |> List.tryPick (fun (attributeName, attribute) -> if attributeName = "DeriveUnion" then Some attribute else None)
-                                    Some(name, Choice2Of2(unionInfo source (List.last typeId).idText deriveUnion cases range.StartLine))
+                                    let isRequireQualifiedAccess = attrs |> List.exists (fun (attributeName, _) -> attributeName = "RequireQualifiedAccess")
+                                    Some(name, Choice2Of2(unionInfo source (List.last typeId).idText deriveUnion isRequireQualifiedAccess cases range.StartLine))
                                 | _ when record -> Some(name, Choice1Of2 ())
                                 | _ -> None)
                         | _ -> []))
@@ -346,7 +352,8 @@ module Records =
                     | _, Some _ -> report range.StartLine $"wire DTO '{fsName}' must be public; wire records carry no invariants to protect"
                     | None, None -> records.Add(attribute, schemaConstructor, componentInfo, fields, xmlDoc, range.StartLine)
             | SynTypeDefnRepr.Simple(SynTypeDefnSimpleRepr.Union(_, cases, _), _) ->
-                unions.[fsName] <- unionInfo source fsName wireUnion cases range.StartLine
+                let isRequireQualifiedAccess = attrs |> List.exists (fun (name, _) -> name = "RequireQualifiedAccess")
+                unions.[fsName] <- unionInfo source fsName wireUnion isRequireQualifiedAccess cases range.StartLine
 
                 if wireSchema.IsSome then
                     report range.StartLine
@@ -669,7 +676,10 @@ module Records =
                         report union.UnionLine $"unknown union representation '{other}'"
                         GeneratedInternal discriminator
 
-                Some(ExternalUnion(typeName, representation, cases, union.FullyQualified))
+                // RequireQualifiedAccess on the raw union means `open type` exposes none of its case tags at
+                // all (confirmed against the real compiler), so it forces the same fully-qualified rendering
+                // as an explicit [<DeriveUnion(FullyQualified = true)>].
+                Some(ExternalUnion(typeName, representation, cases, union.FullyQualified || union.IsRequireQualifiedAccess))
 
         let lowerField (field: SynField) : FieldDecl option =
             let (SynField(attributes, _, idOpt, fieldType, _, xmlDoc, _, range, _)) = field

@@ -507,6 +507,33 @@ type Envelope = { Command: Command }
         test <@ emitted.Contains "Command.Volume(payload.amount)" @>
 
     [<Fact>]
+    let ``a RequireQualifiedAccess union falls back to full qualification, since open type exposes none of its cases`` () =
+        // Confirmed against the real compiler: `open type` on a [<RequireQualifiedAccess>] union exposes
+        // none of its case tags (FS0039), unlike a plain union where it exposes them all. This must be
+        // detected without requiring the user to also write [<DeriveUnion(FullyQualified = true)>].
+        let file =
+            parse
+                """
+namespace My.Wire
+
+open Reified.DerivedSchema
+
+[<RequireQualifiedAccess>]
+[<DeriveUnion>]
+type Command =
+    | Stop
+    | Volume of amount: decimal
+
+[<DeriveSchema>]
+type Envelope = { Command: Command }
+"""
+
+        let emitted = Emitter.emit "Fallback" [ file ] file
+        test <@ not (emitted.Contains "open type Command") @>
+        test <@ emitted.Contains "UnionCase.empty \"stop\" Command.Stop" @>
+        test <@ emitted.Contains "Command.Volume(payload.amount)" @>
+
+    [<Fact>]
     let ``a union whose case tag collides with the Reified vocabulary falls back to full qualification`` () =
         let file =
             parse
@@ -769,6 +796,45 @@ type Task = { Priority: My.Workflow.Shared.Priority }
         let emitted = Emitter.emit "Fallback" files wire
         test <@ emitted.Contains "EnumCase.create \"low\" My.Workflow.Shared.Priority.Low" @>
         test <@ not (emitted.Contains "open My.Workflow.Shared") @>
+
+    [<Fact>]
+    let ``a RequireQualifiedAccess union declared in another file also falls back to full qualification`` () =
+        // Same check as the same-file case, but through the cross-file known-types catalog path
+        // (knownTypesIn), which parses [<RequireQualifiedAccess>] independently of the main pass.
+        let sharedSource =
+            """
+module My.Other
+open Reified.DerivedSchema
+
+[<RequireQualifiedAccess>]
+[<DeriveUnion>]
+type Status =
+    | Open
+    | Closed
+"""
+
+        let wireSource =
+            """
+module My.Wire
+open Reified.DerivedSchema
+
+[<DeriveSchema>]
+type Ticket = { Status: My.Other.Status }
+"""
+
+        let files =
+            Records.parseSet SchemaNaming.CamelCase [ "other.fs", sharedSource; "wire.fs", wireSource ]
+            |> List.map (fun (_, result) ->
+                match result with
+                | Ok file -> file
+                | Error diagnostics -> failwithf "Expected a clean parse, got %A" diagnostics)
+
+        // other.fs declares only a union, no [<DeriveSchema>] record, so it never gets a .g.fs of its own;
+        // the union is owned by wire.fs, the only file that references it.
+        let wire = files |> List.find (fun file -> file.FilePath = "wire.fs")
+        let emitted = Emitter.emit "Fallback" files wire
+        test <@ not (emitted.Contains "open type My.Other.Status") @>
+        test <@ emitted.Contains "UnionCase.empty \"open\" My.Other.Status.Open" @>
 
     [<Fact>]
     let ``transparent string unions may key derived maps`` () =
