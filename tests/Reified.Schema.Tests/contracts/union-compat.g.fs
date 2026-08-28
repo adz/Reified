@@ -115,20 +115,21 @@ module UnionCompatibilityEnvelope =
 
     open Reified.SchemaDSL
     open Reified.ConstraintDSL
+    open type UnionCompatibilityEnvelope
 
     /// The schema declared by union-compat.fs (UnionCompatibilityEnvelope.v1).
-    let schema : Schema<UnionCompatibilityEnvelope> =
+    let schema =
         schema<UnionCompatibilityEnvelope> {
-            fieldAs "workflowId" (fun (value: UnionCompatibilityEnvelope) -> value.WorkflowId) {
+            fieldAs "workflowId" _.WorkflowId {
                 withSchema (Schema.convert WorkflowId (function WorkflowId value -> value) Schema.text)
             }
-            fieldAs "recommended" (fun (value: UnionCompatibilityEnvelope) -> value.Recommended) {
+            fieldAs "recommended" _.Recommended {
                 withSchema RecommendedCommand.schema
             }
-            fieldAs "fSharpSystemTextJson" (fun (value: UnionCompatibilityEnvelope) -> value.FSharpSystemTextJson) {
+            fieldAs "fSharpSystemTextJson" _.FSharpSystemTextJson {
                 withSchema FSharpSystemTextJsonCommand.schema
             }
-            fieldAs "compactExternal" (fun (value: UnionCompatibilityEnvelope) -> value.CompactExternal) {
+            fieldAs "compactExternal" _.CompactExternal {
                 withSchema CompactExternalCommand.schema
             }
             construct (fun workflowId recommended fSharpSystemTextJson compactExternal ->

@@ -100,8 +100,10 @@ type Order =
         let emitted = Emitter.emit "Ns" [ parsed ] parsed
 
         test <@ emitted.Contains "schema<Order> {" @>
-        test <@ emitted.Contains "fieldAs \"sku\" (fun (value: Order) -> value.Sku)" @>
-        test <@ emitted.Contains "fieldAs \"quantity\" (fun (value: Order) -> value.Quantity)" @>
+        test <@ emitted.Contains "let schema =" @>
+        test <@ emitted.Contains "open type Order" @>
+        test <@ emitted.Contains "fieldAs \"sku\" _.Sku" @>
+        test <@ emitted.Contains "fieldAs \"quantity\" _.Quantity" @>
         test <@ not (emitted.Contains "withSchema Schema.text") @>
         test <@ not (emitted.Contains "withSchema Schema.int") @>
         test <@ emitted.Contains "construct (fun sku quantity -> Order.create sku quantity)" @>

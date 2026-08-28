@@ -20,17 +20,18 @@ module ProfileV1 =
 
     open Reified.SchemaDSL
     open Reified.ConstraintDSL
+    open type ProfileV1
 
     /// The schema declared by profile.contract (Profile.v1).
-    let schema : Schema<ProfileV1> =
+    let schema =
         schema<ProfileV1> {
-            fieldAs "name" (fun (value: ProfileV1) -> value.Name) {
+            fieldAs "name" _.Name {
                 constraints [
                     minLength 1
                     maxLength 100
                 ]
             }
-            fieldAs "email" (fun (value: ProfileV1) -> value.Email) {
+            fieldAs "email" _.Email {
                 constrain email
             }
             construct (fun name email ->
@@ -62,20 +63,21 @@ module Profile =
 
     open Reified.SchemaDSL
     open Reified.ConstraintDSL
+    open type Profile
 
     /// The schema declared by profile.contract (Profile.v2).
-    let schema : Schema<Profile> =
+    let schema =
         schema<Profile> {
-            fieldAs "name" (fun (value: Profile) -> value.Name) {
+            fieldAs "name" _.Name {
                 constraints [
                     minLength 1
                     maxLength 100
                 ]
             }
-            fieldAs "email" (fun (value: Profile) -> value.Email) {
+            fieldAs "email" _.Email {
                 constrain email
             }
-            fieldAs "marketing_opt_in" (fun (value: Profile) -> value.MarketingOptIn) {
+            fieldAs "marketing_opt_in" _.MarketingOptIn {
                 withSchema (Schema.bool |> Schema.withDefault false)
             }
             construct (fun name email marketingOptIn ->

@@ -20,17 +20,18 @@ module Geo =
 
     open Reified.SchemaDSL
     open Reified.ConstraintDSL
+    open type Geo
 
     /// The schema declared by geo.contract (Geo.v1).
-    let schema : Schema<Geo> =
+    let schema =
         schema<Geo> {
-            fieldAs "lat" (fun (value: Geo) -> value.Lat) {
+            fieldAs "lat" _.Lat {
                 constraints [
                     atLeast (-90m)
                     atMost 90m
                 ]
             }
-            fieldAs "lon" (fun (value: Geo) -> value.Lon) {
+            fieldAs "lon" _.Lon {
                 constraints [
                     atLeast (-180m)
                     atMost 180m

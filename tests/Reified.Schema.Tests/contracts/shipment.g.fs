@@ -13,11 +13,12 @@ module PickupPoint =
 
     open Reified.SchemaDSL
     open Reified.ConstraintDSL
+    open type PickupPoint
 
     /// The schema declared by shipment.fs (PickupPoint.v1).
-    let schema : Schema<PickupPoint> =
+    let schema =
         schema<PickupPoint> {
-            fieldAs "code" (fun (value: PickupPoint) -> value.Code)
+            fieldAs "code" _.Code
             construct (fun code ->
                 { PickupPoint.Code = code })
         }
@@ -38,11 +39,12 @@ module CourierDelivery =
 
     open Reified.SchemaDSL
     open Reified.ConstraintDSL
+    open type CourierDelivery
 
     /// The schema declared by shipment.fs (CourierDelivery.v1).
-    let schema : Schema<CourierDelivery> =
+    let schema =
         schema<CourierDelivery> {
-            fieldAs "trackingUrl" (fun (value: CourierDelivery) -> value.TrackingUrl)
+            fieldAs "trackingUrl" _.TrackingUrl
             construct (fun trackingUrl ->
                 { CourierDelivery.TrackingUrl = trackingUrl })
         }
@@ -63,20 +65,19 @@ module ShipmentV1 =
 
     open Reified.SchemaDSL
     open Reified.ConstraintDSL
+    open type ShipmentV1
 
     /// The schema declared by shipment.fs (Shipment.v1).
-    let schema : Schema<ShipmentV1> =
+    let schema =
         schema<ShipmentV1> {
-            fieldAs "reference" (fun (value: ShipmentV1) -> value.Reference) {
+            fieldAs "reference" _.Reference {
                 withSchema (Schema.text |> Schema.describe "Public shipment reference.")
                 constrain (pattern "^SH-[0-9]+$")
             }
-            fieldAs "notifyEmail" (fun (value: ShipmentV1) -> value.NotifyEmail) {
+            fieldAs "notifyEmail" _.NotifyEmail {
                 constrain email
             }
-            fieldAs "items" (fun (value: ShipmentV1) -> value.Items) {
-                withSchema (Schema.mapWith Schema.int)
-            }
+            fieldAs "items" _.Items
             construct (fun reference notifyEmail items ->
                 { ShipmentV1.Reference = reference
                   ShipmentV1.NotifyEmail = notifyEmail
@@ -112,6 +113,7 @@ module Shipment =
 
     open Reified.SchemaDSL
     open Reified.ConstraintDSL
+    open type Shipment
 
     let private priorityCases =
         [ EnumCase.create "standard" ShipmentPriority.Standard
@@ -119,38 +121,35 @@ module Shipment =
           EnumCase.create "same-day" ShipmentPriority.SameDay ]
 
     /// The schema declared by shipment.fs (Shipment.v2).
-    let schema : Schema<Shipment> =
+    let schema =
         schema<Shipment> {
-            fieldAs "reference" (fun (value: Shipment) -> value.Reference) {
+            fieldAs "reference" _.Reference {
                 withSchema (Schema.text |> Schema.describe "Public shipment reference.")
                 constrain (pattern "^SH-[0-9]+$")
             }
-            fieldAs "notify_email" (fun (value: Shipment) -> value.NotifyEmail) {
+            fieldAs "notify_email" _.NotifyEmail {
                 constrain email
             }
-            fieldAs "items" (fun (value: Shipment) -> value.Items) {
-                withSchema (Schema.mapWith Schema.int)
-            }
-            fieldAs "tags" (fun (value: Shipment) -> value.Tags) {
-                withSchema (Schema.listWith Schema.text)
+            fieldAs "items" _.Items
+            fieldAs "tags" _.Tags {
                 constraints [
                     minLength 1
                     Constraint.distinct
                 ]
             }
-            fieldAs "weightKg" (fun (value: Shipment) -> value.WeightKg) {
+            fieldAs "weightKg" _.WeightKg {
                 constrain (atLeast 0.5m)
             }
-            fieldAs "priority" (fun (value: Shipment) -> value.Priority) {
+            fieldAs "priority" _.Priority {
                 withSchema (Schema.enum priorityCases |> Schema.withDefault ShipmentPriority.Express)
             }
-            fieldAs "delivery" (fun (value: Shipment) -> value.Delivery) {
+            fieldAs "delivery" _.Delivery {
                 withSchema DeliveryMethod.schema
             }
-            fieldAs "origin" (fun (value: Shipment) -> value.Origin) {
+            fieldAs "origin" _.Origin {
                 withSchema (Schema.option PickupPoint.schema)
             }
-            fieldAs "boxes" (fun (value: Shipment) -> value.Boxes) {
+            fieldAs "boxes" _.Boxes {
                 withSchema (Schema.int |> Schema.withDefault 1)
                 constrain (atLeast 1)
             }

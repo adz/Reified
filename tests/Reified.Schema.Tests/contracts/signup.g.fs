@@ -32,41 +32,39 @@ module Signup =
 
     open Reified.SchemaDSL
     open Reified.ConstraintDSL
+    open type Signup
 
     let private planCases =
         [ EnumCase.create "free" SignupPlan.Free
           EnumCase.create "pro" SignupPlan.Pro ]
 
     /// The schema declared by signup.contract (Signup.v1).
-    let schema : Schema<Signup> =
+    let schema =
         schema<Signup> {
-            fieldAs "email" (fun (value: Signup) -> value.Email) {
+            fieldAs "email" _.Email {
                 withSchema (Schema.text |> Schema.describe "Primary contact address.")
                 constraints [
                     email
                     maxLength 254
                 ]
             }
-            fieldAs "display_name" (fun (value: Signup) -> value.DisplayName) {
+            fieldAs "display_name" _.DisplayName {
                 withSchema (Schema.option (Schema.text |> Schema.constrainAll [ Constraint.minLength (1); Constraint.maxLength (64) ]))
             }
-            fieldAs "age" (fun (value: Signup) -> value.Age) {
+            fieldAs "age" _.Age {
                 constrain (atLeast 13)
             }
-            fieldAs "plan" (fun (value: Signup) -> value.Plan) {
+            fieldAs "plan" _.Plan {
                 withSchema (Schema.enum planCases |> Schema.withDefault SignupPlan.Free)
             }
-            fieldAs "tags" (fun (value: Signup) -> value.Tags) {
-                withSchema (Schema.listWith Schema.text)
+            fieldAs "tags" _.Tags {
                 constraints [
                     maxLength 8
                     Constraint.distinct
                 ]
             }
-            fieldAs "limits" (fun (value: Signup) -> value.Limits) {
-                withSchema (Schema.mapWith Schema.int)
-            }
-            fieldAs "location" (fun (value: Signup) -> value.Location) {
+            fieldAs "limits" _.Limits
+            fieldAs "location" _.Location {
                 withSchema (Schema.option Geo.schema)
             }
             construct (fun email displayName age plan tags limits location ->

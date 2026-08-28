@@ -469,7 +469,7 @@ type Template =
 
         let template = files |> List.find (fun file -> file.FilePath = "templates.fs")
         let emitted = Emitter.emit "Fallback" files template
-        test <@ emitted.Contains "Schema<My.Workflow.Templates.Template>" @>
+        test <@ emitted.Contains "schema<My.Workflow.Templates.Template>" @>
         test <@ emitted.Contains "My.Workflow.VariablesSchemas.Variable.schema" @>
         test <@ emitted.Contains "My.Workflow.Variables.VariableType.Text" @>
 
@@ -653,9 +653,11 @@ type Category =
 
         test <@ Resolver.resolve [ file ] = [] @>
         let emitted = Emitter.emit "Fallback" [ file ] file
+        test <@ emitted.Contains "// Recursive schemas intentionally defer self-reference" @>
+        test <@ emitted.Contains "#nowarn \"40\"" @>
         test <@ emitted.Contains "let rec schema" @>
         test <@ emitted.Contains "Schema.listWith (Schema.defer (fun () -> schema))" @>
-        test <@ not (emitted.Contains "type Category") @>
+        test <@ not (emitted.Contains "\ntype Category =") @>
 
     [<Fact>]
     let ``chain overrides emit against the user's actual type names`` () =
@@ -676,7 +678,7 @@ type Order = { Sku: string; Quantity: int }
         test <@ Resolver.resolve [ file ] = [] @>
         let emitted = Emitter.emit "Fallback" [ file ] file
         test <@ emitted.Contains "module LegacyOrder" @>
-        test <@ emitted.Contains "Schema<LegacyOrder>" @>
+        test <@ emitted.Contains "schema<LegacyOrder>" @>
         test <@ emitted.Contains "(migrateV1ToV2: LegacyOrder -> Result<Order, MigrationError>)" @>
         test <@ emitted.Contains "|> Contract.supersedes 1 LegacyOrder.schema migrateV1ToV2" @>
         test <@ emitted.Contains "namespace My.Wire" @>

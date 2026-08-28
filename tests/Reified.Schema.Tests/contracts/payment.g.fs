@@ -19,11 +19,12 @@ module Card =
 
     open Reified.SchemaDSL
     open Reified.ConstraintDSL
+    open type Card
 
     /// The schema declared by payment.contract (Card.v1).
-    let schema : Schema<Card> =
+    let schema =
         schema<Card> {
-            fieldAs "number" (fun (value: Card) -> value.Number) {
+            fieldAs "number" _.Number {
                 constraints [
                     minLength 12
                     maxLength 19
@@ -55,11 +56,12 @@ module Invoice =
 
     open Reified.SchemaDSL
     open Reified.ConstraintDSL
+    open type Invoice
 
     /// The schema declared by payment.contract (Invoice.v1).
-    let schema : Schema<Invoice> =
+    let schema =
         schema<Invoice> {
-            fieldAs "reference" (fun (value: Invoice) -> value.Reference) {
+            fieldAs "reference" _.Reference {
                 constrain (minLength 1)
             }
             construct (fun reference ->
@@ -94,15 +96,16 @@ module Payment =
 
     open Reified.SchemaDSL
     open Reified.ConstraintDSL
+    open type Payment
 
     let private sourceCases =
         [ UnionCase.fields "card" PaymentSource.Card (function PaymentSource.Card payload -> Some payload | _ -> None) Card.schema
           UnionCase.fields "invoice" PaymentSource.Invoice (function PaymentSource.Invoice payload -> Some payload | _ -> None) Invoice.schema ]
 
     /// The schema declared by payment.contract (Payment.v1).
-    let schema : Schema<Payment> =
+    let schema =
         schema<Payment> {
-            fieldAs "source" (fun (value: Payment) -> value.Source) {
+            fieldAs "source" _.Source {
                 withSchema (Schema.unionWith (UnionRepresentation.Internal "kind") sourceCases)
             }
             construct (fun source ->
