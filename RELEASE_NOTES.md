@@ -1,5 +1,12 @@
 # Release Notes
 
+## 0.6.1 - Unreleased
+
+### Schema generation
+
+- Generated record schemas use type-scoped field labels and omit redundant result annotations and canonical list/map schemas.
+- Generated files suppress the expected recursive-schema initialization warning only when they contain a recursive schema.
+
 ## 0.6.0 - 2026-08-27
 
 ### Fable packages

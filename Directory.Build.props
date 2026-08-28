@@ -7,7 +7,7 @@
 
     <!-- Every package in this repository ships on one release train. The Flow train moved out with
          Flow itself: a tag here says nothing about a version in the Axial repository. -->
-    <ReifiedVersion>0.6.0</ReifiedVersion>
+    <ReifiedVersion>0.6.1</ReifiedVersion>
 
     <Version Condition="'$(Version)' == ''">$(ReifiedVersion)</Version>
     <NuGetAudit>false</NuGetAudit>
