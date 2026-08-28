@@ -66,6 +66,33 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          releases_file="$(mktemp)"
+          trap 'rm -f "$releases_file"' EXIT
+
+          fetch_releases() {
+            gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/releases?per_page=100" > "$releases_file"
+          }
+
+          attempts=1
+          while true; do
+            fetch_releases
+
+            if [[ -z "${{ inputs.version }}" ]] || jq -e --arg version "v${{ inputs.version }}" \
+              '.[][] | select(.tag_name == $version) | .assets[] | select(.name == ("Reified-" + ($version | ltrimstr("v")) + "-livedocs.zip") and (.digest | startswith("sha256:")))' \
+              "$releases_file" >/dev/null; then
+              break
+            fi
+
+            if (( attempts == 5 )); then
+              echo "Release capsule for ${{ inputs.version }} was not visible after $attempts attempts." >&2
+              exit 1
+            fi
+
+            echo "Release capsule for ${{ inputs.version }} is not visible yet; retrying in 5 seconds."
+            attempts=$((attempts + 1))
+            sleep 5
+          done
+
           while IFS=$'\t' read -r version capsule_url capsule_sha256; do
             existing="$(jq -r --arg version "$version" '.Entries[] | select(.Version == $version) | [.CapsuleUrl, .CapsuleSha256] | @tsv' .livedocs/history.json)"
 
@@ -82,8 +109,8 @@ jobs:
               echo "History already contains the verified $version capsule."
             fi
           done < <(
-            gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" | jq -r '
-              [ .[]
+            jq -r '
+              [ .[][]
                 | select(.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+$"))
                 | (.tag_name | ltrimstr("v")) as $version
                 | .assets[]
@@ -93,17 +120,31 @@ jobs:
               ]
               | sort_by(.version | split(".") | map(tonumber))[]
               | [.version, .url, .sha256]
-              | @tsv'
+              | @tsv' "$releases_file"
           )
 
           if [[ -n "${{ inputs.version }}" ]]; then
+            if [[ -z "${{ inputs.capsule_url }}" || -z "${{ inputs.capsule_sha256 }}" ]]; then
+              echo "version, capsule_url, and capsule_sha256 must be dispatched together." >&2
+              exit 1
+            fi
+
             expected="${{ inputs.capsule_url }}"$'\t'"${{ inputs.capsule_sha256 }}"
             actual="$(jq -r --arg version "${{ inputs.version }}" '.Entries[] | select(.Version == $version) | [.CapsuleUrl, .CapsuleSha256] | @tsv' .livedocs/history.json)"
-            if [[ "$actual" != "$expected" ]]; then
-              echo "Dispatched release ${{ inputs.version }} was not found with the expected capsule." >&2
+            current="$(jq -r '.CurrentVersion' .livedocs/history.json)"
+            if [[ "$actual" != "$expected" || "$current" != "${{ inputs.version }}" ]]; then
+              echo "Dispatched release ${{ inputs.version }} was not installed as the current version with the expected capsule." >&2
               exit 1
             fi
           fi
+
+      - name: Restore LiveDocs processing cache
+        uses: actions/cache@v4
+        with:
+          path: .livedocs/cache
+          key: livedocs-${{ runner.os }}-${{ hashFiles('.config/dotnet-tools.json', '.livedocs/history.json') }}
+          restore-keys: |
+            livedocs-${{ runner.os }}-
 
       - name: Build versioned docs site
         run: dotnet livedocs build-history .livedocs/history.json --interactive false --banner false
