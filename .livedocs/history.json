@@ -1,12 +1,42 @@
 {
   "SchemaVersion": 1,
-  "CurrentVersion": "0.2.0",
+  "CurrentVersion": "0.6.1",
   "Entries": [
     {
       "Version": "0.2.0",
       "CapsulePath": null,
       "CapsuleUrl": "https://github.com/adz/Reified/releases/download/v0.2.0/Reified-0.2.0-livedocs.zip",
       "CapsuleSha256": "a4cdc8235876082eead9ae1665cb8eab7f0ce308951f124c52f5343b22c3dced"
+    },
+    {
+      "Version": "0.3.0",
+      "CapsulePath": null,
+      "CapsuleUrl": "https://github.com/adz/Reified/releases/download/v0.3.0/Reified-0.3.0-livedocs.zip",
+      "CapsuleSha256": "ba610498fd68849c043bae183aebb7b7248cf17536d2744bb0f8bec1af776224"
+    },
+    {
+      "Version": "0.4.0",
+      "CapsulePath": null,
+      "CapsuleUrl": "https://github.com/adz/Reified/releases/download/v0.4.0/Reified-0.4.0-livedocs.zip",
+      "CapsuleSha256": "8e7072763d3f04c76872bd92428ba20dbbabfb9719566221e6ff717cb62a7522"
+    },
+    {
+      "Version": "0.5.0",
+      "CapsulePath": null,
+      "CapsuleUrl": "https://github.com/adz/Reified/releases/download/v0.5.0/Reified-0.5.0-livedocs.zip",
+      "CapsuleSha256": "fd6563cd7fa484360b67008a7e178f7a8a666e43a5b902a12cfa4239214a1869"
+    },
+    {
+      "Version": "0.6.0",
+      "CapsulePath": null,
+      "CapsuleUrl": "https://github.com/adz/Reified/releases/download/v0.6.0/Reified-0.6.0-livedocs.zip",
+      "CapsuleSha256": "41ee119223e9db49e2a676c275ad82b39a0223803b4d9266e503a8c066a238e1"
+    },
+    {
+      "Version": "0.6.1",
+      "CapsulePath": null,
+      "CapsuleUrl": "https://github.com/adz/Reified/releases/download/v0.6.1/Reified-0.6.1-livedocs.zip",
+      "CapsuleSha256": "8e2f21a4b297bdab7b4d141565d2d065c58592193b3808ee90b68b8d87ecc51d"
     }
   ]
 }

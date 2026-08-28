@@ -83,8 +83,10 @@ For a tag build:
   capsule to the committed history baseline for the build and publishes the version switcher
 - it runs a separate `publish-nuget` job that publishes the package artifacts to nuget.org
 
-The committed `.livedocs/history.json` is the baseline used by branch and manual Pages builds. After a release, update
-that baseline with the released capsule's immutable GitHub URL and SHA-256 before the next release-preparation commit.
+The Pages workflow synchronizes every semantic-versioned `Reified-<version>-livedocs.zip` asset from GitHub Releases
+into `.livedocs/history.json` before each build. GitHub's asset digest supplies the SHA-256, so both release dispatches
+and later `main` builds retain the complete published history. The committed history remains an offline baseline and
+should be refreshed periodically, but publishing a release does not depend on a follow-up commit.
 
 For manual `workflow_dispatch`, leave `release_tag` empty for an `0.0.0-rcDev` verification run. Supplying an existing
 tag such as `v0.2.0` checks out that tag and repairs its GitHub Release assets and versioned documentation without

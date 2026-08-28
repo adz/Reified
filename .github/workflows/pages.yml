@@ -61,26 +61,48 @@ jobs:
       - name: Build
         run: dotnet build Reified.slnx --configuration Release --no-restore --nologo -v minimal
 
-      - name: Add the newly released capsule to this history build
-        if: inputs.version != ''
+      - name: Synchronize release capsules into this history build
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          version="${{ inputs.version }}"
-          capsule_url="${{ inputs.capsule_url }}"
-          capsule_sha256="${{ inputs.capsule_sha256 }}"
-          existing="$(jq -r --arg version "$version" '.Entries[] | select(.Version == $version) | [.CapsuleUrl, .CapsuleSha256] | @tsv' .livedocs/history.json)"
+          while IFS=$'\t' read -r version capsule_url capsule_sha256; do
+            existing="$(jq -r --arg version "$version" '.Entries[] | select(.Version == $version) | [.CapsuleUrl, .CapsuleSha256] | @tsv' .livedocs/history.json)"
 
-          if [[ -z "$existing" ]]; then
-            dotnet livedocs history-add "$version" \
-              --url "$capsule_url" \
-              --sha256 "$capsule_sha256" \
-              --interactive false \
-              --banner false
-          elif [[ "$existing" != "$capsule_url"$'\t'"$capsule_sha256" ]]; then
-            echo "History already contains $version with a different capsule URL or checksum." >&2
-            exit 1
-          else
-            echo "History already contains the verified $version capsule."
+            if [[ -z "$existing" ]]; then
+              dotnet livedocs history-add "$version" \
+                --url "$capsule_url" \
+                --sha256 "$capsule_sha256" \
+                --interactive false \
+                --banner false
+            elif [[ "$existing" != "$capsule_url"$'\t'"$capsule_sha256" ]]; then
+              echo "History already contains $version with a different capsule URL or checksum." >&2
+              exit 1
+            else
+              echo "History already contains the verified $version capsule."
+            fi
+          done < <(
+            gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" | jq -r '
+              [ .[]
+                | select(.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+$"))
+                | (.tag_name | ltrimstr("v")) as $version
+                | .assets[]
+                | select(.name == ("Reified-" + $version + "-livedocs.zip"))
+                | select(.digest | startswith("sha256:"))
+                | { version: $version, url: .browser_download_url, sha256: (.digest | ltrimstr("sha256:")) }
+              ]
+              | sort_by(.version | split(".") | map(tonumber))[]
+              | [.version, .url, .sha256]
+              | @tsv'
+          )
+
+          if [[ -n "${{ inputs.version }}" ]]; then
+            expected="${{ inputs.capsule_url }}"$'\t'"${{ inputs.capsule_sha256 }}"
+            actual="$(jq -r --arg version "${{ inputs.version }}" '.Entries[] | select(.Version == $version) | [.CapsuleUrl, .CapsuleSha256] | @tsv' .livedocs/history.json)"
+            if [[ "$actual" != "$expected" ]]; then
+              echo "Dispatched release ${{ inputs.version }} was not found with the expected capsule." >&2
+              exit 1
+            fi
           fi
 
       - name: Build versioned docs site
