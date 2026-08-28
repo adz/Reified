@@ -55,7 +55,7 @@ and test-data generation interpret the same field names, value shapes, and const
 
 ## Start here
 
-Start with the [Schema quickstart](/schema/quickstart.html). It declares one record schema, parses structured input,
+The [Schema quickstart](/schema/quickstart.html) declares one record schema, parses structured input,
 reports every field failure with its path, and compiles the same declaration into a JSON codec.
 
 After the quickstart, use these guides as needed:

@@ -98,7 +98,7 @@ together consistently.</p>
 
 <div class="docs-home-routes">
 
-- **Building a structured boundary?** Start with [Schema](/schema/index.html).
+- **Structured boundaries:** [Schema](/schema/index.html).
 - **Only need one piece?** Choose [Constraints](/constraints/index.html),
   [Refined](/refined/index.html), [Parsing](/parsing/index.html), or [Data](/data/index.html).
 - **Composing ordinary F# failures?** Use [Result handling](/result-handling/index.html) independently.

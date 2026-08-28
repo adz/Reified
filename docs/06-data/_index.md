@@ -14,7 +14,7 @@ targetFramework: net8.0
 map directly to JSON, but the same model works well for test fixtures, configuration, command-line input, form values,
 events, and other tree-shaped data.
 
-Start with one readable value, derive related cases without copying it, and test either the complete result or only the
+Build one readable value, derive related cases without copying it, and test either the complete result or only the
 fields that matter.
 
 This is useful when tests otherwise accumulate large JSON strings, nested constructors, or near-identical fixtures.

@@ -9,7 +9,7 @@ targetFramework: net8.0
 
 # Where to go next
 
-Start with Schema for a whole structured boundary. Otherwise, install the package that provides the API you need.
+Use Schema for a whole structured boundary. Otherwise, install the package that provides the API you need.
 
 | Capability | Use it when |
 | --- | --- |

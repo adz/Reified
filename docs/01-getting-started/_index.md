@@ -31,7 +31,7 @@ Refinements ┘             └──> contract tooling
 
 </div>
 
-Start with Schema when structured input must become a trusted model. Constraint, Parse, Data, and Refinements can each
+Use Schema when structured input must become a trusted model. Constraint, Parse, Data, and Refinements can each
 be used alone without Schema, but they are designed to work together consistently.
 
 ```bash
@@ -40,7 +40,7 @@ dotnet add package Reified.Schema.Json
 ```
 
 
-Start with an ordinary record. Nothing about it is Reified-specific:
+The model is an ordinary record with no Reified-specific members:
 
 ```fsharp
 type Signup =

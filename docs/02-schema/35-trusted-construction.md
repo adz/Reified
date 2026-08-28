@@ -26,7 +26,7 @@ There are four useful levels:
 3. A private refined field preserves one field-local invariant wherever the value is used.
 4. A private aggregate plus controlled transitions preserves relationships between fields.
 
-Start with the simplest level that prevents a real problem in the application. Stronger representations add more
+Choose the simplest level that prevents a real application problem. Stronger representations add more
 construction and update functions, so use them where callers benefit from relying on the guarantee.
 
 ## The limit

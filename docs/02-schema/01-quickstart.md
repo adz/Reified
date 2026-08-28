@@ -28,7 +28,7 @@ open Reified.SchemaDSL
 
 ## 1. Plain fields
 
-Start with primitives and nothing else:
+A schema can consist of primitives alone:
 
 ```fsharp
 type Signup =

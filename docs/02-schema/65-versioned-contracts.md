@@ -11,7 +11,7 @@ A `Contract<'model>` is a chain of frozen wire schemas and explicit migrations. 
 queued messages, or events must remain readable after their wire shape changes. Contract versioning belongs at the
 wire boundary; map the current wire value into a strict domain type afterwards.
 
-Schema derivation is documented separately. Start with [Derived Schemas](/schema/derivation/index.html) to generate schemas from
+Schema derivation is documented separately. [Derived Schemas](/schema/derivation/index.html) explains how to generate schemas from
 ordinary `[<DeriveSchema>]` F# records, configure MSBuild, and see every supported attribute.
 
 ## Wire and domain models

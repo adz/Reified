@@ -15,7 +15,7 @@ field's path.
 `Reified.Refinements` has no Schema dependency. Domain types can define refinements without choosing a wire format; an
 application that uses `Reified.Schema` decides where those refinements participate in structured decoding and encoding.
 
-If Schema is new to you, start with [the Schema quickstart](/schema/quickstart.html) for fields,
+The [Schema quickstart](/schema/quickstart.html) introduces fields,
 record construction, and path-aware diagnostics. Then read [Refined Values in Schema](/schema/refined-values.html) for canonical field schemas, raw-value constraints, explicit refinement, and
 schema-local restrictions. This page is the shorter API-oriented view of that integration.
 

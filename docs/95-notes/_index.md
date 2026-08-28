@@ -17,7 +17,7 @@ These pages answer questions that come up *after* you have used the libraries: w
 what it costs, and why the guarantees hold. None of them is a step in the learning path, so they sit here rather
 than inside a product area.
 
-If you have not written a declaration yet, start with [Getting started](/getting-started/index.html) instead.
+If you have not written a declaration yet, read [Getting started](/getting-started/index.html) instead.
 
 ## Pages
 

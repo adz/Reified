@@ -8,7 +8,7 @@ targetFramework: net8.0
 
 # Union Schemas
 
-Start with the three handwritten tools. They make the default wire model explicit:
+Three handwritten tools make the default wire model explicit:
 
 - `Schema.enum` writes an all-fieldless union as a string;
 - `Schema.convert` writes a single-case domain wrapper as its underlying value;

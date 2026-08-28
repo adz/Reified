@@ -12,4 +12,4 @@ Other interpreters read the same declaration without changing its meaning. `Insp
 A schema guarantees values produced through the schema. It cannot stop callers constructing a public record directly.
 Use refined fields or a private model when the invariant must hold for every value of the type.
 
-Start with the [Schema quickstart](/schema/quickstart.html), then use the members below when composing schemas directly.
+The [Schema quickstart](/schema/quickstart.html) introduces schema composition; the members below provide the complete surface.

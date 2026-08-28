@@ -123,6 +123,10 @@ jobs:
               | @tsv' "$releases_file"
           )
 
+          jq '.Entries |= sort_by(.Version | split(".") | map(tonumber)) | reverse' \
+            .livedocs/history.json > .livedocs/history.sorted.json
+          mv .livedocs/history.sorted.json .livedocs/history.json
+
           if [[ -n "${{ inputs.version }}" ]]; then
             if [[ -z "${{ inputs.capsule_url }}" || -z "${{ inputs.capsule_sha256 }}" ]]; then
               echo "version, capsule_url, and capsule_sha256 must be dispatched together." >&2
@@ -147,7 +151,21 @@ jobs:
             livedocs-${{ runner.os }}-
 
       - name: Build versioned docs site
-        run: dotnet livedocs build-history .livedocs/history.json --interactive false --banner false
+        shell: bash
+        run: |
+          for attempt in 1 2 3; do
+            if dotnet livedocs build-history .livedocs/history.json --interactive false --banner false; then
+              exit 0
+            fi
+
+            if (( attempt == 3 )); then
+              echo "LiveDocs history build failed after $attempt attempts." >&2
+              exit 1
+            fi
+
+            echo "LiveDocs history build failed; retrying in 10 seconds."
+            sleep 10
+          done
 
       - name: Prepare Pages artifact
         run: touch output/.nojekyll

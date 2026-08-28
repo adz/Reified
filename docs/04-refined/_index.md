@@ -75,7 +75,7 @@ Read the underlying value through the `Value` member or the module's `value` fun
 
 ## Where the invariant pays
 
-Start with the smallest version of the contrast — one partial operation becoming total:
+The smallest contrast is one partial operation becoming total:
 
 ```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
 List.max lines            // throws on an empty list

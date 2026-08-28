@@ -24,5 +24,5 @@ private type is useful when many callers must rely on the same invariant without
 - [Test schema guarantees](/data/testing-schema-guarantees.html) — study the repository-only FsCheck adapter pattern for
   testing constructors, transitions, codecs, and migrations.
 
-Start with [Construction Guarantees](/schema/trusted-construction.html) if you are deciding whether a public record, refined
-field, or private aggregate fits the model.
+[Construction Guarantees](/schema/trusted-construction.html) explains when a public record, refined field, or private
+aggregate fits the model.
