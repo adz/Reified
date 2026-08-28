@@ -499,7 +499,12 @@ module Emitter =
                         | ExternalRecord _
                         | ExternalEmpty -> ()
 
-                    let unionTypeName = localName typeName
+                    // This module is emitted at file top level - not inside a contract module that gets
+                    // `open type` for its own type - so the raw union type is never in scope. Fully
+                    // qualifying it here is the only always-valid option (see the enum/validate/parse fix
+                    // for the same reasoning: a local `open` isn't legal at every position that would need
+                    // one, and this generated module has no per-binding scope to confine one to anyway).
+                    let unionTypeName = typeName
                     let unionModuleName = localName typeName
                     line ""
                     line "[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]"

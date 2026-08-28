@@ -109,6 +109,38 @@ type Ticket =
         test <@ not (emitted.Contains "open My.Other") @>
 
     [<Fact>]
+    let ``a union schema module fully qualifies the raw union type it constructs`` () =
+        // emitUnionSchema is emitted at file top level, never inside a contract's own module (which
+        // gets `open type` for its own type) - so the raw union type it constructs/matches against is
+        // never in scope under any name. Compiled and confirmed against the real assemblies: with a
+        // `module X.Y` (not `namespace`) source file, a short name here is FS0039 "not defined".
+        let wireSource = """
+module My.Wire
+open Reified.DerivedSchema
+
+[<DeriveUnion "kind">]
+type BindingSource =
+    | Literal of value: string
+    | Ambient
+
+[<DeriveSchema>]
+type Ticket = { Source: BindingSource }
+"""
+
+        let files =
+            Records.parseSet SchemaNaming.CamelCase [ "wire.fs", wireSource ]
+            |> List.map (fun (_, result) ->
+                match result with
+                | Ok file -> file
+                | Error diagnostics -> failwithf "Expected a clean parse, got %A" diagnostics)
+
+        let wire = files |> List.find (fun file -> file.FilePath = "wire.fs")
+        let emitted = Emitter.emit "Fallback" files wire
+        test <@ emitted.Contains "My.Wire.BindingSource.Literal(payload.value)" @>
+        test <@ emitted.Contains "My.Wire.BindingSource.Ambient" @>
+        test <@ emitted.Contains "let schema : Schema<My.Wire.BindingSource>" @>
+
+    [<Fact>]
     let ``a bare marked record lowers to a shape-only version-1 contract`` () =
         let file =
             parse
@@ -693,7 +725,7 @@ type Template =
 
         test <@ emitted.Split("module BindingSource =").Length - 1 = 1 @>
         test <@ emitted.Split("module BindingPolicy =").Length - 1 = 1 @>
-        test <@ emitted.Contains "let schema : Schema<BindingSource>" @>
+        test <@ emitted.Contains "let schema : Schema<My.Workflow.BindingSource>" @>
         test <@ emitted.Contains "type private LiteralCasePayload" @>
         test <@ emitted.Contains "fieldAs \"value\" _.value" @>
         test <@ not (emitted.Contains "schema<{|") @>
