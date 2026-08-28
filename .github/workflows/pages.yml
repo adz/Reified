@@ -123,7 +123,7 @@ jobs:
               | @tsv' "$releases_file"
           )
 
-          jq '.Entries |= sort_by(.Version | split(".") | map(tonumber)) | reverse' \
+          jq '.Entries |= (sort_by(.Version | split(".") | map(tonumber)) | reverse)' \
             .livedocs/history.json > .livedocs/history.sorted.json
           mv .livedocs/history.sorted.json .livedocs/history.json
 
