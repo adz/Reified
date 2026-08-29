@@ -142,24 +142,9 @@ target "CheckReleaseNotes" (fun () ->
     if configuredVersion () <> version || File.ReadAllText("NEXT_VERSION").Trim() <> version || not (File.Exists $"dev-docs/releases/{version}.md") then
         failwith $"Directory.Build.props, NEXT_VERSION, and release notes are not prepared for {version}")
 let mergeReleasedCapsules manifest expected =
-    let releases = Path.GetTempFileName()
-    try
-        let repository = Environment.GetEnvironmentVariable "GITHUB_REPOSITORY"
-        if String.IsNullOrWhiteSpace repository then failwith "GITHUB_REPOSITORY is required for release history discovery."
-        let mutable complete = false
-        for attempt in 1..5 do
-            if not complete then
-                let code, json = runCapture "gh" [ "api"; "--paginate"; "--slurp"; $"repos/{repository}/releases?per_page=100" ] []
-                if code <> 0 && json.Contains "GH_TOKEN" then
-                    failwith "GitHub CLI authentication is unavailable. Set GH_TOKEN for the Pages target."
-                if code = 0 then
-                    File.WriteAllText(releases, json)
-                    let check, _ = runCapture "dotnet" ([ "run"; "--project"; "tools/Reified.ReleaseChecks"; "--"; "merge-releases"; manifest; releases ] @ expected) []
-                    if check = 0 then complete <- true
-                if not complete && attempt < 5 then Threading.Thread.Sleep 5000
-        if not complete then failwith "Released capsules were not visible with the expected metadata after five attempts."
-    finally
-        File.Delete releases
+    let repository = Environment.GetEnvironmentVariable "GITHUB_REPOSITORY"
+    if String.IsNullOrWhiteSpace repository then failwith "GITHUB_REPOSITORY is required for release history discovery."
+    dotnet ([ "livedocs"; "history-sync"; repository; "--output"; manifest; "--interactive"; "false"; "--banner"; "false" ] @ expected)
 
 target "AddCandidateHistory" (fun () ->
     let version = releaseVersion ()
@@ -178,19 +163,11 @@ target "SyncHistory" (fun () ->
     let expected =
         match supplied "RELEASE_VERSION", supplied "RELEASE_CAPSULE_URL", supplied "RELEASE_CAPSULE_SHA256" with
         | None, None, None -> []
-        | Some version, Some url, Some sha -> [ version; url; sha ]
+        | Some version, Some url, Some sha -> [ "--version"; version; "--url"; url; "--sha256"; sha ]
         | _ -> failwith "RELEASE_VERSION, RELEASE_CAPSULE_URL, and RELEASE_CAPSULE_SHA256 must be supplied together."
     mergeReleasedCapsules (historyPath ()) expected)
-target "SortHistory" (fun () -> dotnet [ "run"; "--project"; "tools/Reified.ReleaseChecks"; "--"; "sort-history"; historyPath () ])
-
 let buildHistory () =
-    let mutable complete = false
-    for attempt in 1..3 do
-        if not complete then
-            let code, _ = runCapture "dotnet" [ "livedocs"; "build-history"; historyPath (); "--interactive"; "false"; "--banner"; "false" ] []
-            if code = 0 then complete <- true
-            elif attempt < 3 then Threading.Thread.Sleep 10000
-    if not complete then failwith "LiveDocs history build failed after three attempts"
+    dotnet [ "livedocs"; "build-history"; historyPath (); "--retry"; "3"; "--interactive"; "false"; "--banner"; "false" ]
 
 let addCompatibilityRoutes () =
     let redirects =
@@ -207,7 +184,7 @@ let addCompatibilityRoutes () =
             File.WriteAllText(path, $"<!doctype html><html><head><meta http-equiv=\"refresh\" content=\"0; url={destination}\"><link rel=\"canonical\" href=\"{destination}\"></head><body><a href=\"{destination}\">Moved</a></body></html>")
 
 let checkPages () =
-    dotnet [ "run"; "--project"; "tools/Reified.ReleaseChecks"; "--"; "check-output"; historyPath (); "output" ]
+    dotnet [ "livedocs"; "verify-output"; historyPath (); "--output"; "output"; "--interactive"; "false"; "--banner"; "false" ]
 
 target "BuildCandidateHistory" buildHistory
 target "AddCandidateCompatibilityRoutes" addCompatibilityRoutes

@@ -20,7 +20,6 @@
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/Reified.Build/Reified.Build.fsproj" />
-    <Project Path="tools/Reified.ReleaseChecks/Reified.ReleaseChecks.fsproj" />
     <Project Path="tools/Reified.SchemaGen/schemagen.fsproj" />
   </Folder>
   <Folder Name="/src/">

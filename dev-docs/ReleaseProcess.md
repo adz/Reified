@@ -7,7 +7,7 @@ This project uses a coordinated pre-1.0 release train.
 - Every package in this repository shares one version before 1.0.
 - The shared version is declared once in `Directory.Build.props`.
 - Packable project files must not declare their own `<Version>`.
-- A tag such as `v0.7.0` produces every public Reified package at version `0.7.0`.
+- A tag such as `v0.8.0` produces every public Reified package at version `0.8.0`.
 - Empty version bumps are acceptable before 1.0 because the package boundaries are still settling and a single documented version is simpler for users.
 - Independent package versioning can be reconsidered once the split is stable, likely at or after 1.0.
 - The Axial repository has its own train. A tag here says nothing about a version there.
@@ -53,8 +53,8 @@ every generated local link and version-switcher entry.
 6. Create and push the tag:
 
 ```bash
-git tag v0.7.0
-git push origin v0.7.0
+git tag v0.8.0
+git push origin v0.8.0
 ```
 
 ## CI release behavior
@@ -73,12 +73,13 @@ After the release candidate passes, the workflow:
 - after the GitHub Release exists, it dispatches Pages with the capsule URL and SHA-256 and waits for that deployment
 - only after Pages succeeds, it runs `publish-nuget` with the already-tested package artifacts
 
-The Pages workflow synchronizes every semantic-versioned `Reified-<version>-livedocs.zip` asset from all pages of
-GitHub Releases into `.livedocs/history.json` before each build. GitHub's asset digest supplies the SHA-256. Release
-dispatches retry briefly while a new asset becomes visible, then require that capsule to be the current version with
-the expected URL and checksum. Later `main` builds therefore retain the complete published history. The workflow also
-caches FsLiveDocs processing data by tool configuration and synchronized history. The committed history remains an
-offline baseline and should be refreshed periodically, but publishing a release does not depend on a follow-up commit.
+FsLiveDocs 0.4 owns release-history synchronization and verification. The Pages workflow uses `history-sync` to
+merge semantic-versioned `Reified-<version>-livedocs.zip` assets from GitHub Releases into its temporary index;
+GitHub's asset digest supplies the SHA-256. A release dispatch requires the new capsule to be current with the exact
+expected URL and checksum. `build-history --retry 3` retries transient capsule downloads, and `verify-output` checks
+entry points, version-switcher order, and generated local links. Later `main` builds therefore retain the complete
+published history. The committed history remains an offline compatibility baseline and should be refreshed
+periodically, but publishing a release does not depend on a follow-up commit.
 
 For manual `workflow_dispatch`, leave `release_tag` empty for an `0.0.0-rcDev` verification run. Supplying an existing
 tag such as `v0.2.0` checks out that tag and repairs its GitHub Release assets and versioned documentation without
