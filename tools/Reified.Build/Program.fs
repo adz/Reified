@@ -150,6 +150,8 @@ let mergeReleasedCapsules manifest expected =
         for attempt in 1..5 do
             if not complete then
                 let code, json = runCapture "gh" [ "api"; "--paginate"; "--slurp"; $"repos/{repository}/releases?per_page=100" ] []
+                if code <> 0 && json.Contains "GH_TOKEN" then
+                    failwith "GitHub CLI authentication is unavailable. Set GH_TOKEN for the Pages target."
                 if code = 0 then
                     File.WriteAllText(releases, json)
                     let check, _ = runCapture "dotnet" ([ "run"; "--project"; "tools/Reified.ReleaseChecks"; "--"; "merge-releases"; manifest; releases ] @ expected) []
@@ -199,8 +201,10 @@ let addCompatibilityRoutes () =
           "api/Reified.Schema.Json.JsonCodecException.html", "Reified.JsonCodecException.html" ]
     for route, destination in redirects do
         let path = Path.Combine("output", route)
-        Directory.CreateDirectory(Path.GetDirectoryName path) |> ignore
-        File.WriteAllText(path, $"<!doctype html><html><head><meta http-equiv=\"refresh\" content=\"0; url={destination}\"><link rel=\"canonical\" href=\"{destination}\"></head><body><a href=\"{destination}\">Moved</a></body></html>")
+        let destinationPath = Path.Combine(Path.GetDirectoryName path, destination)
+        if not (File.Exists path) && File.Exists destinationPath then
+            Directory.CreateDirectory(Path.GetDirectoryName path) |> ignore
+            File.WriteAllText(path, $"<!doctype html><html><head><meta http-equiv=\"refresh\" content=\"0; url={destination}\"><link rel=\"canonical\" href=\"{destination}\"></head><body><a href=\"{destination}\">Moved</a></body></html>")
 
 let checkPages () =
     dotnet [ "run"; "--project"; "tools/Reified.ReleaseChecks"; "--"; "check-output"; historyPath (); "output" ]

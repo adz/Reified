@@ -55,20 +55,6 @@ jobs:
       - name: Restore local tools
         run: dotnet tool restore
 
-      - name: Restore
-        run: dotnet restore
-
-      - name: Build
-        run: dotnet build Reified.slnx --configuration Release --no-restore --nologo -v minimal
-
-      - name: Synchronize release capsules into this history build
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RELEASE_VERSION: ${{ inputs.version }}
-          RELEASE_CAPSULE_URL: ${{ inputs.capsule_url }}
-          RELEASE_CAPSULE_SHA256: ${{ inputs.capsule_sha256 }}
-        run: dotnet run --project tools/Reified.Build -- --target SyncHistory
-
       - name: Restore LiveDocs processing cache
         uses: actions/cache@v4
         with:
@@ -77,7 +63,12 @@ jobs:
           restore-keys: |
             livedocs-${{ runner.os }}-
 
-      - name: Build and verify versioned docs site
+      - name: Synchronize capsules, build history, and verify Pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ inputs.version }}
+          RELEASE_CAPSULE_URL: ${{ inputs.capsule_url }}
+          RELEASE_CAPSULE_SHA256: ${{ inputs.capsule_sha256 }}
         run: dotnet run --project tools/Reified.Build -- --target Pages
 
       - name: Prepare Pages artifact
