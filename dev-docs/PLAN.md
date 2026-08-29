@@ -88,7 +88,7 @@ schema<Customer> {
 `constrain`, type-directed `refine`, and executable `validate`. The typed field chain lets `construct` or
 `constructResult` match the closing constructor by arity and position.
 Build-time generation exists as wire-tier tooling: `[<DeriveSchema>]`-marked records are the
-primary declaration (FCS syntax-only frontend in `src/Reified.Schema.Contracts`, run by `scripts/schemagen` or the
+primary declaration (FCS syntax-only frontend in `src/Reified.Schema.Contracts`, run by `tools/Reified.SchemaGen` or the
 `Reified.Schema.Contracts.Build` MSBuild package), with `.contract` files as the parked secondary form. Generated contracts
 remain wire-tier records; domain models stay hand-written F# rather than becoming a second generated authoring surface.
 

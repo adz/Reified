@@ -14,7 +14,7 @@ This project uses a coordinated pre-1.0 release train.
 
 ## Public package set
 
-`scripts/pack.sh` is the authority; `tests/Reified.Package.Tests` fails if a packable runtime package is missing
+the `Pack` FAKE target is the authority; `tests/Reified.Package.Tests` fails if a packable runtime package is missing
 from it. The set is:
 
 - `Reified.Constraint`
@@ -38,19 +38,15 @@ repository tooling and are never packed.
 
 1. Update the shared `<Version>` in `Directory.Build.props`.
 2. Update `RELEASE_NOTES.md`, `NEXT_VERSION`, and add `dev-docs/releases/<version>.md` with that version's notes.
-   `scripts/check-release-notes.sh` fails the release build if the notes file for `NEXT_VERSION` is missing.
-3. Run the local verification commands:
+3. Run the complete FAKE release gate:
 
 ```bash
-dotnet build Reified.slnx --configuration Release --nologo -v minimal
-dotnet test Reified.slnx --configuration Release --no-build --nologo -v minimal
-bash scripts/check-source-inventory.sh
-bash scripts/check-schema-ce-errors.sh
-bash scripts/check-fable-js-surface.sh
-bash scripts/run-aot-probe.sh
-bash scripts/run-package-consumers.sh
-dotnet livedocs build --version <release-version> --interactive false --banner false
+REIFIED_VERSION=<release-version> dotnet run --project tools/Reified.Build -- --target ReleaseCandidate
 ```
+
+This builds and tests the solution, checks Fable and NativeAOT, captures documentation before packing, tests the packed
+NuGet packages as external consumers, inserts the local capsule into release history, renders every version, and checks
+every generated local link and version-switcher entry.
 
 4. Commit the release-prep changes.
 5. Push the release commit to `main`.
@@ -65,22 +61,17 @@ git push origin v0.7.0
 
 `.github/workflows/release.yml` runs for `v*.*.*` tags.
 
-For a tag build:
+For a tag build, it derives the package version from the tag and runs the same `ReleaseCandidate` FAKE target used
+locally. Documentation capture runs before packing because package-specific rebuilds corrupt FsLiveDocs assembly
+loading. The target then tests packed packages and the complete versioned site before publication.
 
-- it builds `Reified.slnx`
-- it tests `Reified.slnx` (every package-scoped test project)
-- it derives the package version from the tag by stripping the leading `v`
-- it runs `bash scripts/check-release-notes.sh <version>`, which fails if `dev-docs/releases/<version>.md` is missing
-- it runs `dotnet livedocs audit --warn-as-error`, builds the docs site, and captures the release capsule
-- it runs `bash scripts/pack.sh -v <version>` **after** the docs steps — `dotnet pack` rebuilds each project fresh for the
-  tagged version, and running it before the docs steps corrupted FsLiveDocs' assembly loading (surfaced as every doc page
-  failing to resolve `Reified.*` types); the docs pipeline must run against the plain `dotnet build` output
+After the release candidate passes, the workflow:
+
 - it uploads package and docs workflow artifacts
 - it creates a GitHub Release with `.nupkg`, `.snupkg`, and the immutable FsLiveDocs capsule attached, using
   `dev-docs/releases/<version>.md` as the release body
-- after the GitHub Release exists, it dispatches the Pages workflow with the capsule URL and SHA-256; Pages adds that
-  capsule to the committed history baseline for the build and publishes the version switcher
-- it runs a separate `publish-nuget` job that publishes the package artifacts to nuget.org
+- after the GitHub Release exists, it dispatches Pages with the capsule URL and SHA-256 and waits for that deployment
+- only after Pages succeeds, it runs `publish-nuget` with the already-tested package artifacts
 
 The Pages workflow synchronizes every semantic-versioned `Reified-<version>-livedocs.zip` asset from all pages of
 GitHub Releases into `.livedocs/history.json` before each build. GitHub's asset digest supplies the SHA-256. Release
@@ -120,13 +111,13 @@ The workflow publishes every `.nupkg` and `.snupkg` produced for the release and
 Use the repository version:
 
 ```bash
-bash scripts/pack.sh
+dotnet run --project tools/Reified.Build -- --target Pack
 ```
 
 Override the version explicitly:
 
 ```bash
-bash scripts/pack.sh -v 0.7.0
+REIFIED_VERSION=0.7.0 dotnet run --project tools/Reified.Build -- --target Pack
 ```
 
 Packages are written to `artifacts/package`.

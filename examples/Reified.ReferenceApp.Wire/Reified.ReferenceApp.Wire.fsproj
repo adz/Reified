@@ -21,7 +21,7 @@
 
   <Target Name="BuildSourceTreeSchemagen" BeforeTargets="ReifiedSchemaGen">
     <MSBuild
-      Projects="..\..\scripts\schemagen\schemagen.fsproj"
+      Projects="..\..\tools\Reified.SchemaGen\schemagen.fsproj"
       Targets="Build"
       Properties="Configuration=$(Configuration)" />
   </Target>

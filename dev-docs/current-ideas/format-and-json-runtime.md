@@ -187,7 +187,7 @@ Identical implementation is not required. Equivalent documented behavior is requ
 ## Current Fable Status And Remaining Work
 
 `Reified.Schema.Json` is a supported Fable surface. The benchmark uses the current Schema API,
-`scripts/check-fable-js-surface.sh` passes, CI runs it, and generated JavaScript executes a Node encode/decode round
+the `Fable` FAKE target passes, CI runs it, and generated JavaScript executes a Node encode/decode round
 trip. Stream APIs remain .NET-only.
 
 Further platform-runtime work should strengthen the shared semantic suite rather than re-prove basic support:

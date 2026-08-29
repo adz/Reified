@@ -18,8 +18,10 @@
   <Folder Name="/benchmarks/">
     <Project Path="benchmarks/Reified.Schema.Benchmarks/ReifiedBenchmarks.fsproj" />
   </Folder>
-  <Folder Name="/scripts/">
-    <Project Path="scripts/schemagen/schemagen.fsproj" />
+  <Folder Name="/tools/">
+    <Project Path="tools/Reified.Build/Reified.Build.fsproj" />
+    <Project Path="tools/Reified.ReleaseChecks/Reified.ReleaseChecks.fsproj" />
+    <Project Path="tools/Reified.SchemaGen/schemagen.fsproj" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Reified/Reified.fsproj" />

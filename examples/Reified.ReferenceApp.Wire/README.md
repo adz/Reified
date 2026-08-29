@@ -29,7 +29,7 @@ Package consumers reference `Reified.Schema.Contracts.Build` (with `PrivateAsset
 The equivalent direct command is:
 
 ```bash
-dotnet run --project scripts/schemagen -- examples/Reified.ReferenceApp.Wire/wire
+dotnet run --project tools/Reified.SchemaGen -- examples/Reified.ReferenceApp.Wire/wire
 ```
 
 The generated module constructs the record by name, so a stale `.g.fs` fails to compile instead of drifting.

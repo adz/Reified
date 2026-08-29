@@ -13,7 +13,7 @@ documentation.
 Validated commands for this refresh:
 
 ```text
-bash scripts/check-source-inventory.sh
+dotnet run --project tools/Reified.Build -- --target SourceInventory
 => Source inventory covers src/tests .fs and .fsproj files.
 
 dotnet build Reified.slnx --nologo -v minimal
@@ -33,16 +33,16 @@ dotnet test Reified.slnx --nologo -v minimal
    Reified.Schema.Tests               333 passed
    => 699 passed, 0 failed, 0 skipped.
 
-bash scripts/check-schema-ce-errors.sh
+dotnet run --project tools/Reified.Build -- --target SchemaCompilerErrors
 => Schema CE invalid transitions and ambiguous refinements produce compile-time errors.
 
-bash scripts/check-fable-js-surface.sh
+dotnet run --project tools/Reified.Build -- --target Fable
 => Fable JavaScript surface compiles, includes Reified.Schema JSON codecs, and agrees with .NET.
 
-bash scripts/run-aot-probe.sh
+dotnet run --project tools/Reified.Build -- --target NativeAot
 => Exit code 0 for the Result, Constraint, Refinements, and Schema probes.
 
-bash scripts/run-package-consumers.sh
+dotnet run --project tools/Reified.Build -- --target PackageConsumers
 => Consumer.FsToolkit, Consumer.Parse, Consumer.Refinements, Consumer.Result, Consumer.Schema,
    and Consumer.Umbrella all passed against the packed .nupkg files.
 
@@ -95,7 +95,7 @@ CI currently proves:
 - the public module and member surface matches `tests/Reified.ApiShape.Tests`
 - the Schema CE rejects invalid transitions and ambiguous refinements at compile time
 - the Fable JavaScript surface compiles and produces the same results on Node as on .NET
-- the umbrella package references exactly the packable runtime packages, and `scripts/pack.sh` packs all of them
+- the umbrella package references exactly the packable runtime packages, and the `Pack` FAKE target packs all of them
 - the schema examples and both reference applications run
 - the NativeAOT probe publishes and runs
 - the packages pack, and the package-consumer fixtures install and run them
@@ -138,7 +138,7 @@ covers the named modules, types, and members users and examples are expected to 
 Two further suites cover what reflection over the built assemblies cannot see:
 
 - `tests/Reified.Package.Tests` pins the package graph: the umbrella's contents, that it compiles no sources, that
-  repository tooling never reaches a consumer through it, and that `scripts/pack.sh` covers every packable package.
+  repository tooling never reaches a consumer through it, and that the `Pack` FAKE target covers every packable package.
 - `tests/package-consumers/**` pins the installed surface: each fixture opens the namespaces a single
   `PackageReference` is supposed to deliver, so a missing or wrong dependency is a compile error rather than a
   silent regression. `Consumer.FsToolkit` additionally pins that `Reified.Refinements` and `Reified.Schema` do not

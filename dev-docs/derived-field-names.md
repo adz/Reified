@@ -73,12 +73,12 @@ Fable 2; it was never merged and must not be installed.
 
 ## What guards this
 
-`scripts/check-fable-js-surface.sh` compiles the Fable surface and runs it on Node.
+the `Fable` FAKE target compiles the Fable surface and runs it on Node.
 `examples/Reified.FableProbe/Checks.fs` declares its schema with `field _.Name` / `field _.Age`, and
 `Program.fs` asserts `planSummary = [ "0:name"; "1:age" ]` — so a regression in either the name derivation or the
 rebuilt getter fails the check rather than silently producing wrong wire names.
 
-`scripts/run-aot-probe.sh` executes the .NET path natively under NativeAOT for the same reason.
+the `NativeAot` FAKE target executes the .NET path natively under NativeAOT for the same reason.
 
 ## Deliberate limits
 

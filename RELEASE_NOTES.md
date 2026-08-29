@@ -1,6 +1,29 @@
 # Release Notes
 
+## 0.8.0 - 2026-08-28
+
+### JSON codecs moved into Reified.Schema (breaking)
+
+- `Reified.Schema` now contains the JSON codec compiler and portable JSON runtime; remove references to the retired `Reified.Schema.Json` package.
+- `Json.compile`, `Json.serialize`, `Json.deserialize`, and `Json.parseData` remain available from the `Reified` namespace.
+
+### Release validation
+
+- Repository build, test, Fable, NativeAOT, package-consumer, documentation, and release checks now run through one compiled FAKE target graph.
+- Release candidates render and verify the complete LiveDocs version history before packages are built, and release publication waits for GitHub Pages before publishing to NuGet.
+- Release manifests and GitHub release responses are parsed through typed Reified schemas; capsule metadata, semantic ordering, generated routes, version switchers, and local links fail closed before publication.
+
+### Schema tooling
+
+- The shipped Schema contract generator now lives under `tools/Reified.SchemaGen` while retaining the packaged `schemagen` command and MSBuild integration.
+
 ## 0.7.0 - 2026-08-28
+
+### JSON codecs moved into Reified.Schema (breaking)
+
+- `Reified.Schema` now includes compiled JSON codecs and portable JSON-to-`Data` parsing. Remove the separate `Reified.Schema.Json` package reference.
+- Open `Reified` and continue using `Json.compile`, `Json.serialize`, `Json.deserialize`, and `Json.parseData`.
+- `JsonCodec<'model>` and `JsonCodecException` now live in the `Reified` namespace. The `Reified.Schema.Json` package is deprecated in favor of `Reified.Schema`.
 
 ### Schema generation
 
@@ -255,4 +278,4 @@ Publish versions as Git tags such as `v0.7.0`.
 
 The GitHub release workflow builds the package artifacts and attaches them to a GitHub Release.
 
-NuGet publishing is handled by the release workflow for `v*.*.*` tags. Use `scripts/pack.sh` to build local artifacts before tagging.
+NuGet publishing is handled by the release workflow for `v*.*.*` tags. Use the `Pack` FAKE target to build local artifacts before tagging.

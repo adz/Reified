@@ -19,7 +19,7 @@ Phases 19–28-prelude are complete and recorded in `dev-docs/decisions/README.m
 completions (2026-07-09..13): the Schema value/model catalog consolidation, `Reified.Refinements` moved into
 the error-handling family, `Schema.check` for already assembled typed values,
 the `.contract` grammar/generator as wire-tier tooling
-(`src/Reified.Schema.Contracts`, `scripts/schemagen`, golden corpus in `tests/Reified.Schema.Tests/contracts/`),
+(`src/Reified.Schema.Contracts`, `tools/Reified.SchemaGen`, golden corpus in `tests/Reified.Schema.Tests/contracts/`),
 the `Contract<'model>` versioning engine (`Contract.parse`/`Contract.parseVersion`, typed contiguous n-1 → n
 migrations), `Schema.defer` recursion with finite inspection and `$defs`-based JSON Schema output, the
 non-packable `Reified.Schema.Testing` FsCheck adapter (`SchemaGen`), (2026-07-16) multi-version `schemagen`

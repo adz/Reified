@@ -2,8 +2,7 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
 
 permissions:
@@ -14,138 +13,55 @@ env:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
 
 jobs:
-  verify:
+  core:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up .NET 10
-        uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
-
-      - name: Restore
-        run: dotnet restore
-
-      - name: Check source inventory
-        run: bash scripts/check-source-inventory.sh
-
-      - name: Build
-        run: dotnet build Reified.slnx --configuration Release --no-restore --nologo -v minimal
-
-      - name: Test
-        run: dotnet test Reified.slnx --configuration Release --no-build --nologo -v minimal
-
-      - name: Check Schema CE compiler errors
-        run: bash scripts/check-schema-ce-errors.sh
-
-      - name: Run schema examples
-        run: |
-          for example in refined-catalog refined-value-schema; do
-            REIFIED_EXAMPLE="$example" dotnet run --project examples/Reified.Schema.Examples/Reified.Schema.Examples.fsproj --configuration Release --no-build --nologo
-          done
-
-      - name: Run getting-started example
-        run: dotnet run --project examples/Reified.GettingStarted/Reified.GettingStarted.fsproj --configuration Release --no-build --nologo
-
-      - name: Run reference applications
-        run: |
-          dotnet run --project examples/Reified.ReferenceApp.Intro/Reified.ReferenceApp.Intro.fsproj --configuration Release --no-build --nologo
-          dotnet run --project examples/Reified.ReferenceApp.Wire/Reified.ReferenceApp.Wire.fsproj --configuration Release --no-build --nologo
+      - run: dotnet run --project tools/Reified.Build -- --target Core
 
   fable:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up .NET 10
-        uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22.x
-
-      - name: Restore local tools
-        run: dotnet tool restore
-
-      - name: Compile and run the Fable JavaScript surface
-        run: bash scripts/check-fable-js-surface.sh
+      - run: dotnet run --project tools/Reified.Build -- --target Fable
 
   native-aot:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up .NET 10
-        uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
-
-      - name: Restore
-        run: dotnet restore
-
-      - name: Publish and run NativeAOT probe
-        run: bash scripts/run-aot-probe.sh
+      - run: dotnet run --project tools/Reified.Build -- --target NativeAot
 
   packages:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up .NET 10
-        uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
-
-      - name: Restore
-        run: dotnet restore
-
-      - name: Pack libraries and run package-consumer fixtures
-        run: bash scripts/run-package-consumers.sh
+      - run: dotnet run --project tools/Reified.Build -- --target PackageConsumers
 
   docs:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up .NET 10
-        uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
-
-      - name: Restore local tools
-        run: dotnet tool restore
-
-      - name: Restore .NET
-        run: dotnet restore
-
-      - name: Build
-        run: dotnet build Reified.slnx --configuration Release --no-restore --nologo -v minimal
-
-      - name: Audit documentation (examples, modes, compilation, links)
-        run: dotnet livedocs audit --warn-as-error
-
-      - name: Build docs site
-        run: dotnet livedocs build
-
-      - name: Prepare Pages artifact
-        run: touch output/.nojekyll
-
-      - name: Upload generated docs artifact
-        uses: actions/upload-artifact@v4
+      - run: dotnet run --project tools/Reified.Build -- --target DocsCapture
+      - run: touch output/.nojekyll
+      - uses: actions/upload-artifact@v4
         with:
           name: api-docs
           path: output/

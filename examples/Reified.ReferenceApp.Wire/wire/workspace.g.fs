@@ -5,21 +5,33 @@
 namespace Reified.ReferenceApp.Wire
 
 open Reified
+open Reified.SchemaDSL
 
-/// Schema and boundary functions for WorkspaceCardV1 (workspace.fs, WorkspaceCard.v1).
+[<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
+[<RequireQualifiedAccess>]
+module Visibility =
+
+    type private Model = Visibility
+    let schema =
+        Schema.enum [
+            EnumCase.create "private" Model.Private
+            EnumCase.create "team" Model.Team
+            EnumCase.create "org-wide" Model.OrgWide
+        ]
+
+/// Schema for WorkspaceCardV1.
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module WorkspaceCardV1 =
 
-    open Reified.SchemaDSL
     open Reified.ConstraintDSL
-    open type WorkspaceCardV1
+    type private Model = WorkspaceCardV1
+    open type Model
 
-    /// The schema declared by workspace.fs (WorkspaceCard.v1).
     let schema =
-        schema<WorkspaceCardV1> {
+        schema<Model> {
             fieldAs "name" _.Name {
-                withSchema (Schema.text |> Schema.describe "Display name of the workspace.")
+                describe "Display name of the workspace."
                 constraints [
                     minLength 1
                     maxLength 60
@@ -32,33 +44,22 @@ module WorkspaceCardV1 =
         }
         |> Schema.describe "A workspace card as first exported: one owner string of the form \"Name <email>\"."
 
-    /// Validates an ordinary record-literal draft of WorkspaceCardV1.
-    let validate (draft: WorkspaceCardV1) : Result<WorkspaceCardV1, SchemaErrors> =
-        Schema.check schema draft
+    let validate = Schema.check schema
+    let parse = Schema.parse schema
 
-    /// Parses structured boundary data into WorkspaceCardV1.
-    let parse (input: Data) : Result<WorkspaceCardV1, SchemaErrors> =
-        Schema.parse schema input
-
-/// Schema and boundary functions for WorkspaceCard (workspace.fs, WorkspaceCard.v2).
+/// Schema for WorkspaceCard.
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module WorkspaceCard =
 
-    open Reified.SchemaDSL
     open Reified.ConstraintDSL
-    open type WorkspaceCard
+    type private Model = WorkspaceCard
+    open type Model
 
-    let private visibilityCases =
-        [ EnumCase.create "private" Visibility.Private
-          EnumCase.create "team" Visibility.Team
-          EnumCase.create "org-wide" Visibility.OrgWide ]
-
-    /// The schema declared by workspace.fs (WorkspaceCard.v2).
     let schema =
-        schema<WorkspaceCard> {
+        schema<Model> {
             fieldAs "name" _.Name {
-                withSchema (Schema.text |> Schema.describe "Display name of the workspace.")
+                describe "Display name of the workspace."
                 constraints [
                     minLength 1
                     maxLength 60
@@ -68,7 +69,7 @@ module WorkspaceCard =
                 constrain email
             }
             fieldAs "visibility" _.Visibility {
-                withSchema (Schema.enum visibilityCases |> Schema.withDefault Visibility.Private)
+                withSchema (Visibility.schema |> Schema.withDefault Visibility.Private)
             }
             fieldAs "members" _.Members {
                 constrain Constraint.distinct
@@ -77,13 +78,8 @@ module WorkspaceCard =
         }
         |> Schema.describe "A workspace card with a dedicated owner email, visibility, and member emails."
 
-    /// Validates an ordinary record-literal draft of WorkspaceCard.
-    let validate (draft: WorkspaceCard) : Result<WorkspaceCard, SchemaErrors> =
-        Schema.check schema draft
-
-    /// Parses structured boundary data into WorkspaceCard.
-    let parse (input: Data) : Result<WorkspaceCard, SchemaErrors> =
-        Schema.parse schema input
+    let validate = Schema.check schema
+    let parse = Schema.parse schema
 
     /// Builds the versioned wire contract; supply each n-1 -> n migration and the version-detection source.
     let contract

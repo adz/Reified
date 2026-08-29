@@ -39,6 +39,12 @@ Refer to [`dev-docs/PLAN.md`](dev-docs/PLAN.md) for architectural direction and
 - Value-preserving guards and extraction helpers belong in `Result`, parsing belongs in `Reified.Parse`, and refined value construction belongs in `Reified.Refinements`.
 - Prefer AOT- and trimming-safe designs. Do not introduce runtime reflection as the foundation for core workflow, validation, schema, or service-access APIs; use explicit definitions first and consider build-time generation only after the API shape stabilizes.
 
+## Dogfooding
+
+- Repository tooling must use the intended public Reified pipeline for domains Reified models. Structured input gets a typed `Schema` and codec; reusable value rules use `Constraint`; structured comparisons use `Data` where applicable. Do not reference one Reified API while bypassing it for the main model with `JsonNode`, dictionaries, regex validation, or equivalent ad hoc machinery.
+- Keep effects in the host tool or build framework; Reified describes and checks their inputs and outputs.
+- If Reified cannot reasonably model repository tooling, identify the missing API or mismatch before adding a parallel parser or validator.
+
 ## Dev Doc Organization
 
 - Keep active architecture in `dev-docs/PLAN.md`, active work in `dev-docs/TASKS.md`, and high-level durable

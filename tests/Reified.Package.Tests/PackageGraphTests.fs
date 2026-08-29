@@ -96,15 +96,15 @@ let ``the build-integration package stays a direct install`` () =
     test <@ not ((umbrellaReferences ()).Contains "Reified.Schema.Contracts.Build") @>
 
 [<Fact>]
-let ``every packable runtime package is packed by the release script`` () =
-    let packScript =
-        File.ReadAllText(Path.Combine(repoRoot (), "scripts", "pack.sh"))
+let ``every packable runtime package is packed by the build tool`` () =
+    let buildTool =
+        File.ReadAllText(Path.Combine(repoRoot (), "tools", "Reified.Build", "Program.fs"))
 
     let unpacked =
         packableRuntimeProjects ()
         |> Set.add "Reified"
         |> Set.add "Reified.Schema.Contracts.Build"
-        |> Set.filter (fun project -> not (packScript.Contains $"/{project}.fsproj"))
+        |> Set.filter (fun project -> not (buildTool.Contains $"/{project}.fsproj"))
 
     test <@ unpacked = Set.empty @>
 

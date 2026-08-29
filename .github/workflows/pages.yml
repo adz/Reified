@@ -62,85 +62,12 @@ jobs:
         run: dotnet build Reified.slnx --configuration Release --no-restore --nologo -v minimal
 
       - name: Synchronize release capsules into this history build
-        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          releases_file="$(mktemp)"
-          trap 'rm -f "$releases_file"' EXIT
-
-          fetch_releases() {
-            gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/releases?per_page=100" > "$releases_file"
-          }
-
-          attempts=1
-          while true; do
-            fetch_releases
-
-            if [[ -z "${{ inputs.version }}" ]] || jq -e --arg version "v${{ inputs.version }}" \
-              '.[][] | select(.tag_name == $version) | .assets[] | select(.name == ("Reified-" + ($version | ltrimstr("v")) + "-livedocs.zip") and (.digest | startswith("sha256:")))' \
-              "$releases_file" >/dev/null; then
-              break
-            fi
-
-            if (( attempts == 5 )); then
-              echo "Release capsule for ${{ inputs.version }} was not visible after $attempts attempts." >&2
-              exit 1
-            fi
-
-            echo "Release capsule for ${{ inputs.version }} is not visible yet; retrying in 5 seconds."
-            attempts=$((attempts + 1))
-            sleep 5
-          done
-
-          while IFS=$'\t' read -r version capsule_url capsule_sha256; do
-            existing="$(jq -r --arg version "$version" '.Entries[] | select(.Version == $version) | [.CapsuleUrl, .CapsuleSha256] | @tsv' .livedocs/history.json)"
-
-            if [[ -z "$existing" ]]; then
-              dotnet livedocs history-add "$version" \
-                --url "$capsule_url" \
-                --sha256 "$capsule_sha256" \
-                --interactive false \
-                --banner false
-            elif [[ "$existing" != "$capsule_url"$'\t'"$capsule_sha256" ]]; then
-              echo "History already contains $version with a different capsule URL or checksum." >&2
-              exit 1
-            else
-              echo "History already contains the verified $version capsule."
-            fi
-          done < <(
-            jq -r '
-              [ .[][]
-                | select(.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+$"))
-                | (.tag_name | ltrimstr("v")) as $version
-                | .assets[]
-                | select(.name == ("Reified-" + $version + "-livedocs.zip"))
-                | select(.digest | startswith("sha256:"))
-                | { version: $version, url: .browser_download_url, sha256: (.digest | ltrimstr("sha256:")) }
-              ]
-              | sort_by(.version | split(".") | map(tonumber))[]
-              | [.version, .url, .sha256]
-              | @tsv' "$releases_file"
-          )
-
-          jq '.Entries |= (sort_by(.Version | split(".") | map(tonumber)) | reverse)' \
-            .livedocs/history.json > .livedocs/history.sorted.json
-          mv .livedocs/history.sorted.json .livedocs/history.json
-
-          if [[ -n "${{ inputs.version }}" ]]; then
-            if [[ -z "${{ inputs.capsule_url }}" || -z "${{ inputs.capsule_sha256 }}" ]]; then
-              echo "version, capsule_url, and capsule_sha256 must be dispatched together." >&2
-              exit 1
-            fi
-
-            expected="${{ inputs.capsule_url }}"$'\t'"${{ inputs.capsule_sha256 }}"
-            actual="$(jq -r --arg version "${{ inputs.version }}" '.Entries[] | select(.Version == $version) | [.CapsuleUrl, .CapsuleSha256] | @tsv' .livedocs/history.json)"
-            current="$(jq -r '.CurrentVersion' .livedocs/history.json)"
-            if [[ "$actual" != "$expected" || "$current" != "${{ inputs.version }}" ]]; then
-              echo "Dispatched release ${{ inputs.version }} was not installed as the current version with the expected capsule." >&2
-              exit 1
-            fi
-          fi
+          RELEASE_VERSION: ${{ inputs.version }}
+          RELEASE_CAPSULE_URL: ${{ inputs.capsule_url }}
+          RELEASE_CAPSULE_SHA256: ${{ inputs.capsule_sha256 }}
+        run: dotnet run --project tools/Reified.Build -- --target SyncHistory
 
       - name: Restore LiveDocs processing cache
         uses: actions/cache@v4
@@ -150,22 +77,8 @@ jobs:
           restore-keys: |
             livedocs-${{ runner.os }}-
 
-      - name: Build versioned docs site
-        shell: bash
-        run: |
-          for attempt in 1 2 3; do
-            if dotnet livedocs build-history .livedocs/history.json --interactive false --banner false; then
-              exit 0
-            fi
-
-            if (( attempt == 3 )); then
-              echo "LiveDocs history build failed after $attempt attempts." >&2
-              exit 1
-            fi
-
-            echo "LiveDocs history build failed; retrying in 10 seconds."
-            sleep 10
-          done
+      - name: Build and verify versioned docs site
+        run: dotnet run --project tools/Reified.Build -- --target Pages
 
       - name: Prepare Pages artifact
         run: touch output/.nojekyll

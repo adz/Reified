@@ -28,7 +28,7 @@
 
   <Target Name="PublishSchemagen">
     <MSBuild
-      Projects="$(MSBuildThisFileDirectory)../../scripts/schemagen/schemagen.fsproj"
+      Projects="$(MSBuildThisFileDirectory)../../tools/Reified.SchemaGen/schemagen.fsproj"
       Targets="Restore;Publish"
       Properties="Configuration=Release;PublishDir=$(_SchemagenPublishDir)/;SelfContained=false" />
   </Target>

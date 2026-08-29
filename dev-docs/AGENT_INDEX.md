@@ -54,7 +54,7 @@ exports a type called `X`. See `dev-docs/namespace-flatten.md`.
   resolver/emitter. The `Reified.DerivedSchema` attribute namespace lives in `Reified.Schema` itself (inert metadata).
   FCS stays tool-tier only: never referenced from a packable library.
 - `Reified.Schema.Contracts.Build` (`src/Reified.Schema.Contracts.Build/`): packable targets-only MSBuild package
-  running `scripts/schemagen` before compile over `<ReifiedDeriveSchema>`/`<ReifiedContract>` items.
+  running `tools/Reified.SchemaGen` before compile over `<ReifiedDeriveSchema>`/`<ReifiedContract>` items.
 - `Reified` is the only umbrella. `Reified.ErrorHandling` is gone and does not come back: a grouping that is not a
   capability does not earn a package. **Values** — Constraint, Refinements, and Parse — is a documentation grouping
   only: no package, no namespace.
@@ -64,14 +64,14 @@ exports a type called `X`. See `dev-docs/namespace-flatten.md`.
 - Constraint/Result: `src/Reified.Constraint/Constraint.fs`, `src/Reified.Result/Result.fs`,
   `tests/Reified.Constraint.Tests/**`, `tests/Reified.Result.Tests/ResultTests.fs`, and `dev-docs/PLAN.md`.
 - Package graph, umbrella contents, and pack/consumer wiring: `src/Reified/Reified.fsproj`,
-  `tests/Reified.Package.Tests/PackageGraphTests.fs`, `scripts/pack.sh`, and `tests/package-consumers/**`.
+  `tests/Reified.Package.Tests/PackageGraphTests.fs`, the `Pack` FAKE target, and `tests/package-consumers/**`.
 - Public API surface: `tests/Reified.ApiShape.Tests/ApiShapeTests.fs` and `dev-docs/API_BASELINE.md`. Adding or
   renaming a public module means editing that suite in the same change.
 - The public first impression: `docs/01-getting-started/_index.md` (`/getting-started/`) and `docs/index.md` (the
   landing page). The code on the getting-started page comes from
   `examples/Reified.GettingStarted/Program.fs`, which CI compiles and runs — change the example and the page
   together, and paste the program's real output rather than writing expected output by hand.
-- Fable JavaScript support: `examples/Reified.FableProbe/**` and `scripts/check-fable-js-surface.sh`. The probe
+- Fable JavaScript support: `examples/Reified.FableProbe/**` and the `Fable` FAKE target. The probe
   runs the same assertions on both targets, so put a new cross-runtime claim in `Checks.fs` rather than in a
   .NET-only test.
 - Derived field names (`field _.Email`): `dev-docs/derived-field-names.md`. Read it before touching
@@ -107,9 +107,9 @@ artifacts, or build artifacts.
 
 ## Validation Commands
 
-- Source/package moves: `bash scripts/check-source-inventory.sh`.
-- Schema CE type-state changes: `bash scripts/check-schema-ce-errors.sh` (fixtures in `tests/compile-fail/schema-ce`).
-- Fable-visible changes: `bash scripts/check-fable-js-surface.sh` (needs `dotnet tool restore` and Node).
+- Source/package moves: `dotnet run --project tools/Reified.Build -- --target SourceInventory`.
+- Schema CE type-state changes: `dotnet run --project tools/Reified.Build -- --target SchemaCompilerErrors` (fixtures in `tests/compile-fail/schema-ce`).
+- Fable-visible changes: `dotnet run --project tools/Reified.Build -- --target Fable` (needs `dotnet tool restore` and Node).
 - Focused .NET tests: `dotnet test <project> --nologo -v minimal`.
 - Public API/doc impact: update source comments and guides, then run `dotnet livedocs build`.
 - Documentation audit: `dotnet livedocs audit --warn-as-error`.
