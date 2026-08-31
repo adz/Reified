@@ -43,6 +43,9 @@ module ProfileV1 =
     let validate = Schema.check schema
     let parse = Schema.parse schema
 
+type ProfileV1 with
+    static member Schema(_: ProfileV1) : Schema<ProfileV1> = ProfileV1.schema
+
 /// A user profile with an explicit marketing consent decision.
 type Profile =
     {
@@ -92,3 +95,6 @@ module Profile =
         Contract.create "Profile" 2 schema
         |> Contract.supersedes 1 ProfileV1.schema migrateV1ToV2
         |> Contract.build source
+
+type Profile with
+    static member Schema(_: Profile) : Schema<Profile> = Profile.schema

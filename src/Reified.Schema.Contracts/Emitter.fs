@@ -357,7 +357,9 @@ module Emitter =
 
     /// True when the field block must select its starting schema explicitly rather than applying operations
     /// to the schema resolved from the getter type. Optional-field decorations stay on the inner value schema,
-    /// and named/domain types have sibling schema values rather than a discoverable static Schema member.
+    /// and reference/named/domain types are addressed here through their sibling `schema` value. (An owned
+    /// contract record also carries a canonical `static member Schema`, but a same-file reference is cheaper
+    /// to emit as the direct `X.schema` than to route through SRTP resolution.)
     let private requiresExplicitSchema (field: FieldDecl) =
         let hasInnerOptionalConstraint =
             field.Constraints
@@ -1352,6 +1354,16 @@ module Emitter =
                     line $"        |> Contract.supersedes {step} {typeNameOf contract.QualifiedName step |> localName}.schema migrateV{step}ToV{step + 1}"
 
                 line "        |> Contract.build source"
+
+            // A generated record participates in canonical field-schema resolution: a bare
+            // `fieldAs "x" _.Field` on a field of this type resolves its schema through the same SRTP
+            // member constraint a `string` field uses. The augmentation is intrinsic - same file and
+            // namespace as the record - so it satisfies the constraint from any assembly with no `open`.
+            // Types the generator does not own keep their sibling `let schema` and stay on `withSchema`.
+            if contract.OwnsType && not (contract.Fields |> List.exists (fun field -> fsFieldName field = "Schema")) then
+                line ""
+                line $"type {contractTypeName} with"
+                line $"    static member Schema(_: {contractTypeName}) : Schema<{contractTypeName}> = {contractModuleName}.schema"
 
         // A union can be declared beside a derived record without that record mentioning it. Emit those
         // remaining owner-file unions after the contracts: a union may depend on a local record schema,

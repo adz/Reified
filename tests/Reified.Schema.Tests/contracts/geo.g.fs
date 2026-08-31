@@ -45,3 +45,6 @@ module Geo =
 
     let validate = Schema.check schema
     let parse = Schema.parse schema
+
+type Geo with
+    static member Schema(_: Geo) : Schema<Geo> = Geo.schema
