@@ -24,6 +24,28 @@ adapters live in the [Axial repository](https://github.com/adz/Axial) along with
 - Rejected: generating a non-curried constructor at build time, which contradicts explicit declarations, and leaving
   the limits to each application, which fails silently at run time.
 
+## 2026-09-01: Fable browser bundle size is a purity flag, not a module split
+
+- **Every `IsFableLibrary` package ships `fable/package.json` = `{ "type": "module", "sideEffects": false }`.**
+  The compiled modules are declaration-only (no top-level statements), so this is honest, and it is what lets a
+  browser bundler drop unreferenced modules. Without it, bundlers execute every imported module for its top-level
+  `const` initializers (`Refine.js` builds a refinement from a constraint at load; `Constraint.js` builds format
+  atoms), pulling `Reified.Constraint` and `Reified.Refinements` into a schema that never touches a refined field.
+  Measured with esbuild on the probe surface: a primitives-plus-codec front end dropped from ~35 KB to ~20 KB
+  gzipped.
+- **Splitting `Shape.fs`/`ValueSchema.fs` was considered and rejected as the lever.** Modern bundlers already drop
+  a partially-used import; the retention was the unannotated top-level side effects, which the flag addresses
+  wholesale. `Shape.fs` also cannot split cleanly: the refined `Schema` overloads must stay on the single
+  `SchemaDefaults` type for SRTP `Resolve()` witness dispatch.
+- **The `Fable` target scans generated JS for top-level side effects** (`hasTopLevelSideEffect` in
+  `tools/Reified.Build/Program.fs`) and fails the build if a module grows one, so a stray module-level `do` or
+  effectful `let` cannot silently invalidate the flag.
+- **The codec dropped `sprintf`/`failwithf` and F# `Map`.** Error strings are `+` concatenation now, which keeps
+  the F# printf parser out of fable-library `String.js`; `compileUnionDecoderObj` uses assoc lists instead of
+  `Map`, keeping `Map.js` out of every codec without a user-facing `Map<>` field. Records were already `Map`-free.
+  .NET happy-path throughput is untouched — the changed code is only on throw and union-decode paths, neither of
+  which the codec benchmark exercises.
+
 ## 2026-08-17: Documentation tooling migrated from Hugo/Docsy to FsLiveDocs
 
 - **`site/` (Hugo/Docsy) and `scripts/docgen/` are gone.** Replaced by FsLiveDocs 0.3.x, driven by

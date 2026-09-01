@@ -70,6 +70,30 @@ constraint behaviour, operand descriptions, localized rendering, a codec round-t
 .NET-only conveniences — such as `Data.ofJsonDocument` and the
 `DateOnly` field type — are compile-time gated so the Fable surface never references them.
 
+### Browser bundle size
+
+The compiled modules are declaration-only — imports, exports, functions, classes, and pure `const`
+bindings, with no top-level statements — so every `IsFableLibrary` package ships a
+`fable/package.json` marking its output `"sideEffects": false`. A browser bundler then drops whatever
+a front end does not reference. A schema that resolves only primitive, nested, and collection fields
+keeps nothing from `Reified.Constraint` or `Reified.Refinements`; naming a refined field type, or
+attaching a constraint, links the constraint engine on demand. The `Fable` target scans the generated
+JavaScript and fails if a module grows a top-level side effect, so the flag stays honest.
+
+Approximate gzipped cost of the Reified modules for a front end bundled with esbuild, measured on the
+probe surface:
+
+| Front end uses | Reified modules, gzipped |
+| --- | --- |
+| Schema authoring only, primitive and nested fields | ~4 KB |
+| Schema plus the `Json` codec, no constraints or refined types | ~20 KB |
+| Codec plus attached constraints | ~26 KB |
+| Codec plus a refined field type | ~30 KB |
+
+fable-library-js is additional and shared across everything on the page. The codec links its `Date`,
+`Guid`, and decimal support unconditionally; avoid `decimal` and `DateOnly`/`DateTimeOffset` fields in
+a browser model where payload size matters.
+
 ### Derived wire names under Fable
 
 The `field _.Email` form reads a quotation of the getter to recover the property name. It works on .NET and on the
