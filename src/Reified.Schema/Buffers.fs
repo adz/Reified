@@ -47,6 +47,8 @@ module internal Buffers =
         abstract member WriteStringSlice: string * int * int -> unit
         /// Writes raw bytes.
         abstract member WriteBytes: byte[] -> unit
+        /// Writes a slice of a byte array without allocating a copy.
+        abstract member WriteBytesSlice: byte[] * int * int -> unit
         /// Writes an integer value.
         abstract member WriteInt: int -> unit
         /// Writes a 64-bit integer value.
@@ -146,6 +148,11 @@ module internal Buffers =
                 (x :> IByteWriter).Ensure(bytes.Length)
                 System.Array.Copy(bytes, 0, x.InternalData, x.InternalCount, bytes.Length)
                 x.InternalCount <- x.InternalCount + bytes.Length
+
+            member x.WriteBytesSlice(bytes: byte[], startIndex: int, length: int) =
+                (x :> IByteWriter).Ensure(length)
+                System.Array.Copy(bytes, startIndex, x.InternalData, x.InternalCount, length)
+                x.InternalCount <- x.InternalCount + length
 
             member x.WriteInt(value: int) =
 #if !FABLE_COMPILER

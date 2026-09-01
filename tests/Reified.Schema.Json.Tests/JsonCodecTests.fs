@@ -635,3 +635,132 @@ module JsonCodecTests =
 
         test <@ json = "{\"color\":\"green\"}" @>
         test <@ Json.deserialize codec json = swatch @>
+
+    // --- Writer options ------------------------------------------------------
+
+    type private Pet = { PetName: string; Legs: int }
+
+    type private Household =
+        { Owner: string
+          Pet: Pet
+          Nicknames: string list }
+
+    let private householdSchema () =
+        let pet =
+            schema<Pet> {
+                fieldAs "name" (fun (value: Pet) -> value.PetName)
+                field _.Legs
+                construct (fun name legs -> { PetName = name; Legs = legs })
+            }
+
+        schema<Household> {
+            field _.Owner
+            field _.Pet { withSchema pet }
+            field _.Nicknames { withSchema (Schema.listWith Schema.text) }
+            construct (fun owner pet nicknames -> { Owner = owner; Pet = pet; Nicknames = nicknames })
+        }
+
+    let private sampleHousehold =
+        { Owner = "Ada"
+          Pet = { PetName = "Rex"; Legs = 4 }
+          Nicknames = [ "A"; "B" ] }
+
+    [<Fact>]
+    let ``serializeIndented indents nested objects and arrays by two spaces`` () =
+        let codec = Json.compile (householdSchema ())
+
+        let expected =
+            "{\n  \"owner\": \"Ada\",\n  \"pet\": {\n    \"name\": \"Rex\",\n    \"legs\": 4\n  },\n  \"nicknames\": [\n    \"A\",\n    \"B\"\n  ]\n}"
+
+        test <@ Json.serializeIndented codec sampleHousehold = expected @>
+        test <@ Json.deserialize codec (Json.serializeIndented codec sampleHousehold) = sampleHousehold @>
+
+    [<Fact>]
+    let ``serializeWith id and serializeWith indented match the plain and indented forms`` () =
+        let codec = Json.compile (householdSchema ())
+
+        test <@ Json.serializeWith id codec sampleHousehold = Json.serialize codec sampleHousehold @>
+        test <@ Json.serializeWith Json.indented codec sampleHousehold = Json.serializeIndented codec sampleHousehold @>
+
+    [<Fact>]
+    let ``indented output keeps empty objects and arrays inline`` () =
+        let codec = Json.compile (householdSchema ())
+        let value = { Owner = "Ada"; Pet = { PetName = ""; Legs = 0 }; Nicknames = [] }
+
+        let json = Json.serializeIndented codec value
+
+        test <@ json.Contains "\"nicknames\": []" @>
+        test <@ not (json.Contains "[\n") @>
+
+    [<Fact>]
+    let ``trailing newline and CRLF line endings are configurable`` () =
+        let codec = Json.compile (householdSchema ())
+
+        let json =
+            Json.serializeWith
+                (fun o -> { o with Indent = JsonIndent.Spaces 2; TrailingNewline = true; LineEnding = JsonLineEnding.CrLf })
+                codec
+                sampleHousehold
+
+        test <@ json.EndsWith "}\r\n" @>
+        test <@ json.Contains "\r\n  \"owner\": \"Ada\"" @>
+
+    [<Fact>]
+    let ``AsciiOnly escapes non-ascii scalars and still round trips`` () =
+        let codec = Json.compile (addressSchema ())
+        let value = { Street = "Þórsgata"; City = "København 😀" }
+
+        let json = Json.serializeWith (fun o -> { o with AsciiOnly = true }) codec value
+
+        test <@ json |> Seq.forall (fun c -> int c < 128) @>
+        test <@ json.Contains "\\ud83d\\ude00" @> // 😀 as a surrogate pair
+        test <@ Json.deserialize codec json = value @>
+
+    [<Fact>]
+    let ``EscapeHtml escapes markup-sensitive characters`` () =
+        let codec = Json.compile (addressSchema ())
+        let value = { Street = "<a href='x'>A & B</a>"; City = "ok" }
+
+        let json = Json.serializeWith (fun o -> { o with EscapeHtml = true }) codec value
+
+        test <@ not (json.Contains "<") @>
+        test <@ not (json.Contains "&") @>
+        test <@ json.Contains "\\u003c" @>
+        test <@ Json.deserialize codec json = value @>
+
+    [<Fact>]
+    let ``serializeBytesWith matches the string form`` () =
+        let codec = Json.compile (householdSchema ())
+
+        let bytes = Json.serializeBytesWith Json.indented codec sampleHousehold
+
+        test <@ System.Text.Encoding.UTF8.GetString bytes = Json.serializeIndented codec sampleHousehold @>
+
+    [<Fact>]
+    let ``negative indent width is rejected`` () =
+        let codec = Json.compile (householdSchema ())
+
+        Assert.Throws<ArgumentException>(fun () ->
+            Json.serializeWith (fun o -> { o with Indent = JsonIndent.Spaces -1 }) codec sampleHousehold |> ignore)
+        |> ignore
+
+    [<Fact>]
+    let ``reindent pretty-prints and normalizes arbitrary JSON text`` () =
+        let compact = """{"a":1,"b":[  2 ,3],"c":{}}"""
+        let expected = "{\n  \"a\": 1,\n  \"b\": [\n    2,\n    3\n  ],\n  \"c\": {}\n}"
+
+        test <@ Json.reindent compact = expected @>
+        test <@ Json.reindent (Json.reindent compact) = expected @>
+
+    [<Fact>]
+    let ``reindent leaves whitespace inside strings untouched`` () =
+        test <@ Json.reindent "{\"k\":\"a  b\\tc\"}" = "{\n  \"k\": \"a  b\\tc\"\n}" @>
+
+    [<Fact>]
+    let ``serializeToStreamWith writes the configured form`` () =
+        let codec = Json.compile (householdSchema ())
+
+        use stream = new IO.MemoryStream()
+        Json.serializeToStreamWith Json.indented codec stream sampleHousehold
+
+        test <@ System.Text.Encoding.UTF8.GetString(stream.ToArray()) = Json.serializeIndented codec sampleHousehold @>

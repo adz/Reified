@@ -1232,6 +1232,124 @@ module rec Json =
         finally
             buffer.Release()
 
+    /// <summary>The unmodified JSON writer options: compact, minimal escaping — exactly what
+    /// <see cref="M:Reified.Json.serialize``1" />, <c>serializeBytes</c>, and <c>serializeToStream</c> produce.</summary>
+    let defaults: JsonWriteOptions =
+        { Indent = JsonIndent.None
+          TrailingNewline = false
+          LineEnding = JsonLineEnding.Lf
+          AsciiOnly = false
+          EscapeHtml = false }
+
+    /// <summary>Configures the writer to indent nested levels by two spaces. Compose it with
+    /// <see cref="M:Reified.Json.serializeWith``1" />: <c>Json.serializeWith Json.indented codec value</c>.</summary>
+    let indented (options: JsonWriteOptions) : JsonWriteOptions =
+        { options with Indent = JsonIndent.Spaces 2 }
+
+    let private resolveWriteOptions (configure: JsonWriteOptions -> JsonWriteOptions) =
+        let options = configure defaults
+
+        match options.Indent with
+        | JsonIndent.Spaces n when n < 0 -> invalidArg (nameof configure) "Indent spaces must not be negative."
+        | _ -> ()
+
+        options
+
+    let private writeOptionsAreCompact (options: JsonWriteOptions) =
+        options.Indent = JsonIndent.None
+        && not options.TrailingNewline
+        && not options.AsciiOnly
+        && not options.EscapeHtml
+
+    let private encodeConfigured
+        (codec: JsonCodec<'model>)
+        (value: 'model)
+        (options: JsonWriteOptions)
+        (target: ResizableBuffer)
+        =
+        if writeOptionsAreCompact options then
+            codec.Encoder (target :> IByteWriter) value
+        else
+            let scratch = ResizableBuffer.Create(4096)
+
+            try
+                codec.Encoder (scratch :> IByteWriter) value
+                formatJson options scratch.InternalData scratch.InternalCount (target :> IByteWriter)
+            finally
+                scratch.Release()
+
+    /// <summary>Serializes a trusted model to a JSON string, configuring the writer through
+    /// <see cref="T:Reified.JsonWriteOptions" />.</summary>
+    /// <remarks>
+    /// Indentation and re-escaping run as one linear pass over the compact output, so a non-default configuration
+    /// costs roughly one extra copy of the payload. <c>serializeWith id</c> equals <c>serialize</c>.
+    /// </remarks>
+    /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="codec" /> is null.</exception>
+    let serializeWith
+        (configure: JsonWriteOptions -> JsonWriteOptions)
+        (codec: JsonCodec<'model>)
+        (value: 'model)
+        : string =
+        if isNull (box codec) then
+            nullArg (nameof codec)
+
+        let options = resolveWriteOptions configure
+        let buffer = ResizableBuffer.Create(4096)
+
+        try
+            encodeConfigured codec value options buffer
+            Encoding.UTF8.GetString(buffer.InternalData, 0, buffer.InternalCount)
+        finally
+            buffer.Release()
+
+    /// <summary>Serializes a trusted model to UTF-8 JSON bytes, configuring the writer through
+    /// <see cref="T:Reified.JsonWriteOptions" />.</summary>
+    /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="codec" /> is null.</exception>
+    let serializeBytesWith
+        (configure: JsonWriteOptions -> JsonWriteOptions)
+        (codec: JsonCodec<'model>)
+        (value: 'model)
+        : byte[] =
+        if isNull (box codec) then
+            nullArg (nameof codec)
+
+        let options = resolveWriteOptions configure
+        let buffer = ResizableBuffer.Create(4096)
+
+        try
+            encodeConfigured codec value options buffer
+            let result = Array.zeroCreate buffer.InternalCount
+            Array.blit buffer.InternalData 0 result 0 buffer.InternalCount
+            result
+        finally
+            buffer.Release()
+
+    /// <summary>Serializes a trusted model to an indented JSON string with two-space nesting.</summary>
+    /// <remarks>Shorthand for <c>serializeWith indented</c>. For indented bytes or a stream, use
+    /// <c>serializeBytesWith indented</c> or <c>serializeToStreamWith indented</c>.</remarks>
+    /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="codec" /> is null.</exception>
+    let serializeIndented (codec: JsonCodec<'model>) (value: 'model) : string =
+        serializeWith indented codec value
+
+    /// <summary>Reformats a JSON string with two-space indentation.</summary>
+    /// <remarks>
+    /// Operates on the text alone — insignificant whitespace is normalized and no schema is applied — so it also
+    /// pretty-prints JSON that did not come from a codec. Assumes the input is well-formed JSON.
+    /// </remarks>
+    /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="json" /> is null.</exception>
+    let reindent (json: string) : string =
+        if isNull json then
+            nullArg (nameof json)
+
+        let source = Encoding.UTF8.GetBytes json
+        let buffer = ResizableBuffer.Create(source.Length + (source.Length >>> 1) + 16)
+
+        try
+            formatJson (indented defaults) source source.Length (buffer :> IByteWriter)
+            Encoding.UTF8.GetString(buffer.InternalData, 0, buffer.InternalCount)
+        finally
+            buffer.Release()
+
     let private decodeRootWith (decoder: Decoder<'value>) (data: byte[]) : 'value =
         let struct (value, next) = decoder (ByteSource(data, 0))
         let next = skipWhitespace next
@@ -1310,6 +1428,31 @@ module rec Json =
 
         try
             codec.Encoder (buffer :> IByteWriter) value
+            stream.Write(buffer.InternalData, 0, buffer.InternalCount)
+            stream.Flush()
+        finally
+            buffer.Release()
+
+    /// <summary>Serializes a trusted model as UTF-8 JSON directly to a stream, configuring the writer through
+    /// <see cref="T:Reified.JsonWriteOptions" />. Not available on Fable.</summary>
+    /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="codec" /> or <paramref name="stream" /> is null.</exception>
+    let serializeToStreamWith
+        (configure: JsonWriteOptions -> JsonWriteOptions)
+        (codec: JsonCodec<'model>)
+        (stream: System.IO.Stream)
+        (value: 'model)
+        : unit =
+        if isNull (box codec) then
+            nullArg (nameof codec)
+
+        if isNull stream then
+            nullArg (nameof stream)
+
+        let options = resolveWriteOptions configure
+        let buffer = ResizableBuffer.Create(4096)
+
+        try
+            encodeConfigured codec value options buffer
             stream.Write(buffer.InternalData, 0, buffer.InternalCount)
             stream.Flush()
         finally

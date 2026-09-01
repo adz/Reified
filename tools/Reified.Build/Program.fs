@@ -145,7 +145,7 @@ target "Fable" (fun () ->
     if code <> 0 then failwith "Fable compilation failed"
     if not (File.Exists(Path.Combine(out, "src/Reified.Schema/Json.js"))) then failwith "Reified.Schema's JSON codec was absent from Fable output"
     let _, output = runCapture "node" [ Path.Combine(out, "Program.js") ] []
-    for expected in [ "Schema record plan: ok"; "Codec round-trip: ok"; "Constraints: ok"; "Operand agreement: ok"; "Localization: ok"; "Data JSON boundaries: ok"; "Reified Fable probe: ok" ] do if not (output.Contains expected) then failwith $"Fable probe missing: {expected}"
+    for expected in [ "Schema record plan: ok"; "Codec round-trip: ok"; "Codec writer options: ok"; "Constraints: ok"; "Operand agreement: ok"; "Localization: ok"; "Data JSON boundaries: ok"; "Reified Fable probe: ok" ] do if not (output.Contains expected) then failwith $"Fable probe missing: {expected}"
     if Directory.EnumerateFiles(out, "*", SearchOption.AllDirectories) |> Seq.exists (fun p -> File.ReadAllText(p).Contains "ResourceManager") then failwith "ResourceManager leaked into Fable output"
     let effectful =
         Directory.EnumerateFiles(Path.Combine(out, "src"), "*.js", SearchOption.AllDirectories)

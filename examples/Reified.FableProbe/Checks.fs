@@ -180,3 +180,18 @@ module Checks =
         let original = { Name = "Ada"; Age = 37 }
         let json = Json.serialize codec original
         Json.deserialize codec json
+
+    /// The JSON writer options must format and re-escape identically on both targets.
+    let runCodecWriterOptions () =
+        let codec = Json.compile contactSchema
+        let value = { Name = "<Ada & Þóra>"; Age = 37 }
+        let compact = Json.serialize codec value
+        let indented = Json.serializeIndented codec value
+
+        [ indented = "{\n  \"name\": \"<Ada & Þóra>\",\n  \"age\": 37\n}"
+          Json.deserialize codec indented = value
+          Json.reindent compact = indented
+          (Json.serializeWith (fun o -> { o with AsciiOnly = true }) codec value)
+          |> Seq.forall (fun c -> int c < 128)
+          (Json.serializeWith (fun o -> { o with EscapeHtml = true }) codec value).Contains "\\u003c" ]
+        |> List.forall id

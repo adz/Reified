@@ -24,6 +24,44 @@ type JsonCodecException(path: string, detail: string, ?inner: exn) =
     /// <summary>Gets the failure detail without the path prefix.</summary>
     member _.Detail = detail
 
+/// <summary>Indentation applied to nested levels by the JSON writer.</summary>
+[<RequireQualifiedAccess>]
+type JsonIndent =
+    /// <summary>No indentation: the compact single-line form.</summary>
+    | None
+    /// <summary>Indent each nested level by this many spaces.</summary>
+    | Spaces of int
+    /// <summary>Indent each nested level with one tab character.</summary>
+    | Tab
+
+/// <summary>Line ending used for the indentation newlines and the optional trailing newline.</summary>
+[<RequireQualifiedAccess>]
+type JsonLineEnding =
+    /// <summary><c>\n</c>.</summary>
+    | Lf
+    /// <summary><c>\r\n</c>.</summary>
+    | CrLf
+
+/// <summary>Cosmetic options for the JSON writer.</summary>
+/// <remarks>
+/// Every combination produces JSON a conformant reader parses back to the same model. Wire-shape choices — field
+/// names, union representation, whether an absent field is omitted or written as <c>null</c> — belong on the schema,
+/// not here. Pass a configuring function to <see cref="M:Reified.Json.serializeWith``1" />; the unmodified value is
+/// <see cref="P:Reified.Json.defaults" />, which matches <see cref="M:Reified.Json.serialize``1" />.
+/// </remarks>
+type JsonWriteOptions =
+    { /// <summary>Indentation for nested levels. <see cref="F:Reified.JsonIndent.None" /> is compact.</summary>
+      Indent: JsonIndent
+      /// <summary>Append one line ending after the value.</summary>
+      TrailingNewline: bool
+      /// <summary>Line ending for indentation and the trailing newline.</summary>
+      LineEnding: JsonLineEnding
+      /// <summary>Escape every non-ASCII scalar as <c>\uXXXX</c> so the output is pure ASCII.</summary>
+      AsciiOnly: bool
+      /// <summary>Also escape <c>&lt;</c>, <c>&gt;</c>, <c>&amp;</c>, <c>'</c>, <c>+</c>, and U+2028/U+2029 for safe
+      /// embedding in HTML or a pre-ES2019 <c>&lt;script&gt;</c> element.</summary>
+      EscapeHtml: bool }
+
 /// Internal JSON lexer and writer primitives shared by the compiled encoder and decoder plans.
 module internal JsonRuntime =
 
@@ -403,11 +441,10 @@ module internal JsonRuntime =
 
     let inline private needsStringEscape (c: char) = c = '"' || c = '\\' || int c < 32
 
-    let private writeUnicodeEscape (writer: IByteWriter) (c: char) =
+    let private writeUnicodeEscape (writer: IByteWriter) (code: int) =
         let hexDigit value =
             if value < 10 then byte (int '0' + value) else byte (int 'a' + value - 10)
 
-        let code = int c
         writer.WriteByte(byte '\\')
         writer.WriteByte(byte 'u')
         writer.WriteByte(hexDigit ((code >>> 12) &&& 0xF))
@@ -455,7 +492,7 @@ module internal JsonRuntime =
                     if index > segmentStart then
                         writer.WriteStringSlice(value, segmentStart, index - segmentStart)
 
-                    writeUnicodeEscape writer c
+                    writeUnicodeEscape writer (int c)
                     segmentStart <- index + 1
                 | _ -> ()
 
@@ -465,3 +502,182 @@ module internal JsonRuntime =
                 writer.WriteStringSlice(value, segmentStart, index - segmentStart)
 
         writer.WriteByte(byte '"')
+
+    // --- Layout pass -----------------------------------------------------------
+    // Reformats already-valid, already-compact JSON: inserts indentation whitespace and, when asked, rewrites
+    // non-ASCII or HTML-sensitive characters as `\uXXXX`. Runs once over the compact bytes; the compact encoder
+    // above is never on this path.
+
+    let private htmlSensitive (b: byte) =
+        b = byte '<' || b = byte '>' || b = byte '&' || b = byte '\'' || b = byte '+'
+
+    let private writeCodePointEscape (sink: IByteWriter) (codePoint: int) =
+        if codePoint > 0xFFFF then
+            let value = codePoint - 0x10000
+            writeUnicodeEscape sink (0xD800 ||| (value >>> 10))
+            writeUnicodeEscape sink (0xDC00 ||| (value &&& 0x3FF))
+        else
+            writeUnicodeEscape sink codePoint
+
+    /// Decodes one UTF-8 scalar at `i`. On a truncated or malformed sequence it returns the lead byte with
+    /// length 1 so the pass stays lossless on input it cannot interpret.
+    let private decodeUtf8 (data: byte[]) (i: int) (count: int) : struct (int * int) =
+        let b0 = int data[i]
+
+        if b0 < 0x80 then
+            struct (b0, 1)
+        elif b0 >= 0xF0 && i + 3 < count then
+            struct (
+                ((b0 &&& 0x07) <<< 18)
+                ||| ((int data[i + 1] &&& 0x3F) <<< 12)
+                ||| ((int data[i + 2] &&& 0x3F) <<< 6)
+                ||| (int data[i + 3] &&& 0x3F),
+                4
+            )
+        elif b0 >= 0xE0 && i + 2 < count then
+            struct (((b0 &&& 0x0F) <<< 12) ||| ((int data[i + 1] &&& 0x3F) <<< 6) ||| (int data[i + 2] &&& 0x3F), 3)
+        elif b0 >= 0xC0 && i + 1 < count then
+            struct (((b0 &&& 0x1F) <<< 6) ||| (int data[i + 1] &&& 0x3F), 2)
+        else
+            struct (b0, 1)
+
+    /// Copies a string token starting at the opening quote `start`, applying the re-escaping options; returns the
+    /// index just past the closing quote.
+    let private copyStringToken
+        (data: byte[])
+        (start: int)
+        (count: int)
+        (sink: IByteWriter)
+        (asciiOnly: bool)
+        (escapeHtml: bool)
+        : int =
+        // A byte that can be copied verbatim as string content under the current options.
+        let copyable (c: byte) =
+            c <> byte '\\'
+            && c <> byte '"'
+            && (if c < 0x80uy then
+                    not (escapeHtml && htmlSensitive c)
+                else
+                    not asciiOnly && not escapeHtml)
+
+        sink.WriteByte(byte '"')
+        let mutable i = start + 1
+        let mutable closed = false
+
+        while not closed && i < count do
+            let b = data[i]
+
+            if b = byte '\\' then
+                if i + 1 < count then
+                    let escaped = data[i + 1]
+
+                    if escaped = byte 'u' && i + 5 < count then
+                        sink.WriteBytesSlice(data, i, 6)
+                        i <- i + 6
+                    else
+                        sink.WriteBytesSlice(data, i, 2)
+                        i <- i + 2
+                else
+                    sink.WriteByte b
+                    i <- i + 1
+            elif b = byte '"' then
+                sink.WriteByte b
+                closed <- true
+                i <- i + 1
+            elif copyable b then
+                let runStart = i
+                i <- i + 1
+
+                while i < count && copyable data[i] do
+                    i <- i + 1
+
+                sink.WriteBytesSlice(data, runStart, i - runStart)
+            elif b < 0x80uy then
+                // escapeHtml: a markup-sensitive ASCII byte
+                writeCodePointEscape sink (int b)
+                i <- i + 1
+            elif asciiOnly then
+                let struct (codePoint, length) = decodeUtf8 data i count
+                writeCodePointEscape sink codePoint
+                i <- i + length
+            else
+                // escapeHtml: a non-ASCII scalar; escape only the JS line separators
+                let struct (codePoint, length) = decodeUtf8 data i count
+
+                if codePoint = 0x2028 || codePoint = 0x2029 then
+                    writeCodePointEscape sink codePoint
+                else
+                    sink.WriteBytesSlice(data, i, length)
+
+                i <- i + length
+
+        i
+
+    /// Reformats the first `count` bytes of `source` (well-formed JSON) into `sink` per the write options.
+    let formatJson (options: JsonWriteOptions) (source: byte[]) (count: int) (sink: IByteWriter) : unit =
+        let indentUnit =
+            match options.Indent with
+            | JsonIndent.None -> [||]
+            | JsonIndent.Spaces n -> Array.create (max 0 n) (byte ' ')
+            | JsonIndent.Tab -> [| byte '\t' |]
+
+        let newline =
+            match options.LineEnding with
+            | JsonLineEnding.Lf -> [| byte '\n' |]
+            | JsonLineEnding.CrLf -> [| byte '\r'; byte '\n' |]
+
+        let pretty = options.Indent <> JsonIndent.None
+        let asciiOnly = options.AsciiOnly
+        let escapeHtml = options.EscapeHtml
+        let mutable depth = 0
+
+        let newlineIndent () =
+            sink.WriteBytes newline
+
+            for _ in 1 .. depth do
+                sink.WriteBytes indentUnit
+
+        let mutable i = 0
+
+        while i < count do
+            let b = source[i]
+
+            if b = byte '"' then
+                i <- copyStringToken source i count sink asciiOnly escapeHtml
+            elif isWhitespaceByte b then
+                i <- i + 1
+            elif b = byte '{' || b = byte '[' then
+                let closeByte = if b = byte '{' then byte '}' else byte ']'
+                let mutable j = i + 1
+
+                while j < count && isWhitespaceByte source[j] do
+                    j <- j + 1
+
+                if j < count && source[j] = closeByte then
+                    sink.WriteByte b
+                    sink.WriteByte closeByte
+                    i <- j + 1
+                else
+                    sink.WriteByte b
+                    depth <- depth + 1
+                    if pretty then newlineIndent ()
+                    i <- i + 1
+            elif b = byte '}' || b = byte ']' then
+                depth <- max 0 (depth - 1)
+                if pretty then newlineIndent ()
+                sink.WriteByte b
+                i <- i + 1
+            elif b = byte ',' then
+                sink.WriteByte b
+                if pretty then newlineIndent ()
+                i <- i + 1
+            elif b = byte ':' then
+                sink.WriteByte b
+                if pretty then sink.WriteByte(byte ' ')
+                i <- i + 1
+            else
+                sink.WriteByte b
+                i <- i + 1
+
+        if options.TrailingNewline then
+            sink.WriteBytes newline
