@@ -289,7 +289,7 @@ module rec Json =
 
             match DateTimeOffset.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind) with
             | true, value -> struct (value, next)
-            | false, _ -> decodeFailure (sprintf "invalid date-time value: %s" text)
+            | false, _ -> decodeFailure ("invalid date-time value: " + text)
 
     let private guidDecoder: Decoder<Guid> =
         fun src ->
@@ -297,7 +297,7 @@ module rec Json =
 
             match Guid.TryParse text with
             | true, value -> struct (value, next)
-            | false, _ -> decodeFailure (sprintf "invalid uuid value: %s" text)
+            | false, _ -> decodeFailure ("invalid uuid value: " + text)
 
 #if NET8_0_OR_GREATER && !FABLE_COMPILER
     let private dateDecoder: Decoder<DateOnly> =
@@ -306,7 +306,7 @@ module rec Json =
 
             match DateOnly.TryParseExact(text, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None) with
             | true, value -> struct (value, next)
-            | false, _ -> decodeFailure (sprintf "invalid date value: %s" text)
+            | false, _ -> decodeFailure ("invalid date value: " + text)
 #endif
 
     /// Boxed `Decoder<'concrete>` per primitive kind, unboxed at typed compile sites.
@@ -591,7 +591,9 @@ module rec Json =
             let data = current.Data
             let mutable more = current.Offset >= data.Length || data[current.Offset] <> byte '}'
             let mutable tag: string = null
-            let mutable offsets = Map.empty<string, int>
+            // Non-discriminator field offsets, newest-first. Only the adjacent representation reads this
+            // (to locate the payload field); a plain assoc list avoids linking F# Map into every codec.
+            let mutable offsets: (string * int) list = []
             if not more then current <- current.Advance 1
             while more do
                 let struct (start, length, escaped, afterKey) = stringRaw current
@@ -602,7 +604,7 @@ module rec Json =
                     tag <- value
                     current <- next
                 else
-                    offsets <- offsets |> Map.add key (skipWhitespace afterColon).Offset
+                    offsets <- (key, (skipWhitespace afterColon).Offset) :: offsets
                     current <- skipValue afterColon
                 let struct (next, hasMore) = readSeparatorOrClose (byte '}') "}" current
                 current <- next
@@ -613,7 +615,7 @@ module rec Json =
         let findCase path tag =
             union.Cases
             |> List.tryFind (fun case -> case.Tag = tag)
-            |> Option.defaultWith (fun () -> raise (JsonCodecException(path, sprintf "unknown union case tag: %s" tag)))
+            |> Option.defaultWith (fun () -> raise (JsonCodecException(path, "unknown union case tag: " + tag)))
 
         match union.Representation with
         | UnionRepresentation.Internal discriminatorName ->
@@ -624,11 +626,10 @@ module rec Json =
                     | EmptyUnionCase -> case.Tag, (None, case.Construct)
                     | FieldsUnionCase { Shape = NestedValueDefinition(model, _) } -> case.Tag, (Some(compileErasedModelDecoder model), case.Construct)
                     | _ -> invalidOp "Internal union cases must use fields payloads.")
-                |> Map.ofList
             fun source ->
                 let tag, _, next = decodeObjectTag discriminatorName source
-                match cases |> Map.tryFind tag with
-                | None -> raise (JsonCodecException("." + discriminatorName, sprintf "unknown union case tag: %s" tag))
+                match cases |> List.tryPick (fun (caseTag, case) -> if caseTag = tag then Some case else None) with
+                | None -> raise (JsonCodecException("." + discriminatorName, "unknown union case tag: " + tag))
                 | Some(None, construct) -> struct (construct (box ()), next)
                 | Some(Some decoder, construct) ->
                     let struct (payload, _) = decoder source
@@ -640,7 +641,7 @@ module rec Json =
                 match payloadDecoder style case.Payload with
                 | None -> struct (case.Construct(box ()), next)
                 | Some decoder ->
-                    match offsets |> Map.tryFind payloadName with
+                    match offsets |> List.tryPick (fun (key, offset) -> if key = payloadName then Some offset else None) with
                     | None -> raise (JsonCodecException("." + payloadName, "missing union payload field"))
                     | Some offset ->
                         let struct (payload, _) = withFieldPath payloadName (fun () -> decoder (ByteSource(source.Data, offset)))
@@ -653,7 +654,7 @@ module rec Json =
                     let case = findCase "$" tag
                     match case.Payload with
                     | EmptyUnionCase -> struct (case.Construct(box ()), next)
-                    | _ -> raise (JsonCodecException("$", sprintf "external union case %s requires a payload" tag))
+                    | _ -> raise (JsonCodecException("$", "external union case " + tag + " requires a payload"))
                 else
                     let current = expectByte (byte '{') "{" source
                     let struct (start, length, escaped, afterKey) = stringRaw current
@@ -905,7 +906,7 @@ module rec Json =
 
             match cases |> Array.tryFind (fun (caseTag, _) -> caseTag = tag) with
             | Some(_, value) -> struct (value, next)
-            | None -> raise (JsonCodecException("$", sprintf "unknown enum case tag: %s" tag))
+            | None -> raise (JsonCodecException("$", "unknown enum case tag: " + tag))
 
     let private compileEnumEncoderObj (enum: TaggedEnumValueDefinition) : Encoder<obj> =
         let cases = enum.Cases |> List.map (fun case -> case.Value, case.Tag) |> Array.ofList

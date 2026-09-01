@@ -20,6 +20,14 @@
 
   <PropertyGroup Condition="'$(IsFableLibrary)' == 'true'">
     <FableProjectFile>$(BaseIntermediateOutputPath)fable\$(MSBuildProjectFile)</FableProjectFile>
+    <!--
+      Fable copies this alongside the compiled output in a consumer's fable_modules/. Every Reified
+      Fable module is import/export/const/function/class declarations only, with no top-level
+      statements, so a browser bundler can drop unreferenced ones outright: a manifest that never
+      resolves a refined field then keeps nothing from Reified.Constraint or Reified.Refinements.
+      The Fable target's hasTopLevelSideEffect scan keeps this claim honest.
+    -->
+    <FablePackageJsonFile>$(BaseIntermediateOutputPath)fable\package.json</FablePackageJsonFile>
   </PropertyGroup>
 
   <Target Name="WriteFableProjectFile"
@@ -48,10 +56,14 @@
 
     <MakeDir Directories="$(BaseIntermediateOutputPath)fable" />
     <WriteLinesToFile File="$(FableProjectFile)" Lines="@(_FableLine)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <WriteLinesToFile File="$(FablePackageJsonFile)"
+                      Lines="{ &quot;type&quot;: &quot;module&quot;, &quot;sideEffects&quot;: false }"
+                      Overwrite="true" WriteOnlyWhenDifferent="true" />
   </Target>
 
   <ItemGroup Condition="'$(IsFableLibrary)' == 'true'">
     <None Include="$(FableProjectFile)" Pack="true" PackagePath="fable\$(MSBuildProjectFile)" Visible="false" />
+    <None Include="$(FablePackageJsonFile)" Pack="true" PackagePath="fable\package.json" Visible="false" />
     <None Include="**\*.fs;**\*.fsi"
           Exclude="$(BaseIntermediateOutputPath)**;$(BaseOutputPath)**;bin\**;obj\**;artifacts\**"
           Pack="true"

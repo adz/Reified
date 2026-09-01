@@ -11,8 +11,8 @@ open System.Text
 /// </remarks>
 type JsonCodecException(path: string, detail: string, ?inner: exn) =
     inherit System.Exception(
-        (if path = "" then sprintf "JSON decode failed at $: %s" detail
-         else sprintf "JSON decode failed at $%s: %s" path detail),
+        (if path = "" then "JSON decode failed at $: " + detail
+         else "JSON decode failed at $" + path + ": " + detail),
         (match inner with
          | Some inner -> inner
          | None -> null)
@@ -83,7 +83,7 @@ module internal JsonRuntime =
         let src = skipWhitespace src
 
         if src.Offset >= src.Data.Length || src.Data[src.Offset] <> expected then
-            decodeFailure (sprintf "expected %s" label)
+            decodeFailure ("expected " + label)
 
         skipWhitespace (src.Advance 1)
 
@@ -93,14 +93,14 @@ module internal JsonRuntime =
         let data = current.Data
 
         if current.Offset >= data.Length then
-            decodeFailure (sprintf "expected , or %s" errorLabel)
+            decodeFailure ("expected , or " + errorLabel)
 
         if data[current.Offset] = byte ',' then
             struct (skipWhitespace (current.Advance 1), true)
         elif data[current.Offset] = closeByte then
             struct (current.Advance 1, false)
         else
-            decodeFailure (sprintf "expected , or %s" errorLabel)
+            decodeFailure ("expected , or " + errorLabel)
 
     let advancePastColon (current: ByteSource) =
         let data = current.Data

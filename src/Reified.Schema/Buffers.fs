@@ -247,7 +247,7 @@ module internal Buffers =
         let inline tokenText () = Encoding.UTF8.GetString(data, offset, length)
 
         if length = 0 then
-            failwithf "Invalid int value: %s" (tokenText ())
+            failwith ("Invalid int value: " + tokenText ())
 
         let mutable index = offset
         let endExclusive = offset + length
@@ -258,7 +258,7 @@ module internal Buffers =
             index <- index + 1
 
         if index >= endExclusive then
-            failwithf "Invalid int value: %s" (tokenText ())
+            failwith ("Invalid int value: " + tokenText ())
 
         let maxMagnitude = if negative then 2147483648UL else 2147483647UL
         let mutable magnitude = 0UL
@@ -267,12 +267,12 @@ module internal Buffers =
             let digit = int data[index] - int (byte '0')
 
             if digit < 0 || digit > 9 then
-                failwithf "Invalid int value: %s" (tokenText ())
+                failwith ("Invalid int value: " + tokenText ())
 
             let digitMagnitude = uint64 digit
 
             if magnitude > (maxMagnitude - digitMagnitude) / 10UL then
-                failwithf "int value out of range: %s" (tokenText ())
+                failwith ("int value out of range: " + tokenText ())
 
             magnitude <- magnitude * 10UL + digitMagnitude
             index <- index + 1
@@ -292,13 +292,13 @@ module internal Buffers =
         if Utf8Parser.TryParse(token, &value, &consumed) && consumed = length then
             value
         else
-            failwithf "Invalid int64 value: %s" (Encoding.UTF8.GetString(data, offset, length))
+            failwith ("Invalid int64 value: " + Encoding.UTF8.GetString(data, offset, length))
 #else
         let token = Encoding.UTF8.GetString(data.[offset .. offset + length - 1])
 
         match System.Int64.TryParse(token, NumberStyles.Integer, CultureInfo.InvariantCulture) with
         | true, value -> value
-        | false, _ -> failwithf "Invalid int64 value: %s" token
+        | false, _ -> failwith ("Invalid int64 value: " + token)
 #endif
 
     let parseFloatBytes (data: byte[]) (offset: int) (length: int) : float =
@@ -310,13 +310,13 @@ module internal Buffers =
         if Utf8Parser.TryParse(token, &value, &consumed, 'G') && consumed = length then
             value
         else
-            failwithf "Invalid float value: %s" (Encoding.UTF8.GetString(data, offset, length))
+            failwith ("Invalid float value: " + Encoding.UTF8.GetString(data, offset, length))
 #else
         let token = Encoding.UTF8.GetString(data.[offset .. offset + length - 1])
 
         match System.Double.TryParse(token, NumberStyles.Float, CultureInfo.InvariantCulture) with
         | true, value -> value
-        | false, _ -> failwithf "Invalid float value: %s" token
+        | false, _ -> failwith ("Invalid float value: " + token)
 #endif
 
     let parseDecimalBytes (data: byte[]) (offset: int) (length: int) : decimal =
@@ -328,11 +328,11 @@ module internal Buffers =
         if Utf8Parser.TryParse(token, &value, &consumed, 'G') && consumed = length then
             value
         else
-            failwithf "Invalid decimal value: %s" (Encoding.UTF8.GetString(data, offset, length))
+            failwith ("Invalid decimal value: " + Encoding.UTF8.GetString(data, offset, length))
 #else
         let token = Encoding.UTF8.GetString(data.[offset .. offset + length - 1])
 
         match System.Decimal.TryParse(token, NumberStyles.Float, CultureInfo.InvariantCulture) with
         | true, value -> value
-        | false, _ -> failwithf "Invalid decimal value: %s" token
+        | false, _ -> failwith ("Invalid decimal value: " + token)
 #endif
