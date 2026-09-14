@@ -1,5 +1,11 @@
 # Release Notes
 
+## Unreleased
+
+### NativeAOT
+
+- Records with ten or more fields no longer throw `TypeLoadException` when a NativeAOT binary decodes them with `Json.compile` or parses them with `Schema.parse`. `Reified.Schema` now ships transitive build props that raise the ILC generic-cycle limits; records of at least 100 fields are covered by default, `ReifiedIlcGenericCycle` and `ReifiedIlcGenericCycleBreadth` raise the limits further, and `ReifiedRaiseIlcGenericCycleLimits=false` opts out.
+
 ## 0.8.0 - 2026-08-28
 
 ### JSON codecs moved into Reified.Schema (breaking)

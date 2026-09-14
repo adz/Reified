@@ -110,7 +110,7 @@ match Json.tryDeserialize codec """{"email":"ada@example.com","age":"thirty"}"""
 | Error message -> None   // JSON decode failed at $.age: expected digit
 ```
 
-The codec is compiled from the schema's typed field plan, so there is no runtime reflection and it stays AOT-, trimming-, and Fable-safe. It is the trusted-path counterpart to `Schema.parse`: it enforces the wire shape but skips constraint checking, because payloads from producers you trust already passed those checks. Untrusted input still goes through `Schema.parse`, which accumulates every violation with its path.
+The codec is compiled from the schema's typed field plan, so there is no runtime reflection and it stays AOT-, trimming-, and Fable-safe. For NativeAOT, the package raises the compiler's generic-cycle limits so records with many fields decode; see [AOT notes](https://adz.github.io/Reified/notes/aot-trimming-fable.html#records-with-many-fields). It is the trusted-path counterpart to `Schema.parse`: it enforces the wire shape but skips constraint checking, because payloads from producers you trust already passed those checks. Untrusted input still goes through `Schema.parse`, which accumulates every violation with its path.
 
 ## Or derive the schema from the record itself
 

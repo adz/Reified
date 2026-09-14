@@ -1,0 +1,17 @@
+<Project>
+  <!--
+    NativeAOT only generates the F# closure types that apply a curried constructor when their generic nesting stays
+    within ILC's generic-cycle limits (defaults: depth 4, breadth 10). Typed record plans apply a record constructor
+    one field at a time, so records with ten or more fields exceed the defaults and throw TypeLoadException at run
+    time. The values below cover records of at least 100 fields. Raise ReifiedIlcGenericCycle and
+    ReifiedIlcGenericCycleBreadth for wider records, or set ReifiedRaiseIlcGenericCycleLimits to false to opt out.
+  -->
+  <PropertyGroup>
+    <ReifiedIlcGenericCycle Condition="'$(ReifiedIlcGenericCycle)' == ''">128</ReifiedIlcGenericCycle>
+    <ReifiedIlcGenericCycleBreadth Condition="'$(ReifiedIlcGenericCycleBreadth)' == ''">256</ReifiedIlcGenericCycleBreadth>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(ReifiedRaiseIlcGenericCycleLimits)' != 'false'">
+    <IlcArg Include="--maxgenericcycle:$(ReifiedIlcGenericCycle)" />
+    <IlcArg Include="--maxgenericcyclebreadth:$(ReifiedIlcGenericCycleBreadth)" />
+  </ItemGroup>
+</Project>

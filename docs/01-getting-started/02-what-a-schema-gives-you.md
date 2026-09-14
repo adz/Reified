@@ -82,7 +82,8 @@ Json.serialize codec { Email = "ada@example.org"; Age = 36; Newsletter = true }
 
 
 There is no second description of the wire shape to keep in step. The codec is built from the schema's typed
-field plan rather than from runtime type inspection, so it works under NativeAOT, trimming, and Fable.
+field plan rather than from runtime type inspection, so it works under NativeAOT, trimming, and Fable. Records with many fields rely on build settings the
+`Reified.Schema` package applies for NativeAOT; see [Compiler-Directed, AOT, and Fable](/notes/aot-trimming-fable.html#records-with-many-fields).
 `compile` does the work up front; `serialize` and `deserialize` are the hot path. Decoding failures come back
 as the same path-aware `SchemaErrors`.
 

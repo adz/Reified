@@ -25,4 +25,5 @@ If you have not written a declaration yet, read [Getting started](/getting-start
   it depends on, and which run on .NET and on Fable JavaScript.
 - [Benchmarks](/notes/benchmarks.html) — measured parse and codec numbers against `System.Text.Json`, on .NET and Fable.
 - [Compiler-Directed, AOT, and Fable](/notes/aot-trimming-fable.html) — why an explicit, reflection-free declaration keeps
-  working under NativeAOT, aggressive trimming, and Fable.
+  working under NativeAOT, aggressive trimming, and Fable, and the NativeAOT compiler limits the package raises for
+  records with many fields.

@@ -18,6 +18,9 @@
              AssemblyFile="$(ILLinkTasksAssembly)"
              Condition="'$(PublishAot)' == 'true' and '$(ILLinkTasksAssembly)' != ''" />
 
+  <!-- A project reference does not import package build assets, so import the props a package consumer receives. -->
+  <Import Project="..\..\src\Reified.Schema\buildTransitive\Reified.Schema.props" />
+
   <ItemGroup>
     <Compile Include="Program.fs" />
   </ItemGroup>
