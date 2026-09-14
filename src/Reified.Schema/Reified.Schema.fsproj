@@ -35,6 +35,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="buildTransitive/Reified.Schema.props" Pack="true" PackagePath="build/;buildTransitive/" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Reified.Data\Reified.Data.fsproj" />
     <ProjectReference Include="..\Reified.Constraint\Reified.Constraint.fsproj" />
     <ProjectReference Include="..\Reified.Refinements\Reified.Refinements.fsproj" />

@@ -40,6 +40,21 @@ Every push publishes and runs a NativeAOT probe (`dotnet run --project tools/Rei
 exercising flows, schemas, parsing, and services with `PublishAot=true` and executes the native binary. If a change
 introduced reflection the trimmer could not prove safe, CI fails.
 
+### Records with many fields
+
+A typed record plan applies the curried `construct` function one field at a time. NativeAOT generates the F#
+closure types for that application only while their generic nesting stays within the ILC compiler's generic-cycle
+limits, and the defaults stop at about nine fields: a larger record compiles, then throws `TypeLoadException` when
+it is decoded or parsed.
+
+The `Reified.Schema` package raises the limits for NativeAOT publishes through a transitive build props file
+(`--maxgenericcycle:32` and `--maxgenericcyclebreadth:64`), which covers records of at least 32 fields and needs no
+setup. The NativeAOT probe decodes and parses a 24-field record to keep this verified. To manage the limits yourself,
+set `ReifiedRaiseIlcGenericCycleLimits` to `false` and pass your own `IlcArg` items.
+
+A project that references the Reified sources through a `ProjectReference` does not receive package build assets;
+import `src/Reified.Schema/buildTransitive/Reified.Schema.props` directly.
+
 ## Fable
 
 The same explicitness is what makes Fable compilation work: `Reified.Result`, `Reified.Constraint`, `Reified.Refinements`, and
