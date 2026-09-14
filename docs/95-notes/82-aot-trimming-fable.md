@@ -48,8 +48,12 @@ limits, and the defaults stop at about nine fields: a larger record compiles, th
 it is decoded or parsed.
 
 The `Reified.Schema` package raises the limits for NativeAOT publishes through a transitive build props file
-(`--maxgenericcycle:32` and `--maxgenericcyclebreadth:64`), which covers records of at least 32 fields and needs no
-setup. The NativeAOT probe decodes and parses a 24-field record to keep this verified. To manage the limits yourself,
+(`--maxgenericcycle:128` and `--maxgenericcyclebreadth:256`), which covers records of at least 100 fields and needs no
+setup. The NativeAOT probe decodes and parses a 100-field record to keep this verified.
+
+The limits apply to the whole application, not only Reified's code. They cost nothing for code whose generic
+instantiations are finite; code with unbounded generic recursion is expanded further before the compiler stops. For
+a larger record, raise `ReifiedIlcGenericCycle` and `ReifiedIlcGenericCycleBreadth`; to manage the limits yourself,
 set `ReifiedRaiseIlcGenericCycleLimits` to `false` and pass your own `IlcArg` items.
 
 A project that references the Reified sources through a `ProjectReference` does not receive package build assets;
