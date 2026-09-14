@@ -10,6 +10,20 @@ alternative looks obviously better than it is, or when something was tried and r
 Flow decisions are not kept here. The effect system, its service and hosting satellites, and the host HTTP
 adapters live in the [Axial repository](https://github.com/adz/Axial) along with the reasoning behind them.
 
+## 2026-09-14: Reified.Schema raises NativeAOT generic-cycle limits for consumers
+
+- Records with ten or more fields threw `TypeLoadException` under NativeAOT when decoded by `Json.compile` or parsed
+  by `Schema.parse`. ILC does not generate the nested F# closure types that apply a long curried constructor once
+  their nesting passes `--maxgenericcycle`/`--maxgenericcyclebreadth` (defaults 4 and 10). A plain F# program applying
+  a 16-argument lambda fails the same way, so no restructuring of the typed record plan avoids it while `construct`
+  stays curried.
+- The package ships `build/` and `buildTransitive/` props that pass 128/256, covering at least 100 fields. Measured on
+  GitKay (Avalonia, FSharp.Core, LibGit2Sharp): the same ILC peak memory and binary size within 48 bytes of the
+  defaults. The limits are application-wide, so they are properties (`ReifiedIlcGenericCycle`,
+  `ReifiedIlcGenericCycleBreadth`) with an opt-out (`ReifiedRaiseIlcGenericCycleLimits=false`).
+- Rejected: generating a non-curried constructor at build time, which contradicts explicit declarations, and leaving
+  the limits to each application, which fails silently at run time.
+
 ## 2026-08-17: Documentation tooling migrated from Hugo/Docsy to FsLiveDocs
 
 - **`site/` (Hugo/Docsy) and `scripts/docgen/` are gone.** Replaced by FsLiveDocs 0.3.x, driven by

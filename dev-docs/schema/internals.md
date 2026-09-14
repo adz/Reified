@@ -138,6 +138,11 @@ lowers to the existing union descriptions. It adds no reflection or interpreter 
   is maximal deterministic verification. Type erasure is done with typed closures and `unbox` at points
   where the static type is known. One-time, build-phase metadata reading (the bare `field _.Name`
   quotation) is fine; reflection on the parse/encode paths is not.
+- **Wide records need raised ILC limits.** Typed record plans apply the curried constructor one field at a time, and
+  NativeAOT stops generating the nested F# closure types past its generic-cycle limits (defaults 4/10, about nine
+  fields). `src/Reified.Schema/buildTransitive/Reified.Schema.props` raises them to 128/256 for consumers, and the
+  Schema AOT probe decodes and parses a 100-field record. A project reference does not receive package build assets,
+  so repository AOT projects import the props file directly.
 - **Descriptions don't execute.** If you're adding behavior to `Schema.fs`, you're probably building an
   interpreter and it belongs in its own file.
 - **One erased view, one typed view.** `FieldDescriptor` serves metadata interpreters; the typed record
