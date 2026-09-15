@@ -60,7 +60,10 @@ let customer = Json.deserialize codec json
 
 `Json.compile` walks the typed record plan retained when the object shape closes and emits a direct plan: ordered field
 descriptors, cached UTF-8 wire-name bytes, typed field decoders, and the original curried constructor applied without
-boxing. Everything is compiler-directed: there is no runtime reflection at codec-compile time or per value, so the codec is AOT- and trimming-safe by construction. Applying a curried constructor of ten or more fields needs
+boxing. Decode first follows the canonical field order emitted by Reified without field dispatch or per-field slots. A
+reordered object, alias, omitted field, or unknown field transparently restarts through the general unordered decoder;
+callers do not select a mode. Everything is compiler-directed: there is no runtime reflection at codec-compile time or
+per value, so the codec is AOT- and trimming-safe by construction. Applying a curried constructor of ten or more fields needs
 NativeAOT generic-cycle limits above the compiler defaults; the `Reified.Schema` package raises them for you, as
 [Compiler-Directed, AOT, and Fable](/notes/aot-trimming-fable.html#records-with-many-fields) explains.
 
