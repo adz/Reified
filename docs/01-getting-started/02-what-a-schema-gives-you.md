@@ -105,7 +105,7 @@ JsonSchema.generate signupSchema
 published document cannot drift from the code that enforces it. Clients generated from it are generated from
 the same shape the parser and codec use.
 
-→ [`JsonSchema` API reference](/api/Reified.JsonSchema.html)
+→ [`JsonSchema` API reference](/api.html)
 
 ## Describe the model to a form or admin UI
 
