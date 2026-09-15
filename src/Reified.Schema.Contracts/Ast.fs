@@ -108,6 +108,7 @@ type Annotation =
 type FieldDecl =
     { FieldName: string
       WireName: string option
+      Aliases: string list
       Optional: bool
       FieldType: FieldType
       Constraints: (ConstraintDecl * int) list

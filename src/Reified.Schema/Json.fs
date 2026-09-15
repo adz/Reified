@@ -61,8 +61,8 @@ module rec Json =
           Utf8: byte[] }
 
     type private FieldMatcher =
-        { CanonicalName: string
-          AcceptedNames: AcceptedName[]
+        { CanonicalName: AcceptedName
+          Aliases: AcceptedName[]
           CreateSlot: unit -> ISlot }
 
     let private utf8 (text: string) = Encoding.UTF8.GetBytes text
@@ -93,14 +93,20 @@ module rec Json =
                 while matched < 0 && index < matchers.Length do
                     let matcher = matchers[index]
 
-                    let equal =
-                        matcher.AcceptedNames
-                        |> Array.exists (fun name ->
-                            match suppliedText with
-                            | Some supplied -> supplied = name.Text
-                            | None -> bytesEqual name.Utf8 data keyStart keyLength)
+                    let equals name =
+                        match suppliedText with
+                        | Some supplied -> supplied = name.Text
+                        | None -> bytesEqual name.Utf8 data keyStart keyLength
 
-                    if equal then matched <- index else index <- index + 1
+                    if equals matcher.CanonicalName then
+                        matched <- index
+                    else
+                        let mutable aliasIndex = 0
+                        while matched < 0 && aliasIndex < matcher.Aliases.Length do
+                            if equals matcher.Aliases[aliasIndex] then matched <- index
+                            aliasIndex <- aliasIndex + 1
+
+                        if matched < 0 then index <- index + 1
 
                 let afterValue =
                     if matched >= 0 then
@@ -129,7 +135,7 @@ module rec Json =
             while missing < slots.Length do
                 if not slots[missing].Seen then
                     raise (
-                        JsonCodecException("." + matchers[missing].CanonicalName, "missing required field")
+                        JsonCodecException("." + matchers[missing].CanonicalName.Text, "missing required field")
                     )
 
                 missing <- missing + 1
@@ -523,9 +529,9 @@ module rec Json =
                             slot :> ISlot
                     | None, _ -> fun () -> Slot<obj>(fieldDecoder) :> ISlot
 
-                { CanonicalName = name
-                  AcceptedNames =
-                    field.ExternalName :: field.Aliases
+                { CanonicalName = { Text = name; Utf8 = utf8 name }
+                  Aliases =
+                    field.Aliases
                     |> List.map (ExternalFieldName.value >> fun text -> { Text = text; Utf8 = utf8 text })
                     |> Array.ofList
                   CreateSlot = createSlot })
@@ -1065,9 +1071,9 @@ module rec Json =
                     | None, _ -> fun () -> Slot<'field>(fieldDecoder) :> ISlot
 
                 let matcher =
-                    { CanonicalName = name
-                      AcceptedNames =
-                        field.Definition.ExternalName :: field.Definition.Aliases
+                    { CanonicalName = { Text = name; Utf8 = utf8 name }
+                      Aliases =
+                        field.Definition.Aliases
                         |> List.map (ExternalFieldName.value >> fun text -> { Text = text; Utf8 = utf8 text })
                         |> Array.ofList
                       CreateSlot = createSlot }

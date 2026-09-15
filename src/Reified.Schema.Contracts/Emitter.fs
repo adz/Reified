@@ -1264,10 +1264,17 @@ module Emitter =
                 let constraints = fieldLevelConstraints field
                 let supplies = declaresSupply field
 
-                if canInferField field && List.isEmpty constraints && not supplies then
+                if canInferField field && List.isEmpty constraints && not supplies && List.isEmpty field.Aliases then
                     line $"            fieldAs \"{escapeString wire}\" {getter}"
                 else
                     line $"            fieldAs \"{escapeString wire}\" {getter} {{"
+
+                    match field.Aliases with
+                    | [] -> ()
+                    | [ alias ] -> line $"                alias \"{escapeString alias}\""
+                    | aliases ->
+                        let values = aliases |> List.map (fun alias -> $"\"{escapeString alias}\"") |> String.concat "; "
+                        line $"                aliases [ {values} ]"
 
                     if requiresExplicitSchema field then
                         let value = valueExpr compactRefSchemaName compactUnionSchemaName compactNamedSchemaName compactKeyMapName (contract.QualifiedName, contract.Version, schemaTypeName) field

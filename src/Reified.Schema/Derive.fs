@@ -41,6 +41,12 @@ type SchemaNameAttribute(name: string) =
     inherit Attribute()
     member _.Name = name
 
+/// <summary>Adds one exact, input-only alternate wire name for a generated record field.</summary>
+[<AttributeUsage(AttributeTargets.Property ||| AttributeTargets.Field, AllowMultiple = true)>]
+type SchemaAliasAttribute(name: string) =
+    inherit Attribute()
+    member _.Name = name
+
 /// <summary>Marks a discriminated union for generated Schema support. The parameterless form uses the
 /// recommended internal <c>type</c> discriminator; named properties select explicit adjacent or external
 /// compatibility representations. General-union fields must be named.</summary>

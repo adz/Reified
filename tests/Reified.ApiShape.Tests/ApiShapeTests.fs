@@ -657,7 +657,7 @@ module ApiShapeTests =
         fieldModule
         |> publicStaticMemberNames
         |> assertContainsAll
-            [ "create"; "externalName"; "aliases"; "order"; "getValue"; "constraints"; "supply"; "withConstraint"; "withConstraints" ]
+            [ "create"; "externalName"; "aliases"; "withAlias"; "withAliases"; "order"; "getValue"; "constraints"; "supply"; "withConstraint"; "withConstraints" ]
         test <@ fieldCreateMethods.Length = 1 @>
         test <@ fieldCreateParameterCount = 3 @>
         test <@ fieldCreateReturnType = fieldTypeDefinition @>

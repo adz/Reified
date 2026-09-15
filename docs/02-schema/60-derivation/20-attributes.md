@@ -34,6 +34,7 @@ the table has the same meaning as its linked handwritten [Schema DSL](/schema/ds
 
 | Attribute | Short description | Schema DSL equivalent |
 | --- | --- | --- |
+| `[<SchemaAlias "old_name">]` | Accept an exact, input-only alternate name. Repeat the attribute for multiple aliases. | [`alias "old_name"`](/schema/dsl.html#accepting-old-field-names) |
 | `[<Pattern "expr">]` | Require text to match a regular expression. | [`constrain (pattern "expr")`](/schema/dsl.html#constraint-equivalents) |
 | `[<Min n>]` | Set the minimum natural length of text, list, or map. | [`constrain (minLength n)`](/schema/dsl.html#constraint-equivalents) |
 | `[<Max n>]` | Set the maximum natural length of text, list, or map. | [`constrain (maxLength n)`](/schema/dsl.html#constraint-equivalents) |

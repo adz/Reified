@@ -248,14 +248,25 @@ module SchemaWideShapeTests =
                       "tags", Data.List [] ]
             )
 
-        match Schema.parse schema input with
-        | Error errors ->
-            test <@
-                SchemaErrors.toList errors
-                |> List.exists (fun diagnostic ->
-                    diagnostic.Error = SchemaError.Custom("field.alias.ambiguous", Some "More than one accepted name was supplied for this field."))
-            @>
-        | Ok value -> failwithf "Expected ambiguous aliases to fail, got %A" value
+        let assertAmbiguous result =
+            match result with
+            | Error errors ->
+                test <@
+                    SchemaErrors.toList errors
+                    |> List.exists (fun diagnostic ->
+                        diagnostic.Error = SchemaError.Custom("field.alias.ambiguous", Some "More than one accepted name was supplied for this field."))
+                @>
+            | Ok value -> failwithf "Expected ambiguous aliases to fail, got %A" value
+
+        Schema.parse schema input |> assertAmbiguous
+
+        Data.Object
+            [ "name", Data.Text "Ada"
+              "name", Data.Text "Grace"
+              "age", Data.Text "36"
+              "tags", Data.List [] ]
+        |> Schema.parse schema
+        |> assertAmbiguous
 
     [<Fact>]
     let ``field aliases cannot collide with another accepted field name`` () =
