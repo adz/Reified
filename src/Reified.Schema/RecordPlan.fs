@@ -53,6 +53,18 @@ module internal ModelSchemaDefinition =
         if orders <> expected then
             invalidArg (nameof fields) "Model schema fields must use contiguous zero-based field order."
 
+    let private ensureDistinctAcceptedNames (fields: FieldDescriptor<'model> list) =
+        let duplicates =
+            fields
+            |> List.collect (fun field -> field.ExternalName :: field.Aliases)
+            |> List.map ExternalFieldName.value
+            |> List.countBy id
+            |> List.choose (fun (name, count) -> if count > 1 then Some name else None)
+
+        match duplicates with
+        | name :: _ -> invalidArg (nameof fields) $"The field name or alias '{name}' is declared more than once."
+        | [] -> ()
+
     let create (constructor: ConstructorApplication<'model>) (fields: FieldDescriptor<'model> list) =
         if isNull (box constructor) then
             nullArg (nameof constructor)
@@ -71,6 +83,7 @@ module internal ModelSchemaDefinition =
                 $"Expected {constructor.ArgumentCount} ordered field(s), but received {fields.Length}."
 
         ensureContiguousOrders fields
+        ensureDistinctAcceptedNames fields
 
         { Constructor = constructor
           Fields = fields |> List.sortBy (fun field -> field.Order.Value)

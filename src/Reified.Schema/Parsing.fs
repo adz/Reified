@@ -445,12 +445,21 @@ module internal SchemaParsing =
             | None when isOmittableValue valueSchema -> parseValue options valueSchema rules path Data.Null
             | None -> errorAt path SchemaError.Omitted
 
+    and private parseFieldInput options basePath (fields: Map<string, Data>) (field: FieldDescriptor<obj>) =
+        let canonical = ExternalFieldName.value field.ExternalName
+        let accepted = field.ExternalName :: field.Aliases |> List.map ExternalFieldName.value
+        let supplied = accepted |> List.choose (fun name -> fields |> Map.tryFind name |> Option.map (fun raw -> name, raw))
+
+        match supplied with
+        | [ name, raw ] -> parseValue options field.ValueSchema field.Rules (basePath @ [ KeyComponent name ]) raw
+        | [] -> parseMissingValue options (basePath @ [ KeyComponent canonical ]) field.ValueSchema field.Rules
+        | _ ->
+            errorAt
+                (basePath @ [ KeyComponent canonical ])
+                (SchemaError.Custom("field.alias.ambiguous", Some "More than one accepted name was supplied for this field."))
+
     and private parseNestedField options basePath (fields: Map<string, Data>) (field: FieldDescriptor<obj>) =
-        let name = ExternalFieldName.value field.ExternalName
-        let path = basePath @ [ KeyComponent name ]
-        match fields |> Map.tryFind name with
-        | Some raw -> parseValue options field.ValueSchema field.Rules path raw
-        | None -> parseMissingValue options path field.ValueSchema field.Rules
+        parseFieldInput options basePath fields field
 
     and private parseObject options path (model: ModelSchemaDefinition<obj>) (fields: Map<string, Data>) =
         let parsedFields = model.Fields |> List.map (parseNestedField options path fields)
@@ -517,11 +526,17 @@ module internal SchemaParsing =
         | diagnostics -> Error(mergeErrors diagnostics)
 
     let private parseRootField options basePath (fields: Map<string, Data>) (field: FieldDescriptor<'model>) =
-        let name = ExternalFieldName.value field.ExternalName
-        let path = basePath @ [ KeyComponent name ]
-        match fields |> Map.tryFind name with
-        | Some raw -> parseValue options field.ValueSchema field.Rules path raw
-        | None -> parseMissingValue options path field.ValueSchema field.Rules
+        let canonical = ExternalFieldName.value field.ExternalName
+        let accepted = field.ExternalName :: field.Aliases |> List.map ExternalFieldName.value
+        let supplied = accepted |> List.choose (fun name -> fields |> Map.tryFind name |> Option.map (fun raw -> name, raw))
+
+        match supplied with
+        | [ name, raw ] -> parseValue options field.ValueSchema field.Rules (basePath @ [ KeyComponent name ]) raw
+        | [] -> parseMissingValue options (basePath @ [ KeyComponent canonical ]) field.ValueSchema field.Rules
+        | _ ->
+            errorAt
+                (basePath @ [ KeyComponent canonical ])
+                (SchemaError.Custom("field.alias.ambiguous", Some "More than one accepted name was supplied for this field."))
 
     /// <summary>Parses structured boundary data through a trusted model schema using custom input parser options.</summary>
     let private parseWithErrors

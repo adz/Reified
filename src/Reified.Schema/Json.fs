@@ -41,19 +41,28 @@ module rec Json =
     and private Slot<'field>(decoder: Decoder<'field>) =
         member val Value = Unchecked.defaultof<'field> with get, set
         member val HasValue = false with get, set
+        member val WasSupplied = false with get, set
 
         interface ISlot with
             member x.Decode src =
+                if x.WasSupplied then
+                    decodeFailure "more than one accepted name was supplied for this field"
+
                 let struct (value, next) = decoder src
                 x.Value <- value
                 x.HasValue <- true
+                x.WasSupplied <- true
                 next
 
             member x.Seen = x.HasValue
 
+    type private AcceptedName =
+        { Text: string
+          Utf8: byte[] }
+
     type private FieldMatcher =
-        { NameText: string
-          NameUtf8: byte[]
+        { CanonicalName: string
+          AcceptedNames: AcceptedName[]
           CreateSlot: unit -> ISlot }
 
     let private utf8 (text: string) = Encoding.UTF8.GetBytes text
@@ -77,14 +86,19 @@ module rec Json =
                 let mutable matched = -1
                 let mutable index = 0
 
+                let suppliedText =
+                    if keyHadEscapes then Some(materializeString data keyStart keyLength true)
+                    else None
+
                 while matched < 0 && index < matchers.Length do
                     let matcher = matchers[index]
 
                     let equal =
-                        if keyHadEscapes then
-                            materializeString data keyStart keyLength true = matcher.NameText
-                        else
-                            bytesEqual matcher.NameUtf8 data keyStart keyLength
+                        matcher.AcceptedNames
+                        |> Array.exists (fun name ->
+                            match suppliedText with
+                            | Some supplied -> supplied = name.Text
+                            | None -> bytesEqual name.Utf8 data keyStart keyLength)
 
                     if equal then matched <- index else index <- index + 1
 
@@ -96,7 +110,8 @@ module rec Json =
                         | :? JsonCodecException as ex ->
                             raise (
                                 JsonCodecException(
-                                    "." + matchers[matched].NameText
+                                    "."
+                                    + (suppliedText |> Option.defaultWith (fun () -> materializeString data keyStart keyLength false))
                                     + (if ex.Path = "$" then "" else ex.Path.Substring 1),
                                     ex.Detail,
                                     ex
@@ -114,7 +129,7 @@ module rec Json =
             while missing < slots.Length do
                 if not slots[missing].Seen then
                     raise (
-                        JsonCodecException("." + matchers[missing].NameText, "missing required field")
+                        JsonCodecException("." + matchers[missing].CanonicalName, "missing required field")
                     )
 
                 missing <- missing + 1
@@ -508,8 +523,11 @@ module rec Json =
                             slot :> ISlot
                     | None, _ -> fun () -> Slot<obj>(fieldDecoder) :> ISlot
 
-                { NameText = name
-                  NameUtf8 = utf8 name
+                { CanonicalName = name
+                  AcceptedNames =
+                    field.ExternalName :: field.Aliases
+                    |> List.map (ExternalFieldName.value >> fun text -> { Text = text; Utf8 = utf8 text })
+                    |> Array.ofList
                   CreateSlot = createSlot })
             |> Array.ofList
 
@@ -1047,8 +1065,11 @@ module rec Json =
                     | None, _ -> fun () -> Slot<'field>(fieldDecoder) :> ISlot
 
                 let matcher =
-                    { NameText = name
-                      NameUtf8 = utf8 name
+                    { CanonicalName = name
+                      AcceptedNames =
+                        field.Definition.ExternalName :: field.Definition.Aliases
+                        |> List.map (ExternalFieldName.value >> fun text -> { Text = text; Utf8 = utf8 text })
+                        |> Array.ofList
                       CreateSlot = createSlot }
 
                 DecodeChainResult<'model, 'constructorIn, 'next>(

@@ -301,6 +301,7 @@ and [<ReferenceEquality>] internal TaggedEnumValueDefinition = { Cases: EnumCase
 
 and [<ReferenceEquality>] internal FieldDescriptor<'model> =
     { ExternalName: ExternalFieldName
+      Aliases: ExternalFieldName list
       Order: FieldOrder
       Getter: 'model -> obj
       ValueSchema: ValueSchemaDefinition
@@ -339,6 +340,7 @@ module internal ModelSchemaErasure =
             definition.Fields
             |> List.map (fun field ->
                 { ExternalName = field.ExternalName
+                  Aliases = field.Aliases
                   Order = field.Order
                   Getter = fun (model: obj) -> field.Getter (unbox<'model> model)
                   ValueSchema = field.ValueSchema
@@ -347,6 +349,7 @@ module internal ModelSchemaErasure =
 
 type internal FieldDefinition<'model, 'value> =
     { ExternalName: ExternalFieldName
+      Aliases: ExternalFieldName list
       Order: FieldOrder
       Getter: 'model -> 'value
       ValueSchema: ValueSchemaDefinition

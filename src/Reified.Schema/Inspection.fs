@@ -58,8 +58,10 @@ and SchemaDescription =
 /// <summary>Describes one field of a model schema for inspection interpreters.</summary>
 and FieldDescription =
     {
-        /// <summary>The boundary-facing external field name.</summary>
+        /// <summary>The canonical boundary-facing external field name.</summary>
         Name: string
+        /// <summary>The exact alternate names accepted when parsing input.</summary>
+        Aliases: string list
         /// <summary>The zero-based field order used for trusted construction and ordered interpreter output.</summary>
         Order: int
         /// <summary>The description of the field's value schema.</summary>
@@ -195,6 +197,7 @@ module Inspect =
 
         and describeFieldDescriptor (field: FieldDescriptor<obj>) : FieldDescription =
             { Name = ExternalFieldName.value field.ExternalName
+              Aliases = field.Aliases |> List.map ExternalFieldName.value
               Order = FieldOrder.value field.Order
               Schema = describeValueDefinition field.ValueSchema
               Constraints = SchemaRule.descriptions field.Rules
@@ -210,6 +213,7 @@ module Inspect =
             definition.Fields
             |> List.map (fun field ->
                 { Name = ExternalFieldName.value field.ExternalName
+                  Aliases = field.Aliases |> List.map ExternalFieldName.value
                   Order = FieldOrder.value field.Order
                   Schema = describeValueDefinitionRoot field.ValueSchema
                   Constraints = SchemaRule.descriptions field.Rules
@@ -252,6 +256,7 @@ module Inspect =
             nullArg (nameof field)
 
         { Name = ExternalFieldName.value field.Definition.ExternalName
+          Aliases = field.Definition.Aliases |> List.map ExternalFieldName.value
           Order = FieldOrder.value field.Definition.Order
           Schema = describeValueDefinition field.Definition.ValueSchema
           Constraints = SchemaRule.descriptions field.Definition.Rules

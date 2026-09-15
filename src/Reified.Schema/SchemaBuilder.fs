@@ -25,9 +25,12 @@ open Microsoft.FSharp.Quotations
 [<CompilerMessage("Internal Reified computation-expression machinery. Do not use directly.", 42, IsHidden = true)>]
 module SchemaFieldSteps =
     [<EditorBrowsable(EditorBrowsableState.Never)>]
-    type FieldInitial<'model, 'target> internal (name: string, getter: 'model -> 'target) =
+    type FieldInitial<'model, 'target> internal
+        (name: string, getter: 'model -> 'target, aliases: ExternalFieldName list) =
         member internal _.Name = name
         member internal _.Getter = getter
+        member internal _.Aliases = aliases
+        member internal _.WithAliases(values) = FieldInitial(name, getter, values)
 
     [<EditorBrowsable(EditorBrowsableState.Never)>]
     type FieldWorking<'model, 'target, 'current> internal
@@ -120,9 +123,14 @@ open SchemaFieldSteps
 /// ordinary <c>open</c>. See <c>dev-docs/derived-field-names.md</c>.
 /// </para>
 /// </remarks>
-type field<'model, 'target> internal (name: string, getter: 'model -> 'target) =
+type field<'model, 'target> internal
+    (name: string, getter: 'model -> 'target, aliases: ExternalFieldName list) =
     member internal _.Name = name
     member internal _.Getter = getter
+    member internal _.AcceptedAliases = aliases
+
+    new (name: string, getter: 'model -> 'target) =
+        field<'model, 'target>(name, getter, [])
 
     /// <summary>Declares a field, deriving its camel-cased wire name from the property getter.</summary>
     /// <example><code>type Signup = { Email: string }
@@ -131,15 +139,15 @@ type field<'model, 'target> internal (name: string, getter: 'model -> 'target) =
     // Fable does not implement Expr.WithValue, so it takes the plain attribute and recompiles the getter.
     new([<ReflectedDefinition>] getter: Expr<'model -> 'target>) =
         let name, get = GetterName.split getter
-        field<'model, 'target>(name, get)
+        field<'model, 'target>(name, get, [])
 #else
     new([<ReflectedDefinition(includeValue = true)>] getter: Expr<'model -> 'target>) =
         let name, get = GetterName.split getter
-        field<'model, 'target>(name, get)
+        field<'model, 'target>(name, get, [])
 #endif
 
     member _.Yield(()) : FieldInitial<'model, 'target> =
-        FieldInitial(name, getter)
+        FieldInitial(name, getter, [])
 
     static member private ConstrainAll
         (
@@ -346,6 +354,51 @@ type field<'model, 'target> internal (name: string, getter: 'model -> 'target) =
             field<'model, 'target>.ConstrainAll(constraints, source.Schema)
         )
 
+    static member private AddAliases(names: string list, initial: FieldInitial<'model, 'target>) =
+        if isNull (box names) then nullArg (nameof names)
+        let aliases = names |> List.map ExternalFieldName.create
+        initial.WithAliases(initial.Aliases @ aliases)
+
+    /// <summary>Adds one exact, input-only alternate wire name for this field.</summary>
+    [<CustomOperation("alias")>]
+    member _.Alias(initial: FieldInitial<'model, 'target>, name: string) =
+        FieldConfigured(field<'model, 'target>.AddAliases([ name ], initial), id)
+
+    /// <summary>Adds one exact, input-only alternate wire name for this field.</summary>
+    [<CustomOperation("alias")>]
+    member _.Alias(source: FieldConfigured<'model, 'target>, name: string) =
+        FieldConfigured(field<'model, 'target>.AddAliases([ name ], source.Initial), source.Configure)
+
+    /// <summary>Adds one exact, input-only alternate wire name for this field.</summary>
+    [<CustomOperation("alias")>]
+    member _.Alias(source: FieldWorking<'model, 'target, 'current>, name: string) =
+        FieldWorking(field<'model, 'target>.AddAliases([ name ], source.Initial), source.Schema)
+
+    /// <summary>Adds one exact, input-only alternate wire name for this field.</summary>
+    [<CustomOperation("alias")>]
+    member _.Alias(source: FieldRefining<'model, 'target, 'raw>, name: string) =
+        FieldRefining(field<'model, 'target>.AddAliases([ name ], source.Initial), source.RawSchema, source.Validations)
+
+    /// <summary>Adds exact, input-only alternate wire names for this field.</summary>
+    [<CustomOperation("aliases")>]
+    member _.Aliases(initial: FieldInitial<'model, 'target>, names: string list) =
+        FieldConfigured(field<'model, 'target>.AddAliases(names, initial), id)
+
+    /// <summary>Adds exact, input-only alternate wire names for this field.</summary>
+    [<CustomOperation("aliases")>]
+    member _.Aliases(source: FieldConfigured<'model, 'target>, names: string list) =
+        FieldConfigured(field<'model, 'target>.AddAliases(names, source.Initial), source.Configure)
+
+    /// <summary>Adds exact, input-only alternate wire names for this field.</summary>
+    [<CustomOperation("aliases")>]
+    member _.Aliases(source: FieldWorking<'model, 'target, 'current>, names: string list) =
+        FieldWorking(field<'model, 'target>.AddAliases(names, source.Initial), source.Schema)
+
+    /// <summary>Adds exact, input-only alternate wire names for this field.</summary>
+    [<CustomOperation("aliases")>]
+    member _.Aliases(source: FieldRefining<'model, 'target, 'raw>, names: string list) =
+        FieldRefining(field<'model, 'target>.AddAliases(names, source.Initial), source.RawSchema, source.Validations)
+
     /// <summary>Refines the current raw schema with an explicit refinement.</summary>
     [<CustomOperation("refine")>]
     member _.Refine
@@ -403,6 +456,7 @@ type field<'model, 'target> internal (name: string, getter: 'model -> 'target) =
         : FieldDeclaration<'model, 'target> =
         FieldDeclaration(
             { ExternalName = ExternalFieldName.create source.Initial.Name
+              Aliases = source.Initial.Aliases
               Order = FieldOrder.create 0
               Getter = source.Initial.Getter
               ValueSchema = source.Schema.ValueDefinition
@@ -477,6 +531,7 @@ module SchemaCeBuilder =
             member _.GetFields(index) =
                 let descriptor: FieldDescriptor<'model> =
                     { ExternalName = field.ExternalName
+                      Aliases = field.Aliases
                       Order = FieldOrder.create index
                       Getter = fun model -> field.Getter model |> box
                       ValueSchema = field.ValueSchema
@@ -508,6 +563,7 @@ module SchemaCeBuilder =
                 ) =
                 let mappedField: FieldDefinition<'mapped, 'field> =
                     { ExternalName = field.ExternalName
+                      Aliases = field.Aliases
                       Order = FieldOrder.create order
                       Getter = map >> field.Getter
                       ValueSchema = field.ValueSchema
@@ -594,6 +650,7 @@ module SchemaCeBuilder =
                         let field = unbox<FieldDescriptor<'model>> value
 
                         { FieldDescriptor.ExternalName = field.ExternalName
+                          Aliases = field.Aliases
                           Order = field.Order
                           Getter = map >> field.Getter
                           ValueSchema = field.ValueSchema
@@ -630,6 +687,7 @@ module SchemaCeBuilder =
             ) : FieldStep<'model, 'value> =
             FieldStep(
                 { ExternalName = ExternalFieldName.create source.Name
+                  Aliases = source.AcceptedAliases
                   Order = FieldOrder.create 0
                   Getter = source.Getter
                   ValueSchema = schema.ValueDefinition
@@ -649,6 +707,7 @@ module SchemaCeBuilder =
 
             FieldStep(
                 { ExternalName = ExternalFieldName.create source.Initial.Name
+                  Aliases = source.Initial.Aliases
                   Order = FieldOrder.create 0
                   Getter = source.Initial.Getter
                   ValueSchema = schema.ValueDefinition
@@ -661,7 +720,7 @@ module SchemaCeBuilder =
                 schema: Schema<'target>
             ) : FieldStep<'model, 'target> =
             SchemaBuilder<'model>.DefaultField(
-                field<'model, 'target>(source.Initial.Name, source.Initial.Getter),
+                field<'model, 'target>(source.Initial.Name, source.Initial.Getter, source.Initial.Aliases),
                 source.Configure schema
             )
 

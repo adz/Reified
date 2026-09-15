@@ -33,6 +33,7 @@ module Field =
 
         Field(
             { ExternalName = ExternalFieldName.create externalName
+              Aliases = []
               Order = FieldOrder.create 0
               Getter = getter
               ValueSchema = value.ValueDefinition
@@ -45,6 +46,13 @@ module Field =
             nullArg (nameof field)
 
         field.Definition.ExternalName
+
+    /// <summary>Returns the alternate input names accepted for a schema field.</summary>
+    let aliases (field: Field<'model, 'value>) =
+        if isNull (box field) then
+            nullArg (nameof field)
+
+        field.Definition.Aliases
 
     /// <summary>Returns the zero-based field order used for trusted construction and ordered interpreter output.</summary>
     let order (field: Field<'model, 'value>) =

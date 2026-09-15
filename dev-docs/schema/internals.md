@@ -107,7 +107,9 @@ a boxed `FieldDefinition<'model,'last>` — the cursor.
   no partial explicit type application) while the first field fixes `'constructor`.
 - `field _.Name` reads the property name from the getter quotation once at schema build, camelCases
   it, and keeps the compiled getter for the hot path; `fieldAs "wire" getter` declares the name
-  instead. Explicit names are never transformed; the camelCase policy applies only to derived names.
+  instead. Explicit names are never transformed; the camelCase policy applies only to derived names. Field blocks
+  add exact input-only names with `alias`/`aliases`; parsing and codecs accept them, while encoding and export retain
+  the canonical name. Model closure rejects collisions across all canonical names and aliases.
   Verified under NativeAOT by the AOT probe and on Node by the Fable probe. The .NET and Fable
   quotation paths differ — see `dev-docs/derived-field-names.md`.
 - `field` (no explicit schema) resolves the value schema from the getter's result type via

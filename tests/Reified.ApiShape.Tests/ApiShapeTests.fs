@@ -142,6 +142,7 @@ module ApiShapeTests =
     let private schemaField<'model, 'value> externalName order getter : Field<'model, 'value> =
         let definition: FieldDefinition<'model, 'value> =
             { ExternalName = ExternalFieldName.create externalName
+              Aliases = []
               Order = FieldOrder.create order
               Getter = getter
               ValueSchema = Schema.text.ValueDefinition
@@ -151,6 +152,7 @@ module ApiShapeTests =
 
     let private schemaFieldDescriptor<'model, 'value> (field: Field<'model, 'value>) : FieldDescriptor<'model> =
         { FieldDescriptor.ExternalName = field.Definition.ExternalName
+          Aliases = field.Definition.Aliases
           Order = field.Definition.Order
           Getter = fun model -> field.Definition.Getter model |> box
           ValueSchema = field.Definition.ValueSchema
@@ -655,7 +657,7 @@ module ApiShapeTests =
         fieldModule
         |> publicStaticMemberNames
         |> assertContainsAll
-            [ "create"; "externalName"; "order"; "getValue"; "constraints"; "supply"; "withConstraint"; "withConstraints" ]
+            [ "create"; "externalName"; "aliases"; "order"; "getValue"; "constraints"; "supply"; "withConstraint"; "withConstraints" ]
         test <@ fieldCreateMethods.Length = 1 @>
         test <@ fieldCreateParameterCount = 3 @>
         test <@ fieldCreateReturnType = fieldTypeDefinition @>

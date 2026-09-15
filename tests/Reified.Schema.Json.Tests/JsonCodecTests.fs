@@ -636,6 +636,21 @@ module JsonCodecTests =
         test <@ json = "{\"color\":\"green\"}" @>
         test <@ Json.deserialize codec json = swatch @>
 
+    [<Fact>]
+    let ``field aliases decode alternate names and encode the canonical name`` () =
+        let schema =
+            schema<RenameFields> {
+                fieldAs "name" (fun (value: RenameFields) -> value.Name) { aliases [ "Name"; "display_name" ] }
+                construct (fun name -> { Name = name })
+            }
+
+        let codec = Json.compile schema
+
+        test <@ Json.deserialize codec "{\"Name\":\"Ada\"}" = { Name = "Ada" } @>
+        test <@ Json.deserialize codec "{\"display_name\":\"Ada\"}" = { Name = "Ada" } @>
+        test <@ Json.serialize codec { Name = "Ada" } = "{\"name\":\"Ada\"}" @>
+        test <@ Json.tryDeserialize codec "{\"name\":\"Ada\",\"Name\":\"Grace\"}" |> Result.isError @>
+
     // --- Writer options ------------------------------------------------------
 
     type private Pet = { PetName: string; Legs: int }

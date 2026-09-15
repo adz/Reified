@@ -56,6 +56,35 @@ fieldAs "type" _.Number
 [Compiler-Directed, AOT, and Fable](/notes/aot-trimming-fable.html) for the version and target requirements. `fieldAs` is
 the portable spelling for Fable's Rust and PHP targets, which have no quotation support.
 
+## Accepting old field names
+
+Add input-only aliases when a boundary must temporarily accept an earlier spelling or casing:
+
+```fsharp
+open Reified
+open Reified.SchemaDSL
+
+type Profile = { DisplayName: string }
+
+let profileSchema =
+    schema<Profile> {
+        fieldAs "displayName" _.DisplayName {
+            alias "DisplayName"
+            aliases [ "display_name"; "display-name" ]
+        }
+        construct (fun displayName -> { DisplayName = displayName })
+    }
+```
+
+`Schema.parse` and compiled JSON codecs accept the canonical name or any alias. Encoding, JSON Schema, diagnostic paths
+for missing fields, and other output interpreters continue to use the canonical `displayName` name. Names are exact and
+case-sensitive; list each accepted case explicitly.
+
+Supplying more than one accepted name for the same field is an error. Schema construction also rejects aliases that
+repeat that field's canonical name or collide with another field name or alias. Use
+[Versioned Contracts](/schema/versioned-contracts.html) instead when a rename represents a durable versioned wire
+format rather than a short compatibility window.
+
 ## Field blocks
 
 A block groups transformations for one field:
