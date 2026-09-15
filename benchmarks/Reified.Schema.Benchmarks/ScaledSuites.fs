@@ -99,6 +99,51 @@ type WideRecordBenchmarks() =
     [<BenchmarkCategory("Deserialize")>]
     member _.SystemTextJsonDeserialize() = JsonSerializer.Deserialize<WideModel.WideRecord>(jsonBytes, options) |> ignore
 
+/// Estimates the ceiling for a cached known-layout decoder. The strict scans validate each expected UTF-8
+/// property name and integer token but deliberately omit model construction, so they are an optimistic lower bound,
+/// not a proposed public decoder.
+[<MemoryDiagnoser>]
+[<GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)>]
+[<Orderer(SummaryOrderPolicy.FastestToSlowest)>]
+type KnownLayoutCeilingBenchmarks() =
+    let codec = Json.compile WideModel.schema
+    let canonicalNames = [| for index in 1 .. 24 -> "f" + index.ToString("00") |]
+    let reverseNames = Array.rev canonicalNames
+    let canonicalBytes = Json.serializeBytes codec WideModel.sample
+    let reverseBytes =
+        reverseNames
+        |> Array.map (fun name -> $"\"{name}\":{int (name.Substring 1)}")
+        |> String.concat ","
+        |> fun fields -> System.Text.Encoding.UTF8.GetBytes("{" + fields + "}")
+
+    let strictScan (expected: string[]) (bytes: byte[]) =
+        let mutable reader = Utf8JsonReader(bytes)
+        if not (reader.Read()) || reader.TokenType <> JsonTokenType.StartObject then invalidOp "Expected object."
+        let mutable total = 0
+        for name in expected do
+            if not (reader.Read()) || reader.TokenType <> JsonTokenType.PropertyName || not (reader.ValueTextEquals name) then
+                invalidOp "Known layout mismatch."
+            if not (reader.Read()) || reader.TokenType <> JsonTokenType.Number then invalidOp "Expected integer."
+            total <- total + reader.GetInt32()
+        if not (reader.Read()) || reader.TokenType <> JsonTokenType.EndObject then invalidOp "Expected object end."
+        total
+
+    [<Benchmark(Description = "Current Reified canonical order")>]
+    [<BenchmarkCategory("Canonical")>]
+    member _.CurrentCanonical() = Json.deserializeBytes codec canonicalBytes |> ignore
+
+    [<Benchmark(Baseline = true, Description = "Strict known canonical scan (ceiling)")>]
+    [<BenchmarkCategory("Canonical")>]
+    member _.StrictCanonical() = strictScan canonicalNames canonicalBytes |> ignore
+
+    [<Benchmark(Description = "Current Reified reverse order")>]
+    [<BenchmarkCategory("Known noncanonical")>]
+    member _.CurrentReverse() = Json.deserializeBytes codec reverseBytes |> ignore
+
+    [<Benchmark(Baseline = true, Description = "Strict known reverse scan (ceiling)")>]
+    [<BenchmarkCategory("Known noncanonical")>]
+    member _.StrictReverse() = strictScan reverseNames reverseBytes |> ignore
+
 /// Measures collection scaling independently of record-field dispatch.
 [<MemoryDiagnoser>]
 [<GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)>]

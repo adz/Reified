@@ -46,6 +46,7 @@ module CodecModel =
         schema<Customer> {
             field _.Id
             field _.Name {
+                alias "Name"
                 constraints [ present; maxLength 80 ]
             }
             field _.Age {
@@ -152,6 +153,16 @@ type BoundaryParseBenchmarks() =
         use document = JsonDocument.Parse jsonBytes
         Data.ofJsonDocument document
 
+    let aliasJsonBytes = System.Text.Encoding.UTF8.GetBytes((System.Text.Encoding.UTF8.GetString jsonBytes).Replace("\"name\":", "\"Name\":"))
+
+    let aliasData, duplicateData =
+        match data with
+        | Data.Object fields ->
+            let aliased = fields |> List.map (fun (name, value) -> if name = "name" then "Name", value else name, value)
+            let nameValue = fields |> List.find (fst >> (=) "name") |> snd
+            Data.Object aliased, Data.Object(("Name", nameValue) :: fields)
+        | _ -> failwith "The benchmark fixture must be a JSON object."
+
     let invalidData =
         match data with
         | Data.Object fields ->
@@ -184,6 +195,18 @@ type BoundaryParseBenchmarks() =
     [<Benchmark(Description = "Schema.parse invalid Data only")>]
     [<BenchmarkCategory("Boundary stages")>]
     member _.ParseInvalidData() = Schema.parse CodecModel.customerSchema invalidData |> ignore
+
+    [<Benchmark(Description = "Schema.parse alias Data")>]
+    [<BenchmarkCategory("Alias resolution")>]
+    member _.ParseAliasData() = Schema.parse CodecModel.customerSchema aliasData |> ignore
+
+    [<Benchmark(Description = "Schema.parse duplicate canonical + alias")>]
+    [<BenchmarkCategory("Alias resolution")>]
+    member _.ParseDuplicateAliasData() = Schema.parse CodecModel.customerSchema duplicateData |> ignore
+
+    [<Benchmark(Description = "Json.deserializeBytes alias")>]
+    [<BenchmarkCategory("Alias resolution")>]
+    member _.CodecDeserializeAlias() = Json.deserializeBytes codec aliasJsonBytes |> ignore
 
 /// Measures the one-time schema codec compilation cost separately from per-payload work.
 [<MemoryDiagnoser>]

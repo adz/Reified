@@ -6,7 +6,7 @@ targetFramework: net8.0
 
 # Benchmarks
 
-This page records one local run of the JSON codec and boundary parsing suites, last measured 2026-09-01. The numbers
+This page records one local run of the JSON codec and boundary parsing suites, last measured 2026-09-15. The numbers
 describe this laptop and toolchain; use them to compare paths and allocations, not as cross-machine performance
 guarantees.
 
@@ -45,10 +45,10 @@ BENCHMARK_ARGS='--job short --filter *' dotnet run --project tools/Reified.Build
 
 | Operation | Reified mean / allocated | `System.Text.Json` mean / allocated |
 | --- | --- | --- |
-| Serialize string | 1.65 us / 1,232 B | 1.59 us / 1,136 B |
-| Serialize UTF-8 | 1.30 us / 880 B | 1.68 us / 776 B |
-| Deserialize string | 3.64 us / 2,912 B | 2.97 us / 2,056 B |
-| Deserialize UTF-8 | 3.41 us / 2,520 B | 3.06 us / 2,056 B |
+| Serialize string | 1.40 us / 1,232 B | 1.33 us / 1,136 B |
+| Serialize UTF-8 | 1.32 us / 880 B | 1.32 us / 776 B |
+| Deserialize string | 3.16 us / 2,912 B | 2.93 us / 2,056 B |
+| Deserialize UTF-8 | 3.05 us / 2,520 B | 2.79 us / 2,056 B |
 
 The timings are close enough that this short run does not establish a meaningful throughput winner. Allocations are
 unchanged from the previous recorded run: the integer encoder's direct UTF-8 formatting keeps Reified serialization
@@ -59,7 +59,7 @@ Codec compilation is separate from per-payload work:
 
 | Operation | Mean | Allocated |
 | --- | --- | --- |
-| `Json.compile` for the customer schema | 8.44 us | 14.5 KB |
+| `Json.compile` for the customer schema | 9.76 us | 15.59 KB |
 
 Compile a codec once and reuse it. Recompiling per payload would dominate the encode path and cost roughly two to
 three times one decode on this model.
@@ -70,20 +70,31 @@ The boundary suite compares the trusted codec against full boundary parsing — 
 
 | Operation | Mean | Allocated |
 | --- | --- | --- |
-| `Reified Json.deserializeBytes` (trusted, end to end) | 3.09 us | 2.46 KB |
-| `JsonDocument` + `Data` + `Schema.parse` (boundary, end to end) | 13.59 us | 13.24 KB |
+| `Reified Json.deserializeBytes` (trusted, end to end) | 3.83 us | 2.46 KB |
+| `JsonDocument` + `Data` + `Schema.parse` (boundary, end to end) | 13.98 us | 13.22 KB |
 
-The boundary path was 4.4 times the mean and 5.4 times the managed allocation of trusted UTF-8 decoding in this
+The boundary path was 3.6 times the mean and 5.4 times the managed allocation of trusted UTF-8 decoding in this
 run. Stage measurements show where that work lands:
 
 | Boundary stage | Mean | Allocated |
 | --- | --- | --- |
-| JSON document to `Data` | 3.36 us | 3.56 KB |
-| `Schema.parse` invalid `Data` | 8.03 us | 9.23 KB |
-| `Schema.parse` valid `Data` | 8.77 us | 9.68 KB |
+| JSON document to `Data` | 3.17 us | 3.56 KB |
+| `Schema.parse` invalid `Data` | 9.12 us | 9.21 KB |
+| `Schema.parse` valid `Data` | 9.34 us | 9.66 KB |
 
 The stages are diagnostic measurements, not additive accounting: the end-to-end benchmark measures its own complete
 operation. The invalid case changes the constrained name to an empty string and measures accumulated error creation.
+
+Alias resolution uses the same customer shape, with `Name` accepted as an input-only alias for canonical `name`:
+
+| Alias operation | Mean | Allocated |
+| --- | --- | --- |
+| Compiled JSON decode through `Name` | 3.40 us | 2.46 KB |
+| `Schema.parse` through `Name` | 8.33 us | 9.66 KB |
+| Reject canonical `name` plus alias `Name` | 7.58 us | 8.80 KB |
+
+Canonical and alias `Schema.parse` timings are indistinguishable within this short run. Alias JSON decoding retains the
+canonical decoder's allocation, and ambiguity detection exits before value parsing completes.
 
 ## Scaling cases
 
@@ -91,8 +102,8 @@ The wide-record suite isolates field dispatch and per-field decode state with 24
 
 | Operation | Reified mean / allocated | `System.Text.Json` mean / allocated |
 | --- | --- | --- |
-| Serialize UTF-8 | 0.97 us / 320 B | 1.17 us / 232 B |
-| Deserialize UTF-8 | 4.06 us / 2,056 B | 2.27 us / 744 B |
+| Serialize UTF-8 | 0.75 us / 320 B | 0.70 us / 232 B |
+| Deserialize UTF-8 | 3.59 us / 2,056 B | 2.14 us / 744 B |
 
 The integer formatting keeps serialization allocation close even as field count grows. Decode allocation grows
 with Reified's slot-per-field implementation, and linear field-name matching becomes more visible on a wide record —
@@ -102,13 +113,12 @@ The list suite measures a root `int list` without record-field dispatch:
 
 | Items | Reified serialize | `System.Text.Json` serialize | Reified deserialize | `System.Text.Json` deserialize |
 | ---: | ---: | ---: | ---: | ---: |
-| 10 | 0.24 us / 80 B | 0.33 us / 88 B | 0.32 us / 640 B | 0.51 us / 576 B |
-| 1,000 | 19.76 us / 3,952 B | 23.54 us / 3,960 B | 32.63 us / 64,000 B | 40.88 us / 40,464 B |
-| 10,000 | 219.95 us / 48,952 B | 226.33 us / 48,960 B | 380.34 us / 640,000 B | 401.06 us / 451,440 B |
+| 10 | 0.20 us / 80 B | 0.22 us / 88 B | 0.32 us / 640 B | 0.49 us / 576 B |
+| 1,000 | 16.32 us / 3,952 B | 20.19 us / 3,960 B | 31.92 us / 64,000 B | 38.89 us / 40,464 B |
+| 10,000 | 192.74 us / 48,952 B | 154.24 us / 48,960 B | 413.06 us / 640,000 B | 582.37 us / 451,440 B |
 
-Serialization allocation is effectively equal across list sizes. Reified timings held a small lead at every size in
-this run, but within the short-run error bars, so a longer job is required before treating either serializer as the
-throughput winner. Reified list decoding is competitive on time but allocates more per item.
+Serialization allocation is effectively equal across list sizes. Timing leads varied by list size and remain within
+wide short-run error bars, so a longer job is required before treating either serializer as the throughput winner. Reified list decoding is competitive on time but allocates more per item.
 
 ## Conclusion
 
