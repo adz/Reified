@@ -272,7 +272,8 @@ module rec Json =
                 if index > 0 then
                     writer.WriteByte(byte ',')
 
-                writeQuoted writer key
+                // Keys are data (paths, user text), so they need the same escaping as string values.
+                writeEscapedString writer key
                 writer.WriteByte(byte ':')
                 encodeItem writer item)
 

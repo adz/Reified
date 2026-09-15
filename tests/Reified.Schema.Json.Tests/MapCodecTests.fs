@@ -53,6 +53,20 @@ module MapCodecTests =
         test <@ Json.deserialize codec "{\"values\":{}}" = ({ Values = Map.empty }: Thresholds) @>
 
     [<Fact>]
+    let ``escapes map keys that need it, so the output is valid JSON`` () =
+        let codec = Json.compile (thresholdsSchema ())
+        let keys = [ @"C:\repo"; "say \"hi\""; "tab\there"; "line\nbreak"; "bell\u0007"; "café ☕" ]
+        let thresholds: Thresholds = { Values = keys |> List.mapi (fun index key -> key, decimal index) |> Map.ofList }
+
+        let json = Json.serialize codec thresholds
+        use parsed = System.Text.Json.JsonDocument.Parse json
+        let parsedKeys = [ for property in parsed.RootElement.GetProperty("values").EnumerateObject() -> property.Name ] |> List.sort
+
+        test <@ parsedKeys = List.sort keys @>
+        test <@ json.Contains "\"C:\\\\repo\"" @>
+        test <@ Json.deserialize codec json = thresholds @>
+
+    [<Fact>]
     let ``round trips a map with transparent string keys`` () =
         let codec = Json.compile (localizedTextSchema ())
         let value: LocalizedText = { Values = Map.ofList [ LocaleTag "en", "Hello"; LocaleTag "fr", "Bonjour" ] }
