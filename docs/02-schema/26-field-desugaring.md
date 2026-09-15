@@ -43,6 +43,23 @@ field _.Children {
 
 There is no separate `fieldWith` declaration. Explicit schema selection is always an operation inside the field.
 
+### Canonical resolution for generated contract types
+
+A type resolves canonically when it exposes `static member Schema: T -> Schema<T>`. Reified supplies that member for
+its built-in types, and `reified schemagen` emits it for every record it owns (the types declared in a `.contract`
+file). A field whose type is such a contract — directly, or wrapped in `list`, `option`, or `Map` — therefore needs
+no `withSchema`:
+
+```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+field _.Origin        // Origin: Geo            - Geo is a generated contract type
+field _.Waypoints     // Waypoints: Geo list
+field _.Destination   // Destination: Geo option
+```
+
+The augmentation is intrinsic to the generated file, so it resolves from any assembly with no `open`. Types carried
+by `[<DeriveSchema>]` on hand-written records are the exception: schemagen cannot add an intrinsic member to a type
+it does not declare, so a field of such a type still selects its schema with `withSchema TheType.schema`.
+
 ## `constrain`
 
 Portable constraints can be inspected by JSON Schema, documentation, and UI interpreters:

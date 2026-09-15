@@ -80,3 +80,6 @@ module Signup =
 
     let validate = Schema.check schema
     let parse = Schema.parse schema
+
+type Signup with
+    static member Schema(_: Signup) : Schema<Signup> = Signup.schema

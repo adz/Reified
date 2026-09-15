@@ -136,6 +136,7 @@ module internal ShapeOps =
                 definition.Fields
                 |> List.map (fun field ->
                     { FieldDescriptor.ExternalName = field.ExternalName
+                      Aliases = field.Aliases
                       Order = field.Order
                       Getter = fun (domain: 'domain) -> field.Getter(project domain)
                       ValueSchema = field.ValueSchema

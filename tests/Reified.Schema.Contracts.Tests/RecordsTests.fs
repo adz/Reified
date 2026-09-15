@@ -298,7 +298,7 @@ open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type Profile =
-    { [<Present; Format "email">] Email: string
+    { [<SchemaAlias "Email"; SchemaAlias "email_address"; Present; Format "email">] Email: string
       [<Length 8>] Code: string
       [<LengthBetween(2, 5)>] Tags: string list
       [<Supplied>] Referral: string option }
@@ -308,6 +308,7 @@ type Profile =
         let byName name = fields |> List.find (fun field -> field.FieldName = name)
 
         test <@ (byName "Email").Constraints |> List.map fst = [ Present ] @>
+        test <@ (byName "Email").Aliases = [ "Email"; "email_address" ] @>
         test <@ (byName "Email").Format = Some "email" @>
         test <@ (byName "Code").Constraints |> List.map fst = [ ExactLength 8 ] @>
         test <@ (byName "Tags").Constraints |> List.map fst = [ LengthRange(2, 5) ] @>
@@ -316,6 +317,7 @@ type Profile =
         test <@ Resolver.resolve [ file ] = [] @>
 
         let emitted = Emitter.emit "Fallback" [ file ] file
+        test <@ emitted.Contains "aliases [ \"Email\"; \"email_address\" ]" @>
         test <@ emitted.Contains "format (SchemaFormat.create \"email\")" @>
         test <@ emitted.Contains "constrain present" @>
         test <@ emitted.Contains "constrain (Constraint.length 8)" @>

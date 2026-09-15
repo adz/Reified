@@ -8,6 +8,7 @@ open Reified
 
 open System
 open System.Globalization
+open System.Collections.Generic
 open Reified.Refinements
 
 /// <summary>Options that customize how structured data is parsed through a schema.</summary>
@@ -20,6 +21,20 @@ type SchemaParseOptions =
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module internal SchemaParsing =
+    type private ObjectFieldIndex(fields: (string * Data) list) =
+        let values = Dictionary<string, struct (Data * int)>()
+
+        do
+            for name, value in fields do
+                match values.TryGetValue name with
+                | true, struct (first, count) -> values[name] <- struct (first, count + 1)
+                | false, _ -> values.Add(name, struct (value, 1))
+
+        member _.TryGet(name: string) =
+            match values.TryGetValue name with
+            | true, occurrence -> ValueSome occurrence
+            | false, _ -> ValueNone
+
 
     let private diagnosticsPath (path: DataPath) : SchemaPathComponent list =
         path
@@ -199,29 +214,27 @@ module internal SchemaParsing =
         match raw with
         | Data.Null -> errorAt path SchemaError.Blank
         | Data.Object fields ->
-            let fields = Map.ofList fields
-
             match valueSchema.Shape with
             | NestedValueDefinition(nestedModel, _) -> parseObject options path nestedModel fields
-            | UnionValueDefinition union -> parseUnion options path union (Data.Object(Map.toList fields))
-            | MapValueDefinition collection -> parseMap options path collection rules fields
-            | LazyValueDefinition _ -> parseValue options valueSchema fieldRules path (Data.Object(Map.toList fields))
+            | UnionValueDefinition union -> parseUnion options path union (Data.Object fields)
+            | MapValueDefinition collection -> parseMap options path collection rules (Map.ofList fields)
+            | LazyValueDefinition _ -> parseValue options valueSchema fieldRules path (Data.Object fields)
             | RefinedValueDefinition(raw, _) ->
                 match raw.Shape with
                 | NestedValueDefinition(nestedModel, _) ->
                     parseObject options path nestedModel fields
                     |> Result.bind (constructValue path valueSchema)
                 | UnionValueDefinition union ->
-                    parseUnion options path union (Data.Object(Map.toList fields))
+                    parseUnion options path union (Data.Object fields)
                     |> Result.bind (constructValue path valueSchema)
                 | MapValueDefinition collection ->
-                    parseMap options path collection rules fields
+                    parseMap options path collection rules (Map.ofList fields)
                     |> Result.bind (constructValue path valueSchema)
                 | LazyValueDefinition _ ->
-                    parseValue options raw [] path (Data.Object(Map.toList fields))
+                    parseValue options raw [] path (Data.Object fields)
                     |> Result.bind (constructValue path valueSchema)
                 | OptionValueDefinition _ ->
-                    parseValue options raw [] path (Data.Object(Map.toList fields))
+                    parseValue options raw [] path (Data.Object fields)
                     |> Result.bind (constructValue path valueSchema)
                 | PrimitiveValueDefinition _
                 | RefinedValueDefinition _
@@ -365,7 +378,7 @@ module internal SchemaParsing =
                     match style with
                     | UnionPayloadStyle.Named ->
                         match rawPayload with
-                        | Data.Object fields -> parseObject options payloadPath model (Map.ofList fields)
+                        | Data.Object fields -> parseObject options payloadPath model fields
                         | _ -> errorAt payloadPath SchemaError.ExpectedObject
                     | UnionPayloadStyle.Positional -> parseModelPositional payloadPath model rawPayload
                     | UnionPayloadStyle.UnwrappedSingle ->
@@ -391,7 +404,7 @@ module internal SchemaParsing =
                 |> Result.bind (fun case ->
                     match case.Payload with
                     | EmptyUnionCase -> Ok(case.Construct(box ()))
-                    | FieldsUnionCase { Shape = NestedValueDefinition(model, _) } -> parseObject options path model fields |> Result.map case.Construct
+                    | FieldsUnionCase { Shape = NestedValueDefinition(model, _) } -> parseObject options path model rawFields |> Result.map case.Construct
                     | _ -> invalidOp "Internal union cases must contain named fields.")
             | Some _ -> errorAt tagPath SchemaError.ExpectedScalar
         | UnionRepresentation.Adjacent(tagField, payloadField, style), Data.Object rawFields ->
@@ -445,14 +458,34 @@ module internal SchemaParsing =
             | None when isOmittableValue valueSchema -> parseValue options valueSchema rules path Data.Null
             | None -> errorAt path SchemaError.Omitted
 
-    and private parseNestedField options basePath (fields: Map<string, Data>) (field: FieldDescriptor<obj>) =
-        let name = ExternalFieldName.value field.ExternalName
-        let path = basePath @ [ KeyComponent name ]
-        match fields |> Map.tryFind name with
-        | Some raw -> parseValue options field.ValueSchema field.Rules path raw
-        | None -> parseMissingValue options path field.ValueSchema field.Rules
+    and private parseFieldInput options basePath (fields: ObjectFieldIndex) (field: FieldDescriptor<obj>) =
+        let canonical = ExternalFieldName.value field.ExternalName
+        let mutable count = 0
+        let mutable suppliedName = canonical
+        let mutable suppliedValue = Data.Null
 
-    and private parseObject options path (model: ModelSchemaDefinition<obj>) (fields: Map<string, Data>) =
+        for name in field.ExternalName :: field.Aliases do
+            let text = ExternalFieldName.value name
+            match fields.TryGet text with
+            | ValueSome(struct (value, occurrences)) ->
+                count <- count + occurrences
+                suppliedName <- text
+                suppliedValue <- value
+            | ValueNone -> ()
+
+        match count with
+        | 1 -> parseValue options field.ValueSchema field.Rules (basePath @ [ KeyComponent suppliedName ]) suppliedValue
+        | 0 -> parseMissingValue options (basePath @ [ KeyComponent canonical ]) field.ValueSchema field.Rules
+        | _ ->
+            errorAt
+                (basePath @ [ KeyComponent canonical ])
+                (SchemaError.Custom("field.alias.ambiguous", Some "More than one accepted name was supplied for this field."))
+
+    and private parseNestedField options basePath (fields: ObjectFieldIndex) (field: FieldDescriptor<obj>) =
+        parseFieldInput options basePath fields field
+
+    and private parseObject options path (model: ModelSchemaDefinition<obj>) (rawFields: (string * Data) list) =
+        let fields = ObjectFieldIndex rawFields
         let parsedFields = model.Fields |> List.map (parseNestedField options path fields)
         let errors = parsedFields |> List.choose (function Error diagnostics -> Some diagnostics | Ok _ -> None)
 
@@ -516,12 +549,28 @@ module internal SchemaParsing =
             | Error diagnostics -> Error diagnostics
         | diagnostics -> Error(mergeErrors diagnostics)
 
-    let private parseRootField options basePath (fields: Map<string, Data>) (field: FieldDescriptor<'model>) =
-        let name = ExternalFieldName.value field.ExternalName
-        let path = basePath @ [ KeyComponent name ]
-        match fields |> Map.tryFind name with
-        | Some raw -> parseValue options field.ValueSchema field.Rules path raw
-        | None -> parseMissingValue options path field.ValueSchema field.Rules
+    let private parseRootField options basePath (fields: ObjectFieldIndex) (field: FieldDescriptor<'model>) =
+        let canonical = ExternalFieldName.value field.ExternalName
+        let mutable count = 0
+        let mutable suppliedName = canonical
+        let mutable suppliedValue = Data.Null
+
+        for name in field.ExternalName :: field.Aliases do
+            let text = ExternalFieldName.value name
+            match fields.TryGet text with
+            | ValueSome(struct (value, occurrences)) ->
+                count <- count + occurrences
+                suppliedName <- text
+                suppliedValue <- value
+            | ValueNone -> ()
+
+        match count with
+        | 1 -> parseValue options field.ValueSchema field.Rules (basePath @ [ KeyComponent suppliedName ]) suppliedValue
+        | 0 -> parseMissingValue options (basePath @ [ KeyComponent canonical ]) field.ValueSchema field.Rules
+        | _ ->
+            errorAt
+                (basePath @ [ KeyComponent canonical ])
+                (SchemaError.Custom("field.alias.ambiguous", Some "More than one accepted name was supplied for this field."))
 
     /// <summary>Parses structured boundary data through a trusted model schema using custom input parser options.</summary>
     let private parseWithErrors
@@ -550,8 +599,9 @@ module internal SchemaParsing =
             | ModelDefinition _, Data.Number _ -> Error(diagnosticsAt [] SchemaError.ExpectedObject)
             | ModelDefinition _, Data.Bool _ -> Error(diagnosticsAt [] SchemaError.ExpectedObject)
             | ModelDefinition _, Data.List _ -> Error(diagnosticsAt [] SchemaError.ExpectedObject)
-            | ModelDefinition model, Data.Object fields ->
-                let parsedFields = model.Fields |> List.map (parseRootField options [] (Map.ofList fields))
+            | ModelDefinition model, Data.Object rawFields ->
+                let fields = ObjectFieldIndex rawFields
+                let parsedFields = model.Fields |> List.map (parseRootField options [] fields)
                 let errors = parsedFields |> List.choose (function Error diagnostics -> Some diagnostics | Ok _ -> None)
 
                 match errors with

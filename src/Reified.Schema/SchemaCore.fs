@@ -33,6 +33,7 @@ module Field =
 
         Field(
             { ExternalName = ExternalFieldName.create externalName
+              Aliases = []
               Order = FieldOrder.create 0
               Getter = getter
               ValueSchema = value.ValueDefinition
@@ -45,6 +46,24 @@ module Field =
             nullArg (nameof field)
 
         field.Definition.ExternalName
+
+    /// <summary>Returns the alternate input names accepted for a schema field.</summary>
+    let aliases (field: Field<'model, 'value>) =
+        if isNull (box field) then
+            nullArg (nameof field)
+
+        field.Definition.Aliases
+
+    /// <summary>Returns a schema field that also accepts one exact, input-only alternate name.</summary>
+    let withAlias (alias: string) (field: Field<'model, 'value>) =
+        if isNull (box field) then nullArg (nameof field)
+        Field({ field.Definition with Aliases = field.Definition.Aliases @ [ ExternalFieldName.create alias ] })
+
+    /// <summary>Returns a schema field that also accepts the exact, input-only alternate names.</summary>
+    let withAliases (aliases: string list) (field: Field<'model, 'value>) =
+        if isNull (box aliases) then nullArg (nameof aliases)
+        if isNull (box field) then nullArg (nameof field)
+        Field({ field.Definition with Aliases = field.Definition.Aliases @ (aliases |> List.map ExternalFieldName.create) })
 
     /// <summary>Returns the zero-based field order used for trusted construction and ordered interpreter output.</summary>
     let order (field: Field<'model, 'value>) =

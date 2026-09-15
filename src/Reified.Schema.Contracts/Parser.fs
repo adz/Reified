@@ -265,6 +265,7 @@ module Parser =
                                     CompleteField
                                         { FieldName = head.HeadName
                                           WireName = head.HeadWire
+                                          Aliases = []
                                           Optional = head.HeadOptional
                                           FieldType = fieldType
                                           Constraints = constraints
@@ -365,6 +366,7 @@ module Parser =
                             fields.Add
                                 { FieldName = head.HeadName
                                   WireName = head.HeadWire
+                                  Aliases = []
                                   Optional = head.HeadOptional
                                   FieldType = UnionBlock(discriminator, List.ofSeq cases)
                                   Constraints = []

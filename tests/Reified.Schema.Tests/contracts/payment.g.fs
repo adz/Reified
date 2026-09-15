@@ -38,6 +38,9 @@ module Card =
     let validate = Schema.check schema
     let parse = Schema.parse schema
 
+type Card with
+    static member Schema(_: Card) : Schema<Card> = Card.schema
+
 /// An invoice payment source.
 type Invoice =
     {
@@ -65,6 +68,9 @@ module Invoice =
 
     let validate = Schema.check schema
     let parse = Schema.parse schema
+
+type Invoice with
+    static member Schema(_: Invoice) : Schema<Invoice> = Invoice.schema
 
 /// The "source" cases of Payment (payment.contract, Payment.v1).
 [<RequireQualifiedAccess>]
@@ -102,3 +108,6 @@ module Payment =
 
     let validate = Schema.check schema
     let parse = Schema.parse schema
+
+type Payment with
+    static member Schema(_: Payment) : Schema<Payment> = Payment.schema

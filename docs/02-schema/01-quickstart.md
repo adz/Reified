@@ -52,7 +52,9 @@ let signupSchema =
 property name. `construct` receives the fields in declaration order; the compiler checks its argument types and its
 result.
 
-Pass a wire name explicitly when it differs from the property: `fieldAs "email_address" _.Email`.
+Pass a wire name explicitly when it differs from the property: `fieldAs "email_address" _.Email`. To accept an old
+input spelling while always writing the canonical name, use a field block with `alias "Email"` or
+`aliases [ "Email"; "emailAddress" ]`.
 
 Deriving the name from `_.Email` uses a quotation. That compiles on .NET and on the Fable targets that support
 quotations, including JavaScript; reach for `fieldAs` on Fable's Rust and PHP targets. See

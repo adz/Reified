@@ -4,6 +4,7 @@ open Reified
 open Reified
 
 open Reified.Tests.Generated
+open Reified.SchemaDSL
 open Swensen.Unquote
 open Xunit
 
@@ -26,6 +27,37 @@ module GeneratedContractTests =
         | Ok parsed ->
             test <@ parsed.Children = [ { Reified.Tests.Generated.Category.Name = "leaf"; Children = [] } ] @>
         | Error diagnostics -> failwithf "Expected recursive generated input to parse, got %A" diagnostics
+
+    type private Trip =
+        { Origin: Geo
+          Waypoints: Geo list
+          Destination: Geo option }
+
+    [<Fact>]
+    let ``a generated contract type resolves as a canonical field schema with no withSchema`` () =
+        // The emitted `type Geo with static member Schema` lets a bare `fieldAs` on a Geo-typed
+        // field resolve through the same SRTP path a `string` field uses, including the list and
+        // option witnesses that recurse into the item type.
+        let schema =
+            schema<Trip> {
+                fieldAs "origin" _.Origin
+                fieldAs "waypoints" _.Waypoints
+                fieldAs "destination" _.Destination
+                construct (fun origin waypoints destination ->
+                    { Origin = origin; Waypoints = waypoints; Destination = destination })
+            }
+
+        let raw =
+            Data.objectOfMap (
+                Map.ofList
+                    [ "origin", Data.objectOfMap (Map.ofList [ "lat", Data.Text "10"; "lon", Data.Text "20" ])
+                      "waypoints", Data.List []
+                      "destination", Data.Null ]
+            )
+
+        match Schema.parse schema raw with
+        | Ok trip -> test <@ trip.Origin.Lat = 10m && trip.Destination = None @>
+        | Error diagnostics -> failwithf "Expected canonical Geo resolution to parse, got %A" diagnostics
 
     [<Fact>]
     let ``validate promotes a draft record literal when every constraint passes`` () =

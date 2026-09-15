@@ -206,6 +206,80 @@ module SchemaWideShapeTests =
         let description = Inspect.model schema
         test <@ description.Fields |> List.map _.Name = [ "fullName"; "age"; "tags" ] @>
 
+    [<Fact>]
+    let ``field aliases accept legacy names and remain inspectable`` () =
+        let schema =
+            schema<Contact> {
+                fieldAs "name" _.Name {
+                    aliases [ "Name"; "display_name" ]
+                }
+                field _.Age
+                field _.Tags { withSchema (Schema.listWith Schema.text) }
+                construct Contact.Create
+            }
+
+        let input =
+            Data.objectOfMap (
+                Map.ofList
+                    [ "display_name", Data.Text "Ada"
+                      "age", Data.Text "36"
+                      "tags", Data.List [] ]
+            )
+
+        test <@ Schema.parse schema input = Ok { Name = "Ada"; Age = 36; Tags = [] } @>
+        test <@ (Inspect.model schema).Fields.Head.Aliases = [ "Name"; "display_name" ] @>
+
+    [<Fact>]
+    let ``field aliases reject ambiguous input`` () =
+        let schema =
+            schema<Contact> {
+                field _.Name { alias "Name" }
+                field _.Age
+                field _.Tags { withSchema (Schema.listWith Schema.text) }
+                construct Contact.Create
+            }
+
+        let input =
+            Data.objectOfMap (
+                Map.ofList
+                    [ "name", Data.Text "Ada"
+                      "Name", Data.Text "Grace"
+                      "age", Data.Text "36"
+                      "tags", Data.List [] ]
+            )
+
+        let assertAmbiguous result =
+            match result with
+            | Error errors ->
+                test <@
+                    SchemaErrors.toList errors
+                    |> List.exists (fun diagnostic ->
+                        diagnostic.Error = SchemaError.Custom("field.alias.ambiguous", Some "More than one accepted name was supplied for this field."))
+                @>
+            | Ok value -> failwithf "Expected ambiguous aliases to fail, got %A" value
+
+        Schema.parse schema input |> assertAmbiguous
+
+        Data.Object
+            [ "name", Data.Text "Ada"
+              "name", Data.Text "Grace"
+              "age", Data.Text "36"
+              "tags", Data.List [] ]
+        |> Schema.parse schema
+        |> assertAmbiguous
+
+    [<Fact>]
+    let ``field aliases cannot collide with another accepted field name`` () =
+        Assert.Throws<System.ArgumentException>(fun () ->
+            schema<Contact> {
+                field _.Name { alias "age" }
+                field _.Age
+                field _.Tags { withSchema (Schema.listWith Schema.text) }
+                construct Contact.Create
+            }
+            |> ignore)
+        |> ignore
+
     // ---- bare-getter fields over refined types ----
 
     type private Registration =

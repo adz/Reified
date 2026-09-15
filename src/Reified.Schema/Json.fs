@@ -41,19 +41,28 @@ module rec Json =
     and private Slot<'field>(decoder: Decoder<'field>) =
         member val Value = Unchecked.defaultof<'field> with get, set
         member val HasValue = false with get, set
+        member val WasSupplied = false with get, set
 
         interface ISlot with
             member x.Decode src =
+                if x.WasSupplied then
+                    decodeFailure "more than one accepted name was supplied for this field"
+
                 let struct (value, next) = decoder src
                 x.Value <- value
                 x.HasValue <- true
+                x.WasSupplied <- true
                 next
 
             member x.Seen = x.HasValue
 
+    type private AcceptedName =
+        { Text: string
+          Utf8: byte[] }
+
     type private FieldMatcher =
-        { NameText: string
-          NameUtf8: byte[]
+        { CanonicalName: AcceptedName
+          Aliases: AcceptedName[]
           CreateSlot: unit -> ISlot }
 
     let private utf8 (text: string) = Encoding.UTF8.GetBytes text
@@ -77,16 +86,27 @@ module rec Json =
                 let mutable matched = -1
                 let mutable index = 0
 
+                let suppliedText =
+                    if keyHadEscapes then Some(materializeString data keyStart keyLength true)
+                    else None
+
                 while matched < 0 && index < matchers.Length do
                     let matcher = matchers[index]
 
-                    let equal =
-                        if keyHadEscapes then
-                            materializeString data keyStart keyLength true = matcher.NameText
-                        else
-                            bytesEqual matcher.NameUtf8 data keyStart keyLength
+                    let equals name =
+                        match suppliedText with
+                        | Some supplied -> supplied = name.Text
+                        | None -> bytesEqual name.Utf8 data keyStart keyLength
 
-                    if equal then matched <- index else index <- index + 1
+                    if equals matcher.CanonicalName then
+                        matched <- index
+                    else
+                        let mutable aliasIndex = 0
+                        while matched < 0 && aliasIndex < matcher.Aliases.Length do
+                            if equals matcher.Aliases[aliasIndex] then matched <- index
+                            aliasIndex <- aliasIndex + 1
+
+                        if matched < 0 then index <- index + 1
 
                 let afterValue =
                     if matched >= 0 then
@@ -96,7 +116,8 @@ module rec Json =
                         | :? JsonCodecException as ex ->
                             raise (
                                 JsonCodecException(
-                                    "." + matchers[matched].NameText
+                                    "."
+                                    + (suppliedText |> Option.defaultWith (fun () -> materializeString data keyStart keyLength false))
                                     + (if ex.Path = "$" then "" else ex.Path.Substring 1),
                                     ex.Detail,
                                     ex
@@ -114,7 +135,7 @@ module rec Json =
             while missing < slots.Length do
                 if not slots[missing].Seen then
                     raise (
-                        JsonCodecException("." + matchers[missing].NameText, "missing required field")
+                        JsonCodecException("." + matchers[missing].CanonicalName.Text, "missing required field")
                     )
 
                 missing <- missing + 1
@@ -289,7 +310,7 @@ module rec Json =
 
             match DateTimeOffset.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind) with
             | true, value -> struct (value, next)
-            | false, _ -> decodeFailure (sprintf "invalid date-time value: %s" text)
+            | false, _ -> decodeFailure ("invalid date-time value: " + text)
 
     let private guidDecoder: Decoder<Guid> =
         fun src ->
@@ -297,7 +318,7 @@ module rec Json =
 
             match Guid.TryParse text with
             | true, value -> struct (value, next)
-            | false, _ -> decodeFailure (sprintf "invalid uuid value: %s" text)
+            | false, _ -> decodeFailure ("invalid uuid value: " + text)
 
 #if NET8_0_OR_GREATER && !FABLE_COMPILER
     let private dateDecoder: Decoder<DateOnly> =
@@ -306,7 +327,7 @@ module rec Json =
 
             match DateOnly.TryParseExact(text, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None) with
             | true, value -> struct (value, next)
-            | false, _ -> decodeFailure (sprintf "invalid date value: %s" text)
+            | false, _ -> decodeFailure ("invalid date value: " + text)
 #endif
 
     /// Boxed `Decoder<'concrete>` per primitive kind, unboxed at typed compile sites.
@@ -508,8 +529,11 @@ module rec Json =
                             slot :> ISlot
                     | None, _ -> fun () -> Slot<obj>(fieldDecoder) :> ISlot
 
-                { NameText = name
-                  NameUtf8 = utf8 name
+                { CanonicalName = { Text = name; Utf8 = utf8 name }
+                  Aliases =
+                    field.Aliases
+                    |> List.map (ExternalFieldName.value >> fun text -> { Text = text; Utf8 = utf8 text })
+                    |> Array.ofList
                   CreateSlot = createSlot })
             |> Array.ofList
 
@@ -591,7 +615,9 @@ module rec Json =
             let data = current.Data
             let mutable more = current.Offset >= data.Length || data[current.Offset] <> byte '}'
             let mutable tag: string = null
-            let mutable offsets = Map.empty<string, int>
+            // Non-discriminator field offsets, newest-first. Only the adjacent representation reads this
+            // (to locate the payload field); a plain assoc list avoids linking F# Map into every codec.
+            let mutable offsets: (string * int) list = []
             if not more then current <- current.Advance 1
             while more do
                 let struct (start, length, escaped, afterKey) = stringRaw current
@@ -602,7 +628,7 @@ module rec Json =
                     tag <- value
                     current <- next
                 else
-                    offsets <- offsets |> Map.add key (skipWhitespace afterColon).Offset
+                    offsets <- (key, (skipWhitespace afterColon).Offset) :: offsets
                     current <- skipValue afterColon
                 let struct (next, hasMore) = readSeparatorOrClose (byte '}') "}" current
                 current <- next
@@ -613,7 +639,7 @@ module rec Json =
         let findCase path tag =
             union.Cases
             |> List.tryFind (fun case -> case.Tag = tag)
-            |> Option.defaultWith (fun () -> raise (JsonCodecException(path, sprintf "unknown union case tag: %s" tag)))
+            |> Option.defaultWith (fun () -> raise (JsonCodecException(path, "unknown union case tag: " + tag)))
 
         match union.Representation with
         | UnionRepresentation.Internal discriminatorName ->
@@ -624,11 +650,10 @@ module rec Json =
                     | EmptyUnionCase -> case.Tag, (None, case.Construct)
                     | FieldsUnionCase { Shape = NestedValueDefinition(model, _) } -> case.Tag, (Some(compileErasedModelDecoder model), case.Construct)
                     | _ -> invalidOp "Internal union cases must use fields payloads.")
-                |> Map.ofList
             fun source ->
                 let tag, _, next = decodeObjectTag discriminatorName source
-                match cases |> Map.tryFind tag with
-                | None -> raise (JsonCodecException("." + discriminatorName, sprintf "unknown union case tag: %s" tag))
+                match cases |> List.tryPick (fun (caseTag, case) -> if caseTag = tag then Some case else None) with
+                | None -> raise (JsonCodecException("." + discriminatorName, "unknown union case tag: " + tag))
                 | Some(None, construct) -> struct (construct (box ()), next)
                 | Some(Some decoder, construct) ->
                     let struct (payload, _) = decoder source
@@ -640,7 +665,7 @@ module rec Json =
                 match payloadDecoder style case.Payload with
                 | None -> struct (case.Construct(box ()), next)
                 | Some decoder ->
-                    match offsets |> Map.tryFind payloadName with
+                    match offsets |> List.tryPick (fun (key, offset) -> if key = payloadName then Some offset else None) with
                     | None -> raise (JsonCodecException("." + payloadName, "missing union payload field"))
                     | Some offset ->
                         let struct (payload, _) = withFieldPath payloadName (fun () -> decoder (ByteSource(source.Data, offset)))
@@ -653,7 +678,7 @@ module rec Json =
                     let case = findCase "$" tag
                     match case.Payload with
                     | EmptyUnionCase -> struct (case.Construct(box ()), next)
-                    | _ -> raise (JsonCodecException("$", sprintf "external union case %s requires a payload" tag))
+                    | _ -> raise (JsonCodecException("$", "external union case " + tag + " requires a payload"))
                 else
                     let current = expectByte (byte '{') "{" source
                     let struct (start, length, escaped, afterKey) = stringRaw current
@@ -905,7 +930,7 @@ module rec Json =
 
             match cases |> Array.tryFind (fun (caseTag, _) -> caseTag = tag) with
             | Some(_, value) -> struct (value, next)
-            | None -> raise (JsonCodecException("$", sprintf "unknown enum case tag: %s" tag))
+            | None -> raise (JsonCodecException("$", "unknown enum case tag: " + tag))
 
     let private compileEnumEncoderObj (enum: TaggedEnumValueDefinition) : Encoder<obj> =
         let cases = enum.Cases |> List.map (fun case -> case.Value, case.Tag) |> Array.ofList
@@ -1046,8 +1071,11 @@ module rec Json =
                     | None, _ -> fun () -> Slot<'field>(fieldDecoder) :> ISlot
 
                 let matcher =
-                    { NameText = name
-                      NameUtf8 = utf8 name
+                    { CanonicalName = { Text = name; Utf8 = utf8 name }
+                      Aliases =
+                        field.Definition.Aliases
+                        |> List.map (ExternalFieldName.value >> fun text -> { Text = text; Utf8 = utf8 text })
+                        |> Array.ofList
                       CreateSlot = createSlot }
 
                 DecodeChainResult<'model, 'constructorIn, 'next>(
@@ -1066,8 +1094,111 @@ module rec Json =
                     | Ok model -> model
                     | Error message -> decodeFailure message)
 
+    type private CanonicalAttempt<'value> = ByteSource -> struct (ValueOption<'value> * ByteSource)
+
+    // Strict canonical-order decoder: no slots and no field dispatch. Layout mismatches are values rather than
+    // exceptions, so the ordinary codec can restart through the unordered/alias decoder without exception cost.
+    type private CanonicalDecodeLink<'constructorIn, 'constructorOut> =
+        { Decode: 'constructorIn -> ByteSource -> struct (ValueOption<'constructorOut> * ByteSource) }
+
+    type private CanonicalDecodeResult<'model, 'constructorIn, 'constructorOut>
+        (link: CanonicalDecodeLink<'constructorIn, 'constructorOut>) =
+        interface IRecordPlanState<'model, 'constructorIn, 'constructorOut> with
+            member _.Value = box link
+
+    type private CanonicalDecodeFactory<'model>() =
+        interface IRecordPlanCompiler<'model, CanonicalAttempt<'model>> with
+            member _.OnEnd<'constructor>() =
+                CanonicalDecodeResult<'model, 'constructor, 'constructor>(
+                    { Decode = fun constructor' source -> struct (ValueSome constructor', source) }
+                )
+                :> IRecordPlanState<'model, 'constructor, 'constructor>
+
+            member _.OnField<'constructorIn, 'field, 'next>
+                (order, field, head: IRecordPlanState<'model, 'constructorIn, 'field -> 'next>) =
+                let headLink = unbox<CanonicalDecodeLink<'constructorIn, 'field -> 'next>> head.Value
+                let name = field.Definition.ExternalName |> ExternalFieldName.value
+                let nameBytes = utf8 name
+                let decodeValue = compileValueDecoder<'field> field.Definition.ValueSchema
+
+                let decode constructor' source =
+                    let struct (previous, afterPrevious) = headLink.Decode constructor' source
+
+                    match previous with
+                    | ValueNone -> struct (ValueNone, afterPrevious)
+                    | ValueSome remaining ->
+                        let afterPrevious = skipWhitespace afterPrevious
+
+                        let propertySource =
+                            if order = 0 then
+                                ValueSome afterPrevious
+                            elif afterPrevious.Offset < afterPrevious.Data.Length
+                                 && afterPrevious.Data[afterPrevious.Offset] = byte ',' then
+                                ValueSome(skipWhitespace (afterPrevious.Advance 1))
+                            else
+                                ValueNone
+
+                        match propertySource with
+                        | ValueNone -> struct (ValueNone, afterPrevious)
+                        | ValueSome propertySource ->
+                            let struct (start, length, escaped, afterName) = stringRaw propertySource
+
+                            let matches =
+                                if escaped then materializeString propertySource.Data start length true = name
+                                else bytesEqual nameBytes propertySource.Data start length
+
+                            if not matches then
+                                struct (ValueNone, propertySource)
+                            else
+                                let struct (value, afterValue) =
+                                    try decodeValue (advancePastColon afterName)
+                                    with
+                                    | :? JsonCodecException as ex ->
+                                        raise (
+                                            JsonCodecException(
+                                                "." + name + (if ex.Path = "$" then "" else ex.Path.Substring 1),
+                                                ex.Detail,
+                                                ex
+                                            )
+                                        )
+
+                                struct (ValueSome(remaining value), afterValue)
+
+                CanonicalDecodeResult<'model, 'constructorIn, 'next>({ Decode = decode })
+                :> IRecordPlanState<'model, 'constructorIn, 'next>
+
+            member _.OnComplete<'constructor, 'constructed>(constructor, chain, finish) =
+                let link = unbox<CanonicalDecodeLink<'constructor, 'constructed>> chain.Value
+                fun source ->
+                    let body = expectByte (byte '{') "{" source
+                    let struct (constructed, afterFields) = link.Decode constructor body
+                    match constructed with
+                    | ValueNone -> struct (ValueNone, source)
+                    | ValueSome value ->
+                        let afterFields = skipWhitespace afterFields
+                        if afterFields.Offset >= afterFields.Data.Length
+                           || afterFields.Data[afterFields.Offset] <> byte '}' then
+                            struct (ValueNone, source)
+                        else
+                            let afterObject = afterFields.Advance 1
+                            match finish value with
+                            | Ok model -> struct (ValueSome model, afterObject)
+                            | Error message -> decodeFailure message
+
     let private compileTypedModelDecoder<'model> (schema: Schema<'model>) : Decoder<'model> =
         SchemaCore.compilePlan (DecodeFactory<'model>()) schema
+
+    let private compileCanonicalModelDecoder<'model> (schema: Schema<'model>) : CanonicalAttempt<'model> =
+        SchemaCore.compilePlan (CanonicalDecodeFactory<'model>()) schema
+
+    let private compileCanonicalFirstModelDecoder<'model> (schema: Schema<'model>) : Decoder<'model> =
+        let canonical = compileCanonicalModelDecoder schema
+        let general = compileTypedModelDecoder schema
+        fun source ->
+            let struct (result, next) = canonical source
+            match result with
+            | ValueSome value -> struct (value, next)
+            | ValueNone -> general source
 
     // The typed encode chain: each field contributes cached wire-name bytes
     // plus a writer over the typed getter.
@@ -1189,7 +1320,7 @@ module rec Json =
             JsonCodec(compileValueEncoder<'model> definition, compileValueDecoder<'model> definition)
         | ModelDefinition definition ->
             match schema.RecordPlan with
-            | Some _ -> JsonCodec(compileTypedModelEncoder schema, compileTypedModelDecoder schema)
+            | Some _ -> JsonCodec(compileTypedModelEncoder schema, compileCanonicalFirstModelDecoder schema)
             | None ->
                 let erased = ModelSchemaErasure.erase definition
                 let objEncoder = compileErasedModelEncoder erased
@@ -1228,6 +1359,124 @@ module rec Json =
             let result = Array.zeroCreate buffer.InternalCount
             Array.blit buffer.InternalData 0 result 0 buffer.InternalCount
             result
+        finally
+            buffer.Release()
+
+    /// <summary>The unmodified JSON writer options: compact, minimal escaping — exactly what
+    /// <see cref="M:Reified.Json.serialize``1" />, <c>serializeBytes</c>, and <c>serializeToStream</c> produce.</summary>
+    let defaults: JsonWriteOptions =
+        { Indent = JsonIndent.None
+          TrailingNewline = false
+          LineEnding = JsonLineEnding.Lf
+          AsciiOnly = false
+          EscapeHtml = false }
+
+    /// <summary>Configures the writer to indent nested levels by two spaces. Compose it with
+    /// <see cref="M:Reified.Json.serializeWith``1" />: <c>Json.serializeWith Json.indented codec value</c>.</summary>
+    let indented (options: JsonWriteOptions) : JsonWriteOptions =
+        { options with Indent = JsonIndent.Spaces 2 }
+
+    let private resolveWriteOptions (configure: JsonWriteOptions -> JsonWriteOptions) =
+        let options = configure defaults
+
+        match options.Indent with
+        | JsonIndent.Spaces n when n < 0 -> invalidArg (nameof configure) "Indent spaces must not be negative."
+        | _ -> ()
+
+        options
+
+    let private writeOptionsAreCompact (options: JsonWriteOptions) =
+        options.Indent = JsonIndent.None
+        && not options.TrailingNewline
+        && not options.AsciiOnly
+        && not options.EscapeHtml
+
+    let private encodeConfigured
+        (codec: JsonCodec<'model>)
+        (value: 'model)
+        (options: JsonWriteOptions)
+        (target: ResizableBuffer)
+        =
+        if writeOptionsAreCompact options then
+            codec.Encoder (target :> IByteWriter) value
+        else
+            let scratch = ResizableBuffer.Create(4096)
+
+            try
+                codec.Encoder (scratch :> IByteWriter) value
+                formatJson options scratch.InternalData scratch.InternalCount (target :> IByteWriter)
+            finally
+                scratch.Release()
+
+    /// <summary>Serializes a trusted model to a JSON string, configuring the writer through
+    /// <see cref="T:Reified.JsonWriteOptions" />.</summary>
+    /// <remarks>
+    /// Indentation and re-escaping run as one linear pass over the compact output, so a non-default configuration
+    /// costs roughly one extra copy of the payload. <c>serializeWith id</c> equals <c>serialize</c>.
+    /// </remarks>
+    /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="codec" /> is null.</exception>
+    let serializeWith
+        (configure: JsonWriteOptions -> JsonWriteOptions)
+        (codec: JsonCodec<'model>)
+        (value: 'model)
+        : string =
+        if isNull (box codec) then
+            nullArg (nameof codec)
+
+        let options = resolveWriteOptions configure
+        let buffer = ResizableBuffer.Create(4096)
+
+        try
+            encodeConfigured codec value options buffer
+            Encoding.UTF8.GetString(buffer.InternalData, 0, buffer.InternalCount)
+        finally
+            buffer.Release()
+
+    /// <summary>Serializes a trusted model to UTF-8 JSON bytes, configuring the writer through
+    /// <see cref="T:Reified.JsonWriteOptions" />.</summary>
+    /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="codec" /> is null.</exception>
+    let serializeBytesWith
+        (configure: JsonWriteOptions -> JsonWriteOptions)
+        (codec: JsonCodec<'model>)
+        (value: 'model)
+        : byte[] =
+        if isNull (box codec) then
+            nullArg (nameof codec)
+
+        let options = resolveWriteOptions configure
+        let buffer = ResizableBuffer.Create(4096)
+
+        try
+            encodeConfigured codec value options buffer
+            let result = Array.zeroCreate buffer.InternalCount
+            Array.blit buffer.InternalData 0 result 0 buffer.InternalCount
+            result
+        finally
+            buffer.Release()
+
+    /// <summary>Serializes a trusted model to an indented JSON string with two-space nesting.</summary>
+    /// <remarks>Shorthand for <c>serializeWith indented</c>. For indented bytes or a stream, use
+    /// <c>serializeBytesWith indented</c> or <c>serializeToStreamWith indented</c>.</remarks>
+    /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="codec" /> is null.</exception>
+    let serializeIndented (codec: JsonCodec<'model>) (value: 'model) : string =
+        serializeWith indented codec value
+
+    /// <summary>Reformats a JSON string with two-space indentation.</summary>
+    /// <remarks>
+    /// Operates on the text alone — insignificant whitespace is normalized and no schema is applied — so it also
+    /// pretty-prints JSON that did not come from a codec. Assumes the input is well-formed JSON.
+    /// </remarks>
+    /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="json" /> is null.</exception>
+    let reindent (json: string) : string =
+        if isNull json then
+            nullArg (nameof json)
+
+        let source = Encoding.UTF8.GetBytes json
+        let buffer = ResizableBuffer.Create(source.Length + (source.Length >>> 1) + 16)
+
+        try
+            formatJson (indented defaults) source source.Length (buffer :> IByteWriter)
+            Encoding.UTF8.GetString(buffer.InternalData, 0, buffer.InternalCount)
         finally
             buffer.Release()
 
@@ -1309,6 +1558,31 @@ module rec Json =
 
         try
             codec.Encoder (buffer :> IByteWriter) value
+            stream.Write(buffer.InternalData, 0, buffer.InternalCount)
+            stream.Flush()
+        finally
+            buffer.Release()
+
+    /// <summary>Serializes a trusted model as UTF-8 JSON directly to a stream, configuring the writer through
+    /// <see cref="T:Reified.JsonWriteOptions" />. Not available on Fable.</summary>
+    /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="codec" /> or <paramref name="stream" /> is null.</exception>
+    let serializeToStreamWith
+        (configure: JsonWriteOptions -> JsonWriteOptions)
+        (codec: JsonCodec<'model>)
+        (stream: System.IO.Stream)
+        (value: 'model)
+        : unit =
+        if isNull (box codec) then
+            nullArg (nameof codec)
+
+        if isNull stream then
+            nullArg (nameof stream)
+
+        let options = resolveWriteOptions configure
+        let buffer = ResizableBuffer.Create(4096)
+
+        try
+            encodeConfigured codec value options buffer
             stream.Write(buffer.InternalData, 0, buffer.InternalCount)
             stream.Flush()
         finally

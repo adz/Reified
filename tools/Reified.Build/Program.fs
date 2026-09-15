@@ -94,16 +94,66 @@ target "SchemaCompilerErrors" (fun () ->
         let code, output = runCapture "dotnet" [ "fsi"; "--exec"; $"tests/compile-fail/schema-ce/{fixture}" ] []
         if code = 0 || not (output.Contains expected) then failwith $"{fixture} did not report: {expected}\n{output}")
 
+// A Fable-compiled Reified module is a bundler tree-shaking hazard only if it carries top-level
+// side effects: with none, marking the output "sideEffects": false lets a browser consumer drop
+// Reified.Constraint and Reified.Refinements entirely from a manifest that never resolves a refined
+// field. The compiled surface today is import/export/const/function/class declarations only, so the
+// flag is honest. This guards that: a stray module-level `do` or effectful `let` binding regresses
+// it. Strings, comments, and multi-line template literals are stripped so brace depth is real.
+let private hasTopLevelSideEffect (source: string) =
+    let mutable depth = 0
+    let mutable inBlockComment = false
+    let mutable inTemplate = false
+    source.Replace("\r\n", "\n").Split('\n')
+    |> Array.exists (fun rawLine ->
+        let startedAtTopLevel = depth = 0 && not inBlockComment && not inTemplate
+        let sb = System.Text.StringBuilder()
+        let mutable i = 0
+        let mutable inSingle = false
+        let mutable inDouble = false
+        while i < rawLine.Length do
+            let c = rawLine[i]
+            let next = if i + 1 < rawLine.Length then rawLine[i + 1] else ' '
+            if inBlockComment then
+                if c = '*' && next = '/' then inBlockComment <- false; i <- i + 1
+            elif inSingle then (if c = '\\' then i <- i + 1 elif c = '\'' then inSingle <- false)
+            elif inDouble then (if c = '\\' then i <- i + 1 elif c = '"' then inDouble <- false)
+            elif inTemplate then (if c = '\\' then i <- i + 1 elif c = '`' then inTemplate <- false)
+            elif c = '/' && next = '/' then i <- rawLine.Length
+            elif c = '/' && next = '*' then inBlockComment <- true; i <- i + 1
+            elif c = '\'' then inSingle <- true
+            elif c = '"' then inDouble <- true
+            elif c = '`' then inTemplate <- true
+            else
+                if c = '{' || c = '(' || c = '[' then depth <- depth + 1
+                elif c = '}' || c = ')' || c = ']' then depth <- max 0 (depth - 1)
+                sb.Append c |> ignore
+            i <- i + 1
+        let code = sb.ToString().Trim()
+        startedAtTopLevel
+        && code <> ""
+        && not (
+            [ "import "; "export "; "const "; "let "; "var "; "function "; "class "; "}"; ")"; "]"; "*" ]
+            |> List.exists code.StartsWith))
+
 target "Fable" (fun () ->
     let out = "artifacts/fable-js-surface"
     if Directory.Exists out then Directory.Delete(out, true)
-    Directory.CreateDirectory out |> ignore; File.WriteAllText(Path.Combine(out, "package.json"), "{ \"type\": \"module\" }")
+    Directory.CreateDirectory out |> ignore
+    File.WriteAllText(Path.Combine(out, "package.json"), "{ \"type\": \"module\", \"sideEffects\": false }")
     let code, _ = runCapture "dotnet" [ "fable"; "examples/Reified.FableProbe/Reified.FableProbe.fsproj"; "--lang"; "javascript"; "--outDir"; out ] [ "TreatWarningsAsErrors", "false" ]
     if code <> 0 then failwith "Fable compilation failed"
     if not (File.Exists(Path.Combine(out, "src/Reified.Schema/Json.js"))) then failwith "Reified.Schema's JSON codec was absent from Fable output"
     let _, output = runCapture "node" [ Path.Combine(out, "Program.js") ] []
-    for expected in [ "Schema record plan: ok"; "Codec round-trip: ok"; "Constraints: ok"; "Operand agreement: ok"; "Localization: ok"; "Data JSON boundaries: ok"; "Reified Fable probe: ok" ] do if not (output.Contains expected) then failwith $"Fable probe missing: {expected}"
-    if Directory.EnumerateFiles(out, "*", SearchOption.AllDirectories) |> Seq.exists (fun p -> File.ReadAllText(p).Contains "ResourceManager") then failwith "ResourceManager leaked into Fable output")
+    for expected in [ "Schema record plan: ok"; "Codec round-trip: ok"; "Codec writer options: ok"; "Constraints: ok"; "Operand agreement: ok"; "Localization: ok"; "Data JSON boundaries: ok"; "Reified Fable probe: ok" ] do if not (output.Contains expected) then failwith $"Fable probe missing: {expected}"
+    if Directory.EnumerateFiles(out, "*", SearchOption.AllDirectories) |> Seq.exists (fun p -> File.ReadAllText(p).Contains "ResourceManager") then failwith "ResourceManager leaked into Fable output"
+    let effectful =
+        Directory.EnumerateFiles(Path.Combine(out, "src"), "*.js", SearchOption.AllDirectories)
+        |> Seq.filter (fun p -> hasTopLevelSideEffect (File.ReadAllText p))
+        |> Seq.map (fun p -> Path.GetRelativePath(out, p))
+        |> List.ofSeq
+    if not (List.isEmpty effectful) then
+        failwith $"""Fable output carries top-level side effects, so "sideEffects": false is no longer honest: {String.Join(", ", effectful)}""")
 
 target "NativeAot" (fun () -> for product in [ "Result"; "Constraint"; "Refinements"; "Schema" ] do let dir = $"artifacts/publish/Reified.{product}.AotProbe/linux-x64" in dotnet [ "publish"; $"examples/Reified.{product}.AotProbe/Reified.{product}.AotProbe.fsproj"; "-c"; "Release"; "-r"; "linux-x64"; "-o"; dir ]; run (Path.Combine(dir, $"Reified.{product}.AotProbe")) [])
 

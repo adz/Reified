@@ -54,7 +54,7 @@ module Checks =
 
     let private contactSchema =
         schema<SchemaContact> {
-            field _.Name
+            field _.Name { alias "Name" }
             field _.Age
             construct (fun name age -> { Name = name; Age = age })
         }
@@ -179,4 +179,22 @@ module Checks =
         let codec = Json.compile contactSchema
         let original = { Name = "Ada"; Age = 37 }
         let json = Json.serialize codec original
-        Json.deserialize codec json
+        let roundTripped = Json.deserialize codec json
+        let aliased = Json.deserialize codec "{\"Name\":\"Ada\",\"age\":37}"
+        if roundTripped = original && aliased = original && json.Contains "\"name\"" then roundTripped
+        else failwith "Field alias codec behavior diverged."
+
+    /// The JSON writer options must format and re-escape identically on both targets.
+    let runCodecWriterOptions () =
+        let codec = Json.compile contactSchema
+        let value = { Name = "<Ada & Þóra>"; Age = 37 }
+        let compact = Json.serialize codec value
+        let indented = Json.serializeIndented codec value
+
+        [ indented = "{\n  \"name\": \"<Ada & Þóra>\",\n  \"age\": 37\n}"
+          Json.deserialize codec indented = value
+          Json.reindent compact = indented
+          (Json.serializeWith (fun o -> { o with AsciiOnly = true }) codec value)
+          |> Seq.forall (fun c -> int c < 128)
+          (Json.serializeWith (fun o -> { o with EscapeHtml = true }) codec value).Contains "\\u003c" ]
+        |> List.forall id

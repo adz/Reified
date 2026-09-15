@@ -760,6 +760,18 @@ module Records =
                             else
                                 None)
 
+                    let aliases =
+                        attrs
+                        |> List.choose (fun (name, attribute) ->
+                            if name = "SchemaAlias" then
+                                match attributeArgs source attribute with
+                                | [ LString value ], _ when not (String.IsNullOrWhiteSpace value) -> Some value
+                                | _ ->
+                                    report line "[<SchemaAlias>] takes one non-blank string"
+                                    None
+                            else
+                                None)
+
                     let defaultValue =
                         attrs
                         |> List.tryPick (fun (name, attribute) -> if name = "Default" then firstLiteral attribute else None)
@@ -779,6 +791,7 @@ module Records =
                     Some
                         { FieldName = fieldName
                           WireName = Some(wireOverride |> Option.defaultValue (wireName naming fieldName))
+                          Aliases = aliases
                           Optional = optional
                           FieldType = lowered
                           Constraints = constraints

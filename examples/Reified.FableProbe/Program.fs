@@ -40,6 +40,10 @@ let main _ =
 
     printfn "Codec round-trip: ok"
 
+    require (Checks.runCodecWriterOptions ()) "JSON writer options differed across targets."
+
+    printfn "Codec writer options: ok"
+
     require
         (Checks.runConstraintSurface ())
         "The type-directed constraint catalogue did not behave correctly."

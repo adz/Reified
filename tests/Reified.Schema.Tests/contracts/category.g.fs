@@ -44,3 +44,6 @@ module Category =
 
     let validate = Schema.check schema
     let parse = Schema.parse schema
+
+type Category with
+    static member Schema(_: Category) : Schema<Category> = Category.schema

@@ -73,7 +73,9 @@ exports a type called `X`. See `dev-docs/namespace-flatten.md`.
   together, and paste the program's real output rather than writing expected output by hand.
 - Fable JavaScript support: `examples/Reified.FableProbe/**` and the `Fable` FAKE target. The probe
   runs the same assertions on both targets, so put a new cross-runtime claim in `Checks.fs` rather than in a
-  .NET-only test.
+  .NET-only test. The target also asserts the compiled JS has no top-level side effects, which is what makes the
+  `fable/package.json` `"sideEffects": false` marker honest — see the 2026-09-01 decision entry. Keep the codec
+  free of `sprintf` and F# `Map` on non-`Map<>` paths; both pull weight into every browser bundle.
 - Derived field names (`field _.Email`): `dev-docs/derived-field-names.md`. Read it before touching
   `GetterName.split` in `src/Reified.Schema/Shape.fs` or the `field` constructor in
   `src/Reified.Schema/SchemaBuilder.fs` — the .NET and Fable paths use different quotation attributes for reasons
