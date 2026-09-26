@@ -77,7 +77,7 @@ Every page below builds on this same `parseName`/`parseAge` pair, so the example
   and `and!`.
 - [Comparison with FsToolkit.ErrorHandling](/comparisons/fstoolkit-comparison.html) - what each library is for, and how they
   interoperate.
-- [API reference](/api.html) - every function, generated from the source.
+- [API reference](/api/Reified.Result.ResultModule.html) - every function, generated from the source.
 
 ## Related
 

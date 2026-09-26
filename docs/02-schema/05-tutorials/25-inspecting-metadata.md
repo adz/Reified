@@ -96,4 +96,4 @@ form control, the JSON Schema, the docs table, and the parser all change togethe
 ## Next
 
 - [Refined Value Schemas](/schema/refined-values.html) for how refinement layers stay inspectable.
-- [Schema reference](/api.html) for the full `Inspect` API.
+- [Schema reference](/api/Reified.Inspect.html) for the full `Inspect` API.

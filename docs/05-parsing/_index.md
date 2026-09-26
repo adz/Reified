@@ -213,4 +213,4 @@ let quantity raw =
 
 
 See [Refined values](/refined/index.html) for the refinement model, and the
-[Parse API reference](/api.html) for every parser.
+[Parse API reference](/api/Reified.ParseModule.html) for every parser.

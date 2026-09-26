@@ -193,6 +193,6 @@ directly against `HttpContext.Response.Body` / `Request.Body` in an ASP.NET Core
 
 ## Next
 
-- Serve the same declaration as a contract with [`JsonSchema.generate`](/api.html).
+- Serve the same declaration as a contract with [`JsonSchema.generate`](/api/Reified.JsonSchema.html).
 - See the two paths together in the runnable
   [minimal API sample](/schema/examples.html#minimal-api-boundary-example).
