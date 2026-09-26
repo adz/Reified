@@ -46,6 +46,7 @@ JSON Schema, NativeAOT, trimming, and Fable.
 - [Set up build generation](/schema/derivation/msbuild.html) — package reference, generated-file modes, and MSBuild properties.
 - [Attributes](/schema/derivation/attributes.html) — every supported attribute and its Schema DSL equivalent.
 - [How inference works](/schema/derivation/inference.html) — records, field types, names, constructors, unions, and diagnostics.
+- [Generated code](/schema/derivation/generated-code.html) — exactly what the companion file contains, and where your own mapping code goes.
 
 ## When to derive
 
