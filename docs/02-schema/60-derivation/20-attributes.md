@@ -22,7 +22,7 @@ the table has the same meaning as its linked handwritten [Schema DSL](/schema/ds
 
 | Attribute | Applies to | Short description | Schema DSL equivalent |
 | --- | --- | --- | --- |
-| `[<DeriveSchema>]` | record | Generate a schema and companion operations for a public wire record. `Chain` and `Version` optionally identify a version series. | [`schema<'model> { ... }`](/schema/dsl.html#fields-without-blocks) |
+| `[<DeriveSchema>]` | record | Generate a schema and companion operations for a public wire record. `Contract` names the versioned contract the record belongs to; `Version` pins a frozen version number. See [version-series inference](/schema/derivation/inference.html#version-series-inference). | [`schema<'model> { ... }`](/schema/dsl.html#fields-without-blocks) |
 | `[<DeriveUnion>]` | union | Derive the recommended internally tagged union with discriminator `type`. Fieldless and directly named payload cases may be mixed. | [`Schema.union`](/schema/union-schemas.html#generate-the-same-schemas) |
 | `[<DeriveUnion "kind">]` | union | Derive the same named-field format with a custom discriminator. | [`Schema.unionWith`](/schema/advanced-union-handling.html#build-a-representation-directly) |
 | `[<DeriveUnion(Representation = UnionRepresentationKind.Adjacent, PayloadField = "Fields", PayloadStyle = UnionPayloadStyleKind.Positional)>]` | union | Keep an adjacent positional contract such as FSharp.SystemTextJson's default. | [`Schema.unionWith`](/schema/advanced-union-handling.html#generate-a-compatibility-format) |

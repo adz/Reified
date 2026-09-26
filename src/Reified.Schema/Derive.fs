@@ -27,10 +27,14 @@ type UnionPayloadStyleKind =
 type DeriveSchemaAttribute() =
     inherit Attribute()
 
-    /// The version-chain name when the record's own name does not follow the `XxxVn` convention.
-    member val Chain: string = null with get, set
+    /// The versioned contract this record belongs to, when its name does not follow the `XxxVn` /
+    /// `Xxx` convention. A dotted name is fully qualified (`"My.Contracts.Profile"`); a bare name is
+    /// relative to the record's own namespace or module. Versions of one contract may live in any files
+    /// and containers, as long as compile order declares them oldest to newest.
+    member val Contract: string = null with get, set
 
-    /// The version within the chain when the record's own name does not follow the `XxxVn` convention.
+    /// The frozen version number of this record within its contract. Omit it on the contract's current
+    /// version, whose number is always one past the highest frozen version.
     member val Version: int = 0 with get, set
 
 /// <summary>Overrides the external name of one record field or one nullary union case. Without it, field

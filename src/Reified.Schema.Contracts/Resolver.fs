@@ -138,9 +138,11 @@ module Resolver =
         let report file line message =
             diagnostics.Add { File = file; Line = line; Message = message }
 
-        // Global contract registry: every declared version of a name, in declaration order. A version
-        // chain lives in one file, declared oldest to newest with no gaps, so the emitted F# and the
-        // Contract engine's contiguous n-1 -> n migration model agree.
+        // Global contract registry: every declared version of a name, in compile order. Versions are
+        // declared oldest to newest with no gaps, so the emitted F# (whose contract builder refers back to
+        // every older version) and the Contract engine's contiguous n-1 -> n migration model agree.
+        // .contract chains generate their own types and stay in one file; derived-record chains may span
+        // files and containers as long as compile order puts older versions first.
         let registry = System.Collections.Generic.Dictionary<string, ResizeArray<string * int * int>>()
 
         for file in files do
@@ -163,12 +165,12 @@ module Resolver =
 
                         report file.FilePath contract.ContractLine
                             $"contract '{contract.ContractName}.v{contract.Version}' is already declared at {duplicateFile}({duplicateLine})"
-                    elif existingFile <> file.FilePath then
+                    elif existingFile <> file.FilePath && contract.OwnsType then
                         report file.FilePath contract.ContractLine
                             $"every version of contract '{contract.ContractName}' must live in one file; v{existingVersion} is declared at {existingFile}({existingLine})"
                     elif contract.Version <> existingVersion + 1 then
                         report file.FilePath contract.ContractLine
-                            $"contract versions are declared oldest to newest with no gaps; expected '{contract.ContractName}.v{existingVersion + 1}' after v{existingVersion}, found v{contract.Version}"
+                            $"contract versions are declared oldest to newest in compile order, with no gaps; expected '{contract.ContractName}.v{existingVersion + 1}' after v{existingVersion} ({existingFile}({existingLine})), found v{contract.Version}"
                     else
                         declared.Add(file.FilePath, contract.ContractLine, contract.Version)
                 | false, _ ->

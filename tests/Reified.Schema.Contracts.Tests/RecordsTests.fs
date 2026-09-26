@@ -379,7 +379,7 @@ type ApolloV2 = { Crew: int }
         test <@ standalone.Contracts |> List.map (fun c -> c.ContractName, c.Version) = [ "ApolloV2", 1 ] @>
 
     [<Fact>]
-    let ``chain attribute arguments override the naming convention`` () =
+    let ``contract attribute arguments override the naming convention`` () =
         let file =
             parse
                 """
@@ -387,10 +387,10 @@ namespace My.Wire
 
 open Reified.DerivedSchema
 
-[<DeriveSchema(Chain = "Order", Version = 1)>]
+[<DeriveSchema(Contract = "Order", Version = 1)>]
 type LegacyOrder = { Sku: string }
 
-[<DeriveSchema(Chain = "Order", Version = 2)>]
+[<DeriveSchema(Contract = "Order", Version = 2)>]
 type Order = { Sku: string; Quantity: int }
 """
 
@@ -1077,7 +1077,7 @@ type Category =
         test <@ not (emitted.Contains "\ntype Category =") @>
 
     [<Fact>]
-    let ``chain overrides emit against the user's actual type names`` () =
+    let ``contract overrides emit against the user's actual type names`` () =
         let file =
             parse
                 """
@@ -1085,10 +1085,10 @@ namespace My.Wire
 
 open Reified.DerivedSchema
 
-[<DeriveSchema(Chain = "Order", Version = 1)>]
+[<DeriveSchema(Contract = "Order", Version = 1)>]
 type LegacyOrder = { Sku: string }
 
-[<DeriveSchema(Chain = "Order", Version = 2)>]
+[<DeriveSchema(Contract = "Order", Version = 2)>]
 type Order = { Sku: string; Quantity: int }
 """
 
@@ -1249,3 +1249,231 @@ type Order =
 """
 
         test <@ messages |> List.exists (fun m -> m.Contains "exactly one") @>
+
+    // ---- versioned contracts: Contract/Version resolution across files and containers ----
+
+    let private parseFiles (sources: (string * string) list) =
+        Records.parseSet SchemaNaming.CamelCase sources
+        |> List.map (fun (_, result) ->
+            match result with
+            | Ok file -> file
+            | Error diagnostics -> failwithf "Expected a clean parse, got %A" diagnostics)
+
+    let private parseFileErrors (sources: (string * string) list) =
+        Records.parseSet SchemaNaming.CamelCase sources
+        |> List.collect (fun (_, result) ->
+            match result with
+            | Ok _ -> []
+            | Error diagnostics -> diagnostics |> List.map _.Message)
+
+    let private versionsOf (files: ContractFile list) =
+        files |> List.collect _.Contracts |> List.map (fun c -> c.QualifiedName, c.Version, c.ExternalTypeName)
+
+    [<Fact>]
+    let ``a Contract without a Version is the current version`` () =
+        let file =
+            parse
+                """
+namespace My.Wire
+
+open Reified.DerivedSchema
+
+[<DeriveSchema(Contract = "Profile", Version = 1)>]
+type LegacyProfile = { Name: string }
+
+[<DeriveSchema(Contract = "Profile", Version = 2)>]
+type ProfileV2Wire = { Name: string; Email: string }
+
+[<DeriveSchema(Contract = "Profile")>]
+type ProfileWire = { Name: string; Email: string; Verified: bool }
+"""
+
+        test
+            <@ versionsOf [ file ] = [ "My.Wire.Profile", 1, Some "My.Wire.LegacyProfile"
+                                       "My.Wire.Profile", 2, Some "My.Wire.ProfileV2Wire"
+                                       "My.Wire.Profile", 3, Some "My.Wire.ProfileWire" ] @>
+
+        test <@ Resolver.resolve [ file ] = [] @>
+        let emitted = Emitter.emit "Fallback" [ file ] file
+        test <@ emitted.Contains "Contract.create \"Profile\" 3 schema" @>
+        test <@ emitted.Contains "(migrateV2ToV3: ProfileV2Wire -> Result<ProfileWire, MigrationError>)" @>
+
+    [<Fact>]
+    let ``a contract with two current versions is rejected`` () =
+        let messages =
+            parseErrors
+                """
+namespace My.Wire
+
+open Reified.DerivedSchema
+
+[<DeriveSchema(Contract = "Profile")>]
+type ProfileWire = { Name: string }
+
+[<DeriveSchema>]
+type Profile = { Name: string; Email: string }
+"""
+
+        test <@ messages |> List.exists (fun m -> m.Contains "more than one current version") @>
+
+    [<Fact>]
+    let ``the removed Chain argument points at Contract`` () =
+        let messages =
+            parseErrors
+                """
+namespace My.Wire
+
+open Reified.DerivedSchema
+
+[<DeriveSchema(Chain = "Order", Version = 1)>]
+type LegacyOrder = { Sku: string }
+"""
+
+        test <@ messages |> List.exists (fun m -> m.Contains "'Chain' argument is now 'Contract'") @>
+
+    [<Fact>]
+    let ``a Vn record joins its contract from another file in the same namespace`` () =
+        let files =
+            parseFiles
+                [ "profile.history.fs",
+                  """
+namespace My.Wire
+open Reified.DerivedSchema
+
+[<DeriveSchema>]
+type ProfileV1 = { Name: string }
+"""
+                  "profile.fs",
+                  """
+namespace My.Wire
+open Reified.DerivedSchema
+
+[<DeriveSchema>]
+type Profile = { Name: string; Email: string }
+""" ]
+
+        test
+            <@ versionsOf files = [ "My.Wire.Profile", 1, Some "My.Wire.ProfileV1"
+                                    "My.Wire.Profile", 2, Some "My.Wire.Profile" ] @>
+
+        test <@ Resolver.resolve files = [] @>
+        let head = files |> List.find (fun file -> file.FilePath = "profile.fs")
+        let emitted = Emitter.emit "Fallback" files head
+        test <@ emitted.Contains "(migrateV1ToV2: My.Wire.ProfileV1 -> Result<Profile, MigrationError>)" @>
+        test <@ emitted.Contains "|> Contract.supersedes 1 My.Wire.ProfileV1.schema migrateV1ToV2" @>
+
+        let history = files |> List.find (fun file -> file.FilePath = "profile.history.fs")
+        test <@ not ((Emitter.emit "Fallback" files history).Contains "let contract") @>
+
+    [<Fact>]
+    let ``a fully qualified Contract places versions in other containers`` () =
+        let files =
+            parseFiles
+                [ "legacy.fs",
+                  """
+module My.Legacy
+open Reified.DerivedSchema
+
+[<DeriveSchema(Contract = "My.Wire.Profile", Version = 1)>]
+type OldProfile = { Name: string }
+"""
+                  "wire.fs",
+                  """
+namespace My.Wire
+open Reified.DerivedSchema
+
+[<DeriveSchema>]
+type Profile = { Name: string; Email: string }
+""" ]
+
+        test
+            <@ versionsOf files = [ "My.Wire.Profile", 1, Some "My.Legacy.OldProfile"
+                                    "My.Wire.Profile", 2, Some "My.Wire.Profile" ] @>
+
+        test <@ Resolver.resolve files = [] @>
+        let head = files |> List.find (fun file -> file.FilePath = "wire.fs")
+        let emitted = Emitter.emit "Fallback" files head
+        test <@ emitted.Contains "(migrateV1ToV2: My.Legacy.OldProfile -> Result<Profile, MigrationError>)" @>
+        test <@ emitted.Contains "|> Contract.supersedes 1 My.LegacySchemas.OldProfile.schema migrateV1ToV2" @>
+
+    [<Fact>]
+    let ``a bare Contract name is relative to the record's own container`` () =
+        let files =
+            parseFiles
+                [ "legacy.fs",
+                  """
+namespace My.Legacy
+open Reified.DerivedSchema
+
+[<DeriveSchema(Contract = "Profile", Version = 1)>]
+type OldProfile = { Name: string }
+"""
+                  "wire.fs",
+                  """
+namespace My.Wire
+open Reified.DerivedSchema
+
+[<DeriveSchema>]
+type Profile = { Name: string; Email: string }
+""" ]
+
+        test
+            <@ versionsOf files = [ "My.Legacy.Profile", 1, Some "My.Legacy.OldProfile"
+                                    "My.Wire.Profile", 1, Some "My.Wire.Profile" ] @>
+
+    [<Fact>]
+    let ``versions spread across files must follow compile order`` () =
+        let files =
+            parseFiles
+                [ "profile.fs",
+                  """
+namespace My.Wire
+open Reified.DerivedSchema
+
+[<DeriveSchema>]
+type Profile = { Name: string; Email: string }
+"""
+                  "profile.history.fs",
+                  """
+namespace My.Wire
+open Reified.DerivedSchema
+
+[<DeriveSchema>]
+type ProfileV1 = { Name: string }
+""" ]
+
+        let messages = Resolver.resolve files |> List.map _.Message
+        test <@ messages |> List.exists (fun m -> m.Contains "compile order") @>
+
+    [<Fact>]
+    let ``a cross-file reference to a versioned record pins its resolved version`` () =
+        let files =
+            parseFiles
+                [ "profile.fs",
+                  """
+namespace My.Wire
+open Reified.DerivedSchema
+
+[<DeriveSchema>]
+type ProfileV1 = { Name: string }
+
+[<DeriveSchema>]
+type Profile = { Name: string; Email: string }
+"""
+                  "account.fs",
+                  """
+namespace My.Accounts
+open Reified.DerivedSchema
+
+[<DeriveSchema>]
+type Account = { Owner: My.Wire.Profile; Previous: My.Wire.ProfileV1 }
+""" ]
+
+        test <@ Resolver.resolve files = [] @>
+        let account = files |> List.find (fun file -> file.FilePath = "account.fs")
+        let fields = account.Contracts.Head.Fields |> List.map _.FieldType
+
+        test
+            <@ fields = [ Reference { RefName = "My.Wire.Profile"; RefVersion = 2 }
+                          Reference { RefName = "My.Wire.Profile"; RefVersion = 1 } ] @>
+

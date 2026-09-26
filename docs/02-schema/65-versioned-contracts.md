@@ -90,14 +90,14 @@ match Contract.parse configContract raw with
 ## Generate a version series from records
 
 The generator can group `[<DeriveSchema>]` records into a version series and write the `Contract` wiring for you. It
-does this by examining the names of the marked records in each source file.
+does this by examining the names and attribute arguments of the marked records in the project.
 
 ### How records are grouped
 
 By default, a marked record whose name ends in `V` followed by a number (`ProfileV1`, `ProfileV2`) belongs to the
-series named by the rest of its name, **but only when a marked record with that bare name (`Profile`) exists in the
-same file**. The bare record is the current version. Its version number is never written down; it is always one more
-than the highest `Vn` in the series.
+contract named by the rest of its name, **but only when a marked record named `Profile` exists in the same namespace
+or module**. The bare record is the current version. Its version number is never written down; it is always one more
+than the highest frozen version.
 
 ```fsharp
 open Reified.DerivedSchema
@@ -110,7 +110,7 @@ type Profile = { Name: string; Email: string } // Profile v2 (current: highest V
 ```
 
 `ProfileV1` on its own, with no marked `Profile`, is not a series. It is an ordinary record whose schema happens to
-have a `V1` in its name. The full rules, including explicit `Chain`/`Version`, are in
+have a `V1` in its name. The full rules, including explicit `Contract`/`Version`, are in
 [Schema Inference](/schema/derivation/inference.html#version-series-inference).
 
 ### What is generated
@@ -162,8 +162,9 @@ The bare name always means "current", so adding a version means freezing the cur
 writing the new shape under the bare name. Existing version numbers never change.
 
 1. Rename the current `Profile` to `ProfileV2`, and leave its fields exactly as they were. It is now frozen.
-2. Declare the new shape as `Profile`. It becomes v3, because the highest `Vn` is now 2.
-3. Keep the records in version order in one file: `ProfileV1`, `ProfileV2`, `Profile`.
+2. Declare the new shape as `Profile`. It becomes v3, because the highest frozen version is now 2.
+3. Keep the records in version order: `ProfileV1`, `ProfileV2`, then `Profile`. They can share a file, or the frozen
+   versions can move to an earlier file (see [Keep frozen versions elsewhere](#keep-frozen-versions-elsewhere)).
 
 ```fsharp
 [<DeriveSchema>]
@@ -206,18 +207,60 @@ the contract.
 
 ### Names that do not follow the convention
 
-Set `Chain` and `Version` explicitly when a record's name should not carry a `Vn` suffix:
+`Contract` names the contract a record belongs to, and `Version` pins a frozen version number. Leave `Version` off the
+current version:
 
 ```fsharp
-[<DeriveSchema(Chain = "Profile", Version = 1)>]
+[<DeriveSchema(Contract = "Profile", Version = 1)>]
 type LegacyProfile = { Name: string }
 
-[<DeriveSchema>]
-type Profile = { Name: string; Email: string }   // bare chain name: v2
+[<DeriveSchema(Contract = "Profile")>]
+type ProfileWire = { Name: string; Email: string }   // current: v2
 ```
 
-The generated `contract` then takes `LegacyProfile -> Result<Profile, MigrationError>`. See
-[Build Generation](/schema/derivation/msbuild.html) for setup.
+The generated `ProfileWire.contract` takes `LegacyProfile -> Result<ProfileWire, MigrationError>` and builds a
+`Contract<ProfileWire>` named `"Profile"`. A contract has exactly one current version; a second record without a
+version is reported as a generation error.
+
+### Keep frozen versions elsewhere
+
+A contract's versions do not have to share a file, namespace, or module. The only requirement is compile order: the
+current version's `contract` builder refers to every older schema, so older versions must be declared first.
+
+A bare `Contract` name is relative to the record's own namespace or module. A dotted name is fully qualified, which
+lets frozen versions live in a separate container:
+
+```fsharp no-check reason="Declares its own namespace or module, which cannot follow the site's F# prelude opens."
+// Profile.History.fs: compiled first, never edited again
+module MyApp.Wire.History
+
+open Reified.DerivedSchema
+
+[<DeriveSchema(Contract = "MyApp.Wire.Profile", Version = 1)>]
+type ProfileV1 = { Name: string }
+```
+
+```fsharp no-check reason="Declares its own namespace or module, which cannot follow the site's F# prelude opens."
+// Profile.fs
+namespace MyApp.Wire
+
+open Reified.DerivedSchema
+
+[<DeriveSchema>]
+type Profile = { Name: string; Email: string }   // current: v2
+```
+
+```xml
+<Compile Include="Profile.History.fs" />
+<Compile Include="Profile.fs" />
+```
+
+The generated `Profile.contract` refers to the frozen version by its full name,
+`MyApp.Wire.History.ProfileV1`. Declaring `Profile.fs` first is reported as a compile-order error. `ProfileV1` without
+the `Contract` argument would not join here, because the `Vn` convention only looks in its own namespace or module.
+When both files use the same namespace, the convention works across files without any arguments.
+
+See [Build Generation](/schema/derivation/msbuild.html) for setup.
 
 ## Design rules
 

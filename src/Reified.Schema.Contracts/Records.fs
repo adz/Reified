@@ -112,7 +112,7 @@ module Records =
 
     type private RecordInfo =
         { FsName: string
-          Chain: string
+          Contract: string
           Version: int
           RecordDoc: string list
           RecordFields: SynField list
@@ -137,9 +137,37 @@ module Records =
           UnionCases: SynUnionCase list
           UnionLine: int }
 
+    /// <summary>One marked record's version declaration, read before project-wide resolution: the
+    /// explicit <c>Contract</c>/<c>Version</c> arguments, if any, and where the record is declared.</summary>
+    type private VersionSpec =
+        { /// Fully qualified record name (container + type name).
+          Record: string
+          Container: string option
+          FsName: string
+          ExplicitContract: string option
+          ExplicitVersion: int option
+          UsesChain: bool
+          SpecFile: string
+          SpecLine: int }
+
     type private KnownTypes =
         { Records: Set<string>
-          Unions: Map<string, UnionInfo> }
+          Unions: Map<string, UnionInfo>
+          Specs: VersionSpec list
+          /// Fully qualified record name -> (fully qualified contract name, version), resolved across
+          /// every source file in the generation set.
+          Versions: Map<string, string * int> }
+
+    let private emptyKnownTypes =
+        { Records = Set.empty
+          Unions = Map.empty
+          Specs = []
+          Versions = Map.empty }
+
+    let private qualify (container: string option) (name: string) =
+        match container with
+        | Some prefix -> prefix + "." + name
+        | None -> name
 
     let private unionInfo (source: ISourceText) (fsName: string) (wireUnion: SynAttribute option) (isRequireQualifiedAccess: bool) (cases: SynUnionCase list) line =
         let _, unionNamedArgs = wireUnion |> Option.map (attributeArgs source) |> Option.defaultValue ([], [])
@@ -186,14 +214,15 @@ module Records =
           UnionCases = cases
           UnionLine = line }
 
-    let private chainOf (source: ISourceText) (attribute: SynAttribute) (fsName: string) (markedNames: Set<string>) =
+    /// Reads the version arguments of one [<DeriveSchema>] attribute.
+    let private versionSpecOf (source: ISourceText) (attribute: SynAttribute) (filePath: string) (container: string option) (fsName: string) (line: int) : VersionSpec =
         let _, named = attributeArgs source attribute
 
-        let explicitChain =
+        let explicitContract =
             named
             |> List.tryPick (fun (name, value) ->
                 match name, value with
-                | "Chain", SynExpr.Const(SynConst.String(text, _, _), _) -> Some text
+                | "Contract", SynExpr.Const(SynConst.String(text, _, _), _) -> Some text
                 | _ -> None)
 
         let explicitVersion =
@@ -203,18 +232,81 @@ module Records =
                 | "Version", SynExpr.Const(SynConst.Int32 value, _) -> Some value
                 | _ -> None)
 
-        match explicitChain, explicitVersion with
-        | Some chain, Some version -> chain, version
-        | Some chain, None -> chain, 1
-        | None, Some version -> fsName, version
-        | None, None ->
-            // XxxVn is a superseded version of chain Xxx only when the bare chain name is also marked.
-            let m: Match = Regex.Match(fsName, @"^(.+?)V([0-9]+)$")
+        { Record = qualify container fsName
+          Container = container
+          FsName = fsName
+          ExplicitContract = explicitContract
+          ExplicitVersion = explicitVersion
+          UsesChain = named |> List.exists (fun (name, _) -> name = "Chain")
+          SpecFile = filePath
+          SpecLine = line }
 
-            if m.Success && markedNames.Contains m.Groups.[1].Value then
-                m.Groups.[1].Value, int m.Groups.[2].Value
-            else
-                fsName, 0 // resolved to latest+0 sentinel below
+    /// <summary>Assigns every marked record a contract and a version, across the whole generation set.
+    /// A dotted <c>Contract</c> name is fully qualified; a bare one is relative to the record's own
+    /// namespace or module. <c>XxxVn</c> joins contract <c>Xxx</c> in the same container when a marked
+    /// record or an explicit <c>Contract</c> of that name exists anywhere in the set. A record without a
+    /// version is its contract's current version: one past the highest frozen version, or 1.</summary>
+    let private resolveVersions (specs: VersionSpec list) : Map<string, string * int> * ContractDiagnostic list =
+        let diagnostics = ResizeArray<ContractDiagnostic>()
+        let report (spec: VersionSpec) message = diagnostics.Add { ContractDiagnostic.File = spec.SpecFile; Line = spec.SpecLine; Message = message }
+
+        let explicitContractOf (spec: VersionSpec) =
+            spec.ExplicitContract
+            |> Option.map (fun name -> if name.Contains "." then name else qualify spec.Container name)
+
+        let contractNames =
+            Set.union (specs |> List.map _.Record |> Set.ofList) (specs |> List.choose explicitContractOf |> Set.ofList)
+
+        let assigned =
+            specs
+            |> List.map (fun spec ->
+                if spec.UsesChain then
+                    report spec $"'{spec.FsName}': the DeriveSchema 'Chain' argument is now 'Contract'"
+
+                match spec.ExplicitContract with
+                | Some name when String.IsNullOrWhiteSpace name || name.StartsWith "." || name.EndsWith "." || name.Contains ".." ->
+                    report spec $"'{spec.FsName}': Contract \"{name}\" is not a valid F# type path"
+                | _ -> ()
+
+                match spec.ExplicitVersion with
+                | Some version when version < 1 -> report spec $"'{spec.FsName}': Version must be a positive integer, found {version}"
+                | _ -> ()
+
+                let version = spec.ExplicitVersion |> Option.filter (fun version -> version > 0)
+
+                match explicitContractOf spec, version with
+                | Some contract, version -> spec, contract, version
+                | None, Some version -> spec, spec.Record, Some version
+                | None, None ->
+                    // XxxVn is a frozen version of contract Xxx only when Xxx names a marked record or an
+                    // explicit contract in the same container, so ordinary names like ApolloV2 stay standalone.
+                    let m: Match = Regex.Match(spec.FsName, @"^(.+?)V([0-9]+)$")
+                    let series = if m.Success then Some(qualify spec.Container m.Groups.[1].Value) else None
+
+                    match series with
+                    | Some series when contractNames.Contains series && series <> spec.Record ->
+                        spec, series, Some(int m.Groups.[2].Value)
+                    | _ -> spec, spec.Record, None)
+
+        let resolved =
+            assigned
+            |> List.groupBy (fun (_, contract, _) -> contract)
+            |> List.collect (fun (contract, members) ->
+                let highest = members |> List.choose (fun (_, _, version) -> version) |> List.fold max 0
+                let current = members |> List.filter (fun (_, _, version) -> Option.isNone version)
+
+                if List.length current > 1 then
+                    let names = current |> List.map (fun (spec, _, _) -> spec.FsName) |> String.concat ", "
+
+                    for spec, _, _ in current do
+                        report spec
+                            $"contract '{contract}' has more than one current version ({names}); only one record may omit its version, the others need a Vn name or an explicit Version"
+
+                members
+                |> List.map (fun (spec, contract, version) -> spec.Record, (contract, version |> Option.defaultValue (highest + 1))))
+            |> Map.ofList
+
+        resolved, List.ofSeq diagnostics
 
     let private knownTypesIn (filePath: string) (sourceText: string) =
         let source = SourceText.ofString sourceText
@@ -222,7 +314,7 @@ module Records =
         let result = checker.Value.ParseFile(filePath, source, options) |> Async.RunSynchronously
 
         if result.Diagnostics |> Array.exists (fun diagnostic -> diagnostic.Severity = FSharp.Compiler.Diagnostics.FSharpDiagnosticSeverity.Error) then
-            { Records = Set.empty; Unions = Map.empty }
+            emptyKnownTypes
         else
             match result.ParseTree with
             | ParsedInput.ImplFile(ParsedImplFileInput(contents = modules)) ->
@@ -230,6 +322,7 @@ module Records =
                     modules
                     |> List.collect (fun (SynModuleOrNamespace(longId, _, _, decls, _, _, _, _, _)) ->
                     let container = longId |> List.map _.idText |> String.concat "."
+                    let containerName = if container = "" then None else Some container
 
                     decls
                     |> List.collect (function
@@ -244,12 +337,16 @@ module Records =
                                     let deriveUnion = attrs |> List.tryPick (fun (attributeName, attribute) -> if attributeName = "DeriveUnion" then Some attribute else None)
                                     let isRequireQualifiedAccess = attrs |> List.exists (fun (attributeName, _) -> attributeName = "RequireQualifiedAccess")
                                     Some(name, Choice2Of2(unionInfo source (List.last typeId).idText deriveUnion isRequireQualifiedAccess cases range.StartLine))
-                                | _ when record -> Some(name, Choice1Of2 ())
+                                | _ when record ->
+                                    let deriveSchema = attrs |> List.pick (fun (attributeName, attribute) -> if attributeName = "DeriveSchema" then Some attribute else None)
+                                    Some(name, Choice1Of2(versionSpecOf source deriveSchema filePath containerName (List.last typeId).idText range.StartLine))
                                 | _ -> None)
                         | _ -> []))
-                { Records = entries |> List.choose (function | name, Choice1Of2 () -> Some name | _ -> None) |> Set.ofList
-                  Unions = entries |> List.choose (function | name, Choice2Of2 union -> Some(name, union) | _ -> None) |> Map.ofList }
-            | _ -> { Records = Set.empty; Unions = Map.empty }
+                { Records = entries |> List.choose (function | name, Choice1Of2 _ -> Some name | _ -> None) |> Set.ofList
+                  Unions = entries |> List.choose (function | name, Choice2Of2 union -> Some(name, union) | _ -> None) |> Map.ofList
+                  Specs = entries |> List.choose (function | _, Choice1Of2 spec -> Some spec | _ -> None)
+                  Versions = Map.empty }
+            | _ -> emptyKnownTypes
 
     /// <summary>Parses one F# source file and lowers its marked records. Returns a contract file whose
     /// <c>Contracts</c> list is empty when the file declares no <c>[&lt;DeriveSchema&gt;]</c> records.</summary>
@@ -430,35 +527,19 @@ module Records =
             |> Seq.map (fun name -> name, (container |> Option.map (fun prefix -> prefix + "." + name) |> Option.defaultValue name))
             |> Map.ofSeq
 
-        let chains =
-            records
-            |> Seq.map (fun (attribute, _, SynComponentInfo(longId = longId), _, _, _) ->
-                let fsName = (List.last longId).idText
-                fsName, chainOf source attribute fsName markedNames)
+        // Contract and version for each marked record, resolved across the whole generation set.
+        let resolvedVersions =
+            markedNames
+            |> Seq.map (fun name ->
+                let qualified = Map.find name qualifiedNames
+
+                name,
+                (Map.tryFind qualified knownTypes.Versions |> Option.defaultValue (qualified, 1)))
             |> Map.ofSeq
 
-        // A bare marked record whose chain has explicit or convention-derived siblings is the current
-        // version: one past the highest sibling. A record alone in its chain is version 1.
-        let resolvedChains =
-            chains
-            |> Map.map (fun _ (chain, version) ->
-                if version > 0 then
-                    chain, version
-                else
-                    let highestSibling =
-                        chains
-                        |> Map.toSeq
-                        |> Seq.filter (fun (_, (siblingChain, siblingVersion)) -> siblingChain = chain && siblingVersion > 0)
-                        |> Seq.map (fun (_, (_, siblingVersion)) -> siblingVersion)
-                        |> Seq.fold max 0
-
-                    chain, highestSibling + 1)
-
         let referenceTo line (name: string) : ContractRef option =
-            match Map.tryFind name resolvedChains with
-            | Some(chain, version) ->
-                let identity = container |> Option.map (fun prefix -> prefix + "." + chain) |> Option.defaultValue chain
-                Some { RefName = identity; RefVersion = version }
+            match Map.tryFind name resolvedVersions with
+            | Some(contract, version) -> Some { RefName = contract; RefVersion = version }
             | None ->
                 report line $"'{name}' is not a [<DeriveSchema>] record in this source file"
                 None
@@ -502,7 +583,9 @@ module Records =
 
                     let crossFileLookup () =
                         match uniqueKnownPath line "record" knownTypes.Records fullName with
-                        | Some path -> Some(Reference { RefName = path; RefVersion = 1 })
+                        | Some path ->
+                            let contract, version = Map.tryFind path knownTypes.Versions |> Option.defaultValue (path, 1)
+                            Some(Reference { RefName = contract; RefVersion = version })
                         | None ->
                             match uniqueKnownPath line "union" knownTypes.Unions.Keys fullName with
                             | Some path -> lowerUnion line path (Map.find path knownTypes.Unions)
@@ -805,10 +888,10 @@ module Records =
             records
             |> Seq.map (fun (_, schemaConstructor, SynComponentInfo(longId = longId), fields, xmlDoc, headerLine) ->
                 let fsName = (List.last longId).idText
-                let chain, version = Map.find fsName resolvedChains
+                let contract, version = Map.find fsName resolvedVersions
 
-                { ContractName = chain
-                  QualifiedName = container |> Option.map (fun prefix -> prefix + "." + chain) |> Option.defaultValue chain
+                { ContractName = contract.Substring(contract.LastIndexOf '.' + 1)
+                  QualifiedName = contract
                   Version = version
                   Doc = docLines xmlDoc
                   Annotations = []
@@ -834,20 +917,37 @@ module Records =
                   DeclaredTypes = declaredTypes
                   Contracts = contracts }
 
+    let private withDiagnostics (extra: ContractDiagnostic list) (result: Result<ContractFile, ContractDiagnostic list>) =
+        match extra, result with
+        | [], _ -> result
+        | extra, Ok _ -> Error extra
+        | extra, Error diagnostics -> Error(diagnostics @ extra)
+
     /// Parses one source file without project-wide references. Prefer <c>parseSet</c> for build generation.
     let parse naming filePath sourceText =
-        parseWithKnownTypes { Records = Set.empty; Unions = Map.empty } naming filePath sourceText
+        let versions, versionDiagnostics = resolveVersions (knownTypesIn filePath sourceText).Specs
+
+        parseWithKnownTypes { emptyKnownTypes with Versions = versions } naming filePath sourceText
+        |> withDiagnostics versionDiagnostics
 
     /// Parses a project set. The first pass builds a catalogue keyed by each derived type's fully qualified
-    /// namespace/module path; the second pass only accepts cross-file references written with that full path.
+    /// namespace/module path and resolves every contract version across the set; the second pass only
+    /// accepts cross-file references written with that full path.
     let parseSet naming (sources: (string * string) list) =
-        let knownTypes =
+        let catalogue =
             sources
             |> List.map (fun (path, text) -> knownTypesIn path text)
             |> List.fold (fun state current ->
                 { Records = Set.union state.Records current.Records
-                  Unions = Map.fold (fun unions key value -> Map.add key value unions) state.Unions current.Unions })
-                { Records = Set.empty; Unions = Map.empty }
+                  Unions = Map.fold (fun unions key value -> Map.add key value unions) state.Unions current.Unions
+                  Specs = state.Specs @ current.Specs
+                  Versions = Map.empty })
+                emptyKnownTypes
+
+        let versions, versionDiagnostics = resolveVersions catalogue.Specs
+        let knownTypes = { catalogue with Versions = versions }
 
         sources
-        |> List.map (fun (path, text) -> path, parseWithKnownTypes knownTypes naming path text)
+        |> List.map (fun (path, text) ->
+            let fileDiagnostics = versionDiagnostics |> List.filter (fun diagnostic -> diagnostic.File = path)
+            path, parseWithKnownTypes knownTypes naming path text |> withDiagnostics fileDiagnostics)

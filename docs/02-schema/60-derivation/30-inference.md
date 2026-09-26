@@ -128,34 +128,41 @@ wire name `item`.
 
 ## Version-series inference
 
-The generator examines the names and attributes of the `[<DeriveSchema>]` records in each source file and assigns
-every record a **series** (the contract name) and a **version** number. Records sharing a series form a version chain.
+The generator examines the names and `[<DeriveSchema>]` arguments of every marked record in the project. It assigns
+each record a **contract** (a fully qualified name such as `My.Wire.Profile`) and a **version** number. Records that
+share a contract form its version series.
 
 Each record is classified by the first rule that applies:
 
-| Record | Series | Version |
+| Record | Contract | Version |
 | --- | --- | --- |
-| `[<DeriveSchema(Chain = "Profile", Version = 2)>]` | `Profile` | 2 |
-| `[<DeriveSchema(Chain = "Profile")>]` | `Profile` | 1 |
-| `[<DeriveSchema(Version = 2)>]` on `Profile` | its own name, `Profile` | 2 |
-| `ProfileV2`, and a marked `Profile` exists in the same file | `Profile` | 2, from the suffix |
-| `ProfileV2`, and no marked `Profile` in the same file | its own name, `ProfileV2` | 1 (a standalone record, not a series) |
-| any other name, such as `Profile` | its own name | one more than the highest version already assigned to that series, or 1 if none |
+| `[<DeriveSchema(Contract = "Profile", Version = 2)>]` | `Profile` in the record's own namespace or module | 2 (frozen) |
+| `[<DeriveSchema(Contract = "My.Wire.Profile", Version = 2)>]` | `My.Wire.Profile`, exactly as written | 2 (frozen) |
+| `[<DeriveSchema(Contract = "Profile")>]` | `Profile` in the record's own namespace or module | current |
+| `[<DeriveSchema(Version = 2)>]` on `Profile` | the record's own name | 2 (frozen) |
+| `ProfileV2`, where contract `Profile` exists in the same namespace or module | `Profile` | 2 (frozen), from the suffix |
+| `ProfileV2`, where no contract `Profile` exists there | the record's own name, `ProfileV2` | current (a standalone record, not a series) |
+| any other name, such as `Profile` | the record's own name | current |
 
-The last row is what makes a bare record the **current** version: `ProfileV1`, `ProfileV2`, and `Profile` give
-`Profile` version 3. Nothing records that number in source; it moves up when you add a `ProfileV3`.
+A `Contract` value containing a dot is fully qualified. A value without a dot is relative to the record's own namespace
+or module. "Contract `Profile` exists" means that some marked record is named `Profile`, or some record declares
+`Contract = "Profile"`, in that container anywhere in the project.
 
-The suffix match is `<Name>V<digits>` at the end of the type name, and it only counts when `<Name>` is itself a marked
-record in the same file. That stops unrelated names such as `ApolloV2` or `CodecV8` from being treated as versions.
+**Frozen** versions state their number, either as a `Vn` suffix or as `Version = n`. The **current** version never
+does: its number is always one more than the highest frozen version of its contract, or 1 when there are none. So
+`ProfileV1`, `ProfileV2`, and `Profile` give `Profile` version 3, and that number moves up when you freeze a
+`ProfileV3`. Stored payloads keep their meaning because frozen numbers never move.
 
-A series must also satisfy these checks, reported as generation diagnostics:
+A contract's versions may be spread across files, namespaces, and modules, subject to these checks, which are reported
+as generation diagnostics:
 
-- every version lives in **one source file**;
-- versions are declared **oldest to newest, with no gaps** (`V1`, `V2`, then the bare record);
+- a contract has **exactly one current version**;
+- versions are declared **oldest to newest in compile order, with no gaps**. The current version's generated
+  `contract` builder refers to every older version's schema, so the older versions must compile first;
 - no version number appears twice.
 
-A series with more than one version gets a `contract` builder on its latest version. It takes one migration parameter
-per adjacent step, `migrateV1ToV2`, `migrateV2ToV3`, and so on, plus a `VersionSource`. The generator never writes the
-migrations themselves. A single-version series (just `Profile`) gets no builder. See
+A contract with more than one version gets a `contract` builder on its current version. It takes one migration
+parameter per adjacent step, `migrateV1ToV2`, `migrateV2ToV3`, and so on, plus a `VersionSource`. The generator never
+writes the migrations themselves. A contract with a single version gets no builder. See
 [Versioned Contracts](/schema/versioned-contracts.html#generate-a-version-series-from-records) for the generated
 signatures and how to add a version.

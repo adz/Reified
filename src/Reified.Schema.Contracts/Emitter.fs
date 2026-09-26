@@ -415,7 +415,7 @@ module Emitter =
             match target with
             | None -> typeNameOf reference.RefName reference.RefVersion
             | Some target when target.OwnsType || target.ContractName = "" -> typeNameOf reference.RefName reference.RefVersion
-            | Some target when file.Module.IsNone && file.Contracts |> List.exists (fun contract -> contract.QualifiedName = target.QualifiedName) ->
+            | Some target when file.Module.IsNone && file.Contracts |> List.exists (fun contract -> contract.QualifiedName = target.QualifiedName && contract.Version = target.Version) ->
                 target.ExternalTypeName |> Option.map localName |> Option.defaultValue (typeNameOf reference.RefName reference.RefVersion)
             | Some target -> target.ExternalTypeName |> Option.defaultValue (typeNameOf reference.RefName reference.RefVersion)
 
@@ -425,10 +425,12 @@ module Emitter =
                 |> List.find (fun contract ->
                     contract.QualifiedName = reference.RefName && contract.Version = reference.RefVersion)
 
+            // A derived contract's versions may live in different files; find the one declaring this version.
             let source =
                 fileSet
                 |> List.find (fun candidate ->
-                    candidate.Contracts |> List.exists (fun contract -> contract.QualifiedName = target.QualifiedName))
+                    candidate.Contracts
+                    |> List.exists (fun contract -> contract.QualifiedName = target.QualifiedName && contract.Version = target.Version))
 
             match target.ExternalTypeName, source.Module with
             | Some externalTypeName, Some sourceModule when source.FilePath = file.FilePath -> localName externalTypeName
@@ -635,10 +637,12 @@ module Emitter =
                 |> List.find (fun contract ->
                     contract.QualifiedName = reference.RefName && contract.Version = reference.RefVersion)
 
+            // A derived contract's versions may live in different files; find the one declaring this version.
             let source =
                 fileSet
                 |> List.find (fun candidate ->
-                    candidate.Contracts |> List.exists (fun contract -> contract.QualifiedName = target.QualifiedName))
+                    candidate.Contracts
+                    |> List.exists (fun contract -> contract.QualifiedName = target.QualifiedName && contract.Version = target.Version))
 
             match source.Module with
             | Some sourceModule when source.FilePath <> file.FilePath -> Some(sourceModule + "Schemas")
@@ -1348,9 +1352,30 @@ module Emitter =
                 line "    /// Builds the versioned wire contract; supply each n-1 -> n migration and the version-detection source."
                 line "    let contract"
 
+                // Versions declared in this file keep their short names. A derived contract's older
+                // versions may live in earlier files or other containers; those are referenced through
+                // the same qualification rules as any cross-file record reference.
+                let declaredHere version =
+                    file.Contracts
+                    |> List.exists (fun candidate -> candidate.QualifiedName = contract.QualifiedName && candidate.Version = version)
+
+                let versionRef version = { RefName = contract.QualifiedName; RefVersion = version }
+
+                let versionTypeName version =
+                    if contract.OwnsType || declaredHere version then
+                        typeNameOf contract.QualifiedName version |> localName
+                    else
+                        refTypeName (versionRef version)
+
+                let versionSchemaModule version =
+                    if contract.OwnsType || declaredHere version then
+                        typeNameOf contract.QualifiedName version |> localName
+                    else
+                        refSchemaName (versionRef version)
+
                 for step in oldestVersion .. contract.Version - 1 do
-                    let fromType = typeNameOf contract.QualifiedName step |> localName
-                    let toType = typeNameOf contract.QualifiedName (step + 1) |> localName
+                    let fromType = versionTypeName step
+                    let toType = versionTypeName (step + 1)
                     line $"        (migrateV{step}ToV{step + 1}: {fromType} -> Result<{toType}, MigrationError>)"
 
                 line "        (source: VersionSource)"
@@ -1358,7 +1383,7 @@ module Emitter =
                 line $"        Contract.create \"{escapeString contract.ContractName}\" {contract.Version} schema"
 
                 for step in contract.Version - 1 .. -1 .. oldestVersion do
-                    line $"        |> Contract.supersedes {step} {typeNameOf contract.QualifiedName step |> localName}.schema migrateV{step}ToV{step + 1}"
+                    line $"        |> Contract.supersedes {step} {versionSchemaModule step}.schema migrateV{step}ToV{step + 1}"
 
                 line "        |> Contract.build source"
 

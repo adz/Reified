@@ -101,8 +101,8 @@ Details that follow from the emitted shape:
 
 ## For each version series
 
-When records form a chain (`OrderV1`, `OrderV2`, `Order`, or explicit `Chain`/`Version`), every version gets the
-module above. The **latest** version's module also gets a `contract` builder:
+When records form a version series (`OrderV1`, `OrderV2`, `Order`, or explicit `Contract`/`Version`), every version
+gets the module above. The **current** version's module also gets a `contract` builder:
 
 ```fsharp no-check reason="Shape of emitted code."
     /// Builds the versioned wire contract; supply each n-1 -> n migration and the version-detection source.
@@ -119,6 +119,9 @@ module above. The **latest** version's module also gets a `contract` builder:
 
 The generator never writes migrations. You pass them in. Adding a version adds a parameter, so every call site stops
 compiling until you supply the new migration.
+
+When an older version is declared in another file, namespace, or module, the builder refers to it by its full name,
+for example `My.Legacy.OldOrder` and `My.LegacySchemas.OldOrder.schema`.
 
 ## For unions and wrapper types
 
