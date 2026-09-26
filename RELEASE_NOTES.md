@@ -1,5 +1,19 @@
 # Release Notes
 
+## Unreleased
+
+### `DeriveSchema` `Chain` renamed to `Contract` (breaking)
+
+- `[<DeriveSchema(Chain = "Name")>]` is now `[<DeriveSchema(Contract = "Name")>]`. There is no compatibility alias; a record still using `Chain` fails generation with a diagnostic that points at `Contract`. Rename the argument in each affected record.
+- A dotted `Contract` name is fully qualified. A bare name is relative to the record's own namespace or module.
+
+### Schema generation
+
+- A contract's versions are resolved across the whole project, so frozen versions can live in earlier files, namespaces, or modules as long as compile order declares them oldest to newest. `XxxVn` joins contract `Xxx` anywhere in the same container. `.contract` files keep the one-file rule.
+- A record without a `Version` is its contract's current version, one past the highest frozen version. A second current version in the same contract is now a generation error.
+- The generated `contract` builder qualifies older versions declared elsewhere, and cross-file references to a versioned record pin that version.
+- New documentation: [Generated Code](docs/02-schema/60-derivation/40-generated-code.md) lists what `schemagen` emits, and the versioned-contracts guide spells out version-series grouping.
+
 ## 0.9.0 - 2026-09-16
 
 ### Schema field aliases
