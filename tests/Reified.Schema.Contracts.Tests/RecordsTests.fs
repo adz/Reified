@@ -1350,7 +1350,8 @@ open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type Profile = { Name: string; Email: string }
-""" ]
+"""
+                ]
 
         test
             <@ versionsOf files = [ "My.Wire.Profile", 1, Some "My.Wire.ProfileV1"
@@ -1384,7 +1385,8 @@ open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type Profile = { Name: string; Email: string }
-""" ]
+"""
+                ]
 
         test
             <@ versionsOf files = [ "My.Wire.Profile", 1, Some "My.Legacy.OldProfile"
@@ -1415,7 +1417,8 @@ open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type Profile = { Name: string; Email: string }
-""" ]
+"""
+                ]
 
         test
             <@ versionsOf files = [ "My.Legacy.Profile", 1, Some "My.Legacy.OldProfile"
@@ -1440,7 +1443,8 @@ open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type ProfileV1 = { Name: string }
-""" ]
+"""
+                ]
 
         let messages = Resolver.resolve files |> List.map _.Message
         test <@ messages |> List.exists (fun m -> m.Contains "compile order") @>
@@ -1467,7 +1471,8 @@ open Reified.DerivedSchema
 
 [<DeriveSchema>]
 type Account = { Owner: My.Wire.Profile; Previous: My.Wire.ProfileV1 }
-""" ]
+"""
+                ]
 
         test <@ Resolver.resolve files = [] @>
         let account = files |> List.find (fun file -> file.FilePath = "account.fs")

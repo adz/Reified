@@ -166,7 +166,9 @@ writing the new shape under the bare name. Existing version numbers never change
 3. Keep the records in version order: `ProfileV1`, `ProfileV2`, then `Profile`. They can share a file, or the frozen
    versions can move to an earlier file (see [Keep frozen versions elsewhere](#keep-frozen-versions-elsewhere)).
 
-```fsharp
+```fsharp isolated
+open Reified.DerivedSchema
+
 [<DeriveSchema>]
 type ProfileV1 = { Name: string }
 
