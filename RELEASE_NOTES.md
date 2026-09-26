@@ -1,5 +1,23 @@
 # Release Notes
 
+## 0.9.0 - 2026-09-16
+
+### Schema field aliases
+
+- Record fields accept exact, case-sensitive input aliases through `alias` and `aliases`; JSON encoding, schema export, and canonical inspection retain the canonical field name.
+- `Schema.parse` and compiled JSON codecs reject ambiguous input containing more than one accepted name for a field, and schema construction rejects canonical-name and alias collisions across the object.
+- `[<SchemaAlias>]` adds aliases to derived schemas, and aliases are available through field inspection and standalone field composition.
+
+### JSON codecs
+
+- Canonical-order object decoding now uses a transparent positional fast path and falls back automatically for aliases, reordered properties, omissions, and unknown properties. In the recorded 24-field benchmark, Reified decoded canonical UTF-8 about 19% faster than `System.Text.Json`.
+- `Json.serializeIndented` and `Json.reindent` produce formatted JSON. `Json.serializeWith`, `Json.serializeBytesWith`, and `Json.serializeToStreamWith` configure indentation, trailing newlines, ASCII-only output, and HTML-safe escaping.
+- Fable output declares package modules side-effect-free and trims unused constraint, refinement, printf, and map runtime code from browser bundles.
+
+### Schema generation
+
+- Types owned by `.contract` files now receive a canonical static `Schema` member, allowing generated contract types to participate directly in schema field inference, including list and option nesting.
+
 ## 0.8.2 - 2026-09-15
 
 ### JSON codecs
