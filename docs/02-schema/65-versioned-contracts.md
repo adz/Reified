@@ -89,38 +89,134 @@ match Contract.parse configContract raw with
 
 ## Generate a version series from records
 
-The generator groups marked records ending in `Vn` and treats a bare record as the current version:
+The generator can group `[<DeriveSchema>]` records into a version series and write the `Contract` wiring for you. It
+does this by examining the names of the marked records in each source file.
+
+### How records are grouped
+
+By default, a marked record whose name ends in `V` followed by a number (`ProfileV1`, `ProfileV2`) belongs to the
+series named by the rest of its name, **but only when a marked record with that bare name (`Profile`) exists in the
+same file**. The bare record is the current version. Its version number is never written down; it is always one more
+than the highest `Vn` in the series.
 
 ```fsharp
 open Reified.DerivedSchema
 
 [<DeriveSchema>]
+type ProfileV1 = { Name: string }            // Profile v1 (frozen)
+
+[<DeriveSchema>]
+type Profile = { Name: string; Email: string } // Profile v2 (current: highest Vn + 1)
+```
+
+`ProfileV1` on its own, with no marked `Profile`, is not a series. It is an ordinary record whose schema happens to
+have a `V1` in its name. The full rules, including explicit `Chain`/`Version`, are in
+[Schema Inference](/schema/derivation/inference.html#version-series-inference).
+
+### What is generated
+
+Every version gets its own module with `schema`, `parse`, and `validate`, exactly as for any derived record (see
+[Generated Code](/schema/derivation/generated-code.html)). The current version's module also gets one extra function,
+`contract`:
+
+| Generated binding | Type |
+| --- | --- |
+| `ProfileV1.schema` | `Schema<ProfileV1>`: the frozen v1 wire shape |
+| `ProfileV1.parse` / `ProfileV1.validate` | as for any derived record |
+| `Profile.schema` | `Schema<Profile>`: the current (v2) wire shape |
+| `Profile.parse` / `Profile.validate` | parse or check **only** the current shape; no version handling |
+| `Profile.contract` | `(ProfileV1 -> Result<Profile, MigrationError>) -> VersionSource -> Contract<Profile>` |
+
+The generated `contract` is just the hand-written chain from the section above, with the versions filled in:
+
+```fsharp no-check reason="Shape of emitted code."
+    let contract
+        (migrateV1ToV2: ProfileV1 -> Result<Profile, MigrationError>)
+        (source: VersionSource)
+        : Contract<Profile> =
+        Contract.create "Profile" 2 schema
+        |> Contract.supersedes 1 ProfileV1.schema migrateV1ToV2
+        |> Contract.build source
+```
+
+**The generator does not write migrations.** It cannot know how a v1 value becomes a v2 value, so each migration is a
+parameter that you supply. `contract` only chains the frozen schemas and your migrations in the right order:
+
+```fsharp no-check reason="Depends on the generated Profile module."
+let migrateV1ToV2 (v1: ProfileV1) : Result<Profile, MigrationError> =
+    Ok { Name = v1.Name; Email = "" }
+
+let profileContract : Contract<Profile> =
+    Profile.contract migrateV1ToV2 (VersionSource.Field "schemaVersion")
+
+// Reads v1 or v2 input and always returns the current Profile.
+let load raw = Contract.parse profileContract raw
+```
+
+Use `Contract.parse profileContract` for stored or incoming data that may be any version. `Profile.parse` accepts only
+the current shape.
+
+### Adding a third version
+
+The bare name always means "current", so adding a version means freezing the current record under a `Vn` name and
+writing the new shape under the bare name. Existing version numbers never change.
+
+1. Rename the current `Profile` to `ProfileV2`, and leave its fields exactly as they were. It is now frozen.
+2. Declare the new shape as `Profile`. It becomes v3, because the highest `Vn` is now 2.
+3. Keep the records in version order in one file: `ProfileV1`, `ProfileV2`, `Profile`.
+
+```fsharp
+[<DeriveSchema>]
 type ProfileV1 = { Name: string }
 
 [<DeriveSchema>]
-type Profile = { Name: string; Email: string }
+type ProfileV2 = { Name: string; Email: string }                  // was Profile
+
+[<DeriveSchema>]
+type Profile = { Name: string; Email: string; Verified: bool }     // v3
 ```
 
+After a build, the generated `contract` has one more parameter:
 
-It generates the frozen schemas and a typed builder requiring every adjacent migration:
-
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-let profileContract =
-    Profile.contract
-        (fun v1 -> Ok { Name = v1.Name; Email = "" })
-        (VersionSource.Field "schemaVersion")
+```fsharp no-check reason="Shape of emitted code."
+    let contract
+        (migrateV1ToV2: ProfileV1 -> Result<ProfileV2, MigrationError>)
+        (migrateV2ToV3: ProfileV2 -> Result<Profile, MigrationError>)
+        (source: VersionSource)
+        : Contract<Profile> =
+        Contract.create "Profile" 3 schema
+        |> Contract.supersedes 2 ProfileV2.schema migrateV2ToV3
+        |> Contract.supersedes 1 ProfileV1.schema migrateV1ToV2
+        |> Contract.build source
 ```
 
+The compiler now points at everything that needs attention:
 
-When names do not follow the convention, set `Chain` and `Version` explicitly:
+- The existing `migrateV1ToV2` must return `ProfileV2` instead of `Profile`. Change its return type; the body usually
+  stays the same.
+- The `Profile.contract` call site needs the new `migrateV2ToV3`.
+- Code that maps the current wire record into your domain type now sees the v3 `Profile`.
+
+Parsing a v1 payload now runs `migrateV1ToV2` and then `migrateV2ToV3`. Payloads already stored as v1 or v2 are read by
+their frozen schemas, so nothing has to be rewritten or renumbered.
+
+`Contract` only reads. Whatever writes new payloads must stamp the new version number itself. Use
+`Contract.currentVersion profileContract` rather than hard-coding the number, so the writer moves to 3 together with
+the contract.
+
+### Names that do not follow the convention
+
+Set `Chain` and `Version` explicitly when a record's name should not carry a `Vn` suffix:
 
 ```fsharp
 [<DeriveSchema(Chain = "Profile", Version = 1)>]
 type LegacyProfile = { Name: string }
+
+[<DeriveSchema>]
+type Profile = { Name: string; Email: string }   // bare chain name: v2
 ```
 
-
-See [Schema Inference](/schema/derivation/inference.html#version-series-inference) for grouping rules and
+The generated `contract` then takes `LegacyProfile -> Result<Profile, MigrationError>`. See
 [Build Generation](/schema/derivation/msbuild.html) for setup.
 
 ## Design rules

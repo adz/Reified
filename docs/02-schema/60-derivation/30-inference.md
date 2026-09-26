@@ -128,8 +128,34 @@ wire name `item`.
 
 ## Version-series inference
 
-Names ending in `Vn` are grouped by convention. For example, `ProfileV1`, `ProfileV2`, and a bare `Profile` form a
-contiguous series, with the bare record inferred as the current version. Use
-`[<DeriveSchema(Chain = "Profile", Version = 1)>]` when names do not follow the convention. A series additionally gets
-a typed `contract` builder whose parameters are the explicit migrations between adjacent versions; see
-[Versioned Contracts](/schema/versioned-contracts.html).
+The generator examines the names and attributes of the `[<DeriveSchema>]` records in each source file and assigns
+every record a **series** (the contract name) and a **version** number. Records sharing a series form a version chain.
+
+Each record is classified by the first rule that applies:
+
+| Record | Series | Version |
+| --- | --- | --- |
+| `[<DeriveSchema(Chain = "Profile", Version = 2)>]` | `Profile` | 2 |
+| `[<DeriveSchema(Chain = "Profile")>]` | `Profile` | 1 |
+| `[<DeriveSchema(Version = 2)>]` on `Profile` | its own name, `Profile` | 2 |
+| `ProfileV2`, and a marked `Profile` exists in the same file | `Profile` | 2, from the suffix |
+| `ProfileV2`, and no marked `Profile` in the same file | its own name, `ProfileV2` | 1 (a standalone record, not a series) |
+| any other name, such as `Profile` | its own name | one more than the highest version already assigned to that series, or 1 if none |
+
+The last row is what makes a bare record the **current** version: `ProfileV1`, `ProfileV2`, and `Profile` give
+`Profile` version 3. Nothing records that number in source; it moves up when you add a `ProfileV3`.
+
+The suffix match is `<Name>V<digits>` at the end of the type name, and it only counts when `<Name>` is itself a marked
+record in the same file. That stops unrelated names such as `ApolloV2` or `CodecV8` from being treated as versions.
+
+A series must also satisfy these checks, reported as generation diagnostics:
+
+- every version lives in **one source file**;
+- versions are declared **oldest to newest, with no gaps** (`V1`, `V2`, then the bare record);
+- no version number appears twice.
+
+A series with more than one version gets a `contract` builder on its latest version. It takes one migration parameter
+per adjacent step, `migrateV1ToV2`, `migrateV2ToV3`, and so on, plus a `VersionSource`. The generator never writes the
+migrations themselves. A single-version series (just `Profile`) gets no builder. See
+[Versioned Contracts](/schema/versioned-contracts.html#generate-a-version-series-from-records) for the generated
+signatures and how to add a version.
