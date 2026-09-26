@@ -1,6 +1,6 @@
 # Release Notes
 
-## Unreleased
+## 0.10.0 - 2026-09-27
 
 ### `DeriveSchema` `Chain` renamed to `Contract` (breaking)
 
@@ -13,6 +13,10 @@
 - A record without a `Version` is its contract's current version, one past the highest frozen version. A second current version in the same contract is now a generation error.
 - The generated `contract` builder qualifies older versions declared elsewhere, and cross-file references to a versioned record pin that version.
 - New documentation: [Generated Code](docs/02-schema/60-derivation/40-generated-code.md) lists what `schemagen` emits, and the versioned-contracts guide spells out version-series grouping.
+
+### Documentation
+
+- The documentation toolchain moved to FsLiveDocs 0.10.0. Package pages in the API reference now introduce each package with its project description, and the docs check runs in seconds instead of minutes.
 
 ## 0.9.0 - 2026-09-16
 
