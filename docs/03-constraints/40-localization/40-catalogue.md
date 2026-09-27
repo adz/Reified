@@ -13,8 +13,8 @@ separate `constraint.actual` entry.
 
 | Key | Arguments | Plural on | Default English |
 | --- | --- | --- | --- |
-| `constraint.presence.present` | n/a | must be present |
-| `constraint.presence.blank` | n/a | must be blank |
+| `constraint.presence.present` | n/a | n/a | must be present |
+| `constraint.presence.blank` | n/a | n/a | must be blank |
 | `constraint.cardinality.exact` | `expected` | `expected` | must have a size of exactly {expected} |
 | `constraint.cardinality.minimum` | `minimum` | `minimum` | must have a size of at least {minimum} |
 | `constraint.cardinality.maximum` | `maximum` | `maximum` | must have a size of at most {maximum} |
@@ -30,35 +30,35 @@ separate `constraint.actual` entry.
 | `constraint.membership.noneOf` | `choices` | n/a | must not be one of {choices} |
 | `constraint.membership.contains` | `item` | n/a | must contain {item} |
 | `constraint.membership.notContains` | `item` | n/a | must not contain {item} |
-| `constraint.uniqueness` | n/a | must not contain duplicate values |
-| `constraint.format.email` | n/a | must be an email address |
-| `constraint.format.trimmed` | n/a | must not have leading or trailing whitespace |
-| `constraint.format.numeric` | n/a | must contain digits only |
-| `constraint.format.alphanumeric` | n/a | must contain letters and digits only |
+| `constraint.uniqueness` | n/a | n/a | must not contain duplicate values |
+| `constraint.format.email` | n/a | n/a | must be an email address |
+| `constraint.format.trimmed` | n/a | n/a | must not have leading or trailing whitespace |
+| `constraint.format.numeric` | n/a | n/a | must contain digits only |
+| `constraint.format.alphanumeric` | n/a | n/a | must contain letters and digits only |
 | `constraint.format.pattern` | `pattern` | n/a | must match {pattern} |
 | `constraint.number.multipleOf` | `divisor` | n/a | must be a multiple of {divisor} |
-| `constraint.number.finite` | n/a | must be a finite number |
+| `constraint.number.finite` | n/a | n/a | must be a finite number |
 
 A built-in whose operand Reified cannot describe reports the relation rather than approximating the
 operand. These carry no arguments:
 
 | Key | Arguments | Plural on | Default English |
 | --- | --- | --- | --- |
-| `constraint.unsupportedOperand.relation.equal` | n/a | must equal the required value |
-| `constraint.unsupportedOperand.relation.notEqual` | n/a | must not equal the excluded value |
-| `constraint.unsupportedOperand.relation.greaterThan` | n/a | must be greater than the required value |
-| `constraint.unsupportedOperand.relation.lessThan` | n/a | must be less than the required value |
-| `constraint.unsupportedOperand.relation.atLeast` | n/a | must be at least the required value |
-| `constraint.unsupportedOperand.relation.atMost` | n/a | must be at most the required value |
-| `constraint.unsupportedOperand.within` | n/a | must be within the required range |
-| `constraint.unsupportedOperand.contains` | n/a | must contain the required value |
-| `constraint.unsupportedOperand.multipleOf` | n/a | must be a multiple of the required value |
+| `constraint.unsupportedOperand.relation.equal` | n/a | n/a | must equal the required value |
+| `constraint.unsupportedOperand.relation.notEqual` | n/a | n/a | must not equal the excluded value |
+| `constraint.unsupportedOperand.relation.greaterThan` | n/a | n/a | must be greater than the required value |
+| `constraint.unsupportedOperand.relation.lessThan` | n/a | n/a | must be less than the required value |
+| `constraint.unsupportedOperand.relation.atLeast` | n/a | n/a | must be at least the required value |
+| `constraint.unsupportedOperand.relation.atMost` | n/a | n/a | must be at most the required value |
+| `constraint.unsupportedOperand.within` | n/a | n/a | must be within the required range |
+| `constraint.unsupportedOperand.contains` | n/a | n/a | must contain the required value |
+| `constraint.unsupportedOperand.multipleOf` | n/a | n/a | must be a multiple of the required value |
 
 The composition and joining entries:
 
 | Key | Arguments | Plural on | Default English |
 | --- | --- | --- | --- |
-| `constraint.attribute.default` | n/a | value |
+| `constraint.attribute.default` | n/a | n/a | value |
 | `constraint.actual` | `message`, `actual` | n/a | {message}, but was {actual} |
 | `constraint.fullMessage` | `attribute`, `message` | n/a | {attribute} {message} |
 | `constraint.group.all.pair` | `first`, `second` | n/a | {first} and {second} |

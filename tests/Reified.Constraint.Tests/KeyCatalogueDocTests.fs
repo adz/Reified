@@ -79,7 +79,8 @@ module KeyCatalogueDocTests =
         |> Seq.map (fun row ->
             let names (cell: string) =
                 match cell.Trim() with
-                | "—" -> Set.empty
+                | "—"
+                | "n/a" -> Set.empty
                 | cell -> cell.Split ',' |> Array.map (fun name -> name.Trim().Trim '`') |> Set.ofArray
 
             row.Groups[1].Value, (names row.Groups[2].Value, names row.Groups[3].Value))
