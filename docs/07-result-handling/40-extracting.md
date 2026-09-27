@@ -52,7 +52,7 @@ match parseAge "abc" with
 ```
 
 
-A `Result` from this package is the standard F# type, so every existing technique applies — matching, `function`
+A `Result` from this package is the standard F# type, so every existing technique applies, matching, `function`
 shorthand, active patterns.
 
 ## Keeping the error

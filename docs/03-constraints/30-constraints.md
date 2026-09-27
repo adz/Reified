@@ -31,7 +31,7 @@ Constraint.check nameLength (String.replicate 81 "a")
 Because the description is data with a known meaning, other tools can read it: JSON Schema lowers it, SchemaGen
 generates values that satisfy it, documentation describes it, and a future solver can reason about it.
 
-You reach this tier by composing built-ins and naming the composition — which covers most real domain invariants.
+You reach this tier by composing built-ins and naming the composition, which covers most real domain invariants.
 There is no registration API for user-defined interpreted primitives, and no authored string or argument can claim
 inspectable logic. That restriction is what makes the tier trustworthy: a name proves nothing, and an annotation that
 nobody checks against the predicate it describes will eventually lie.
@@ -64,12 +64,12 @@ The enclosing description stays opaque, so reporting an interpreted leaf this wa
 Construct a `Violation` directly only when no built-in states what you mean.
 
 Descriptions are required and must be non-blank, because they are the only thing a renderer has to work with. They
-are also, by default, untranslatable — see [Custom rules](/constraints/localization/custom-rules.html) for `customLocalized`, which lets you
+are also, by default, untranslatable, see [Custom rules](/constraints/localization/custom-rules.html) for `customLocalized`, which lets you
 attach your own catalogue key.
 
 `Constraint.contramap` is opaque for the same reason: an arbitrary projection changes the proposition in a way no
 description can express. The inner description is retained beneath the boundary so documentation stays readable, and
-an opaque child never erases its interpreted siblings — the rest of the expression stays inspectable.
+an opaque child never erases its interpreted siblings, the rest of the expression stays inspectable.
 
 ## Negation
 
@@ -78,11 +78,11 @@ to something else:
 
 | Rule | Negates | Stays interpreted |
 | --- | --- | --- |
-| `Constraint.blank` | `present` | yes — exact complements for every supported shape |
+| `Constraint.blank` | `present` | yes, exact complements for every supported shape |
 | `Constraint.notEqualTo` | `equalTo` | yes |
-| `Constraint.noneOf` | `oneOf` | yes — exports as a refused `enum` |
-| `Constraint.notContains` | `contains` | yes — exports as a refused `contains` |
-| `Constraint.notWith` | anything | **no** — opaque, and requires prose |
+| `Constraint.noneOf` | `oneOf` | yes, exports as a refused `enum` |
+| `Constraint.notContains` | `contains` | yes, exports as a refused `contains` |
+| `Constraint.notWith` | anything | **no**, opaque, and requires prose |
 
 Reach for the specific one whenever it says what you mean. A reserved-name rule is `noneOf`, not a negated `oneOf`:
 
@@ -92,7 +92,7 @@ let handle : Constraint<string> =
 ```
 
 
-Both run the same predicate, but only the primitive is inspectable — it lowers to JSON Schema, generates, and
+Both run the same predicate, but only the primitive is inspectable, it lowers to JSON Schema, generates, and
 documents itself, where a negated rule can do none of those.
 
 ### Why there is no general `not`
@@ -108,12 +108,12 @@ The catalogue could not offer an interpreted `not` honestly. Format, uniqueness,
 complement inside their family. Float comparisons are not complementable under `NaN`, where both `x > y` and
 `x <= y` are false. A cardinality complement would need bounds the catalogue rejects, such as a maximum of -1. An
 operation that is sometimes interpreted, sometimes needs prose, and sometimes cannot be constructed at all is worse
-than one that is honestly opaque — so where a complement *is* expressible, it is published under its own name in the
+than one that is honestly opaque, so where a complement *is* expressible, it is published under its own name in the
 table above instead.
 
 ## Operands Reified cannot describe
 
-Interpreted rules put their comparison value — the *operand* — into their description, so tools downstream can read
+Interpreted rules put their comparison value, the *operand*, into their description, so tools downstream can read
 it. That description is a closed data model, `ConstraintValue`: text, integers, decimals, Booleans, null, and lists of
 those. It is deliberately small, because every interpreter has to understand all of it.
 
@@ -142,7 +142,7 @@ Three separate consequences, worth keeping apart:
 - **Checking is unaffected.** The constraint accepts and rejects exactly the values it should.
 - **Export cannot name the value.** JSON Schema, generated documentation, and test-data generation see an opaque rule
   and say nothing about it, rather than inventing a rendering.
-- **A derived message cannot print it.** `Violation.render` produces `"must be at least the required value"` — the
+- **A derived message cannot print it.** `Violation.render` produces `"must be at least the required value"`, the
   relation, without the operand.
 
 Nothing is silently approximated, and no boxed value escapes through the inspection API.
@@ -168,7 +168,7 @@ Constraint.between 0 10
 
 
 This reaches inspection and generated schema prose. It never reaches a violation and never changes what the
-constraint means. To change what a failure says, author the rule as `custom` or `customWith` — there is no message
+constraint means. To change what a failure says, author the rule as `custom` or `customWith`, there is no message
 override, because one would let the reported failure diverge from the description that was published.
 
 Because it never reaches a violation, `describe` takes no catalogue key and is not localized: it is documentation
@@ -199,7 +199,7 @@ That last rule has teeth, and lowering has three fidelities rather than two:
 covers a few characters a validator does not. That direction is safe; the reverse would not be, which is why the
 blank set is defined to make it impossible.
 
-An authored `Constraint.pattern` stays runtime-only because the .NET regex dialect is not ECMA-262 — `\d`, for one,
+An authored `Constraint.pattern` stays runtime-only because the .NET regex dialect is not ECMA-262, `\d`, for one,
 matches any Unicode decimal digit on .NET and only `[0-9]` under ECMA-262, so publishing an authored pattern could
 silently change what it means. Reified's own patterns are written in the common subset and lower exactly:
 `Constraint.email` emits its exact runtime pattern, and `Constraint.numeric` is defined as ASCII digits for

@@ -43,7 +43,7 @@ let parseAge (raw: string) =
 
 ## sequence
 
-`sequence` is the same operation when you already hold the results — it is `traverse id`.
+`sequence` is the same operation when you already hold the results, it is `traverse id`.
 
 ```fsharp
 [ Ok 1; Ok 2 ] |> Result.sequence
@@ -57,7 +57,7 @@ let parseAge (raw: string) =
 ## It stops at the first error
 
 Traversal is fail-fast, and this is observable: the mapping does not run for items after the failure. This matters
-when the mapping does real work — a lookup, a request, a write.
+when the mapping does real work, a lookup, a request, a write.
 
 ```fsharp
 let mutable visited = []
@@ -74,7 +74,7 @@ List.rev visited
 ```
 
 
-`"3"` was never visited. Only the first failure is reported, and later items are not examined at all — so this cannot
+`"3"` was never visited. Only the first failure is reported, and later items are not examined at all, so this cannot
 tell a user everything wrong with their input.
 
 ## traverseAll and sequenceAll

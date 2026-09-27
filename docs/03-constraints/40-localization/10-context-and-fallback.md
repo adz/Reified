@@ -25,7 +25,7 @@ renderer gets reused across sibling fields, and an appending `attribute` would q
 `signup.name.email` on the second field.
 
 The context is never used as a noun. With no attribute, `fullMessage` uses the contextual
-`constraint.attribute.default` — "value" in English — so a whole-model failure reads "value must be present"
+`constraint.attribute.default`, "value" in English, so a whole-model failure reads "value must be present"
 rather than "Signup must be present".
 
 Schema supplies its typed path as the attribute for you; see
@@ -74,7 +74,7 @@ billing_address  -> Billing address
 
 
 Humanization applies only to a raw segment Reified invented a noun for. A value that came out of a resource file is
-returned exactly as authored — no recasing, trimming, or Unicode normalization, ever.
+returned exactly as authored, no recasing, trimming, or Unicode normalization, ever.
 
 ### Segments are opaque
 

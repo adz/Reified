@@ -20,7 +20,7 @@ let contactSchema =
 
 
 This is the form to prefer at use sites. Every built-in refined type from
-[Reified.Refinements](/refined/index.html) works this way — `NonBlankString`,
+[Reified.Refinements](/refined/index.html) works this way, `NonBlankString`,
 `FiniteFloat`, `UnitInterval`, `NonEmptyList<_>`, and the rest resolve without a `withSchema`, as
 [Getting Started](/getting-started/index.html) shows.
 
@@ -35,7 +35,7 @@ field _.Name {
 ```
 
 
-Expressing them this way means there is only ever one set of bounds — the schema's. An earlier `BoundedString` type
+Expressing them this way means there is only ever one set of bounds, the schema's. An earlier `BoundedString` type
 recorded the bounds it happened to be constructed under, so a value refined at `1..99` was still a `BoundedString`
 when checked against a `2..80` schema, and the schema had to re-run its own bounds anyway.
 
@@ -151,7 +151,7 @@ field _.Quantity {
 
 
 An arbitrary predicate is opaque, so it runs during parsing and checking but is documented rather than enforced by
-generated schemas. Composing built-ins instead — `Constraint.multipleOf 2` here — keeps the rule inspectable, which is
+generated schemas. Composing built-ins instead, `Constraint.multipleOf 2` here, keeps the rule inspectable, which is
 what lets JSON Schema lower it and SchemaGen generate values that satisfy it. See
 [Interpreted and opaque](/constraints/constraints.html) for the trade.
 

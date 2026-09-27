@@ -78,7 +78,7 @@ Data.redisplayPath "age" parsed.Input     // "12"
 ```
 
 
-A form template needs only `parsed.Input` and `parsed.ErrorsFor` — there is no half-valid model to guard against.
+A form template needs only `parsed.Input` and `parsed.ErrorsFor`, there is no half-valid model to guard against.
 Use `SchemaError.render` for field-level messages or `RetainedParseResult.renderErrors parsed` for a summary list.
 
 ## Use The Trusted Model
@@ -90,7 +90,7 @@ match parsed.Result with
 ```
 
 
-`Signup` here is a public record, so the guarantee belongs to the successful parse result, not to the type — other
+`Signup` here is a public record, so the guarantee belongs to the successful parse result, not to the type, other
 code can still write a `Signup` literal that skips the schema. That is the right trade for a boundary form model.
 When a value's construction history is uncertain, `Schema.check signupSchema value` runs the same constraints over an
 already assembled value; when an invariant must hold for every value of the type, use a private representation with a

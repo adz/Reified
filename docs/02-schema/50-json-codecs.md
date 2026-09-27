@@ -12,9 +12,9 @@ boundary parsing come from one declaration. It is included in the `Reified.Schem
 
 Reified has two paths for JSON, and they exist because they optimize for different things:
 
-- **Boundary parsing** — `Data` + `Schema.parse`: for untrusted input. It runs constraint metadata, accumulates
+- **Boundary parsing**, `Data` + `Schema.parse`: for untrusted input. It runs constraint metadata, accumulates
   path-aware diagnostics, and keeps the structured data for redisplay.
-- **Trusted path** — `Json.compile` + `Json.serialize`/`Json.deserialize`: for payloads whose producer you trust, such
+- **Trusted path**, `Json.compile` + `Json.serialize`/`Json.deserialize`: for payloads whose producer you trust, such
   as internal services, storage, caches, and queues. It enforces the wire shape and required fields, skips constraint
   checking, and runs about 4x faster than the boundary path with a fraction of the allocations (see the
   [benchmarks](/notes/benchmarks.html#schema-json-codec)).
@@ -106,7 +106,7 @@ match Json.tryDeserialize codec """{"name":"Ada","age":"not-a-number"}""" with
 
 
 The codec reports the first structural failure and stops. When you need every problem reported with redisplayable
-input — a form, a public API — that is boundary parsing's job:
+input, a form, a public API, that is boundary parsing's job:
 
 ```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
 // Boundary parsing: complete diagnostics for untrusted input.
@@ -127,8 +127,8 @@ let roundTripped = Json.deserializeBytes codec bytes
 
 ## Formatting The Output
 
-`serialize`, `serializeBytes`, and `serializeToStream` emit compact JSON. For an indented string — logs, fixtures,
-config files a human reads — use `serializeIndented`:
+`serialize`, `serializeBytes`, and `serializeToStream` emit compact JSON. For an indented string, logs, fixtures,
+config files a human reads, use `serializeIndented`:
 
 ```fsharp
 let pretty = Json.serializeIndented codec customer
@@ -159,12 +159,12 @@ Indentation and re-escaping run as one linear pass over the compact output, so a
 roughly one extra copy of the payload; the compact functions stay on the direct path. `Json.reindent` applies the
 same pass to any JSON string, codec-produced or not, which is handy for pretty-printing a payload in a log line.
 
-The options are strictly cosmetic — every combination parses back to the same model. Wire-shape decisions (field
+The options are strictly cosmetic, every combination parses back to the same model. Wire-shape decisions (field
 names, union representation, whether an absent field is omitted or written as `null`) belong on the schema.
 
 ## What The Codec Does Not Do
 
-- It does not run constraint metadata such as `maxLength` or `between` — those belong to boundary parsing and
+- It does not run constraint metadata such as `maxLength` or `between`, those belong to boundary parsing and
   validation. A value that only ever passes through trusted systems does not pay for checks it already passed.
 - Checked constructors from `constructResult` still run, so intrinsic cross-field invariants hold on the trusted path;
   their errors surface as `JsonCodecException`.

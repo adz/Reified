@@ -97,7 +97,7 @@ let requestViaDsl =
 | `insert path index value` | `DataEdit.insert path index value` | `DataEdit` |
 | `rename path name` | `DataEdit.rename path name` | `DataEdit` |
 | `update path function` | `DataEdit.update path function` | `DataEdit` |
-| — | `Data.patch edits input` | changed `Data` |
+| n/a | `Data.patch edits input` | changed `Data` |
 
 `set` makes the final path contain the value, adding a missing final object field when necessary. `replace` requires
 the target to exist, so a misspelled or unexpectedly absent path fails.

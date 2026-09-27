@@ -78,7 +78,7 @@ let validateAge (request: SignupRequest) =
 `Constraint.satisfies` when a `bool` is.
 
 This tutorial keeps the `Violation` by mapping it into an error case that carries it. Do that when something later
-needs the facts — classifying the failure, rendering it in another language, or showing the value that was rejected.
+needs the facts, classifying the failure, rendering it in another language, or showing the value that was rejected.
 The violation is comparable diagnostic data carrying the failing atom, so it survives to the boundary that decides
 how, and in which language, to say it. Rendering it here would settle that question too early.
 

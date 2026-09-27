@@ -1,19 +1,19 @@
 ---
 weight: 90
 title: "Walkthrough: Reference Apps"
-description: The reference application tiers — plain results and refined values, then a wire tier generated from records.
+description: The reference application tiers, plain results and refined values, then a wire tier generated from records.
 targetFramework: net8.0
 ---
 
 # Walkthrough: Reference Apps
 
-The reference apps exercise the schema group the way an application does — values crossing CLI, form, JSON, and
-storage boundaries — so that API friction invisible in a snippet has nowhere to hide. Two tiers are runnable here:
+The reference apps exercise the schema group the way an application does, values crossing CLI, form, JSON, and
+storage boundaries, so that API friction invisible in a snippet has nowhere to hide. Two tiers are runnable here:
 
-1. [`Reified.ReferenceApp.Intro`](/constraints/reference-app.html) — plain `Result`, checks,
+1. [`Reified.ReferenceApp.Intro`](/constraints/reference-app.html), plain `Result`, checks,
    refined values, and accumulated validation, with no schemas at all. Start there if you are new; this page
    covers the schema tier.
-2. `examples/Reified.ReferenceApp.Wire` — boundary discipline with the wire tier **generated** from
+2. `examples/Reified.ReferenceApp.Wire`, boundary discipline with the wire tier **generated** from
    `[<DeriveSchema>]` records.
 
 ## The generated-wire slice
@@ -42,10 +42,10 @@ type WorkspaceCard =
 
 
 `schemagen` writes the sibling `workspace.g.fs`: the schema pipeline you would have written by hand, `parse` and
-`validate`, typed `Fields` references, and — because `WorkspaceCardV1`/`WorkspaceCard` follow the version-chain
-naming convention — a `WorkspaceCard.contract` builder that takes your typed v1 → v2 migration. The hand-written
+`validate`, typed `Fields` references, and, because `WorkspaceCardV1`/`WorkspaceCard` follow the version-chain
+naming convention, a `WorkspaceCard.contract` builder that takes your typed v1 → v2 migration. The hand-written
 surface shrinks to exactly the parts that carry meaning: the migration, the strict domain mapping (`TrustedCard`
-rejects an owner listed as a member — a rule the wire deliberately cannot express), and a head-version write
+rejects an owner listed as a member, a rule the wire deliberately cannot express), and a head-version write
 through a compiled codec. Generated schemas are ordinary schemas, so `JsonSchema.generate` and `Json.compile`
 come along for free.
 

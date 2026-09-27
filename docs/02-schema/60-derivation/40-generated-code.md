@@ -129,9 +129,9 @@ A derived record's field types can generate their own modules, emitted once in t
 
 | Declaration | Generated module contents |
 | --- | --- |
-| nullary union (`Free \| Team`) or `[<DeriveEnum>]` | `Plan.schema` — `Schema.enum [ EnumCase.create "free" Plan.Free; ... ]` |
-| single-case wrapper (`type Sku = Sku of string`) | `Sku.schema` — `Schema.convert Sku (function Sku v -> v) Schema.text`; plus `Sku.map`, a `Schema.mapWithKey` helper, when it is used as a `Map` key |
-| `[<DeriveUnion>]` union | `Payment.schema` — `Schema.union [...]` (or `Schema.unionWith` for a non-default representation), with private `try<Case>Case` extractors and private `<Case>CasePayload` records for multi-field cases |
+| nullary union (`Free \| Team`) or `[<DeriveEnum>]` | `Plan.schema`, `Schema.enum [ EnumCase.create "free" Plan.Free; ... ]` |
+| single-case wrapper (`type Sku = Sku of string`) | `Sku.schema`, `Schema.convert Sku (function Sku v -> v) Schema.text`; plus `Sku.map`, a `Schema.mapWithKey` helper, when it is used as a `Map` key |
+| `[<DeriveUnion>]` union | `Payment.schema`, `Schema.union [...]` (or `Schema.unionWith` for a non-default representation), with private `try<Case>Case` extractors and private `<Case>CasePayload` records for multi-field cases |
 
 These modules are `[<RequireQualifiedAccess>]` like record modules. A union's
 schema is emitted once in its declaring file and reused from everywhere else.

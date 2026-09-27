@@ -9,12 +9,12 @@ targetFramework: net8.0
 
 This page explains Reified's runtime-portability guarantees and what makes them hold.
 
-Reified performs no runtime reflection in any hot path — everything is compiler-directed, for maximal deterministic
+Reified performs no runtime reflection in any hot path, everything is compiler-directed, for maximal deterministic
 verification. That is not an optimization applied afterwards; it is an architectural rule: schemas, constructors,
 getters, checks, codecs, and service access are all explicit declarations the compiler can see, so there is nothing
 for the trimmer to remove by mistake and nothing NativeAOT cannot compile ahead of time. Where build-phase metadata
 reading exists (the bare `field _.Name` form reads a property name from the getter expression once, when the schema
-value is built), it runs during schema construction, never per parsed or encoded value — and the AOT probe executes it
+value is built), it runs during schema construction, never per parsed or encoded value, and the AOT probe executes it
 natively to prove it.
 
 ## Why It Holds By Construction
@@ -23,7 +23,7 @@ natively to prove it.
   captures the real constructor and typed getters as values. There is no property discovery, no attribute scanning,
   and no `Activator.CreateInstance`.
 - **Codecs compile from the typed shape.** `Json.compile` turns the schema's retained typed constructor and fields
-  into encode/decode plans — cached wire-name bytes and typed field decoders — where `System.Text.Json`'s default path
+  into encode/decode plans, cached wire-name bytes and typed field decoders, where `System.Text.Json`'s default path
   builds converters through reflection and asks you to switch to source generators for AOT. Reified has nothing to
   switch: the explicit path is the only path.
 - **Refined values are functions, not conventions.** `Schema.convert construct inspect` carries the conversion in both
@@ -65,15 +65,15 @@ The same explicitness is what makes Fable compilation work: `Reified.Result`, `R
 `Reified.Schema` all compile to JavaScript, so a browser front end can parse
 and redisplay through the same schema declaration the server uses. The `Json` codec compiles too, so a
 codec is available on both sides of the wire. CI compiles the Fable JavaScript surface and runs it on Node
-(`dotnet run --project tools/Reified.Build -- --target Fable`), asserting the same results the same checks produce on .NET —
+(`dotnet run --project tools/Reified.Build -- --target Fable`), asserting the same results the same checks produce on .NET , 
 constraint behaviour, operand descriptions, localized rendering, a codec round-trip, and JSON boundaries.
-.NET-only conveniences — such as `Data.ofJsonDocument` and the
-`DateOnly` field type — are compile-time gated so the Fable surface never references them.
+.NET-only conveniences, such as `Data.ofJsonDocument` and the
+`DateOnly` field type, are compile-time gated so the Fable surface never references them.
 
 ### Browser bundle size
 
-The compiled modules are declaration-only — imports, exports, functions, classes, and pure `const`
-bindings, with no top-level statements — so every `IsFableLibrary` package ships a
+The compiled modules are declaration-only, imports, exports, functions, classes, and pure `const`
+bindings, with no top-level statements, so every `IsFableLibrary` package ships a
 `fable/package.json` marking its output `"sideEffects": false`. A browser bundler then drops whatever
 a front end does not reference. A schema that resolves only primitive, nested, and collection fields
 keeps nothing from `Reified.Constraint` or `Reified.Refinements`; naming a refined field type, or
@@ -103,7 +103,7 @@ Fable targets that support quotations:
 | --- | --- | --- |
 | JavaScript, TypeScript, Python, BEAM | Yes | 5.10 |
 | Dart | Yes | 5.13 |
-| Rust, PHP | No — use `fieldAs` | — |
+| Rust, PHP | No, use `fieldAs` | n/a |
 
 No compiler flag or define is needed, and a schema means the same thing on every target:
 
@@ -116,7 +116,7 @@ fieldAs "email_address" _.Email
 ```
 
 
-Reading the name happens **once, while the schema value is built** — never per parsed or encoded value, so the
+Reading the name happens **once, while the schema value is built**, never per parsed or encoded value, so the
 guarantee at the top of this page holds on both targets. The Fable probe declares its schema with `field _.Name`
 and asserts the derived wire names from the compiled JavaScript, so this stays proven rather than claimed.
 

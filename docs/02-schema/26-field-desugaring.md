@@ -47,7 +47,7 @@ There is no separate `fieldWith` declaration. Explicit schema selection is alway
 
 A type resolves canonically when it exposes `static member Schema: T -> Schema<T>`. Reified supplies that member for
 its built-in types, and `reified schemagen` emits it for every record it owns (the types declared in a `.contract`
-file). A field whose type is such a contract — directly, or wrapped in `list`, `option`, or `Map` — therefore needs
+file). A field whose type is such a contract, directly, or wrapped in `list`, `option`, or `Map`, therefore needs
 no `withSchema`:
 
 ```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."

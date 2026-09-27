@@ -41,7 +41,7 @@ proportion, so it cannot be 140% or `NaN`. The delivery window's start is not af
 end. None of those facts needs restating later, because none of them can be false.
 
 Quantity and price are ordinary numbers, checked on the way in. They are not refined types
-because F# cannot carry "greater than zero" through arithmetic — see
+because F# cannot carry "greater than zero" through arithmetic, see
 [why there are no refined numbers](/refined/catalog.html#why-there-are-no-refined-numbers).
 
 ## Admit the input
@@ -65,7 +65,7 @@ orderLine "   " 1 9.99m        // Error [ Blank ]
 Refine.nonEmptyList ([]: OrderLine list)
                                // Error [ InvalidLength (MinimumLength 1, Some 0) ]
 UnitInterval.create 1.4        // Error [ OutOfRange (Between ("0", "1"), Some "1.4") ]
-UnitInterval.create Double.NaN // Error — NaN is outside every interval
+UnitInterval.create Double.NaN // Error, NaN is outside every interval
 ```
 
 
@@ -95,7 +95,7 @@ let subtotal (order: Order) =
 ```
 
 
-`reduce` needs no seed and no empty case — that is the invariant paying, and it pays
+`reduce` needs no seed and no empty case, that is the invariant paying, and it pays
 without putting a `Result` between every operation.
 
 ### Discount
@@ -152,7 +152,7 @@ let isDeliverable (order: Order) (candidate: DateTimeOffset) =
     Interval.contains candidate order.Delivery
 
 let overlapWith (order: Order) (other: Interval<DateTimeOffset>) =
-    Interval.intersect order.Delivery other   // Interval option — None when disjoint
+    Interval.intersect order.Delivery other   // Interval option, None when disjoint
 ```
 
 
@@ -162,7 +162,7 @@ smuggled into a value whose `Lower` is somehow above its `Upper`.
 
 ## Catch a duplicate the type system can see
 
-Distinctness is a relationship between values, so it needs a checked constructor — but the
+Distinctness is a relationship between values, so it needs a checked constructor, but the
 resulting type then converts to a map without silently dropping entries:
 
 ```fsharp
@@ -201,6 +201,6 @@ downstream.
 
 ## Next
 
-- [Built-in Refined Values](/refined/catalog.html) — what each type is closed under.
-- [Customer Id](/refined/tutorials/customer-id.html) — define a refined type of your own, and give it a schema.
-- [Compose Parse and Refinement](/refined/composition.html) — mapping failures to application errors.
+- [Built-in Refined Values](/refined/catalog.html), what each type is closed under.
+- [Customer Id](/refined/tutorials/customer-id.html), define a refined type of your own, and give it a schema.
+- [Compose Parse and Refinement](/refined/composition.html), mapping failures to application errors.

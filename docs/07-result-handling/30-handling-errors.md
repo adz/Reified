@@ -28,7 +28,7 @@ Error NameMissing |> Result.mapError (fun _ -> "name is required")
 ```
 
 
-`orError` discards the existing error and substitutes yours. Use it when the incoming error carries nothing — the
+`orError` discards the existing error and substitutes yours. Use it when the incoming error carries nothing, the
 `unit` from `okIf`, `failIf`, or `fromTry`, or a low-level detail the caller should not see.
 
 ```fsharp
@@ -59,7 +59,7 @@ which fallback to use depends on why the first attempt failed.
 ```
 
 
-Both keep the error type the same. A recovery step that fails with a *different* error type is not covered here —
+Both keep the error type the same. A recovery step that fails with a *different* error type is not covered here , 
 convert with `mapError` first so both sides agree.
 
 ## Choosing between them

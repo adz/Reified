@@ -98,7 +98,7 @@ before you rely on them.
 
 ## Command-line arguments
 
-`Data.ofCliArgs` takes `seq<string>` — normally the arguments handed to `main` — and always returns a `Data.Object`.
+`Data.ofCliArgs` takes `seq<string>`, normally the arguments handed to `main`, and always returns a `Data.Object`.
 
 ```fsharp
 Data.ofCliArgs
@@ -166,7 +166,7 @@ Data.ofConfiguration [ "a", "1"; "a:b", "2" ]
 ```
 
 
-Repetition never builds a list here — only indexed segments do. One exception protects sections: a null value does not
+Repetition never builds a list here, only indexed segments do. One exception protects sections: a null value does not
 overwrite an existing section, because `IConfiguration.AsEnumerable()` emits every section key with a null value
 alongside that section's children.
 

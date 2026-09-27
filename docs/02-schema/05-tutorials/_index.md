@@ -10,7 +10,7 @@ targetFramework: net8.0
 [The quickstart](/schema/quickstart.html) is the first thing to read: it builds one model up through
 plain fields, refined fields, field constraints, and a private model behind a checked constructor.
 
-These tutorials then take single topics further — a complete form, nested models and collections, and reading schema
+These tutorials then take single topics further, a complete form, nested models and collections, and reading schema
 metadata without running validation.
 
 ## Guides

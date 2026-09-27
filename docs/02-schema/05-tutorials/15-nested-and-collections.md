@@ -72,13 +72,13 @@ let raw =
 
 ## Parse And Read Item Errors
 
-Every item is parsed and every item error is kept — one bad line item does not hide the others:
+Every item is parsed and every item error is kept, one bad line item does not hide the others:
 
 ```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
 let parsed = Schema.parseRetainingInput orderSchema raw
 
 parsed.ErrorsFor "items[1].quantity"   // quantity 0 fails greaterThan 0
-parsed.ErrorsFor "items[0].sku"        // [] — the first item is fine
+parsed.ErrorsFor "items[0].sku"        // [], the first item is fine
 ```
 
 

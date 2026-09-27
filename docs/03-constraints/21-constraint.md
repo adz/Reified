@@ -10,8 +10,8 @@ targetFramework: net8.0
 # Constraint
 
 Most validation stacks make you write every rule twice: once as the check, and once as the message that
-explains it to a person. The two live in different places — an attribute and a resource key, a builder call
-and a message override, a predicate and a string literal — and they drift. Someone widens a length limit
+explains it to a person. The two live in different places, an attribute and a resource key, a builder call
+and a message override, a predicate and a string literal, and they drift. Someone widens a length limit
 and the error still quotes the old one.
 
 `Reified.Constraint` has no second place to write it. A `Constraint<'value>` is a reusable description of
@@ -52,7 +52,7 @@ let validateEmail raw : Result<string, SignupError> =
 ```
 
 
-That is the whole function. It is no longer, and no more ceremonious, than the equivalent hand-written predicate — and
+The function is no longer, and no more ceremonious, than the equivalent hand-written predicate, and
 unlike the predicate, `Constraint.email` is still the same value you can later put in a refinement, a schema, or a
 JSON Schema document without rewriting the rule.
 
@@ -76,14 +76,14 @@ module SignupRules =
 ```
 
 
-Open it inside the module, not at the top of a file — `present` and `email` are ordinary words, and their
+Open it inside the module, not at the top of a file, `present` and `email` are ordinary words, and their
 meaning should be obvious from the two lines above them. The DSL changes vocabulary, not semantics: every name
 returns the same `Constraint<'value>` the qualified name returns. Code elsewhere refers to `SignupRules.age`,
 and the rest of this page uses `Constraint.` spellings so each example stands on its own.
 
 → [ConstraintDSL](/constraints/dsl.html)
 
-Reach for the structured path when the extra facts earn their keep — when you want to classify failures, render
+Reach for the structured path when the extra facts earn their keep, when you want to classify failures, render
 messages in more than one language, or report several field failures at once. Then keep the violation and
 `Result.mapError` it into a case that carries it:
 
@@ -135,7 +135,7 @@ Give the renderer a different culture and the identical violation reads `"Le nom
 with contextual fallback, and without any application code walking a violation tree or reproducing Reified's
 key catalogue.
 
-Translation is cheap here because it is not a feature bolted on afterwards — it is the same split that
+Translation is cheap here because it is not a feature bolted on afterwards, it is the same split that
 removed the duplicated message in the first place. Shipping in one language still gets the benefit; you
 simply never build the resources.
 
@@ -199,5 +199,5 @@ Otherwise take [ConstraintDSL](/constraints/dsl.html) for the full vocabulary an
 then [Using constraints](/constraints/overview.html) for composition and keeping the input, [Working with
 violations](/constraints/violations.html) for rendering and inspecting failures, [Interpreted and opaque](/constraints/constraints.html)
 for what makes a rule inspectable and what an escape hatch costs, and [Localization](/constraints/localization/index.html) for
-translating failures — with [Adding a language](/constraints/adding-a-language.html) for the working order of a new
+translating failures, with [Adding a language](/constraints/adding-a-language.html) for the working order of a new
 translation and [Fable support](/constraints/fable.html) for the JavaScript target.

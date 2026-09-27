@@ -212,6 +212,6 @@ The package graph makes the same point. `Reified.Data` depends on nothing, which
 without taking a validation library. Teaching `at` to accept a `Constraint<'value>` would mean `Reified.Data`
 depending on `Reified.Constraint` for a convenience that only test code wants.
 
-When you do want a typed rule over a value inside a `Data` tree, parse the tree with a schema and check the model —
+When you do want a typed rule over a value inside a `Data` tree, parse the tree with a schema and check the model , 
 which is the thing the schema already does, with paths and accumulated errors. Reach for `satisfying` for the
 in-between case: one local, structural rule that no schema owns.

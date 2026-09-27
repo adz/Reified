@@ -49,7 +49,7 @@ Schema.text |> Schema.constrain present
 
 In each of those the surrounding type is already known, and the name resolves against it.
 
-The one case that needs help is a binding whose only type information *is* the annotation — which is also the
+The one case that needs help is a binding whose only type information *is* the annotation, which is also the
 central story of naming a reusable rule. Dispatch runs on the return type, so without the annotation the compiler
 has nothing to select on:
 
@@ -83,7 +83,7 @@ and generation treat them identically.
 ### Text sizes count code points
 
 The size family measures text in Unicode **code points**, not UTF-16 code units. An emoji outside the Basic
-Multilingual Plane is one character, so `Constraint.length 1` accepts `"\U0001F600"` — where `String.Length`
+Multilingual Plane is one character, so `Constraint.length 1` accepts `"\U0001F600"`, where `String.Length`
 would report 2.
 
 ```fsharp
@@ -111,9 +111,9 @@ Some constructors are deliberately absent because they shadow names the same val
 | `check` | shadows `Schema.check` | `Constraint.check` |
 | `test`, `guard` | execution stays qualified, consistent with `check` | `Constraint.satisfies`, `Constraint.guard` |
 
-The omissions are driven by collision alone, which is why `notContains` is exported although `contains` is not — no
-core operation is named `notContains`. All constraint *execution* — `Constraint.satisfies`, `Constraint.check`,
-`Constraint.guard`, and `Constraint.inspect` — stays qualified, so `ConstraintDSL` declares constraints and
+The omissions are driven by collision alone, which is why `notContains` is exported although `contains` is not, no
+core operation is named `notContains`. All constraint *execution*, `Constraint.satisfies`, `Constraint.check`,
+`Constraint.guard`, and `Constraint.inspect`, stays qualified, so `ConstraintDSL` declares constraints and
 `Constraint.*` executes and inspects them.
 
 ## Result adapters

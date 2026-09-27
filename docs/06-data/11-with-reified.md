@@ -36,7 +36,7 @@ Booleans and numbers, while form, CLI, and configuration leaves are all text tha
 to parse. Repeated names build a list in `ofNameValues` but overwrite in `ofConfiguration`, where lists
 come from indexed key segments instead. CLI flags arrive as the text `"true"` or `"false"`. So the same
 schema will accept input from any of them, but two sources have to agree on the resulting tree, not just
-on the logical content — see
+on the logical content, see
 [the adapter rules](/data/converting-data.html) for what each one produces.
 
 This is also why the builder syntax matters in tests: a fixture written with `data [ ... ]` exercises
@@ -46,7 +46,7 @@ the identical parse path as production JSON, with no serializer in the loop.
 
 `Schema.parseRetainingInput` keeps the original `Data` alongside the parse result, so a failed form
 round-trip can re-show exactly what the user typed next to each field error. The paths in schema
-diagnostics (`address.city`, `lines[2].quantity`) address back into the input tree —
+diagnostics (`address.city`, `lines[2].quantity`) address back into the input tree , 
 `Data.redisplayPath` (string form) or `Data.redisplayAt` (`DataPath` form) recovers the raw fragment
 at any of them.
 

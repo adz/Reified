@@ -4,7 +4,7 @@ title: Notes
 linkTitle: Notes
 type: docs
 notoc: true
-description: Package inventory, platform support, measured numbers, and the compiler-directed design — reference material rather than a learning path.
+description: Package inventory, platform support, measured numbers, and the compiler-directed design, reference material rather than a learning path.
 menu:
   main:
     weight: 6
@@ -21,9 +21,9 @@ If you have not written a declaration yet, read [Getting started](/getting-start
 
 ## Pages
 
-- [Packages and platforms](/notes/packages-and-platforms.html) — the full package inventory, what each one gives you, what
+- [Packages and platforms](/notes/packages-and-platforms.html), the full package inventory, what each one gives you, what
   it depends on, and which run on .NET and on Fable JavaScript.
-- [Benchmarks](/notes/benchmarks.html) — measured parse and codec numbers against `System.Text.Json`, on .NET and Fable.
-- [Compiler-Directed, AOT, and Fable](/notes/aot-trimming-fable.html) — why an explicit, reflection-free declaration keeps
+- [Benchmarks](/notes/benchmarks.html), measured parse and codec numbers against `System.Text.Json`, on .NET and Fable.
+- [Compiler-Directed, AOT, and Fable](/notes/aot-trimming-fable.html), why an explicit, reflection-free declaration keeps
   working under NativeAOT, aggressive trimming, and Fable, and the NativeAOT compiler limits the package raises for
   records with many fields.

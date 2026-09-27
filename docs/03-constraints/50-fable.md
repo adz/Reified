@@ -76,7 +76,7 @@ Nothing else in the localization path needs conditioning. `Violation.message`, `
 The built-in formatter under Fable renders operands with the portable invariant rendering and **ignores placeholder
 format suffixes**. `{divisor:N0}` renders as though it were `{divisor}`.
 
-Placeholder *parsing* is identical on every target — the suffix is recognized and stripped, not left in the output —
+Placeholder *parsing* is identical on every target, the suffix is recognized and stripped, not left in the output , 
 but there is no culture to format through, and inventing one would give the browser and the server two different
 numbers for the same constraint.
 
@@ -100,8 +100,8 @@ A constraint must mean the same thing on both runtimes, and its message must too
 
 Fable erases a `Guid` to a string and a `TimeSpan` to a number, so a boxed type test labels them `Text` and
 `Integer` there while .NET labels them correctly. Reified's constructors resolve the operand at the call site, where
-the type is still concrete, so the same constraint describes itself identically — and therefore interpolates
-identically — on both targets. This is checked by the shared Fable surface test, not assumed.
+the type is still concrete, so the same constraint describes itself identically, and therefore interpolates
+identically, on both targets. This is checked by the shared Fable surface test, not assumed.
 
 Blankness and text length are the other pair. Text sizes count Unicode code points rather than UTF-16 code units,
 and whitespace is defined the same way on both runtimes, so `constraint.cardinality.between` reports the same
@@ -136,7 +136,7 @@ let renderer = Renderer.ofLookup (fun key -> loaded |> Map.tryFind key)
 ```
 
 
-Generate the bundle from `Catalogue.keys` and `SchemaMessages.keys` rather than transcribing it — see
+Generate the bundle from `Catalogue.keys` and `SchemaMessages.keys` rather than transcribing it, see
 [Adding a language](/constraints/adding-a-language.html). Since the same catalogue drives both targets, one generated bundle
 serves the browser and the server.
 

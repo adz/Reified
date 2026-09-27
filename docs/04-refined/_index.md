@@ -10,7 +10,7 @@ targetFramework: net8.0
 
 `Reified.Refinements` supplies types that carry an invariant, together with the operations that
 invariant makes possible. Guarded construction is how a value is admitted, but it is not
-the reason to reach for a refined type — a wrapper that only checks on the way in leaves
+the reason to reach for a refined type, a wrapper that only checks on the way in leaves
 callers unwrapping it at first use, and the invariant buys nothing after the boundary.
 
 The types here are chosen so that later code can be simpler:
@@ -110,8 +110,8 @@ let averageLine (lines: NonEmptyList<OrderLine>) =
 
 
 The refined version is shorter, not just safer. That is deliberate: the collection types
-carry the ordinary list vocabulary — `sum`, `sumBy`, `average`, `choose`, `countBy`,
-`item` — as well as the operations the invariant makes total. A refined type that only
+carry the ordinary list vocabulary, `sum`, `sumBy`, `average`, `choose`, `countBy`,
+`item`, as well as the operations the invariant makes total. A refined type that only
 offered the clever operations would push you back through `toList` for everyday work, and
 the invariant would be lost halfway down the pipeline. See
 [the catalogue](/refined/catalog.html#everyday-operations).
@@ -122,7 +122,7 @@ the invariant would be lost halfway down the pipeline. See
 
 F# cannot propagate an invariant through arithmetic the way a refinement-typed language
 can, so a `PositiveInt` would have to re-establish "greater than zero" at every step. With
-unchecked integer arithmetic — `Int32.MaxValue + 1` is negative — that means returning
+unchecked integer arithmetic, `Int32.MaxValue + 1` is negative, that means returning
 `Result` from addition, and a `Result` per arithmetic step is bulk that hides mistakes
 rather than catching them.
 
@@ -134,8 +134,8 @@ field _.Quantity { constrain (Constraint.greaterThan 0) }
 
 
 `FiniteFloat` is the exception that proves the rule: it is worth having because `NaN` and
-infinity silently destroy an **aggregate** — `List.average [ 12.5; 3.0; nan; 8.25 ]` is
-`NaN` — not because of arithmetic or ordering. See
+infinity silently destroy an **aggregate**, `List.average [ 12.5; 3.0; nan; 8.25 ]` is
+`NaN`, not because of arithmetic or ordering. See
 [the catalogue](/refined/catalog.html#floating-point).
 
 ## Define your own

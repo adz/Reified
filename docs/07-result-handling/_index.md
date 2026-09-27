@@ -69,7 +69,7 @@ Every page below builds on this same `parseName`/`parseAge` pair, so the example
 - [Transforming values](/result-handling/transforming.html) - `map` and `bind`, and how a chain of fallible steps compose.
 - [Handling errors](/result-handling/handling-errors.html) - change the error type, replace one, and recover.
 - [Extracting values](/result-handling/extracting.html) - get back to a plain value, an option, or a default.
-- [Working with collections](/result-handling/collections.html) — apply a fallible operation across a sequence with `traverse` and
+- [Working with collections](/result-handling/collections.html), apply a fallible operation across a sequence with `traverse` and
   `sequence`, or collect every failure with `traverseAll` and `sequenceAll`.
 - [Observing a Result](/result-handling/observing.html) - log or measure mid-pipeline with `tap` and `tapError`.
 - [The result computation expression](/result-handling/result-ce.html) - write dependent steps as straight-line code with `result { }`.
@@ -84,7 +84,7 @@ Every page below builds on this same `parseName`/`parseAge` pair, so the example
 `Reified.Result` composes failures. Admitting values in the first place is the
 [Constraints](/constraints/index.html) test typed values, [Parsing](/parsing/index.html) decodes serialized primitives,
 and [Refined](/refined/index.html) constructs values whose types record a successful check. All three return the
-standard F# `Result`, so these helpers work on their output — but none requires this package, and this package does
+standard F# `Result`, so these helpers work on their output, but none requires this package, and this package does
 not require them.
 
 Accumulation here is **flat**: `result.list { }` collects a list of your error values with no field identity.

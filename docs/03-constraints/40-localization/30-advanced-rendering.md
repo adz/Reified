@@ -32,14 +32,14 @@ constraint.fullMessage       = {attribute} {message}
 
 
 Rendering one interpreted leaf goes: resolve the predicate, wrap it in `constraint.actual` if the violation carries
-an actual value, and — for `fullMessage` only — wrap that in `constraint.fullMessage` with the resolved noun.
+an actual value, and, for `fullMessage` only, wrap that in `constraint.fullMessage` with the resolved noun.
 
 Keeping them separate is what makes `{actual}` optional without an optional-placeholder rule, and it lets a locale
 put the value or the noun somewhere English would not:
 
 ```text
 constraint.actual      = reçu {actual} au lieu de « {message} »
-constraint.fullMessage = {message} — {attribute}
+constraint.fullMessage = {message}, {attribute}
 ```
 
 
@@ -80,7 +80,7 @@ renderer
 ```
 
 
-A list operand — `choices` on `Constraint.oneOf`, for instance — is joined through the contextual
+A list operand, `choices` on `Constraint.oneOf`, for instance, is joined through the contextual
 `constraint.list.*` patterns, and each item goes through the formatter.
 
 
@@ -112,8 +112,8 @@ Violation.message Renderer.english group
 ```
 
 
-A language whose joining cannot be expressed as pair/start/middle/end — where the conjunction changes the words of
-its members, or the whole group has to be reordered — is not served by these patterns. That case takes
+A language whose joining cannot be expressed as pair/start/middle/end, where the conjunction changes the words of
+its members, or the whole group has to be reordered, is not served by these patterns. That case takes
 `Violation.toMessageTree` and owns its own traversal. This is a genuine limit, not a gap to work around with a
 cleverer pattern.
 
@@ -121,7 +121,7 @@ cleverer pattern.
 ## Plurals
 
 An entry may declare at most one plural operand. Where one is declared, ordinary lookup tries `<key>.one` when the
-operand is exactly one and `<key>.other` otherwise, then the bare key — at each contextual level, before moving
+operand is exactly one and `<key>.other` otherwise, then the bare key, at each contextual level, before moving
 outwards:
 
 ```text
@@ -144,7 +144,7 @@ resolver.
 ## Advanced resolvers
 
 `Renderer.ofLookup` owns the entire candidate order and asks a plain lookup for exact keys. When your localization
-system wants to select plural categories and render entries itself — ICU, for instance — take a resolver instead.
+system wants to select plural categories and render entries itself, ICU, for instance, take a resolver instead.
 It receives one request per contextual level:
 
 ```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
@@ -163,9 +163,9 @@ let renderer =
 
 The answer means:
 
-- `None` — continue to the next, less specific level;
-- `MessageResolution.Template template` — Reified interpolates and formats it;
-- `MessageResolution.Rendered text` — you rendered it; Reified never interpolates that text again, so literal braces
+- `None`, continue to the next, less specific level;
+- `MessageResolution.Template template`, Reified interpolates and formats it;
+- `MessageResolution.Rendered text`, you rendered it; Reified never interpolates that text again, so literal braces
   in it stay literal.
 
 `Rendered` is final for the entry that was requested. Reified may still use its text as the `{message}` of
@@ -186,7 +186,7 @@ Renderer.Advanced.format spec renderer             // render any catalogue's ent
 
 
 These take a `MessageFormatSpec`: a message identity and arguments (`MessageDescriptor`) plus the owning
-catalogue's neutral fallback and plural operand. That pairing is what lets Schema — or your own catalogue — reuse
+catalogue's neutral fallback and plural operand. That pairing is what lets Schema, or your own catalogue, reuse
 every renderer mechanic without `Reified.Constraint` knowing a single one of its keys.
 
 ```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."

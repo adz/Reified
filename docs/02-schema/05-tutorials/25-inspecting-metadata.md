@@ -8,7 +8,7 @@ targetFramework: net8.0
 # Inspecting Schema Metadata Tutorial
 
 A schema is data, not a validator. This tutorial reads a schema's fields, shapes, formats, and constraints without
-parsing any input or constructing any model — the foundation for JSON Schema emitters, documentation generators, and
+parsing any input or constructing any model, the foundation for JSON Schema emitters, documentation generators, and
 UI metadata.
 
 ## Describe A Schema
@@ -29,7 +29,7 @@ Nothing executes: no getters run, no constructors are called, no checks fire. Th
 
 ## Read Field Shapes And Constraints
 
-Each field carries a `SchemaDescription` — shape, declared format, and constraint metadata:
+Each field carries a `SchemaDescription`, shape, declared format, and constraint metadata:
 
 ```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
 let email = description.Fields |> List.find (fun field -> field.Name = "email")
@@ -61,7 +61,7 @@ them.
 
 ## Lower Constraints To Another Format
 
-A description is a small recursive tree — atoms, `All`, `Any`, `Optional`, and `Opaque` — and every interpreted atom
+A description is a small recursive tree, atoms, `All`, `Any`, `Optional`, and `Opaque`, and every interpreted atom
 reuses the same expectation types the violations use, so lowering is one traversal:
 
 ```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
@@ -80,12 +80,12 @@ let keywords (description: SchemaDescription) =
 
 `ConstraintDescription.atoms` deliberately stops at an opacity boundary, and it is only safe where dropping a rule is
 sound. An interpreter that *claims enforcement* must consult the whole expression instead: dropping a conjunct weakens
-an `All`, and dropping a disjunct strengthens an `Any` — which would reject values the library accepts.
+an `All`, and dropping a disjunct strengthens an `Any`, which would reject values the library accepts.
 
 Atoms are shape-neutral. `Cardinality.Maximum 5` becomes `maxLength`, `maxItems`, or `maxProperties` depending on the
 `SchemaShape` it is attached to, so combine the two rather than reading the description alone.
 
-The repository keeps three worked prototypes — a JSON Schema emitter, a docs describer, and a UI metadata producer —
+The repository keeps three worked prototypes, a JSON Schema emitter, a docs describer, and a UI metadata producer , 
 in `tests/Reified.Schema.Tests/SchemaInterpreterPrototypeTests.fs`, all built only on `Inspect`.
 
 ## Why This Matters

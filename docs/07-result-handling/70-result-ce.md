@@ -56,7 +56,7 @@ result {
 
 
 On the right of `let!` is a `Result<'value, 'error>`; on the left is the `'value`. The block's own type is
-`Result<'whatever you return, 'error>` — the error type is shared by every step, which is why they all fail with
+`Result<'whatever you return, 'error>`, the error type is shared by every step, which is why they all fail with
 `SignupError` here.
 
 ## Failure stops the block
@@ -75,7 +75,7 @@ signup "Ada" "abc"   // Error (AgeNotANumber "abc")
 ```
 
 
-`signup "" "abc"` returns `Error NameMissing`. The age is never parsed, so its failure is never seen — the block stops
+`signup "" "abc"` returns `Error NameMissing`. The age is never parsed, so its failure is never seen, the block stops
 at the first one.
 
 That short-circuit is observable, not just a description of the result:
@@ -122,7 +122,7 @@ result {
 
 
 `try/with` and `try/finally` work as usual. Note what they do and do not catch: they handle .NET **exceptions**, not
-`Error` values. An `Error` is an ordinary return value, so it does not trigger `with` — it just ends the block.
+`Error` values. An `Error` is an ordinary return value, so it does not trigger `with`, it just ends the block.
 
 ## When to use it
 

@@ -15,7 +15,7 @@ dotnet add package Reified
 ```
 
 
-`Reified` is an umbrella. It has no code of its own — it just references every runtime package below, so you get the
+`Reified` is an umbrella. It has no code of its own, it just references every runtime package below, so you get the
 whole set and can ignore the rest of this page.
 
 Schema is the integrated path through the packages:
@@ -65,8 +65,8 @@ fieldAs "email_address" _.Email   // declares it
 
 `field` reads an F# quotation to derive the wire name, so it needs a target that supports quotations: JavaScript,
 TypeScript, Python, and BEAM from Fable 5.10, and Dart from 5.13. Fable's Rust and PHP targets have no quotation
-support, so declare names there with `fieldAs`. Everything else — field typing, schema inference, constraints,
-constructors, parsing, checking, and codecs — is available on every target either way.
+support, so declare names there with `fieldAs`. Everything else, field typing, schema inference, constraints,
+constructors, parsing, checking, and codecs, is available on every target either way.
 
 ## Development tools
 
@@ -76,7 +76,7 @@ produce runs in your application at run time.
 | Tool | What it does | How to get it |
 | --- | --- | --- |
 | `Reified.Schema.Contracts.Build` | Runs schema generation over your `[<DeriveSchema>]` records and `.contract` files before each compile | `dotnet add package Reified.Schema.Contracts.Build` |
-| `Reified.Schema.Contracts` | The generation library itself — the record frontend, the `.contract` parser, and the emitter | Not published; used through the build package above |
+| `Reified.Schema.Contracts` | The generation library itself, the record frontend, the `.contract` parser, and the emitter | Not published; used through the build package above |
 | `Reified.Schema.Testing` | Derives FsCheck generators from a schema so tests produce accepted values | Not published; copy or adapt the pattern from this repository |
 
 `Reified.Schema.Contracts.Build` is the one you install. It is deliberately kept out of the `Reified` umbrella: MSBuild

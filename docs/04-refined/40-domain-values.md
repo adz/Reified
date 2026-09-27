@@ -13,7 +13,7 @@ This page is the reference for that machinery.
 Before reaching for it, decide whether the concept deserves a type at all. Checked construction is how a value is
 admitted, not a reason on its own: if nothing downstream becomes total or loses a branch, the rule belongs in a
 [constraint](/constraints/constraint.html) on the primitive instead. Numeric ranges are the clearest
-example — F# cannot carry "greater than zero" through arithmetic, so a refined number costs more at every use site
+example, F# cannot carry "greater than zero" through arithmetic, so a refined number costs more at every use site
 than it saves. [When not to make a type](/refined/catalog.html#when-not-to-make-a-type) draws the line, and
 [Customer Id](/refined/tutorials/customer-id.html) works a full example through.
 
@@ -86,7 +86,7 @@ The same constraint values provide executable checks and `ConstraintDetails` met
 ## Use a metadata-free check
 
 Use `defineWithCheck` for an invariant no built-in constraint describes. The check runs, but nothing downstream can
-read the rule — the trade-off is
+read the rule, the trade-off is
 [interpreted versus opaque](/constraints/constraints.html):
 
 ```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."

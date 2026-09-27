@@ -37,7 +37,7 @@ books.isbn.invalid
 ```
 
 
-A key is `segment ("." segment)*`. An empty key or empty segment is rejected at construction — a malformed key
+A key is `segment ("." segment)*`. An empty key or empty segment is rejected at construction, a malformed key
 written in source is a defect, and failing at the call site beats failing at a rendering edge in whichever language
 nobody tested. `%`, brackets, whitespace, and non-ASCII characters are exact input; you never pre-encode a key.
 

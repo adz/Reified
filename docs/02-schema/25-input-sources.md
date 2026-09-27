@@ -10,7 +10,7 @@ targetFramework: net8.0
 
 [`Data`](/data/index.html) is the source-agnostic boundary shape: `Null`, `Text`, `Number`, `Bool`, `List`, and
 `Object`. Adapters turn common sources into `Data`, and one schema parses them all. (`Data` is its own dependency-free
-package, useful beyond schemas — see [its docs](/data/index.html).)
+package, useful beyond schemas, see [its docs](/data/index.html).)
 
 ## The Schema
 
@@ -74,7 +74,7 @@ arguments collect under the `_` field.
 
 ## JSON Bodies With System.Text.Json
 
-On .NET 8+ targets, adapt a parsed `JsonDocument` or `JsonElement` directly — the natural fit for ASP.NET Core
+On .NET 8+ targets, adapt a parsed `JsonDocument` or `JsonElement` directly, the natural fit for ASP.NET Core
 request bodies:
 
 ```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
@@ -117,7 +117,7 @@ let raw =
 
 Later pairs override earlier ones at the same path, matching .NET configuration layering: a repeated key keeps its
 last value, and a later scalar or section replaces the earlier shape at that key. Collections come from numeric
-segments, never from repetition — repeated names as multi-value input is a wire convention that belongs to
+segments, never from repetition, repeated names as multi-value input is a wire convention that belongs to
 `ofNameValues`. Section keys with null values, as `IConfiguration.AsEnumerable()` emits alongside a section's
 children, never override those children, so real layered `IConfiguration` output round-trips directly.
 
@@ -137,17 +137,17 @@ match parsed.Result with
 ## From C#
 
 Consume-don't-author: F# declares the schema, C# parses and reads diagnostics. Most adapters take plain .NET types
-already — `ofNameValueCollection` takes `NameValueCollection`, `ofCliArgs` and `ofData` take ordinary
-sequences and values — and call as plain static methods. `ofMap` and `ofConfiguration` take F#-only types (`Map` and
+already, `ofNameValueCollection` takes `NameValueCollection`, `ofCliArgs` and `ofData` take ordinary
+sequences and values, and call as plain static methods. `ofMap` and `ofConfiguration` take F#-only types (`Map` and
 a sequence of F# tuples), so use their C#-friendly equivalents instead:
 
 ```csharp
 using Reified.Schema;
 
-// ofMap's C# equivalent — takes IDictionary<string, string> instead of an F# Map:
+// ofMap's C# equivalent, takes IDictionary<string, string> instead of an F# Map:
 Data raw = DataModule.ofDictionary(new Dictionary<string, string> { ["name"] = "Ada Lovelace" });
 
-// ofConfiguration's C# equivalent — takes the pairs IConfiguration.AsEnumerable() already returns:
+// ofConfiguration's C# equivalent, takes the pairs IConfiguration.AsEnumerable() already returns:
 Data fromConfig = DataModule.ofConfigurationPairs(configuration.AsEnumerable());
 
 RetainedParseResult<Customer, SchemaError> parsed = Schema.parseRetainingInput(customerSchema, raw);

@@ -1,7 +1,7 @@
 ---
 title: What a schema gives you
 linkTitle: What a schema gives you
-description: The seven jobs one schema declaration does — parsing input, checking values, JSON, published contracts, form metadata, versioning, and test data.
+description: The seven jobs one schema declaration does, parsing input, checking values, JSON, published contracts, form metadata, versioning, and test data.
 weight: 2
 type: docs
 targetFramework: net8.0
@@ -9,8 +9,8 @@ targetFramework: net8.0
 
 Around one model you end up doing the same seven jobs: read input into it, check values that arrived some
 other way, serialize it, publish its shape, describe it to a UI, accept last year's payloads, and build test
-data for it. Each is usually its own configuration — attributes, a serializer contract, a Swagger annotation,
-a fixture builder — and each has to be told the rules again.
+data for it. Each is usually its own configuration, attributes, a serializer contract, a Swagger annotation,
+a fixture builder, and each has to be told the rules again.
 
 The schema is the source for all seven. You write it once:
 
@@ -38,8 +38,8 @@ let signupSchema =
 
 ## Turn untrusted input into a model
 
-The job the getting-started page walks through. `Schema.parse` takes a `Data` tree from any source — a form
-post, a query string, JSON, configuration — converts each field, checks each rule, and calls the constructor.
+The job the getting-started page walks through. `Schema.parse` takes a `Data` tree from any source, a form
+post, a query string, JSON, configuration, converts each field, checks each rule, and calls the constructor.
 Every independent field is checked, so a failure carries *all* the problems with their paths, not just the
 first. Nothing downstream has to wonder whether validation ran: no `Signup` exists unless it passed.
 
@@ -48,7 +48,7 @@ first. Nothing downstream has to wonder whether validation ran: no `Signup` exis
 ## Check a value you already hold
 
 Not every model arrives as input. A record literal in a test, a row mapped out of a database, a payload
-deserialized by something else — those are already `Signup` values, and the type system has no opinion about
+deserialized by something else, those are already `Signup` values, and the type system has no opinion about
 whether the rules hold. `Schema.check` runs the same field rules and the same constructor against a value
 that already exists:
 
@@ -63,7 +63,7 @@ match Schema.check signupSchema imported with
 ```
 
 
-Same rules, same error shape, same paths as parsing — only the input differs. This is the admission decision
+Same rules, same error shape, same paths as parsing, only the input differs. This is the admission decision
 for models that stay publicly constructible; when you would rather make the invalid value unrepresentable in
 the first place, see [Trusted construction](/schema/trusted-construction.html).
 
@@ -101,7 +101,7 @@ JsonSchema.generate signupSchema
 ```
 
 
-`"minimum": 13` was not written twice — it is the `atLeast 13` from the declaration, which is why the
+`"minimum": 13` was not written twice, it is the `atLeast 13` from the declaration, which is why the
 published document cannot drift from the code that enforces it. Clients generated from it are generated from
 the same shape the parser and codec use.
 
@@ -119,7 +119,7 @@ Inspect.model signupSchema
 
 Finite metadata: field names, shapes, the constraints on each. Nothing is parsed and nothing is checked. This
 is what forms, admin UIs, and documentation generators read when they need to *describe* the model rather than
-enforce it — render the right input control per field, or show the rule beside it before the user submits.
+enforce it, render the right input control per field, or show the rule beside it before the user submits.
 
 → [`Inspect` API reference](/api/Reified.Inspect.html)
 
@@ -144,14 +144,14 @@ payloads carry the same `SchemaErrors` with the same paths.
 ## Build test data that obeys the rules
 
 The last job runs the rules backwards: instead of rejecting values that violate the declaration, produce
-values that satisfy it. Fixtures stop being hand-maintained lists that quietly drift from the rules — raise
+values that satisfy it. Fixtures stop being hand-maintained lists that quietly drift from the rules, raise
 the minimum age and the generated data follows.
 
 → [Data](/data/index.html) · [Building test cases](/data/how-to-build-test-cases.html)
 
 ## Why one declaration and not seven
 
-Each of these jobs could be configured separately, and usually is. The cost is not the typing — it is that
+Each of these jobs could be configured separately, and usually is. The cost is not the typing, it is that
 seven descriptions of the same model are free to disagree, and they only disagree in production. Making the
 declaration a value means the rule lives in exactly one place, and each job is a different reading of it. It
 also means a new job costs nothing at the declaration site: the schemas you have already written gain it for

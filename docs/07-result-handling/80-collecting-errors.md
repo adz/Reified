@@ -7,8 +7,8 @@ targetFramework: net8.0
 
 # Collecting every error
 
-`result { }` stops at the first failure. When the steps do not depend on each other — the fields of a form, the
-columns of a row — the caller usually wants every problem at once, not the first one repeatedly.
+`result { }` stops at the first failure. When the steps do not depend on each other, the fields of a form, the
+columns of a row, the caller usually wants every problem at once, not the first one repeatedly.
 
 `result.list { }` collects them. Join the independent bindings with `and!` instead of `let!`.
 
@@ -64,7 +64,7 @@ result.array {
 ```
 
 
-For any other container, map at the end — `Result.mapError Set.ofList`, `Result.mapError NonEmptyList.ofList`, and so
+For any other container, map at the end, `Result.mapError Set.ofList`, `Result.mapError NonEmptyList.ofList`, and so
 on.
 
 ## `and!` accumulates; `let!` still fails fast
@@ -95,7 +95,7 @@ mixed "Ada" "12"   // Error [AgeOutOfRange 12]
 
 
 The third case is the one to understand. Name and age both succeeded, so the block reached the `let!`, which failed on
-its own — one error. And in the second case the `let!` never ran at all, so `AgeOutOfRange` could not have appeared
+its own, one error. And in the second case the `let!` never ran at all, so `AgeOutOfRange` could not have appeared
 alongside the other two even if the age had been out of range.
 
 The rule: **everything you want reported together must be in the same `and!` group.** A failure in an earlier group
@@ -123,9 +123,9 @@ The errors are flattened into one list rather than nested.
 ## What it does not do
 
 The collected errors are a flat container. They carry no field names, no paths, and no indication of which binding
-produced which error — only the order they were bound in.
+produced which error, only the order they were bound in.
 
-If the independent bindings are fields of structured input — a form post, a request body, a configuration file — that
+If the independent bindings are fields of structured input, a form post, a request body, a configuration file, that
 association is `Schema`'s job, and it is the default next step. Declare the model once and `Schema.parse` accumulates
 every field failure with the path that produced it, keeps the raw value for redisplay, renders messages in the
 caller's language, and hands back your domain type:
@@ -145,13 +145,13 @@ Data.ofNameValues form |> Schema.parse signupSchema
 
 See [the Schema quickstart](/schema/quickstart.html).
 
-Staying at the Result layer is still reasonable when the failures are not really fields — independent checks in
+Staying at the Result layer is still reasonable when the failures are not really fields, independent checks in
 application code, or a small internal function whose caller just wants a list. In that case carry the association
 yourself, by mapping each step's error to a pair of field name and reason before the block collects them.
 
 The line between the two: `result.list { ... and! ... }` accumulates one group of independent bindings.
 `Schema.parse` owns accumulation at a structured boundary, with paths.
 
-For the third case — the same operation applied across a collection — use
+For the third case, the same operation applied across a collection, use
 [`Result.traverseAll` and `Result.sequenceAll`](/result-handling/collections.html#traverseall-and-sequenceall), which run every mapping
 and return `Result<'output list, 'error list>`.

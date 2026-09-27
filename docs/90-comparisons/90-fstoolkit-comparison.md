@@ -54,7 +54,7 @@ submittedName |> Result.fromOption |> Result.orError NameMissing
 The FsToolkit equivalents read as `acceptedTerms |> Result.requireTrue TermsNotAccepted` and
 `submittedName |> Result.requireSome NameMissing`.
 
-With `open Reified.ResultDSL`, the `Result.` prefix on `require` and `orError` drops — `fromOption` stays qualified,
+With `open Reified.ResultDSL`, the `Result.` prefix on `require` and `orError` drops, `fromOption` stays qualified,
 since `ResultDSL` exports only the CE and the local admission functions (`okIf`, `failIf`, `require`, `orError`,
 `mapError`), not the whole `Result` module:
 

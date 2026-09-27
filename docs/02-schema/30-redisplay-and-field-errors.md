@@ -40,7 +40,7 @@ parsed.ErrorsFor "contacts[1].value"    // errors on the second contact's value
 ```
 
 
-`SchemaError` deliberately omits the field name — the diagnostics path already carries it — so the same error value
+`SchemaError` deliberately omits the field name, the diagnostics path already carries it, so the same error value
 renders correctly wherever it is attached.
 
 ## Redisplay
@@ -67,7 +67,7 @@ for field in formFields do
 ```
 
 
-Because failed parses never construct the model, there is no half-valid object to guard against — the template works
+Because failed parses never construct the model, there is no half-valid object to guard against, the template works
 from structured data and diagnostics only.
 
 For summary output, render every failed diagnostic in one line:
@@ -104,8 +104,8 @@ errors |> SchemaErrors.toStringWith signup   // one full message per line
 a template that renders its own label does not print the name twice. `fullMessages` composes the attribute noun once
 for payloads, logs, and summaries.
 
-You supply only the document context. Index components stay out of resource keys — `contacts[0].value` and
-`contacts[1].value` are one field for a translator — and stay in every returned path, so field lookup and redisplay
+You supply only the document context. Index components stay out of resource keys, `contacts[0].value` and
+`contacts[1].value` are one field for a translator, and stay in every returned path, so field lookup and redisplay
 still work:
 
 ```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
@@ -128,16 +128,16 @@ below. Both render through the same mechanics, so one renderer covers both. See
 
 ## The Schema catalogue
 
-`Reified.Schema` owns its own keys for parse, boundary-supply, and structural failures. They stay in that package —
+`Reified.Schema` owns its own keys for parse, boundary-supply, and structural failures. They stay in that package , 
 Schema depends on Constraint and never the reverse.
 
 | Key | Arguments | Default English |
 | --- | --- | --- |
-| `schema.omitted` | — | must be supplied |
-| `schema.blank` | — | must be present |
-| `schema.expectedScalar` | — | must be a single value |
-| `schema.expectedObject` | — | must be an object |
-| `schema.expectedMany` | — | must be a collection |
+| `schema.omitted` | n/a | must be supplied |
+| `schema.blank` | n/a | must be present |
+| `schema.expectedScalar` | n/a | must be a single value |
+| `schema.expectedObject` | n/a | must be an object |
+| `schema.expectedMany` | n/a | must be a collection |
 | `schema.invalidFormat` | `expected` | must be a valid {expected} |
 | `schema.parseOutOfRange` | `target` | must be within the range of {target} |
 | `schema.unknownTag` | `choices` | must be one of {choices} |
@@ -145,7 +145,7 @@ Schema depends on Constraint and never the reverse.
 `SchemaMessages.keys`, `.arguments`, and `.english` expose the same data. Constructor failures and custom errors
 carrying authored prose have no catalogue entry: Schema does not invent a key for text your application wrote.
 
-At `SchemaPath.root`, full rendering uses `constraint.attribute.default` — "value" in English — never the document context.
+At `SchemaPath.root`, full rendering uses `constraint.attribute.default`, "value" in English, never the document context.
 
 ## Mapping To Domain Errors
 

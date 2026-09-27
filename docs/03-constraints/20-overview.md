@@ -26,7 +26,7 @@ Constraint.check name "Ada"
 
 
 `Constraint.present` and the size family resolve across text, lists, arrays, and maps by the type they are used at.
-Applied where that type is already known — inside a rule like the one above, or to a schema — they need nothing
+Applied where that type is already known, inside a rule like the one above, or to a schema, they need nothing
 extra. On a standalone binding the annotation is the only type information available, so it is what tells the
 compiler which shape you meant.
 
@@ -36,7 +36,7 @@ compiler which shape you meant.
 list is the satisfied identity.
 
 `Constraint.any` takes a first alternative plus the rest, evaluates left to right, and stops at the first success. It
-never throws, because an empty disjunction — which nothing could satisfy and which has no reason to report — cannot be
+never throws, because an empty disjunction, which nothing could satisfy and which has no reason to report, cannot be
 written.
 
 Use `any` for a valid set with a hole in it, which neither a list of literals nor a range can express. The recurring
@@ -86,7 +86,7 @@ character is deliberate, and it is what lets the rule be published at all.
 
 A JSON Schema validator decides whitespace by ECMA-262's `\s`, which is not quite .NET's set. The two used to
 disagree in both directions, and one of those directions is genuinely harmful: where a validator treats a character
-as whitespace and Reified does not, an exported schema rejects a payload the library would have accepted — and the
+as whitespace and Reified does not, an exported schema rejects a payload the library would have accepted, and the
 library never sees it to explain why. U+FEFF was the whole of that direction, since .NET Core dropped it from
 `Char.IsWhiteSpace` while ECMA-262 keeps it. Treating it as blank removes the problem.
 
@@ -104,7 +104,7 @@ let checkedName : Result<string, Violation> =
 
 
 `guard` returns the unchanged input after success. For a local condition that is not worth naming as a reusable
-`Constraint`, `Result.okIf`/`Result.failIf` with `Result.orError` play the same role — see
+`Constraint`, `Result.okIf`/`Result.failIf` with `Result.orError` play the same role, see
 [Creating a Result](/result-handling/creating.html).
 
 Map the whole violation once at the application boundary:
@@ -147,10 +147,10 @@ pipeline can continue, and `satisfies` gives a `bool` when a local branch wants 
 
 
 None of them changes the *type* of the value. Extraction does, and stays an ordinary match or `Option`/`Choice`
-conversion at the call site rather than living in `Constraint` or `Result` — folding "prove a fact" and "extract a
+conversion at the call site rather than living in `Constraint` or `Result`, folding "prove a fact" and "extract a
 value" into one function would give a rule whose meaning depended on what the caller wanted back, and nothing
 downstream could read it.
 
 The split is what makes one constraint usable by many interpreters: a schema lowers a rule, a generator satisfies it,
-a document publishes it — and all three need the rule to be a claim *about* a value rather than a transformation of
+a document publishes it, and all three need the rule to be a claim *about* a value rather than a transformation of
 one.

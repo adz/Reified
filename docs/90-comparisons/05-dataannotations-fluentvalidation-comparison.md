@@ -1,7 +1,7 @@
 ---
 weight: 5
 title: How it compares
-description: Reified.Constraint against DataAnnotations, FluentValidation, and Validus — including where they are the better choice.
+description: Reified.Constraint against DataAnnotations, FluentValidation, and Validus, including where they are the better choice.
 targetFramework: net8.0
 ---
 
@@ -54,11 +54,11 @@ Refinement.define retryCount RetryCount _.Value    // used in a refined type
 ```
 
 
-The same declaration lowers to JSON Schema and generates test data. A predicate — in any library, including
-Reified's own `Constraint.custom` escape hatch — cannot be inspected, and Reified says so rather than
+The same declaration lowers to JSON Schema and generates test data. A predicate, in any library, including
+Reified's own `Constraint.custom` escape hatch, cannot be inspected, and Reified says so rather than
 pretending otherwise.
 
-If you only ever need to answer "is this valid?", the inspectability buys you nothing — but it does not cost you
+If you only ever need to answer "is this valid?", the inspectability buys you nothing, but it does not cost you
 anything either. A constraint used that way is still one line, and you never have to see a `Violation`:
 
 ```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
@@ -102,8 +102,8 @@ compose, results accumulate, and there is very little to learn. For many F# appl
 amount of machinery.
 
 **Where it differs:** validators are functions, so the message is supplied alongside the rule rather than
-derived from it, and nothing can inspect a validator afterwards. Reified's extra concepts — `Violation`,
-`Renderer`, interpreted versus opaque rules — exist to buy inspectability and derived messages.
+derived from it, and nothing can inspect a validator afterwards. Reified's extra concepts, `Violation`,
+`Renderer`, interpreted versus opaque rules, exist to buy inspectability and derived messages.
 
 They are not, however, an entry fee. A check that ends in your own error case reads the same length in either
 library, and the Reified version leaves you a rule you can reuse in a schema or a refined type later:
@@ -129,7 +129,7 @@ Stated plainly, because the sections above are about what it gives:
 
 ## When Reified is worth it
 
-The benefit compounds where the same value rule is needed in more than one place — a domain type's
+The benefit compounds where the same value rule is needed in more than one place, a domain type's
 invariant, a request schema, a published JSON Schema, a generated fixture, a form message in two languages.
 If that describes your project, one declaration replaces four or five parallel ones.
 
@@ -138,7 +138,7 @@ If your validation is a handful of checks in one place and never leaves it, a pr
 
 ## Related comparisons
 
-- [`Reified.Result` against FsToolkit.ErrorHandling](/comparisons/fstoolkit-comparison.html) — for
+- [`Reified.Result` against FsToolkit.ErrorHandling](/comparisons/fstoolkit-comparison.html), for
   composing failures rather than describing valid values.
 - Decoding serialized input is a different job from validating a typed value: see
   [`Reified.Parse`](/parsing/index.html) and [Schema](/schema/index.html) rather than this page.

@@ -24,8 +24,8 @@ carry the prose their author wrote. Turning either into a sentence happens at th
 ```
 
 
-`Renderer.english` is the same idea with the renderer mechanics available — bare predicates, composed nouns, and
-group joining — still without a resource file:
+`Renderer.english` is the same idea with the renderer mechanics available, bare predicates, composed nouns, and
+group joining, still without a resource file:
 
 ```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
 violation |> Violation.fullMessage Renderer.english
@@ -68,7 +68,7 @@ violation |> Violation.fullMessage field  // "Name must be present"
 ```
 
 
-Use `message` where a label already names the field — a form row, or a Schema result whose returned path identifies
+Use `message` where a label already names the field, a form row, or a Schema result whose returned path identifies
 it. Use `fullMessage` for API payloads, logs, and anywhere the message stands alone.
 
 The noun is composed once, never per leaf, so a group of three failures still names the field once:
@@ -140,7 +140,7 @@ and check what is missing with [Adding a language](/constraints/adding-a-languag
 
 ### Translate one of your own rules
 
-Give the rule a key and it joins the same lookup — see [Custom rules](/constraints/localization/custom-rules.html).
+Give the rule a key and it joins the same lookup, see [Custom rules](/constraints/localization/custom-rules.html).
 
 ### Do not translate the English sentence
 
@@ -151,13 +151,13 @@ language formats numbers. Look up the identity instead; that is what the identit
 
 ## Where next
 
-- [Context and fallback](/constraints/localization/context-and-fallback.html) — scoping a renderer to a document and a field, and how lookup
+- [Context and fallback](/constraints/localization/context-and-fallback.html), scoping a renderer to a document and a field, and how lookup
   falls back.
-- [Custom rules](/constraints/localization/custom-rules.html) — making your own constraints translatable.
-- [Advanced rendering](/constraints/localization/advanced-rendering.html) — composition, interpolation, groups, plurals, and resolvers.
-- [The key catalogue](/constraints/localization/catalogue.html) — every key Reified can produce.
-- [Adding a language](/constraints/adding-a-language.html) — the working order for a new translation, and proving coverage.
-- [Fable support](/constraints/fable.html) — what the rendering edge does and does not do in JavaScript.
+- [Custom rules](/constraints/localization/custom-rules.html), making your own constraints translatable.
+- [Advanced rendering](/constraints/localization/advanced-rendering.html), composition, interpolation, groups, plurals, and resolvers.
+- [The key catalogue](/constraints/localization/catalogue.html), every key Reified can produce.
+- [Adding a language](/constraints/adding-a-language.html), the working order for a new translation, and proving coverage.
+- [Fable support](/constraints/fable.html), what the rendering edge does and does not do in JavaScript.
 
 Schema renders its own parse and structural failures through these same mechanics, with the field path supplied for
 you: see [Redisplay and field errors](/schema/redisplay-and-field-errors.html).

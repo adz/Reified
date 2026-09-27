@@ -8,7 +8,7 @@ targetFramework: net8.0
 # Customer Id Tutorial
 
 The built-in types cover shapes common to every domain. This tutorial defines one specific
-to yours, and — just as importantly — shows how to decide whether it should be a type at
+to yours, and, just as importantly, shows how to decide whether it should be a type at
 all.
 
 ```fsharp
@@ -24,10 +24,10 @@ receives it. Ask what becomes total, or what branch disappears:
 
 | Candidate | Verdict |
 |---|---|
-| `CustomerId` — a positive account number | **Type.** Lookup, ordering, and equality all rely on it, and an id of `0` is a bug you want to catch once. |
-| `EmailAddress` — matches an email pattern | **Constraint.** Nothing downstream is total because of it; you unwrap it to send mail. |
-| `ShippingWeight` — positive, and summed across a parcel | **Constraint.** The moment you add two of them, F# cannot carry "positive" through, so the type turns every sum into a `Result`. |
-| `NormalisedName` — trimmed and lower-cased | **Neither.** That is a transformation, so it belongs in [Parse](/parsing/index.html). |
+| `CustomerId`, a positive account number | **Type.** Lookup, ordering, and equality all rely on it, and an id of `0` is a bug you want to catch once. |
+| `EmailAddress`, matches an email pattern | **Constraint.** Nothing downstream is total because of it; you unwrap it to send mail. |
+| `ShippingWeight`, positive, and summed across a parcel | **Constraint.** The moment you add two of them, F# cannot carry "positive" through, so the type turns every sum into a `Result`. |
+| `NormalisedName`, trimmed and lower-cased | **Neither.** That is a transformation, so it belongs in [Parse](/parsing/index.html). |
 
 Only the first changes what later code can assume. The second is real validation with no
 downstream consequence; the third is validation that arithmetic immediately undoes. Both
@@ -102,7 +102,7 @@ module CustomerId =
 
 
 Both work because the invariant is a fact about the value, not about the moment of
-construction — and neither involves arithmetic, which is where F# stops being able to
+construction, and neither involves arithmetic, which is where F# stops being able to
 carry the invariant for you. If you cannot write an operation like these, that is good
 evidence the concept should be a constraint instead.
 
@@ -132,7 +132,7 @@ let customerIdSchema : Schema<CustomerId> =
 
 Parsing checks the `int`, constructs the `CustomerId`, and reports failures at the field's
 path. Encoding projects back through `Value`. The emitted JSON Schema carries
-`exclusiveMinimum: 0` because the constraint travelled with the refinement — you did not
+`exclusiveMinimum: 0` because the constraint travelled with the refinement, you did not
 write the rule twice.
 
 To resolve the type in a bare field without a `withSchema`, register it once as described
@@ -141,7 +141,7 @@ example through the Schema DSL and shows where schema-local constraints fit alon
 
 ## Next
 
-- [Order Totals](/refined/tutorials/order-totals.html) — the built-in types used in anger.
-- [Define Refined Types](/refined/domain-values.html) — the full `Refinement` reference.
-- [Schema Integration](/schema/index.html) — applying refinements at structured boundaries.
-- [Refined Schemas](/schema/refined-values.html) — the Schema-side view.
+- [Order Totals](/refined/tutorials/order-totals.html), the built-in types used in anger.
+- [Define Refined Types](/refined/domain-values.html), the full `Refinement` reference.
+- [Schema Integration](/schema/index.html), applying refinements at structured boundaries.
+- [Refined Schemas](/schema/refined-values.html), the Schema-side view.

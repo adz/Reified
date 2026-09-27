@@ -202,7 +202,7 @@ match Schema.check bookingSchema extended with
 
 This suits models that remain publicly constructible, where `Schema.check` is the admission decision rather than the type.
 
-**Several fields, private aggregate.** When fields must move together — shifting a booking changes both dates — lower
+**Several fields, private aggregate.** When fields must move together, shifting a booking changes both dates, lower
 to the draft, edit with ordinary record syntax, and re-admit:
 
 ```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
@@ -217,7 +217,7 @@ authoritative constructor.
 
 Every gated update returns `Result`. That is the honest cost of a cross-field invariant: an edit can break the
 relationship, so an infallible `with` on the validated type would be the bypass this page exists to close. When a
-specific transition provably preserves the invariant — shifting both dates by the same amount cannot reorder them —
+specific transition provably preserves the invariant, shifting both dates by the same amount cannot reorder them , 
 the owning module can expose it as a total function and keep the proof next to the representation.
 
 ## Existing typed values

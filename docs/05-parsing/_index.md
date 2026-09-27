@@ -11,7 +11,7 @@ targetFramework: net8.0
 # Parsing
 
 `Reified.Parse` changes serialized text into primitive typed values. `"42"` becomes `42`, `"true"` becomes `true`. The
-point of the package is not that it converts — `Int32.TryParse` converts — but that when conversion fails it says which
+point of the package is not that it converts, `Int32.TryParse` converts, but that when conversion fails it says which
 of three different things went wrong, in a value you can act on.
 
 ```sh
@@ -48,7 +48,7 @@ type ParseError =
 | `InvalidFormat (target, input)` | Text was supplied but does not spell a value of that type. | `Parse.bool "yes"` → `InvalidFormat ("bool", "yes")` |
 | `OutOfRange (target, input)` | Text spells a well-formed number the destination type cannot hold. | `Parse.int "99999999999"` → `OutOfRange ("int", "99999999999")` |
 
-`target` names the destination type — `"int"`, `"bool"`, `"decimal"`, `"Guid"` — so a caller can tell which conversion
+`target` names the destination type, `"int"`, `"bool"`, `"decimal"`, `"Guid"`, so a caller can tell which conversion
 failed without tracking it separately. `input` is the offending text, retained for redisplay.
 
 The distinction between the three matters more than it looks. An empty field and a misspelled one usually deserve
@@ -71,7 +71,7 @@ different messages, and only `OutOfRange` tells a user that their number was und
 | `Parse.enum<'enum>` | `'enum` | A case name, case-insensitive, or its numeric text. |
 
 Every parser takes `string` and returns `Result<'value, ParseError>`. Every numeric parser uses invariant culture, so
-the same text parses the same way on every machine — a decimal point is always `.`, never `,`.
+the same text parses the same way on every machine, a decimal point is always `.`, never `,`.
 
 Only the numeric parsers can produce `OutOfRange`; the others report `MissingValue` or `InvalidFormat`.
 
@@ -123,7 +123,7 @@ Parse.int raw |> Result.orError PortMissing
 ```
 
 
-Keep the `ParseError` instead — `Result.mapError InvalidInteger` into a case that carries it — when something later
+Keep the `ParseError` instead, `Result.mapError InvalidInteger` into a case that carries it, when something later
 needs to tell the three failures apart or redisplay the offending text.
 
 When the text is one field of structured input rather than a standalone value, do not do this by hand.

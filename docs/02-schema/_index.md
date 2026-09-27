@@ -60,13 +60,13 @@ reports every field failure with its path, and compiles the same declaration int
 
 After the quickstart, use these guides as needed:
 
-- [Schema DSL](/schema/dsl.html) — fields, constraints, constructors, and nested schemas.
-- [Input Sources](/schema/input-sources.html) — name/value input, JSON-like data, CLI values, and configuration.
-- [Construction Guarantees](/schema/trusted-construction.html) — what a schema proves and when a private type is needed.
-- [Union Schemas](/schema/union-schemas.html) — the recommended tagged-union format.
-- [JSON Codecs](/schema/json-codecs.html) — trusted serialization and deserialization from the same declaration.
-- [Derived Schemas](/schema/derivation/index.html) — generate schema declarations during the build.
-- [Versioned Contracts](/schema/versioned-contracts.html) — migrate frozen wire shapes into the current model.
+- [Schema DSL](/schema/dsl.html), fields, constraints, constructors, and nested schemas.
+- [Input Sources](/schema/input-sources.html), name/value input, JSON-like data, CLI values, and configuration.
+- [Construction Guarantees](/schema/trusted-construction.html), what a schema proves and when a private type is needed.
+- [Union Schemas](/schema/union-schemas.html), the recommended tagged-union format.
+- [JSON Codecs](/schema/json-codecs.html), trusted serialization and deserialization from the same declaration.
+- [Derived Schemas](/schema/derivation/index.html), generate schema declarations during the build.
+- [Versioned Contracts](/schema/versioned-contracts.html), migrate frozen wire shapes into the current model.
 
 Use the [API reference for `Schema`](/api/Reified.Schema.html) when you need the complete constructor and interpreter
 catalogue rather than a guided workflow.

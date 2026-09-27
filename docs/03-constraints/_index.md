@@ -37,14 +37,14 @@ package, FsToolkit.ErrorHandling, or ordinary pattern matching when you need to 
 
 ## Start here
 
-- [Quickstart](/constraints/quickstart.html) — define and check a constraint.
-- [Constraint](/constraints/constraint.html) — the core type and its guarantees.
-- [ConstraintDSL](/constraints/dsl.html) — the authoring vocabulary.
-- [Reusable constraints](/constraints/constraints.html) — interpreted rules and opaque escape hatches.
-- [Working with violations](/constraints/violations.html) — inspect and render failures.
-- [Localization](/constraints/localization/index.html) — contextual messages and language catalogues.
-- [Tutorial: constraints and Result](/constraints/tutorials/constraint-result.html) — map violations into application errors.
-- [Fable support](/constraints/fable.html) — use the same rules on JavaScript.
+- [Quickstart](/constraints/quickstart.html), define and check a constraint.
+- [Constraint](/constraints/constraint.html), the core type and its guarantees.
+- [ConstraintDSL](/constraints/dsl.html), the authoring vocabulary.
+- [Reusable constraints](/constraints/constraints.html), interpreted rules and opaque escape hatches.
+- [Working with violations](/constraints/violations.html), inspect and render failures.
+- [Localization](/constraints/localization/index.html), contextual messages and language catalogues.
+- [Tutorial: constraints and Result](/constraints/tutorials/constraint-result.html), map violations into application errors.
+- [Fable support](/constraints/fable.html), use the same rules on JavaScript.
 
 Use [Parsing](/parsing/index.html) when serialized text must first become a typed value. Use
 [Refined](/refined/index.html) when successful admission should be recorded in the type. Use

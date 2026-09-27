@@ -13,15 +13,15 @@ application grows: public records bypassing checks, wire DTOs entering business 
 Use only the strength of guarantee the code needs. A plain record is often right for a wire payload or edit form. A
 private type is useful when many callers must rely on the same invariant without checking it again.
 
-- [Build a private aggregate](/schema/patterns/private-aggregates.html) — keep record syntax inside the owning module while callers see
+- [Build a private aggregate](/schema/patterns/private-aggregates.html), keep record syntax inside the owning module while callers see
   only safe construction and update functions.
-- [Model legal transitions](/schema/patterns/legal-transitions.html) — replace unrestricted record updates with named operations and typed
+- [Model legal transitions](/schema/patterns/legal-transitions.html), replace unrestricted record updates with named operations and typed
   refusals.
-- [Separate wire and domain models](/schema/patterns/wire-and-domain-models.html) — generate permissive wire schemas during the build,
+- [Separate wire and domain models](/schema/patterns/wire-and-domain-models.html), generate permissive wire schemas during the build,
   then admit them into hand-written domain types.
-- [Split a larger application](/schema/patterns/project-structure.html) — use project references to stop boundary and infrastructure
+- [Split a larger application](/schema/patterns/project-structure.html), use project references to stop boundary and infrastructure
   types from reaching the domain.
-- [Test schema guarantees](/data/testing-schema-guarantees.html) — study the repository-only FsCheck adapter pattern for
+- [Test schema guarantees](/data/testing-schema-guarantees.html), study the repository-only FsCheck adapter pattern for
   testing constructors, transitions, codecs, and migrations.
 
 [Construction Guarantees](/schema/trusted-construction.html) explains when a public record, refined field, or private

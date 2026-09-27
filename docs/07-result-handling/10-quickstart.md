@@ -20,7 +20,7 @@ open Reified.ResultDSL
 ```
 
 
-The package works with the standard F# `Result<'value, 'error>` — it does not wrap or replace it. What it supplies is
+The package works with the standard F# `Result<'value, 'error>`, it does not wrap or replace it. What it supplies is
 the vocabulary around it:
 
 | Concern | API | Returns |
@@ -78,7 +78,7 @@ This accumulation is **flat**: a list of your error values with no field identit
 first place belongs to [Constraints](/constraints/index.html), while path-aware accumulated diagnostics over a
 whole structured input belong to [Reified.Schema](/schema/index.html).
 
-All of them return the standard F# `Result`, so these helpers work on their output — but none of them requires this
+All of them return the standard F# `Result`, so these helpers work on their output, but none of them requires this
 package.
 
 ## Continue

@@ -1,7 +1,7 @@
 ---
 weight: 10
 title: Quickstart
-description: Build one schema up in four stages — plain fields, refined fields, constraints, and a private model behind a checked constructor.
+description: Build one schema up in four stages, plain fields, refined fields, constraints, and a private model behind a checked constructor.
 targetFramework: net8.0
 ---
 
@@ -47,8 +47,8 @@ let signupSchema =
 ```
 
 
-`field _.Email` gives the getter and nothing more. The field's value schema comes from its type — `string` resolves
-`Schema.text`, `int` resolves `Schema.int`, `bool` resolves `Schema.bool` — and the wire name is the camelCased
+`field _.Email` gives the getter and nothing more. The field's value schema comes from its type, `string` resolves
+`Schema.text`, `int` resolves `Schema.int`, `bool` resolves `Schema.bool`, and the wire name is the camelCased
 property name. `construct` receives the fields in declaration order; the compiler checks its argument types and its
 result.
 
@@ -62,7 +62,7 @@ quotations, including JavaScript; reach for `fieldAs` on Fable's Rust and PHP ta
 
 ### Parse
 
-`Data` is a source-neutral input tree. The same schema reads form posts, CLI arguments, JSON, and configuration —
+`Data` is a source-neutral input tree. The same schema reads form posts, CLI arguments, JSON, and configuration , 
 see [Input Sources](/schema/input-sources.html).
 
 ```fsharp
@@ -140,7 +140,7 @@ JsonSchema.generate signupSchema
 //  "required":["email","age","newsletter"]}
 
 Inspect.model signupSchema
-// finite metadata: field names, shapes, constraints — no execution
+// finite metadata: field names, shapes, constraints, no execution
 ```
 
 
@@ -153,7 +153,7 @@ Inspect.model signupSchema
 | schema | `Inspect.model` | metadata without execution |
 | versioned `Data` | `Contract.parse` | current model or `ContractError` |
 
-`Schema.check` is for values that did not arrive as `Data` — a record literal, a database mapper's output, an import.
+`Schema.check` is for values that did not arrive as `Data`, a record literal, a database mapper's output, an import.
 It runs the same field rules and calls the same constructor:
 
 ```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
@@ -192,7 +192,7 @@ let registrationSchema =
 
 
 The fields stay bare. Every refined type has exactly one schema, so the field resolves it from the type the same way
-`string` resolved `Schema.text`. Rules that need a parameter — a length range, a pattern — are constraints rather
+`string` resolved `Schema.text`. Rules that need a parameter, a length range, a pattern, are constraints rather
 than types, and go on the field as their own line: `field _.Name { constrain (Constraint.lengthBetween 2 80) }`.
 
 `NonEmptyList<NonBlankString>` composes: the outer refinement resolves, and so does the item.
@@ -275,13 +275,13 @@ age: Must be between 13 and 120; got 9.
 ```
 
 
-A constraint preserves the value's type — `maxLength 40` on a `string` field leaves a `string` field. That is the
+A constraint preserves the value's type, `maxLength 40` on a `string` field leaves a `string` field. That is the
 difference from `refine`, which changes the type and is what makes the guarantee durable.
 
 Which to reach for:
 
-- The rule is true of every value of the type — put it in the refinement, and every construction path enforces it.
-- The rule is true only at this boundary — put it in the field block, where a reader can see it applies here.
+- The rule is true of every value of the type, put it in the refinement, and every construction path enforces it.
+- The rule is true only at this boundary, put it in the field block, where a reader can see it applies here.
 
 Schema will not take metadata without an executable check behind it, so what an inspector reports is always what
 parsing enforces. Constraint names come from
@@ -290,7 +290,7 @@ parsing enforces. Constraint names come from
 
 ## 4. A private model behind a checked constructor
 
-Stages 2 and 3 cover rules about one field. A rule *between* fields — a booking's start must not follow its end — has
+Stages 2 and 3 cover rules about one field. A rule *between* fields, a booking's start must not follow its end, has
 nowhere field-local to live, and no field type can carry it.
 
 Make the representation private so the only way to build the type runs the rule:
@@ -377,7 +377,7 @@ let shift days booking =
 
 The draft is not a hole in the guarantee. A `BookingDraft` proves nothing; only `Booking.create` and
 `Schema.parse Booking.schema` produce a `Booking`, and both run the same rule. Skipping it means editing the module
-that owns the representation — a visible act, rather than a quiet record literal elsewhere in the codebase.
+that owns the representation, a visible act, rather than a quiet record literal elsewhere in the codebase.
 
 Every gated update returns `Result`. That is the real cost of a cross-field invariant: an edit can break the
 relationship, so an infallible `with` on the checked type would be exactly the bypass this stage closes.
@@ -386,16 +386,16 @@ relationship, so an infallible `with` on the checked type would be exactly the b
 
 The four stages are a ladder, not a target. Take the lowest rung that prevents a real problem:
 
-1. Plain fields — the schema is the admission decision.
-2. Refined fields — field-local invariants hold everywhere, and the record stays public with `with` intact.
-3. Field constraints — boundary-specific rules, visible where they apply.
-4. Private model and draft — relationships between fields.
+1. Plain fields, the schema is the admission decision.
+2. Refined fields, field-local invariants hold everywhere, and the record stays public with `with` intact.
+3. Field constraints, boundary-specific rules, visible where they apply.
+4. Private model and draft, relationships between fields.
 
-- [Construction Guarantees](/schema/trusted-construction.html) — what each rung does and does not promise.
-- [SchemaDSL](dsl.html) — the full declaration vocabulary.
-- [Derived Schemas](derivation/index.html) — generate that declaration from an attributed F# wire record.
-- [Field Blocks and Plain Functions](/schema/field-desugaring.html) — a field block read as ordinary functions over one `Schema`.
-- [Refined Schemas](/schema/refined-values.html) — your own domain types as fields.
-- [Tutorials](tutorials/index.html) — a signup form, nested models and collections, and metadata inspection.
-- [Redisplay And Field Errors](/schema/redisplay-and-field-errors.html) — failed parses that keep the user's input.
-- [Versioned Contracts](/schema/versioned-contracts.html) — evolving the wire format without freezing the domain model.
+- [Construction Guarantees](/schema/trusted-construction.html), what each rung does and does not promise.
+- [SchemaDSL](dsl.html), the full declaration vocabulary.
+- [Derived Schemas](derivation/index.html), generate that declaration from an attributed F# wire record.
+- [Field Blocks and Plain Functions](/schema/field-desugaring.html), a field block read as ordinary functions over one `Schema`.
+- [Refined Schemas](/schema/refined-values.html), your own domain types as fields.
+- [Tutorials](tutorials/index.html), a signup form, nested models and collections, and metadata inspection.
+- [Redisplay And Field Errors](/schema/redisplay-and-field-errors.html), failed parses that keep the user's input.
+- [Versioned Contracts](/schema/versioned-contracts.html), evolving the wire format without freezing the domain model.

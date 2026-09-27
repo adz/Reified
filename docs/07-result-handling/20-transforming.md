@@ -22,7 +22,7 @@ type SignupError =
 
 ## map: the step cannot fail
 
-`map` applies a plain function to the success value. An `Error` passes straight through untouched — the function never
+`map` applies a plain function to the success value. An `Error` passes straight through untouched, the function never
 runs.
 
 ```fsharp

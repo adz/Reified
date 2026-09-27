@@ -27,8 +27,8 @@ The measured run used:
 - BenchmarkDotNet 0.15.8
 
 The recorded results use BenchmarkDotNet's `ShortRun` job: one launch, three warmups, and three measured iterations.
-That is enough for a laptop-local directional comparison, but the error bars are wide — often a large fraction of the
-mean — so treat close timings as equivalent until a longer run shows otherwise. Allocations are stable between runs
+This is enough for a laptop-local directional comparison, but the error bars are wide, often a large fraction of the
+mean, so treat close timings as equivalent until a longer run shows otherwise. Allocations are stable between runs
 and are the more reliable signal here.
 
 ## JSON codec
@@ -66,7 +66,7 @@ three times one decode on this model.
 
 ## Boundary parsing
 
-The boundary suite compares the trusted codec against full boundary parsing — `JsonDocument` to `Data` to `Schema.parse` with complete path-aware diagnostics:
+The boundary suite compares the trusted codec against full boundary parsing, `JsonDocument` to `Data` to `Schema.parse` with complete path-aware diagnostics:
 
 | Operation | Mean | Allocated |
 | --- | --- | --- |

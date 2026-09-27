@@ -52,7 +52,7 @@ fieldAs "type" _.Number
 
 
 `field` derives its name by reading a quotation of the getter, once, while the schema value is built. That runs on
-.NET and on the Fable targets with quotation support, so both forms are available almost everywhere — see
+.NET and on the Fable targets with quotation support, so both forms are available almost everywhere, see
 [Compiler-Directed, AOT, and Fable](/notes/aot-trimming-fable.html) for the version and target requirements. `fieldAs` is
 the portable spelling for Fable's Rust and PHP targets, which have no quotation support.
 
@@ -127,7 +127,7 @@ Operations run from top to bottom:
 5. `validate` runs executable value-preserving logic over the current type.
 
 Raw constraints have to come before `refine`, because after it the current type is `ContactEmail` and `maxLength` is
-not a rule about a `ContactEmail` — it is a rule about the text that was admitted. Put text rules above the line and
+not a rule about a `ContactEmail`, it is a rule about the text that was admitted. Put text rules above the line and
 domain rules below it.
 
 The getter fixes where the pipeline must end. `field _.Email` on a `ContactEmail` member means the block has to arrive
@@ -153,7 +153,7 @@ field _.Email {
 
 
 The typed vocabulary in `Reified.SchemaDSL` covers every [interpreted](/constraints/constraints.html)
-constraint — the built-ins Reified can read as data and lower to JSON Schema. The field type checks every
+constraint, the built-ins Reified can read as data and lower to JSON Schema. The field type checks every
 entry, so `email` cannot be applied to an `int` field. Lifted constraints such as `minLength` apply to strings,
 lists, arrays, and maps with shape-appropriate interpretation.
 

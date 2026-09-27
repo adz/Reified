@@ -75,12 +75,12 @@ constraint.fullMessage       = {attribute} {message}
 ```
 
 
-Reorder them freely. A language that puts the actual value first, or the noun last, changes only these entries —
+Reorder them freely. A language that puts the actual value first, or the noun last, changes only these entries , 
 not the twenty-five predicates:
 
 ```text
 constraint.actual      = reçu {actual} au lieu de « {message} »
-constraint.fullMessage = {message} — {attribute}
+constraint.fullMessage = {message}, {attribute}
 ```
 
 
@@ -106,8 +106,8 @@ Three or more items combine the last two with `end`, fold the preceding items ri
 apply `start` to the first. Two items use `pair`. One item is rendered alone with no lookup at all, so there is no
 pattern to write for the singular case.
 
-If your language's joining cannot be expressed this way — the conjunction changes the words of its members, or the
-group has to be reordered as a whole — patterns are the wrong tool. Project `Violation.toMessageTree` and own the
+If your language's joining cannot be expressed this way, the conjunction changes the words of its members, or the
+group has to be reordered as a whole, patterns are the wrong tool. Project `Violation.toMessageTree` and own the
 traversal:
 
 ```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
@@ -133,7 +133,7 @@ attribute.postcode                = Le code postal
 ```
 
 
-Name the ones that matter and let the rest humanize. Humanization only ever applies to a raw segment name — a
+Name the ones that matter and let the rest humanize. Humanization only ever applies to a raw segment name, a
 resolved resource value is returned byte-for-byte, including its casing and any leading or trailing whitespace the
 translator wanted.
 
@@ -163,8 +163,8 @@ constraint.cardinality.minimum.other = doit contenir au moins {minimum} élémen
 `.one` is selected when the operand is exactly one; `.other` otherwise. The plural key is tried before the bare key
 *at the same contextual level*, which means a bare field-specific entry still beats a pluralized model-level one.
 
-Two forms are all ordinary lookup does. A language with more categories — or one where the category depends on more
-than the value — takes an advanced resolver:
+Two forms are all ordinary lookup does. A language with more categories, or one where the category depends on more
+than the value, takes an advanced resolver:
 
 ```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
 let renderer =
@@ -222,7 +222,7 @@ let ``the French catalogue covers every Reified key`` () =
 ```
 
 
-Reified cannot enumerate your contexts and fields — it has never seen them. For contextual coverage, enumerate the
+Reified cannot enumerate your contexts and fields, it has never seen them. For contextual coverage, enumerate the
 ones you care about and ask the renderer exactly what it will look up:
 
 ```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
@@ -244,13 +244,13 @@ let candidates context field key =
 `lookupCandidates` returns the exact encoded keys in order, including the selected `.one`/`.other` key at each
 level; `attributeCandidates` returns the noun keys. Assert that at least one of each resolves.
 
-For a pluralized entry, pass an argument map with a representative operand — the selected suffix depends on the
+For a pluralized entry, pass an argument map with a representative operand, the selected suffix depends on the
 value, so `1` and `3` give you the `.one` and `.other` candidates respectively.
 
 ## What a translator never has to do
 
-- reproduce the key list by hand — it is `Catalogue.keys`;
-- write an optional-value template — `{actual}` is a separate composition entry;
-- repeat the field name in every predicate — the noun composes once, around the finished message;
-- handle a missing entry — every key falls back through the contextual chain to neutral English;
-- worry about a field named with a dot or a bracket — segments are encoded before joining.
+- reproduce the key list by hand, it is `Catalogue.keys`;
+- write an optional-value template, `{actual}` is a separate composition entry;
+- repeat the field name in every predicate, the noun composes once, around the finished message;
+- handle a missing entry, every key falls back through the contextual chain to neutral English;
+- worry about a field named with a dot or a bracket, segments are encoded before joining.

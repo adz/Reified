@@ -51,7 +51,7 @@ rejected: AgeNotANumber "abc"
 The value returned is the original `Error (AgeNotANumber "abc")`. `tap` did not run, because the result was not `Ok`;
 `tapError` ran and returned its input untouched.
 
-Both signatures say the same thing — the effect returns `unit`, so it has no way to influence what comes out:
+Both signatures say the same thing, the effect returns `unit`, so it has no way to influence what comes out:
 
 ```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
 Result.tap      : ('value -> unit) -> Result<'value, 'error> -> Result<'value, 'error>
@@ -72,4 +72,4 @@ let handleSignup raw =
 
 
 Keep the effect small and total. An effect that throws will propagate out of `tap`, which defeats the purpose of
-working in `Result` — and because the exception escapes mid-pipeline, the result you were carrying is lost.
+working in `Result`, and because the exception escapes mid-pipeline, the result you were carrying is lost.

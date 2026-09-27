@@ -41,7 +41,7 @@ type DataCase = { Name: string; Value: Data }
 same variation list can be applied to more than one baseline. `dimension` groups variations into one independent axis
 of a matrix.
 
-`variants` and `matrix` apply those descriptions to a baseline and return `DataCase list` — each case is a name and
+`variants` and `matrix` apply those descriptions to a baseline and return `DataCase list`, each case is a name and
 the value that resulted. A `DataCase` is what a test iterates over.
 
 ### Why not just `Data list`
@@ -55,8 +55,8 @@ the value means:
   than by a position in a Cartesian product.
 - `variants` can reject duplicate names, which catches two cases that were meant to differ but describe the same thing.
 
-The value is a plain `Data`, so anything on the rest of these pages — `Data.patch`, `matching`, `Data.compare`,
-`Data.Json.render` — applies to `case.Value` directly.
+The value is a plain `Data`, so anything on the rest of these pages, `Data.patch`, `matching`, `Data.compare`,
+`Data.Json.render`, applies to `case.Value` directly.
 
 ```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
 for case in cases do

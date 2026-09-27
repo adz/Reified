@@ -29,7 +29,7 @@ public class CustomerValidator : AbstractValidator<Customer>
 ```
 
 
-The `Customer` had to be constructed first — usually by a model binder filling public setters with whatever arrived.
+The `Customer` had to be constructed first, usually by a model binder filling public setters with whatever arrived.
 Between construction and validation (and anywhere a code path forgets to call the validator) an invalid `Customer`
 exists and can leak.
 
@@ -78,7 +78,7 @@ errors. With FluentValidation, each of those is a separate artifact to keep in s
 
 | Concern | FluentValidation | Reified |
 | --- | --- | --- |
-| Invalid object exists? | Yes, until validated | No — parsing constructs or fails |
+| Invalid object exists? | Yes, until validated | No, parsing constructs or fails |
 | Rules readable as data | No (lambdas in classes) | Yes (`Constraint` metadata) |
 | OpenAPI/JSON Schema | Separate annotations | Generated from the same declaration |
 | Error paths | Property names via expressions | Structural paths (`contacts[1].value`) |

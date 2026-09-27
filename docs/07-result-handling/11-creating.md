@@ -38,7 +38,7 @@ Result.error NameMissing  // Error NameMissing
 ## From a predicate over a value
 
 `okIf` keeps the value when the predicate holds; `failIf` is its inverse. Both fail with `unit`, because at that point
-there is nothing to say about the failure yet — you attach the reason with `orError`.
+there is nothing to say about the failure yet, you attach the reason with `orError`.
 
 ```fsharp
 "Ada" |> Result.okIf (String.IsNullOrWhiteSpace >> not)
@@ -122,7 +122,7 @@ let positive : Constraint<int> = Constraint.greaterThan 0
 
 
 Note the success type: `Constraint.guard` returns `Ok 36`, not `Ok ()`. If the rule is only a local condition, not
-something worth naming and reusing, use `okIf`/`failIf` with `orError` instead — see
+something worth naming and reusing, use `okIf`/`failIf` with `orError` instead, see
 [Constraint vs. Result](/constraints/overview.html) for the distinction.
 
 ## Which one to reach for
