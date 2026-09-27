@@ -13,7 +13,9 @@ Business code needs types that make current invariants easy to rely on.
 A **wire model** represents serialized data such as JSON, a message, or a stored document. A **domain model** represents
 the business concept used by application logic. An **invariant** is a rule every valid domain value must satisfy.
 
-Keep those jobs in separate types.
+Keep those jobs in separate types. This page assumes you have already chosen generation over a hand-written schema;
+see [Schema or Generated DTO](/schema/schema-or-generated-dto.html) for that decision and for keeping the wire
+record free of constraint attributes so validation stays in the domain mapping below, not duplicated on the DTO.
 
 ## Define a permissive wire record
 

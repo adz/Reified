@@ -43,13 +43,15 @@ JSON Schema, NativeAOT, trimming, and Fable.
 
 ## Guides
 
-- [Set up build generation](/schema/derivation/msbuild.html) — package reference, generated-file modes, and MSBuild properties.
-- [Attributes](/schema/derivation/attributes.html) — every supported attribute and its Schema DSL equivalent.
-- [How inference works](/schema/derivation/inference.html) — records, field types, names, constructors, unions, and diagnostics.
-- [Generated code](/schema/derivation/generated-code.html) — exactly what the companion file contains, and where your own mapping code goes.
+- [Set up build generation](/schema/derivation/msbuild.html), package reference, generated-file modes, and MSBuild properties.
+- [Attributes](/schema/derivation/attributes.html), every supported attribute and its Schema DSL equivalent.
+- [How inference works](/schema/derivation/inference.html), records, field types, names, constructors, unions, and diagnostics.
+- [Generated code](/schema/derivation/generated-code.html), exactly what the companion file contains, and where your own mapping code goes.
 
 ## When to derive
 
-Derivation is intended for public, permissive boundary records. Keep domain invariants in refined values or private
-domain types, then map the parsed wire record through a domain constructor. See
-[Separate Wire and Domain Models](/schema/patterns/wire-and-domain-models.html).
+Derivation is intended for public, permissive boundary records: a wire shape you do not own, or one with frozen
+versions that must keep decoding. Keep domain invariants in refined values or private domain types, then map the
+parsed wire record through a domain constructor; see [Separate Wire and Domain Models](/schema/patterns/wire-and-domain-models.html).
+If you own the model end to end and it has no version history, write the `Schema<'model>` by hand instead and
+skip the DTO. See [Schema or Generated DTO](/schema/schema-or-generated-dto.html) for the full decision.

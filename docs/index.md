@@ -21,7 +21,7 @@ targetFramework: net8.0
 Enforce project wide.</h1>
 
 <div class="lede">
-<p>Declare a rule once — on a value, a field, or a whole model — and the checking, the diagnostics, the JSON codec, the contract document, and the test data are all read from that one declaration.</p>
+<p>Declare a rule once, on a value, a field, or a whole model, and the checking, the diagnostics, the JSON codec, the contract document, and the test data are all read from that one declaration. No runtime reflection: the same declaration compiles under NativeAOT, trimming, and Fable.</p>
 </div>
 
 </div>
@@ -47,12 +47,18 @@ Schema.parse signupSchema input
 // email: Expected an email address, but was ada.
 // newsletter: This value was omitted.
 
-Json.serialize (Json.compile signupSchema) signup
+let codec = Json.compile signupSchema     // compile once, typically at startup
+Json.serialize codec signup
 // {"email":"ada@example.org","age":36,"newsletter":true}
 ```
 
 
 </div>
+
+<p style="max-width: 78ch; margin: 0 auto 1rem; text-align: center;">The compiled codec is not a slower, safer
+alternative to hand-rolled JSON. On canonical UTF-8 input Reified's decoder ran about 19% faster than
+<code>System.Text.Json</code> and allocated less, in the recorded <a href="notes/benchmarks.html">benchmark</a>,
+because a schema-derived codec skips the reflection and boxing a general-purpose serializer pays for on every call.</p>
 
 <div class="docs-home-example" style="max-width: 78ch; margin: 0 auto 2rem;">
 
@@ -74,18 +80,38 @@ JSON Schema, and the generated test data come from that one declaration. Nothing
 <a class="btn btn-primary" href="getting-started/index.html">Get started &rarr;</a>
 </p>
 
-<h2 class="docs-home-section-title">Choose your starting point</h2>
+<h2 class="docs-home-section-title">Five things, in the order they usually matter</h2>
 
 <div class="docs-home-routes">
 
-- **Structured boundaries:** [Schema](/schema/index.html).
-- **Only need one piece?** Choose [Constraints](/constraints/index.html),
-  [Refined](/refined/index.html), [Parsing](/parsing/index.html), or [Data](/data/index.html).
-- **Composing ordinary F# failures?** Use [Result handling](/result-handling/index.html) independently.
+1. **JSON without reflection.** A schema compiles to a JSON codec that runs under NativeAOT and trimming, and
+   the same schema compiles to Fable JavaScript. See [JSON Codecs](/schema/json-codecs.html) and
+   [AOT, trimming, and Fable](/notes/aot-trimming-fable.html).
+2. **A schema you can inspect, not just run.** One declaration produces field-aware parse diagnostics, JSON
+   Schema export, and messages a translator can localize without touching the rule. See
+   [Schema](/schema/index.html), [Redisplay and Field Errors](/schema/redisplay-and-field-errors.html), and
+   [Localization](/constraints/localization/index.html).
+3. **Refined types.** A value's invariant is proven once, at construction, and every later use relies on the
+   proof instead of re-checking it. See [Refined values](/refined/index.html).
+4. **Parse and Result.** Untrusted text becomes a typed value with a reason attached to failure, and ordinary F#
+   `Result` composes without an exception model underneath it. See [Parsing](/parsing/index.html) and
+   [Result handling](/result-handling/index.html).
+5. **Data, as a supporting piece.** A source-neutral structured value for building fixtures and comparing output;
+   useful alongside the four above, not a reason to reach for Reified on its own. See [Data](/data/index.html).
 
 </div>
 
-<p style="max-width: 78ch; margin: 2rem auto; text-align: center;"><a href="notes/packages-and-platforms.html">Packages and platforms &rarr;</a></p>
+<p style="max-width: 78ch; margin: 2rem auto; text-align: center;">Writing a schema for a payload you receive
+from somewhere else, or one with old versions still in storage? See
+<a href="schema/schema-or-generated-dto.html">Schema or Generated DTO</a> before you start: generation and a
+hand-written schema solve different problems, and combining them wrong is the most common way to end up with
+validation that silently does not run.</p>
+
+<p style="text-align: center; margin-bottom: 1rem;">
+<a class="btn btn-primary" href="getting-started/index.html">Get started &rarr;</a>
+</p>
+
+<p style="max-width: 78ch; margin: 0 auto 2rem; text-align: center;"><a href="notes/packages-and-platforms.html">Packages and platforms &rarr;</a></p>
 
 <div class="docs-home-meta" style="margin-bottom: 4rem;">
 <a class="docs-chip" href="getting-started/index.html">Getting started</a>

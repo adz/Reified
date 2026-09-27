@@ -13,6 +13,14 @@ menu:
 Reified gives F# applications one model for trusted values and structured boundaries on .NET and Fable. Declare an
 invariant once; checking, diagnostics, codecs, contract documents, and test data read the same declaration.
 
+In the order they usually matter: a compiled JSON codec that runs under NativeAOT and trimming with no runtime
+reflection, and beat `System.Text.Json` on decode time in the recorded benchmark because it skips the reflection
+and boxing a general-purpose serializer performs on every call; a schema that field-aware diagnostics, JSON
+Schema export, and localizable messages are all read from, in addition to running as a parser; refined types
+that prove an invariant once at construction, so later code relies on the proof instead of re-checking it;
+`Parse` and `Result` for ordinary typed conversion and composition; and `Data`, a source-neutral structured value
+used alongside the four above.
+
 This page walks one complete transaction end to end, then widens out to the pieces it used. Everything on it
 is compiled and executed on every CI run from
 [`examples/Reified.GettingStarted`](https://github.com/adz/Reified/blob/main/examples/Reified.GettingStarted/Program.fs);
@@ -87,7 +95,7 @@ Schema.parse signupSchema input
 `"36"` arrived as text and landed as an `int`. No `Signup` exists unless every field and the constructor
 succeeded, so downstream code does not have to wonder whether validation ran.
 
-Now feed it something a real user would send — a malformed address, an age below the limit, a missing field:
+Now feed it something a real user would send, a malformed address, an age below the limit, a missing field:
 
 ```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
 let input =
@@ -111,7 +119,7 @@ newsletter: This value was omitted.
 
 
 Every independent field is checked, so one parse reports every problem rather than the first. The paths come
-from the structure of the declaration — application code never repeats field names alongside the checks.
+from the structure of the declaration, application code never repeats field names alongside the checks.
 Nobody wrote those three sentences: each one is rendered from the rule that failed.
 
 And now the declaration pays for itself. The same `signupSchema`, read by a different interpreter, is a JSON
@@ -130,17 +138,17 @@ Json.serialize codec { Email = "ada@example.org"; Age = 36; Newsletter = true }
 There is no second description of the wire shape to keep in step, and no runtime reflection: the codec is
 compiled from the schema's typed field plan, so it works under NativeAOT, trimming, and Fable.
 
-That is the whole idea. The rest of this page is the same idea at smaller and larger scales.
+The rest of this page walks the same declaration at smaller and larger scales.
 
 ## The problem it solves
 
-One rule — "an age is at least 13" — usually ends up written four times: in the parser that reads the request,
+One rule, "an age is at least 13", usually ends up written four times: in the parser that reads the request,
 in the validator that guards the domain, in the form that shows the message, and in the test that builds a
 fixture. They start identical and drift. When they drift, the parser accepts what the validator rejects, or the
 form shows a message no code enforces.
 
 Reified's answer is to make the rule a value. A rule you can inspect can be *executed* by a checker,
-*explained* by a renderer, *exported* to JSON Schema or OpenAPI, and *sampled* by a generator — from one
+*explained* by a renderer, *exported* to JSON Schema or OpenAPI, and *sampled* by a generator, from one
 declaration.
 
 ## One rule on one value
@@ -163,7 +171,7 @@ let retryCount : Constraint<int> = Constraint.between 0 10
 
 
 Nobody wrote that failure sentence separately. A `Constraint` carries its own description, and a `Violation`
-carries the rule that failed and the offending value as data — so the message cannot fall out of step with the
+carries the rule that failed and the offending value as data, so the message cannot fall out of step with the
 check, and it can be localized or reformatted without touching the rule.
 
 → [Constraint](/constraints/constraint.html)
@@ -181,8 +189,8 @@ Refine.nonBlankString "  "     // Error ...
 ```
 
 
-Downstream code takes `NonBlankString` and stops re-checking. Your own domain types work the same way —
-`CustomerId`, `Email`, `WorkspaceName` — each defined over a constraint and constructed through it.
+Downstream code takes `NonBlankString` and stops re-checking. Your own domain types work the same way , 
+`CustomerId`, `Email`, `WorkspaceName`, each defined over a constraint and constructed through it.
 
 → [Refined values](/refined/index.html)
 
@@ -224,7 +232,7 @@ JsonSchema.generate signupSchema
 ```
 
 
-`"minimum": 13` was not written twice — it is the `atLeast 13` from the declaration, read for a different
+`"minimum": 13` was not written twice, it is the `atLeast 13` from the declaration, read for a different
 purpose. The same declaration does four more jobs: checking a value you already hold, accepting payloads from
 older versions, describing the model to a form, and generating test data that obeys the rules.
 
@@ -235,8 +243,8 @@ older versions, describing the model to a form, and generating test data that ob
 There is no exception model and no framework result type. `Schema.parse` returns
 `Result<'model, SchemaErrors>`; a value check returns `Result<'value, Violation>`. Both errors are data you can
 match on, group by path, translate, or serialize into a problem-details response.
-[`Reified.Result`](/result-handling/index.html) adds the composition — `result { }` for fail-fast sequencing, accumulating
-builders for collecting every error at once — over the standard `Result` type rather than replacing it.
+[`Reified.Result`](/result-handling/index.html) adds the composition, `result { }` for fail-fast sequencing, accumulating
+builders for collecting every error at once, over the standard `Result` type rather than replacing it.
 
 ## The words this documentation uses
 
