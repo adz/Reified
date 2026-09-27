@@ -1,3 +1,23 @@
+---
+title: Inspect
+api:
+  family: Reified.Inspect
+  sections:
+    - id: models
+      title: Model inspection
+      order: 10
+      members: [model, field]
+      facets:
+        task: [inspect]
+        audience: [common]
+    - id: values
+      title: Value inspection
+      order: 20
+      members: [schema]
+      facets:
+        task: [inspect]
+---
+
 # `Inspect`
 
 `Inspect.model` turns a schema into finite metadata without parsing input or running application code. The result

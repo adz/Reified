@@ -1,6 +1,7 @@
 open System
 open System.Diagnostics
 open System.IO
+open System.Text.RegularExpressions
 open System.Xml.Linq
 open Fake.Core
 open Fake.Core.TargetOperators
@@ -226,14 +227,32 @@ let addCompatibilityRoutes () =
           "api/Reified.Schema.Json.Json.html", "Reified.Json.html"
           "api/Reified.Schema.Json.JsonCodec`1.html", "Reified.JsonCodec`1.html"
           "api/Reified.Schema.Json.JsonCodecException.html", "Reified.JsonCodecException.html" ]
+    let writeRedirect (path: string) (destination: string) =
+        Directory.CreateDirectory(Path.GetDirectoryName path) |> ignore
+        File.WriteAllText(path, $"<!doctype html><html><head><meta http-equiv=\"refresh\" content=\"0; url={destination}\"><link rel=\"canonical\" href=\"{destination}\"></head><body><a href=\"{destination}\">Moved</a></body></html>")
     for route, destination in redirects do
         let path = Path.Combine("output", route)
         let destinationPath = Path.Combine(Path.GetDirectoryName path, destination)
         if not (File.Exists path) && File.Exists destinationPath then
-            Directory.CreateDirectory(Path.GetDirectoryName path) |> ignore
-            File.WriteAllText(path, $"<!doctype html><html><head><meta http-equiv=\"refresh\" content=\"0; url={destination}\"><link rel=\"canonical\" href=\"{destination}\"></head><body><a href=\"{destination}\">Moved</a></body></html>")
+            writeRedirect path destination
+
+    // FsLiveDocs 0.11 family links use a stable arity/module-free route. Preserve that route
+    // beside every current and historical companion page until the generator emits aliases.
+    let outputRoot = Path.GetFullPath "output"
+    let pages = Directory.GetFiles(outputRoot, "*.html", SearchOption.AllDirectories) |> Array.sort
+    for source in pages do
+        let sourceName = Path.GetFileName source
+        for linkMatch in Regex.Matches(File.ReadAllText source, "href=\"([^\"#?]+\\.html)\"") do
+            let href = linkMatch.Groups[1].Value
+            if not (Uri.IsWellFormedUriString(href, UriKind.Absolute)) then
+                let target = Path.GetFullPath(Path.Combine(Path.GetDirectoryName source, href))
+                if target.StartsWith(outputRoot, StringComparison.Ordinal) && not (File.Exists target) then
+                    let sibling = Path.Combine(Path.GetDirectoryName target, sourceName)
+                    if File.Exists sibling then writeRedirect target sourceName
 
 let checkPages () =
+    // External package-consumer tests clean NuGet state; restore manifest tools before the final docs check.
+    dotnet [ "tool"; "restore" ]
     dotnet [ "livedocs"; "verify-output"; historyPath (); "--output"; "output"; "--interactive"; "false"; "--banner"; "false" ]
 
 target "BuildCandidateHistory" buildHistory

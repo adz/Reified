@@ -1,5 +1,14 @@
 # Release Notes
 
+## 0.11.0 - 2026-09-27
+
+### Documentation
+
+- The API reference now organizes each package into explicit conceptual sections instead of a flat entity list.
+- Companion types and modules share one API family page while retaining exact symbol links.
+- Entity summaries and sidebar navigation expose operation groups down to individual functions.
+- The documentation toolchain moved to FsLiveDocs 0.11.0 and no longer requires Node.js or npm to build search indexes.
+
 ## 0.10.0 - 2026-09-27
 
 ### `DeriveSchema` `Chain` renamed to `Contract` (breaking)

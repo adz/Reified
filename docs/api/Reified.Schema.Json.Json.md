@@ -1,3 +1,37 @@
+---
+title: Json
+api:
+  family: Reified.Schema.Json.Json
+  sections:
+    - id: compile
+      title: Compile codecs
+      order: 10
+      members: [compile]
+      facets:
+        task: [compile]
+        audience: [common]
+    - id: write
+      title: Serialize JSON
+      order: 20
+      members: [serialize, serializeBytes, serializeWith, serializeBytesWith, serializeIndented, serializeToStream, serializeToStreamWith]
+      facets:
+        task: [serialize]
+        capability: [json]
+    - id: read
+      title: Deserialize JSON
+      order: 30
+      members: [deserialize, deserializeBytes, tryDeserialize, deserializeStreamAsync, parseData]
+      facets:
+        task: [deserialize]
+        capability: [json]
+    - id: formatting
+      title: Formatting options
+      order: 40
+      members: [defaults, indented, reindent]
+      facets:
+        capability: [formatting]
+---
+
 # `Json`
 
 `Json.compile` interprets a `Schema<'model>` as a reusable `JsonCodec<'model>`. Compile once, then use the codec to
