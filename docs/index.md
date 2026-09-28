@@ -76,9 +76,18 @@ JsonSchema.generate signupSchema
 <p style="max-width: 78ch; margin: 0 auto 0.5rem; text-align: center;">Every failure message, the JSON codec, the
 JSON Schema, and the generated test data come from that one declaration. Nothing above is written twice.</p>
 
-<p style="text-align: center; margin-bottom: 2rem;">
+<p style="text-align: center; margin-bottom: 1rem;">
 <a class="btn btn-primary" href="getting-started/index.html">Get started &rarr;</a>
 </p>
+
+<div class="docs-home-meta" style="margin-bottom: 2rem;">
+<a class="docs-chip" href="schema/json-codecs.html">JSON Codecs</a>
+<a class="docs-chip" href="schema/index.html">Schema</a>
+<a class="docs-chip" href="refined/index.html">Refined</a>
+<a class="docs-chip" href="parsing/index.html">Parsing</a>
+<a class="docs-chip" href="result-handling/index.html">Result handling</a>
+<a class="docs-chip" href="data/index.html">Data</a>
+</div>
 
 <h2 class="docs-home-section-title">Five things, in the order they usually matter</h2>
 
