@@ -21,11 +21,11 @@
 
   <Target Name="BuildSourceTreeSchemagen" BeforeTargets="ReifiedSchemaGen">
     <MSBuild
-      Projects="..\..\tools\Reified.SchemaGen\schemagen.fsproj"
+      Projects="..\..\tools\Reified.SchemaGen.Task\schemagen.fsproj"
       Targets="Build"
       Properties="Configuration=$(Configuration)" />
   </Target>
 
-  <Import Project="..\..\src\Reified.Schema.Contracts.Build\build\Reified.Schema.Contracts.Build.targets" />
+  <Import Project="..\..\src\Reified.SchemaGen.MSBuild\build\Reified.SchemaGen.MSBuild.targets" />
 
 </Project>

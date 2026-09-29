@@ -2,6 +2,18 @@
 
 ## 0.11.0 - 2026-09-27
 
+### `Reified.Schema.Contracts` renamed to `Reified.SchemaGen` (breaking)
+
+- `Reified.Schema.Contracts` is now `Reified.SchemaGen`, and `Reified.Schema.Contracts.Build` is now
+  `Reified.SchemaGen.MSBuild`. There is no compatibility alias or deprecated forwarding package; update the
+  `PackageReference` in any project that references the MSBuild integration directly.
+- The name previously described the package's original feature, the `.contract` file grammar, from before
+  `[<DeriveSchema>]`-record generation became the primary path and made `.contract` a secondary form. `Contract`
+  now refers to exactly one thing project-wide: the runtime `Contract<'model>` versioning type in `Reified.Schema`,
+  which is unaffected by this rename and did not move.
+- `[<DeriveSchema>]` and its `Contract`/`Version` arguments are unaffected: they live in the base `Reified.Schema`
+  package, not in the renamed one, and always have.
+
 ### Documentation
 
 - The API reference now organizes each package into explicit conceptual sections instead of a flat entity list.

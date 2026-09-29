@@ -1,8 +1,8 @@
-module Reified.Schema.Contracts.SchemaGen
+module Reified.SchemaGen.Cli
 
 open System
 open System.IO
-open Reified.Schema.Contracts
+open Reified.SchemaGen
 
 /// reified schemagen: generates checked-in F# from .contract files and [<DeriveSchema>]-marked records.
 ///

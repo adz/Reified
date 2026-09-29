@@ -86,14 +86,14 @@ let ``the umbrella does not pull repository tooling into a consumer`` () =
     // The contract compiler and the FsCheck adapter are repository tooling. Reaching a consumer
     // through the umbrella would put FCS and FsCheck on an application's dependency graph.
     let references = umbrellaReferences ()
-    test <@ not (references.Contains "Reified.Schema.Contracts") @>
+    test <@ not (references.Contains "Reified.SchemaGen") @>
     test <@ not (references.Contains "Reified.Schema.Testing") @>
 
 [<Fact>]
 let ``the build-integration package stays a direct install`` () =
     // MSBuild build/ assets are not transitive, so an umbrella dependency would install the targets
-    // without ever running them. Referencing Reified.Schema.Contracts.Build is the consumer's job.
-    test <@ not ((umbrellaReferences ()).Contains "Reified.Schema.Contracts.Build") @>
+    // without ever running them. Referencing Reified.SchemaGen.MSBuild is the consumer's job.
+    test <@ not ((umbrellaReferences ()).Contains "Reified.SchemaGen.MSBuild") @>
 
 [<Fact>]
 let ``every packable runtime package is packed by the build tool`` () =
@@ -103,7 +103,7 @@ let ``every packable runtime package is packed by the build tool`` () =
     let unpacked =
         packableRuntimeProjects ()
         |> Set.add "Reified"
-        |> Set.add "Reified.Schema.Contracts.Build"
+        |> Set.add "Reified.SchemaGen.MSBuild"
         |> Set.filter (fun project -> not (buildTool.Contains $"/{project}.fsproj"))
 
     test <@ unpacked = Set.empty @>

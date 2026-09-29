@@ -20,7 +20,7 @@
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/Reified.Build/Reified.Build.fsproj" />
-    <Project Path="tools/Reified.SchemaGen/schemagen.fsproj" />
+    <Project Path="tools/Reified.SchemaGen.Task/schemagen.fsproj" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Reified/Reified.fsproj" />
@@ -31,8 +31,8 @@
     <Project Path="src/Reified.Refinements/Reified.Refinements.fsproj" />
     <Project Path="src/Reified.Schema/Reified.Schema.fsproj" />
     <Project Path="src/Reified.Schema.Http/Reified.Schema.Http.fsproj" />
-    <Project Path="src/Reified.Schema.Contracts/Reified.Schema.Contracts.fsproj" />
-    <Project Path="src/Reified.Schema.Contracts.Build/Reified.Schema.Contracts.Build.fsproj" />
+    <Project Path="src/Reified.SchemaGen/Reified.SchemaGen.fsproj" />
+    <Project Path="src/Reified.SchemaGen.MSBuild/Reified.SchemaGen.MSBuild.fsproj" />
     <Project Path="src/Reified.Schema.Testing/Reified.Schema.Testing.fsproj" />
   </Folder>
   <Folder Name="/tests/">
@@ -45,7 +45,7 @@
     <Project Path="tests/Reified.Schema.Json.Tests/Reified.Schema.Json.Tests.fsproj" />
     <Project Path="tests/Reified.Schema.Tests/Reified.Schema.Tests.fsproj" />
     <Project Path="tests/Reified.Schema.Http.Tests/Reified.Schema.Http.Tests.fsproj" />
-    <Project Path="tests/Reified.Schema.Contracts.Tests/Reified.Schema.Contracts.Tests.fsproj" />
+    <Project Path="tests/Reified.SchemaGen.Tests/Reified.SchemaGen.Tests.fsproj" />
     <Project Path="tests/Reified.Schema.Testing.Tests/Reified.Schema.Testing.Tests.fsproj" />
   </Folder>
 </Solution>

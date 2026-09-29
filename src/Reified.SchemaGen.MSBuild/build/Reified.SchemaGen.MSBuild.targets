@@ -26,7 +26,7 @@
     <ReifiedSchemaGenToolPath Condition="'$(ReifiedSchemaGenToolPath)' == ''">$(MSBuildThisFileDirectory)../tools/schemagen.dll</ReifiedSchemaGenToolPath>
   </PropertyGroup>
 
-  <UsingTask TaskName="Reified.Schema.Contracts.Build.GenerateSchemas" AssemblyFile="$(ReifiedSchemaGenToolPath)" />
+  <UsingTask TaskName="Reified.SchemaGen.MSBuild.GenerateSchemas" AssemblyFile="$(ReifiedSchemaGenToolPath)" />
 
   <Target Name="ReifiedSchemaGen" BeforeTargets="CoreCompile" Condition="'$(ReifiedSchemaGenEnabled)' == 'true'">
     <GenerateSchemas

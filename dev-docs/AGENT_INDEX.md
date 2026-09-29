@@ -29,7 +29,7 @@ exports a type called `X`. See `dev-docs/namespace-flatten.md`.
 
 - `Reified` (`src/Reified/`): umbrella package. No sources and no assembly — only a dependency on every packable
   runtime package below. `Reified.Package.Tests` pins its contents; adding a packable package without adding it
-  here fails that suite. `Reified.Schema.Contracts.Build` is deliberately excluded: MSBuild `build/` assets are not
+  here fails that suite. `Reified.SchemaGen.MSBuild` is deliberately excluded: MSBuild `build/` assets are not
   transitive, so an umbrella dependency would install the targets without running them.
 - `Reified.Result` (`src/Reified.Result/`): generic Result combinators, conversions/extraction helpers, and `result { }`
   in the `Reified.Result` namespace. Independent leaf.
@@ -49,12 +49,12 @@ exports a type called `X`. See `dev-docs/namespace-flatten.md`.
   serve these contracts (ASP.NET Core, GenHTTP) live in the [Axial repository](https://github.com/adz/Axial).
 - `Reified.Schema.Testing` (`src/Reified.Schema.Testing/`): non-packable FsCheck adapter deriving test data from Schema.
   Depends on `Reified.Schema` and FsCheck; never move the test-library dependency into a public package.
-- `Reified.Schema.Contracts` (`src/Reified.Schema.Contracts/`): non-packable wire-tier generation library — the
+- `Reified.SchemaGen` (`src/Reified.SchemaGen/`): non-packable wire-tier generation library — the
   `[<DeriveSchema>]` record frontend (`Records.fs`, FCS syntax-only), the `.contract` parser, and the shared
   resolver/emitter. The `Reified.DerivedSchema` attribute namespace lives in `Reified.Schema` itself (inert metadata).
   FCS stays tool-tier only: never referenced from a packable library.
-- `Reified.Schema.Contracts.Build` (`src/Reified.Schema.Contracts.Build/`): packable targets-only MSBuild package
-  running `tools/Reified.SchemaGen` before compile over `<ReifiedDeriveSchema>`/`<ReifiedContract>` items.
+- `Reified.SchemaGen.MSBuild` (`src/Reified.SchemaGen.MSBuild/`): packable targets-only MSBuild package
+  running `tools/Reified.SchemaGen.Task` before compile over `<ReifiedDeriveSchema>`/`<ReifiedContract>` items.
 - `Reified` is the only umbrella. `Reified.ErrorHandling` is gone and does not come back: a grouping that is not a
   capability does not earn a package. **Values** — Constraint, Refinements, and Parse — is a documentation grouping
   only: no package, no namespace.

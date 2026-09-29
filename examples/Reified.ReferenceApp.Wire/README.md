@@ -23,13 +23,13 @@ dotnet run --project examples/Reified.ReferenceApp.Wire/Reified.ReferenceApp.Wir
 
 ## Regenerating
 
-Package consumers reference `Reified.Schema.Contracts.Build` (with `PrivateAssets="all"`). The build discovers
+Package consumers reference `Reified.SchemaGen.MSBuild` (with `PrivateAssets="all"`). The build discovers
 `[<DeriveSchema>]` in ordinary F# compile files and generates under `obj` by default. This reference app sets
 `ReifiedSchemaGeneratedFiles` to `CheckedIn`, so an ordinary build refreshes `wire/workspace.g.fs` after edits.
 The equivalent direct command is:
 
 ```bash
-dotnet run --project tools/Reified.SchemaGen -- examples/Reified.ReferenceApp.Wire/wire
+dotnet run --project tools/Reified.SchemaGen.Task -- examples/Reified.ReferenceApp.Wire/wire
 ```
 
 The generated module constructs the record by name, so a stale `.g.fs` fails to compile instead of drifting.

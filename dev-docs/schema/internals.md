@@ -120,7 +120,7 @@ a boxed `FieldDefinition<'model,'last>` — the cursor.
 - `Schema.list<'item>()` and `Schema.map<'item>()` use the same resolver. `listWith`/`mapWith` accept an explicit member
   schema for recursion or local configuration. `constrainItems`/`constrainValues` rewrite the nested value definition;
   collection constraints remain on the outer definition.
-- `Reified.Schema.Contracts.Emitter` mirrors handwritten authoring: it emits `field` for canonically resolvable fields
+- `Reified.SchemaGen.Emitter` mirrors handwritten authoring: it emits `field` for canonically resolvable fields
   with no operations, and applies documentation, formats, defaults, constraints, and supply rules directly to an
   inferred non-optional primitive/list/map schema. It retains `withSchema` for unions, recursion, generated references,
   transparent-key maps, and decorated optional inner values. Optional inner constraints have type `Constraint<'item>`,
@@ -160,4 +160,4 @@ lowers to the existing union descriptions. It adds no reflection or interpreter 
 | Add a constraint | `Constraint` module (`Schema.fs`), its check in `SchemaValidation.fs`, JSON Schema lowering in `Reified.Schema.JsonSchema`, typed wrapper in `Syntax` (`Shape.fs`) |
 | Add a primitive | `PrimitiveValueKind`, `Value` module, parsing in `SchemaValidation.fs`, `SchemaDefaults` overloads |
 | Add an interpreter | New file after `SchemaApi.fs` (as `JsonSchema.fs` does), or a new package; walk `Inspect.model` output or compile the typed record plan |
-| Change generated code | `src/Reified.Schema.Contracts` (Emitter) — not this project |
+| Change generated code | `src/Reified.SchemaGen` (Emitter) — not this project |

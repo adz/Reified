@@ -1,7 +1,7 @@
-namespace Reified.Schema.Contracts.Tests
+namespace Reified.SchemaGen.Tests
 
 open System.IO
-open Reified.Schema.Contracts
+open Reified.SchemaGen
 open Swensen.Unquote
 open Xunit
 

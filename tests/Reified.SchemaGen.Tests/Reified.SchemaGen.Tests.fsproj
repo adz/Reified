@@ -4,7 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <IsPackable>false</IsPackable>
 
-    <!-- Pulls in Reified.Schema.Contracts, which references FSharp.Compiler.Service (needs
+    <!-- Pulls in Reified.SchemaGen, which references FSharp.Compiler.Service (needs
          FSharp.Core >= 10.1.204). Override the repo-wide dotnet8-friendly floor back up here to
          avoid a spurious NU1605 downgrade warning. -->
     <FSCorePackageVersion>10.1.204</FSCorePackageVersion>
@@ -32,7 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Reified.Schema.Contracts\Reified.Schema.Contracts.fsproj" />
+    <ProjectReference Include="..\..\src\Reified.SchemaGen\Reified.SchemaGen.fsproj" />
   </ItemGroup>
 
 </Project>

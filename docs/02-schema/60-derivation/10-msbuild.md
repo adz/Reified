@@ -13,7 +13,7 @@ Add the runtime Schema package and the private build-time generator package:
 ```xml
 <ItemGroup>
   <PackageReference Include="Reified.Schema" Version="..." />
-  <PackageReference Include="Reified.Schema.Contracts.Build" Version="..." PrivateAssets="all" />
+  <PackageReference Include="Reified.SchemaGen.MSBuild" Version="..." PrivateAssets="all" />
 </ItemGroup>
 ```
 
@@ -43,7 +43,7 @@ By default output is written below `obj/`, so it should not be committed.
 
   <ItemGroup>
     <PackageReference Include="Reified.Schema" Version="..." />
-    <PackageReference Include="Reified.Schema.Contracts.Build" Version="..." PrivateAssets="all" />
+    <PackageReference Include="Reified.SchemaGen.MSBuild" Version="..." PrivateAssets="all" />
   </ItemGroup>
 </Project>
 ```

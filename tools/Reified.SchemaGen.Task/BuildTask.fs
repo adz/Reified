@@ -1,11 +1,11 @@
-namespace Reified.Schema.Contracts.Build
+namespace Reified.SchemaGen.MSBuild
 
 open System
 open System.IO
 open System.Text.RegularExpressions
 open Microsoft.Build.Framework
 open Microsoft.Build.Utilities
-open Reified.Schema.Contracts
+open Reified.SchemaGen
 
 /// Discovers schema declarations, generates changed files, and preserves F# compile order.
 type GenerateSchemas() =

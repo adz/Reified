@@ -12,7 +12,7 @@
     module in any case: no abbreviation, no AutoOpen, no alias. A facade here would therefore have to
     restate every public function by hand, which is the duplication the rule was written to prevent.
 
-    Reified.Schema.Contracts.Build is deliberately absent. MSBuild `build/` assets do not flow through
+    Reified.SchemaGen.MSBuild is deliberately absent. MSBuild `build/` assets do not flow through
     a transitive package reference, so an umbrella dependency would install the targets without ever
     running them. Projects that derive schemas at build time reference that package directly.
   -->

@@ -1,4 +1,4 @@
-namespace Reified.Schema.Contracts
+namespace Reified.SchemaGen
 
 open Reified
 

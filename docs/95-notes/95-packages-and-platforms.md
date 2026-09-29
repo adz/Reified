@@ -75,13 +75,13 @@ produce runs in your application at run time.
 
 | Tool | What it does | How to get it |
 | --- | --- | --- |
-| `Reified.Schema.Contracts.Build` | Runs schema generation over your `[<DeriveSchema>]` records and `.contract` files before each compile | `dotnet add package Reified.Schema.Contracts.Build` |
-| `Reified.Schema.Contracts` | The generation library itself, the record frontend, the `.contract` parser, and the emitter | Not published; used through the build package above |
+| `Reified.SchemaGen.MSBuild` | Runs schema generation over your `[<DeriveSchema>]` records and `.contract` files before each compile | `dotnet add package Reified.SchemaGen.MSBuild` |
+| `Reified.SchemaGen` | The generation library itself, the record frontend, the `.contract` parser, and the emitter | Not published; used through the build package above |
 | `Reified.Schema.Testing` | Derives FsCheck generators from a schema so tests produce accepted values | Not published; copy or adapt the pattern from this repository |
 
-`Reified.Schema.Contracts.Build` is the one you install. It is deliberately kept out of the `Reified` umbrella: MSBuild
+`Reified.SchemaGen.MSBuild` is the one you install. It is deliberately kept out of the `Reified` umbrella: MSBuild
 `build/` assets are not transitive, so an umbrella dependency would install the targets without ever running them. Add
 it to the project whose records you want generated.
 
-`Reified.Schema.Contracts` and `Reified.Schema.Testing` are not packable, and there is nothing to install for either.
+`Reified.SchemaGen` and `Reified.Schema.Testing` are not packable, and there is nothing to install for either.
 See [Derived Schemas](/schema/derivation/index.html) and [Testing patterns](/data/testing-schema-guarantees.html).

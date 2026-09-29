@@ -50,4 +50,4 @@ through a compiled codec. Generated schemas are ordinary schemas, so `JsonSchema
 come along for free.
 
 See [Versioned Contracts](/schema/versioned-contracts.html) for the full attribute vocabulary, the
-`.contract` grammar alternative, and running generation in your build with `Reified.Schema.Contracts.Build`.
+`.contract` grammar alternative, and running generation in your build with `Reified.SchemaGen.MSBuild`.

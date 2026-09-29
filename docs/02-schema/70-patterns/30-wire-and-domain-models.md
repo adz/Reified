@@ -47,7 +47,7 @@ generated code is placed under `obj` and inserted in the correct compile order a
 ```xml
 <ItemGroup>
   <PackageReference
-      Include="Reified.Schema.Contracts.Build"
+      Include="Reified.SchemaGen.MSBuild"
       Version="..."
       PrivateAssets="all" />
 </ItemGroup>

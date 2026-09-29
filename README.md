@@ -131,7 +131,7 @@ Signup.parse      // Data -> Result<Signup, SchemaErrors>
 Signup.validate   // Signup -> Result<Signup, SchemaErrors>
 ```
 
-This is the same schema as the handwritten one above — not an equivalent one. `Reified.Schema.Contracts.Build` reads the attributes from F# source at build time and generates ordinary constructor-last Schema DSL, which then compiles normally. The attributes are inert metadata; nothing is reflected over at runtime, and everything downstream — parsing, JSON codecs, JSON Schema, test data — works exactly as it does for a schema you wrote by hand.
+This is the same schema as the handwritten one above — not an equivalent one. `Reified.SchemaGen.MSBuild` reads the attributes from F# source at build time and generates ordinary constructor-last Schema DSL, which then compiles normally. The attributes are inert metadata; nothing is reflected over at runtime, and everything downstream — parsing, JSON codecs, JSON Schema, test data — works exactly as it does for a schema you wrote by hand.
 
 Derivation is the preferred approach for DTOs. Keep it to public, permissive boundary records, and map the parsed result through a domain constructor so real invariants live in refined values and domain types rather than on the wire record.
 
@@ -141,7 +141,7 @@ Install `Reified` to get the complete runtime set. For the integrated boundary m
 
 - `Reified` — umbrella package that references all runtime packages
 - `Reified.Schema` — structured model admission, diagnostics, inspection, JSON Schema, and compiled JSON codecs
-- `Reified.Schema.Contracts.Build` — MSBuild integration for derived record and wire contracts
+- `Reified.SchemaGen.MSBuild` — MSBuild integration for derived record and wire contracts
 
 Schema builds on focused packages that remain useful by themselves:
 
@@ -155,7 +155,7 @@ part of Schema's dependency chain.
 
 The contract compiler and schema-derived testing adapter are repository tooling, not runtime packages.
 
-`Reified.Schema.Contracts.Build` is not in the umbrella. MSBuild targets do not travel through a transitive package reference, so a project that derives schemas at build time references it directly.
+`Reified.SchemaGen.MSBuild` is not in the umbrella. MSBuild targets do not travel through a transitive package reference, so a project that derives schemas at build time references it directly.
 
 ## Documentation
 

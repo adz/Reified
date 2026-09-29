@@ -135,7 +135,7 @@ Booking.fs          // user Booking and Create(BookingDraft)
 Booking.post.g.fs   // projection, schema, parse/check/update; compiled after Booking.fs
 ```
 
-Current `Reified.Schema.Contracts.Build.targets` inserts generated output immediately after its declaration file. Supporting a generated draft in the constructor therefore requires generator and MSBuild ordering changes.
+Current `Reified.SchemaGen.MSBuild.targets` inserts generated output immediately after its declaration file. Supporting a generated draft in the constructor therefore requires generator and MSBuild ordering changes.
 
 Until that complexity is justified, constructor parameters remain the simpler shape:
 

@@ -1,4 +1,4 @@
-namespace Reified.Schema.Contracts
+namespace Reified.SchemaGen
 
 /// <summary>A literal value in a contract declaration. Literals are the only values the grammar can express;
 /// everything with semantics is a name resolved against F# code at generation time.</summary>

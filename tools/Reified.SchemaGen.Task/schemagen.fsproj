@@ -3,13 +3,13 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <!-- net8.0 + Major roll-forward so the published tool runs on any consumer's runtime when shipped
-         inside the Reified.Schema.Contracts.Build package. -->
+         inside the Reified.SchemaGen.MSBuild package. -->
     <TargetFramework>net8.0</TargetFramework>
     <RollForward>Major</RollForward>
     <NoWarn>$(NoWarn);NU1608</NoWarn>
     <IsPackable>false</IsPackable>
 
-    <!-- Pulls in Reified.Schema.Contracts, which references FSharp.Compiler.Service (needs
+    <!-- Pulls in Reified.SchemaGen, which references FSharp.Compiler.Service (needs
          FSharp.Core >= 10.1.204). Override the repo-wide dotnet8-friendly floor back up here to
          avoid a spurious NU1605 downgrade warning. -->
     <FSCorePackageVersion>10.1.204</FSCorePackageVersion>
@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Reified.Schema.Contracts\Reified.Schema.Contracts.fsproj" />
+    <ProjectReference Include="..\..\src\Reified.SchemaGen\Reified.SchemaGen.fsproj" />
     <PackageReference Include="Microsoft.Build.Framework" Version="17.11.4" PrivateAssets="all" ExcludeAssets="runtime" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.11.4" PrivateAssets="all" ExcludeAssets="runtime" />
   </ItemGroup>

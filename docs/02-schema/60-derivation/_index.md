@@ -41,6 +41,10 @@ This is source generation, not runtime reflection. The attributes are inert meta
 [Schema DSL](/schema/dsl.html) as a hand-written declaration and therefore works with parsing, inspection, JSON codecs,
 JSON Schema, NativeAOT, trimming, and Fable.
 
+`Reified.SchemaGen` matches `[<DeriveSchema>]` by its bare attribute name in the source syntax tree, before the
+project type-checks, not by resolving it to the specific `Reified.DerivedSchema.DeriveSchemaAttribute` type. An
+unrelated type of your own also named `DeriveSchema`, in scope in the same file, would match the same way.
+
 ## Guides
 
 - [Set up build generation](/schema/derivation/msbuild.html), package reference, generated-file modes, and MSBuild properties.

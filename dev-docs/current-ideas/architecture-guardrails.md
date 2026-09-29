@@ -5,7 +5,7 @@ also constrain generated code. Schema establishes trust at data boundaries; priv
 named domain transitions evolve it.
 
 This note records the remaining recommendations from the 2026-07 architecture review. Contract generation freshness is
-not listed as a separate CI command because `Reified.Schema.Contracts.Build` now makes generation part of the ordinary
+not listed as a separate CI command because `Reified.SchemaGen.MSBuild` now makes generation part of the ordinary
 build.
 
 ## Terms

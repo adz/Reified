@@ -19,7 +19,7 @@ Phases 19–28-prelude are complete and recorded in `dev-docs/decisions/README.m
 completions (2026-07-09..13): the Schema value/model catalog consolidation, `Reified.Refinements` moved into
 the error-handling family, `Schema.check` for already assembled typed values,
 the `.contract` grammar/generator as wire-tier tooling
-(`src/Reified.Schema.Contracts`, `tools/Reified.SchemaGen`, golden corpus in `tests/Reified.Schema.Tests/contracts/`),
+(`src/Reified.SchemaGen`, `tools/Reified.SchemaGen.Task`, golden corpus in `tests/Reified.Schema.Tests/contracts/`),
 the `Contract<'model>` versioning engine (`Contract.parse`/`Contract.parseVersion`, typed contiguous n-1 → n
 migrations), `Schema.defer` recursion with finite inspection and `$defs`-based JSON Schema output, the
 non-packable `Reified.Schema.Testing` FsCheck adapter (`SchemaGen`), (2026-07-16) multi-version `schemagen`
@@ -106,33 +106,26 @@ has since changed (see below); items are otherwise still checked against what th
   comment is still accurate to current behavior. Spot-check when touching a package's public API, not on a fixed
   schedule.
 
-### Concrete rough edge: "Contract" naming and discoverability
+### Concrete rough edge: "Contract" naming and discoverability (resolved 2026-09-29)
 
-Filed 2026-09-29 from real usage, not a docs pass. "Contract" currently names, with no naming relationship a
-reader can follow from one to the next:
+Filed 2026-09-29 from real usage, not a docs pass. "Contract" named, with no naming relationship a reader could
+follow from one to the next: the runtime `Contract<'model>` versioning type (`Reified.Schema`); the `.contract`-file
+and `[<DeriveSchema>]`-record compiler/AST package, `Reified.Schema.Contracts`; its MSBuild package,
+`Reified.Schema.Contracts.Build`; and the `[<DeriveSchema(Contract = "Name")>]` attribute argument, declared inside
+the base package but read by the compiler package. A newcomer installed a package named `...Contracts.Build` to
+generate code using an attribute argument `Contract` to opt into a runtime type `Contract<'model>` that lived in a
+package with a different name than the one they installed.
 
-1. `Contract<'model>` (`src/Reified.Schema/Contract.fs`) — the runtime versioned wire-migration type:
-   `Contract.create`, `Contract.supersedes`, `Contract.build`.
-2. `Reified.Schema.Contracts` (`src/Reified.Schema.Contracts/`) — a *different* thing: the `.contract`-file and
-   `[<DeriveSchema>]`-record compiler/AST (`ContractDecl`, `ContractFile`, `ContractRef`, `ContractDiagnostic`).
-3. `Reified.Schema.Contracts.Build` — the MSBuild package a project actually references to turn on generation.
-4. `[<DeriveSchema(Contract = "Name")>]` — the attribute argument that assigns a record to a versioned contract
-   (sense 1), declared and read inside package sense 2/3.
+**Resolved same day** by renaming the compiler and its MSBuild package, not by adding a map paragraph:
+`Reified.Schema.Contracts` → `Reified.SchemaGen`, `Reified.Schema.Contracts.Build` → `Reified.SchemaGen.MSBuild`,
+and the internal `tools/Reified.SchemaGen` task/CLI project → `tools/Reified.SchemaGen.Task` (to avoid colliding
+with the newly-renamed library of the same name). "SchemaGen" was not invented for this: it was already the public
+name of the MSBuild properties consumers set (`ReifiedSchemaGenEnabled`, `ReifiedSchemaGenToolPath`,
+`ReifiedSchemaGeneratedFiles`) and of the CLI tool itself, so those anchor names did not move; the packages were
+renamed to match them. `Contract` now names exactly one thing project-wide, the runtime `Contract<'model>` type in
+`Reified.Schema`, and `[<DeriveSchema>]`'s `Contract`/`Version` arguments were already in that same base package
+and did not move either. See `RELEASE_NOTES.md`'s 0.11.0 entry for the consumer-facing breaking-change note.
 
-A newcomer installs a package named `...Contracts.Build` (sense 3) to generate code that uses an attribute
-argument `Contract` (sense 4) to opt into a runtime type `Contract<'model>` (sense 1) that lives in a package with
-a different name (`Reified.Schema`, not `Reified.Schema.Contracts`) than the one they installed. Nothing in the
-docs currently states this map explicitly; `docs/02-schema/47-schema-or-generated-dto.md` and
-`65-versioned-contracts.md` each explain one piece from inside its own vocabulary.
-
-Fix directions to weigh, not yet decided:
-
-- Rename the compiler package/AST (sense 2/3) away from "Contracts," since it is a code generator for schemas, not
-  the versioning concept, e.g. `Reified.Schema.Derivation`/`Reified.Schema.Derivation.Build`, leaving "Contract"
-  meaning only sense 1 (the runtime versioning type) project-wide. This is the rename with the best payoff and the
-  highest cost: it is a public package rename, needs a deprecation window if done post-1.0, and is free to do now.
-- Short of a rename, add one paragraph, probably at the top of `docs/02-schema/65-versioned-contracts.md` or a new
-  page it's the canonical link target for, that states the four senses above explicitly and links each to where it
-  actually lives, so at least the *map* exists even if the names stay.
-- Either way, this is 1.0-gating: renaming `Reified.Schema.Contracts` after 1.0 costs a deprecation cycle;
-  renaming it now costs a version bump.
+Full solution build, full test suite (including the renamed `Reified.SchemaGen.Tests`, 87 tests), the docs audit,
+and a live end-to-end regeneration of `examples/Reified.ReferenceApp.Wire`'s `.contract`/`[<DeriveSchema>]` sources
+through the renamed MSBuild pipeline all passed after the rename, with no generated-file diff.

@@ -8,7 +8,7 @@
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <DevelopmentDependency>true</DevelopmentDependency>
     <NoWarn>$(NoWarn);NU5128</NoWarn>
-    <PackageId>Reified.Schema.Contracts.Build</PackageId>
+    <PackageId>Reified.SchemaGen.MSBuild</PackageId>
     <Authors>Adam Davies</Authors>
     <Description>MSBuild integration for Reified schema generation: discovers [&lt;DeriveSchema&gt;]-marked F# records, derives wire schemas before compile, and supports intermediate or checked-in generated files.</Description>
     <PackageProjectUrl>https://github.com/adz/Reified</PackageProjectUrl>
@@ -21,14 +21,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="build/Reified.Schema.Contracts.Build.targets" Pack="true" PackagePath="build/" />
+    <None Include="build/Reified.SchemaGen.MSBuild.targets" Pack="true" PackagePath="build/" />
     <!-- Compile nothing; the package carries only the targets file and the published generator. -->
     <Compile Remove="**/*.fs" />
   </ItemGroup>
 
   <Target Name="PublishSchemagen">
     <MSBuild
-      Projects="$(MSBuildThisFileDirectory)../../tools/Reified.SchemaGen/schemagen.fsproj"
+      Projects="$(MSBuildThisFileDirectory)../../tools/Reified.SchemaGen.Task/schemagen.fsproj"
       Targets="Restore;Publish"
       Properties="Configuration=Release;PublishDir=$(_SchemagenPublishDir)/;SelfContained=false" />
   </Target>

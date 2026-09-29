@@ -1,4 +1,4 @@
-namespace Reified.Schema.Contracts
+namespace Reified.SchemaGen
 
 /// <summary>Semantic validation over parsed contract files: reference resolution, constraint/type
 /// compatibility, defaults, and declaration ordering. A file set that resolves cleanly is safe to emit.</summary>
