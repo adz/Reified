@@ -55,10 +55,10 @@ Json.serialize codec signup
 
 </div>
 
-<p style="max-width: 78ch; margin: 0 auto 1rem; text-align: center;">The compiled codec is not a slower, safer
-alternative to hand-rolled JSON. On canonical UTF-8 input Reified's decoder ran about 19% faster than
-<code>System.Text.Json</code> and allocated less, in the recorded <a href="notes/benchmarks.html">benchmark</a>,
-because a schema-derived codec skips the reflection and boxing a general-purpose serializer pays for on every call.</p>
+<p style="max-width: 78ch; margin: 0 auto 1rem; text-align: center;">The compiled codec is competitive with
+<code>System.Text.Json</code> on serialization and ahead of it on decoding: on canonical UTF-8 input, Reified's
+decoder ran about 14% faster on .NET 10 in the recorded <a href="notes/benchmarks.html">benchmark</a>, and
+allocated less, because a schema-derived codec skips per-call reflection and boxing.</p>
 
 <div class="docs-home-example" style="max-width: 78ch; margin: 0 auto 2rem;">
 
@@ -89,23 +89,21 @@ JSON Schema, and the generated test data come from that one declaration. Nothing
 <a class="docs-chip" href="data/index.html">Data</a>
 </div>
 
-<h2 class="docs-home-section-title">Five things, in the order they usually matter</h2>
-
 <div class="docs-home-routes">
 
-1. **JSON without reflection.** A schema compiles to a JSON codec that runs under NativeAOT and trimming, and
+- **JSON without reflection.** A schema compiles to a JSON codec that runs under NativeAOT and trimming, and
    the same schema compiles to Fable JavaScript. See [JSON Codecs](/schema/json-codecs.html) and
    [AOT, trimming, and Fable](/notes/aot-trimming-fable.html).
-2. **A schema you can inspect, not just run.** One declaration produces field-aware parse diagnostics, JSON
+- **A schema you can inspect, not just run.** One declaration produces field-aware parse diagnostics, JSON
    Schema export, and messages a translator can localize without touching the rule. See
    [Schema](/schema/index.html), [Redisplay and Field Errors](/schema/redisplay-and-field-errors.html), and
    [Localization](/constraints/localization/index.html).
-3. **Refined types.** A value's invariant is proven once, at construction, and every later use relies on the
+- **Refined types.** A value's invariant is proven once, at construction, and every later use relies on the
    proof instead of re-checking it. See [Refined values](/refined/index.html).
-4. **Parse and Result.** Untrusted text becomes a typed value with a reason attached to failure, and ordinary F#
+- **Parse and Result.** Untrusted text becomes a typed value with a reason attached to failure, and ordinary F#
    `Result` composes without an exception model underneath it. See [Parsing](/parsing/index.html) and
    [Result handling](/result-handling/index.html).
-5. **Data, as a supporting piece.** A source-neutral structured value for building fixtures and comparing output;
+- **Data, as a supporting piece.** A source-neutral structured value for building fixtures and comparing output;
    useful alongside the four above, not a reason to reach for Reified on its own. See [Data](/data/index.html).
 
 </div>

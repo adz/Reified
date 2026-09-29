@@ -14,10 +14,11 @@ Reified gives F# applications one model for trusted values and structured bounda
 invariant once; checking, diagnostics, codecs, contract documents, and test data read the same declaration.
 
 In the order they usually matter: a compiled JSON codec that runs under NativeAOT and trimming with no runtime
-reflection, and beat `System.Text.Json` on decode time in the recorded benchmark because it skips the reflection
-and boxing a general-purpose serializer performs on every call; a schema that field-aware diagnostics, JSON
-Schema export, and localizable messages are all read from, in addition to running as a parser; refined types
-that prove an invariant once at construction, so later code relies on the proof instead of re-checking it;
+reflection, competitive with `System.Text.Json` on serialization and ahead of it on decode time in the recorded
+benchmark, because it skips the reflection and boxing a general-purpose serializer performs on every call; a
+schema that field-aware diagnostics, JSON Schema export, and localizable messages are all read from, in addition
+to running as a parser; refined types that prove an invariant once at construction, so later code relies on the
+proof instead of re-checking it;
 `Parse` and `Result` for ordinary typed conversion and composition; and `Data`, a source-neutral structured value
 used alongside the four above.
 

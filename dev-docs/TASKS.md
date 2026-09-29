@@ -51,11 +51,11 @@ From the same ZIO comparison; these belong *with* the remote-config milestone, n
 
 ## Smaller queue items
 
-- **Regenerate `docs/95-notes/80-benchmarks.md`.** The homepage and getting-started page now quote its UTF-8 decode
-  number directly, so a stale benchmark is a stale marketing claim, not only a stale reference page. Run
-  `BENCHMARK_ARGS='--job short --filter *' dotnet run --project tools/Reified.Build -- --target Benchmarks` on an
-  otherwise idle machine, update the table and the recorded date, and check the quoted percentage still matches
-  wherever it is repeated (`docs/index.md`, `docs/01-getting-started/_index.md`).
+- **Re-run the Across .NET versions table in `docs/95-notes/80-benchmarks.md` on .NET 11 GA.** It currently uses
+  an RC toolchain (2026-09-29), which the page itself says is not representative of shipped performance. Follow
+  [`dev-docs/BenchmarkProcess.md`](BenchmarkProcess.md) for the multi-runtime setup and the two BenchmarkDotNet
+  bugs it works around, and check the "competitive"/percentage wording still matches wherever it is repeated
+  (`docs/index.md`, `docs/01-getting-started/_index.md`).
 - **A head-version codec recipe or helper for contracts.** `Contract` parses old versions and exposes the head
   schema, but the "always write the latest version" workflow is assembled by hand from `Contract.headSchema`,
   conversion, and `Json.compile`. Building the reference app got this wrong more than once. Writing an old version
