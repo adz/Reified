@@ -1,7 +1,8 @@
 # Reified documentation
 
-Start at `/getting-started/`: one complete transaction — a model declaration, untrusted input parsed into it,
-accumulated path-aware failures, and a JSON codec derived from the same declaration.
+Start at `/getting-started/`: one complete transaction, a model declaration, untrusted input parsed into it,
+accumulated path-aware failures, and a JSON codec derived from the same declaration, reflection-free and
+competitive with `System.Text.Json`, ahead of it on decode.
 
 Schema uses Constraint, Parse, Data, and Refinements; each package can also be installed without Schema. Result is an
 independent set of composition tools. Load only the context needed for the task:
@@ -9,11 +10,13 @@ independent set of composition tools. Load only the context needed for the task:
 - Schema parsing, JSON codecs, versioned contracts, and path-aware diagnostics: `/schema/llms.txt`
 - Reusable value rules and structured violations: `/constraints/llms.txt`
 - Invariant-carrying types: `/refined/`
-- Primitive text decoding: `/parsing/`
-- Structured fixtures, immutable edits, comparisons, and produced-data matching: `/data/llms.txt`
-- Result composition, `result { }`, and accumulating builders: `/result-handling/llms.txt`
+- Primitive text decoding and Result composition, `result { }`, and accumulating builders: `/parsing/`,
+  `/result-handling/llms.txt`
+- Structured fixtures, immutable edits, comparisons, and produced-data matching, also the required input shape
+  for `Schema.parse`, not only a testing convenience: `/data/llms.txt`
 
-The main documentation order is Schema, Constraints, Refined, Parsing, Data, and Result handling.
+The main documentation order is Schema (JSON codecs first within it), Constraints, Refined, Parsing, Result
+handling, and Data.
 
 `Reified` is an umbrella package that installs every runtime package at once. It adds no API of its own: every
 type still comes from the package documented above.
