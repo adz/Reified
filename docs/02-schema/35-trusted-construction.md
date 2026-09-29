@@ -136,7 +136,8 @@ The next section restores both without reopening the constructor.
 ## Drafts
 
 A draft is a public record whose only job is to be assembled and edited freely before admission. Give the private
-aggregate a draft type, and make the schema's constructor the one path from draft fields to the domain type:
+aggregate a draft type, and make the schema's constructor the one path from draft fields to the domain type. Named
+`Reservation` here, to keep this design distinct from the no-draft `Booking` above:
 
 ```fsharp
 type ReservationDraft =
@@ -179,8 +180,8 @@ constructible, but it serves transport and versioning; a draft serves local asse
 share a type in small applications. Name the value `draft`, `wire`, or `contract` so the trust boundary stays visible,
 and do not pass either shape through business logic as though its schema had changed the record's constructors.
 
-The draft is not a hole in the guarantee. A `BookingDraft` proves nothing and can hold any field values; only
-`Booking.create` and `Schema.parse` produce a `Booking`, and both run the same rule. Code that skips the rule must
+The draft is not a hole in the guarantee. A `ReservationDraft` proves nothing and can hold any field values; only
+`Reservation.create` and `Schema.parse` produce a `Reservation`, and both run the same rule. Code that skips the rule must
 change the module that owns the representation, which is a visible, reviewable act rather than a quiet record literal
 somewhere else in the codebase.
 
@@ -237,7 +238,7 @@ authoritative constructor.
 
 Every gated update returns `Result`. That is the honest cost of a cross-field invariant: an edit can break the
 relationship, so an infallible `with` on the validated type would be the bypass this page exists to close. When a
-specific transition provably preserves the invariant, shifting both dates by the same amount cannot reorder them , 
+specific transition provably preserves the invariant, shifting both dates by the same amount cannot reorder them,
 the owning module can expose it as a total function and keep the proof next to the representation.
 
 ## Existing typed values
@@ -259,7 +260,7 @@ domain representation carries a stronger, durable guarantee.
 
 ## Recommendation
 
-The reference app uses all three levels deliberately:
+The reference app uses all four levels deliberately:
 
 - `WorkspaceV1` and `WorkspaceV2` are public wire records.
 - `WorkspaceName`, `PersonName`, and `WorkItemTitle` have private representations and checked refinements.
