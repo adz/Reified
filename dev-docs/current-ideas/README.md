@@ -27,6 +27,13 @@ Active sketches:
 - `contract-as-wire-projection.md` — undecided answer to the parked `.contract` grammar question: keep it as a
   generated, fail-closed wire projection of any schema (review/diff artifact, JSON-Schema-like) rather than a
   second hand-authored declaration surface.
+- `data-ergonomics.md` — `Reified.Data`'s speculative phases 2 and later (richer patterns, snapshots, captures,
+  property generation, contracts/replay, patch interchange, a query language), gated on a demonstrated consumer.
+  Phase 1 shipped; its rationale lives in `docs/06-data/` and `dev-docs/decisions/README.md`, not here.
+- `format-and-json-runtime.md` — one package per future representation format; nothing to act on until
+  a second wire format has a real consumer. Its JSON-runtime platform-split proposal is largely already done:
+  `Buffers.fs` already writes numbers with `Utf8Formatter`/`Span<byte>` and pools with `ArrayPool<byte>.Shared`
+  on .NET, with Fable fallbacks. See `dev-docs/TASKS.md`'s correction note.
 
 Implemented work and settled decisions do not remain in this folder. Constraint unification and contextual
 constraint localization shipped and are recorded in `dev-docs/decisions/README.md` and `AGENTS.md`; the term

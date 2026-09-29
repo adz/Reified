@@ -103,8 +103,11 @@ JSON Schema, and the generated test data come from that one declaration. Nothing
 - **Parse and Result.** Untrusted text becomes a typed value with a reason attached to failure, and ordinary F#
    `Result` composes without an exception model underneath it. See [Parsing](/parsing/index.html) and
    [Result handling](/result-handling/index.html).
-- **Data, as a supporting piece.** A source-neutral structured value for building fixtures and comparing output;
-   useful alongside the four above, not a reason to reach for Reified on its own. See [Data](/data/index.html).
+- **Data.** `Schema.parse` reads from it, not from JSON, a form post, or a query string directly, so it is the
+   one boundary-input shape untrusted data becomes on the way in, as well as a source-neutral value for building
+   fixtures and comparing output. The trusted `Json.compile` codec path bypasses it entirely, string or bytes
+   straight to your model, so it is required for the boundary path and optional for the trusted one, not optional
+   everywhere. See [Data](/data/index.html).
 
 </div>
 
