@@ -66,6 +66,7 @@ Look keys up in [the catalogue](/constraints/localization/catalogue.html).
 ## The two messages
 
 `Violation.message` renders a bare predicate. `Violation.fullMessage` composes the attribute noun around it once.
+Using the `violation` and `renderer` from above:
 
 ```fsharp
 let field = renderer |> Renderer.context "signup" |> Renderer.attribute "name"
