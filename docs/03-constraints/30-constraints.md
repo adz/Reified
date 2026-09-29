@@ -98,7 +98,7 @@ let handle : Constraint<string> =
 ```
 
 
-Both run the same predicate, but only the primitive is inspectable, it lowers to JSON Schema, generates, and
+Both run the same predicate, but only the primitive is inspectable: it lowers to JSON Schema, generates, and
 documents itself, where a negated rule can do none of those.
 
 ### Why there is no general `not`
@@ -106,9 +106,9 @@ documents itself, where a negated rule can do none of those.
 `Constraint.notWith` is the only general negation, and it requires prose because its failure has no reason to derive:
 
 ```fsharp
-let isbnPrefix : Constraint<string> = Constraint.oneOf [ "978-0-"; "978-1-" ]
+let isbnPrefixAllowed : Constraint<string> = Constraint.oneOf [ "978-0-"; "978-1-" ]
 
-Constraint.notWith "must not be a supported ISBN prefix" isbnPrefix
+Constraint.notWith "must not be a supported ISBN prefix" isbnPrefixAllowed
 ```
 
 

@@ -34,8 +34,11 @@ construction and update functions, so use them where callers benefit from relyin
 A library can guarantee the result of its own functions. It cannot prevent a caller from using another public
 constructor:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+open Reified
 open Reified.SchemaDSL
+open System
+
 type Booking =
     { Start: DateOnly
       End: DateOnly }
@@ -63,17 +66,19 @@ available.
 
 Private refined fields make illegal field values unrepresentable:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-type WorkspaceName = private WorkspaceName of NonBlankString
+```fsharp
+open Reified
+open Reified.Refinements
+
+type WorkspaceName = private WorkspaceName of string
 
 module WorkspaceName =
-    let value (WorkspaceName name) = name.Value
+    let value (WorkspaceName name) = name
 
     let refinement =
-        Refinement.defineAll
-            [ Reified.Constraint.Constraint.present
-              Reified.Constraint.Constraint.maxLength 80 ]
-            (Refine.nonBlankString >> Result.defaultWith (Violation.describeAll >> failwith) >> WorkspaceName)
+        Refinement.define
+            (Constraint.all [ Constraint.present; Constraint.maxLength 80 ])
+            WorkspaceName
             value
 
     let create raw = Refinement.create refinement raw
@@ -83,7 +88,7 @@ module WorkspaceName =
 ```
 
 
-`Refinement.defineAll` keeps executable checks, readable metadata, total construction, and projection in one value.
+`Refinement.define` keeps an executable check, readable metadata, total construction, and projection in one value.
 `Schema.refine` applies that definition, so direct construction and Schema interpretation share the invariant.
 
 Any `WorkspaceName` is valid because its representation is private and every exposed constructor returns `Result`.
@@ -93,7 +98,11 @@ The schema participates in that construction; it is not the sole guardian.
 
 Use a private aggregate representation when every value must satisfy a relationship between fields:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+open Reified
+open Reified.SchemaDSL
+open System
+
 type Booking =
     private
         { Start: DateOnly
@@ -129,28 +138,28 @@ The next section restores both without reopening the constructor.
 A draft is a public record whose only job is to be assembled and edited freely before admission. Give the private
 aggregate a draft type, and make the schema's constructor the one path from draft fields to the domain type:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-type BookingDraft =
+```fsharp
+type ReservationDraft =
     { Start: DateOnly
       End: DateOnly }
 
-type Booking =
+type Reservation =
     private
         { Start: DateOnly
           End: DateOnly }
 
-module Booking =
-    let create (draft: BookingDraft) =
+module Reservation =
+    let create (draft: ReservationDraft) =
         if draft.Start <= draft.End then Ok { Start = draft.Start; End = draft.End }
         else Error "Start must not be after end."
 
-    let toDraft (booking: Booking) : BookingDraft =
-        { Start = booking.Start; End = booking.End }
+    let toDraft (reservation: Reservation) : ReservationDraft =
+        { Start = reservation.Start; End = reservation.End }
 
     let schema =
-        schema<Booking> {
-            fieldAs "start" (fun b -> b.Start)
-            fieldAs "end" (fun b -> b.End)
+        schema<Reservation> {
+            fieldAs "start" (fun r -> r.Start)
+            fieldAs "end" (fun r -> r.End)
             constructResult (fun start finish -> create { Start = start; End = finish })
         }
 ```
@@ -158,8 +167,10 @@ module Booking =
 
 Construction keeps field names without exposing the representation:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-let booking = Booking.create { Start = arrival; End = departure }
+```fsharp
+let arrival = DateOnly(2026, 6, 1)
+let departure = DateOnly(2026, 6, 5)
+let reservation = Reservation.create { Start = arrival; End = departure }
 ```
 
 
@@ -180,8 +191,15 @@ somewhere else in the codebase.
 **Refined fields, public record.** When every invariant is field-local, the record can stay public and `with` needs no
 gate. The replacement value already went through its own constructor:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-let renamed = { workspace with Name = newName }   // newName: WorkspaceName, proven at creation
+```fsharp
+type Workspace = { Name: WorkspaceName }
+
+match WorkspaceName.create "Ada's Workspace", WorkspaceName.create "New Name" with
+| Ok initialName, Ok newName ->
+    let workspace = { Name = initialName }
+    let renamed = { workspace with Name = newName }   // newName: WorkspaceName, proven at creation
+    ignore renamed
+| _ -> ()
 ```
 
 
@@ -191,12 +209,14 @@ untouched while making the invalid states unrepresentable.
 **Schema-described public record.** Update the record with ordinary `with`, then re-check it to run the schema's
 constraints and record constructor against the changed value. With the public `Booking` from the first section:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+let booking : Booking = { Start = DateOnly(2026, 6, 1); End = DateOnly(2026, 6, 5) }
+let newEnd = DateOnly(2026, 6, 8)
 let extended = { booking with End = newEnd }
 
 match Schema.check bookingSchema extended with
-| Ok booking -> save booking
-| Error diagnostics -> reject diagnostics
+| Ok checked -> printfn "%A" checked
+| Error diagnostics -> printfn "%A" diagnostics
 ```
 
 
@@ -205,10 +225,10 @@ This suits models that remain publicly constructible, where `Schema.check` is th
 **Several fields, private aggregate.** When fields must move together, shifting a booking changes both dates, lower
 to the draft, edit with ordinary record syntax, and re-admit:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-let shift days booking =
-    let draft = Booking.toDraft booking
-    Booking.create { draft with Start = draft.Start.AddDays days; End = draft.End.AddDays days }
+```fsharp
+let shift days reservation =
+    let draft = Reservation.toDraft reservation
+    Reservation.create { draft with Start = draft.Start.AddDays days; End = draft.End.AddDays days }
 ```
 
 
@@ -224,10 +244,12 @@ the owning module can expose it as a total function and keep the proof next to t
 
 `Schema.check` is for values whose construction history is uncertain:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+let importedBooking : Booking = { Start = DateOnly(2026, 6, 1); End = DateOnly(2026, 6, 5) }
+
 match Schema.check bookingSchema importedBooking with
-| Ok checked -> useBooking checked
-| Error diagnostics -> quarantine diagnostics
+| Ok checked -> printfn "%A" checked
+| Error diagnostics -> printfn "%A" diagnostics
 ```
 
 
