@@ -63,7 +63,7 @@ quotations, including JavaScript; reach for `fieldAs` on Fable's Rust and PHP ta
 
 ### Parse
 
-`Data` is a source-neutral input tree. The same schema reads form posts, CLI arguments, JSON, and configuration , 
+`Data` is a source-neutral input tree. The same schema reads form posts, CLI arguments, JSON, and configuration,
 see [Input Sources](/schema/input-sources.html).
 
 ```fsharp
