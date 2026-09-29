@@ -144,7 +144,7 @@ below. Both render through the same mechanics, so one renderer covers both. See
 
 ## The Schema catalogue
 
-`Reified.Schema` owns its own keys for parse, boundary-supply, and structural failures. They stay in that package , 
+`Reified.Schema` owns its own keys for parse, boundary-supply, and structural failures. They stay in that package;
 Schema depends on Constraint and never the reverse.
 
 | Key | Arguments | Default English |
