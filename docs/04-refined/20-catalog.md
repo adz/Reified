@@ -35,8 +35,8 @@ open Reified.Refinements
 `NonEmptyList` carries its non-emptiness in the representation, so the case is public and
 you can pattern match on it:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-let lines = NonEmpty(firstLine, remainingLines)   // total, no Result
+```fsharp
+let lines = NonEmpty(1, [ 2; 3; 4 ])              // total, no Result
 
 let (NonEmpty(first, rest)) = lines               // total
 let total = NonEmptyList.reduce (+) lines         // total, needs no seed
@@ -69,10 +69,12 @@ A refined collection is still a collection. Alongside the operations the invaria
 total, each module carries the everyday list vocabulary, so a pipeline never has to drop
 back to `List` and re-admit the result:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-let total   = NonEmptyList.sumBy _.Total lines        // not List.sumBy on a converted list
+```fsharp
+let prices = NonEmpty(9.99, [ 4.99; 12.50 ])
+
+let sum     = NonEmptyList.sumBy id lines             // not List.sumBy on a converted list
 let mean    = NonEmptyList.average prices             // total: the divisor is never zero
-let biggest = NonEmptyList.maxBy _.Quantity lines     // total: no option
+let biggest = NonEmptyList.maxBy id lines             // total: no option
 ```
 
 
@@ -104,10 +106,11 @@ need be injective.
 One generic `Interval<'T>` covers any ordered value. It is always inhabited, so emptiness
 is reported as an option rather than by a second type:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-let window  = Interval.between start finish     // total: orders its arguments
+```fsharp
+let window  = Interval.between 1 10             // total: orders its arguments
+let other   = Interval.between 5 15
 let overlap = Interval.intersect window other   // Interval option, honest about emptiness
-let clamped = Interval.clamp candidate window   // total
+let clamped = Interval.clamp 7 window           // total
 ```
 
 
@@ -141,7 +144,7 @@ re-establish the fact by hand. Since integer arithmetic is unchecked ,
 `Int32.MaxValue + 1` is negative, an addition returning `PositiveInt` would be unsound,
 which leaves returning `Result`:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Illustrative: PositiveInt does not exist in this package. Shows what call sites would cost if it did."
 // what a refined numeric type costs for ((2 + 3) * 4) + 1
 PositiveInt.add a b
 |> Result.bind (fun s -> PositiveInt.multiply s c)
@@ -155,7 +158,7 @@ than to catch one.
 
 Numeric ranges are therefore constraints:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
 field _.Quantity { constrain (Constraint.greaterThan 0) }
 ```
 
@@ -183,9 +186,12 @@ both rather than only `NaN`.
 `NaN` also makes `List.contains` and `List.distinct` wrong, since both use IEEE equality
 under which `NaN` is not equal to itself.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-FiniteFloat.negate value      // closed
-FiniteFloat.average values    // one Result at the end, not one per step
+```fsharp
+match FiniteFloat.create 12.5 with
+| Ok value ->
+    FiniteFloat.negate value |> ignore                    // closed
+    FiniteFloat.average (NonEmpty(value, []))             // one Result at the end, not one per step
+| Error _ -> failwith "unreachable"
 ```
 
 
@@ -201,12 +207,16 @@ unwrap with `value`, compute in plain `float`, and re-admit once.
 `UnitInterval` holds a proportion in `[0, 1]`. It is the only type here closed under
 multiplication, which is the reason to reach for it:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-UnitInterval.multiply a b         // total and closed
-UnitInterval.complement a         // total
-UnitInterval.lerp low high a      // total, always lands between the endpoints
-UnitInterval.inverseLerp low high v // the inverse: where v sits, clamped
-UnitInterval.saturatingAdd a b    // not closed under +, so this clamps
+```fsharp
+match UnitInterval.create 0.3, UnitInterval.create 0.6 with
+| Ok a, Ok b ->
+    UnitInterval.multiply a b |> ignore         // total and closed
+    UnitInterval.complement a |> ignore         // total
+    UnitInterval.lerp 0.0 10.0 a |> ignore      // total, always lands between the endpoints
+    UnitInterval.inverseLerp 0.0 10.0 3.0       // the inverse: where v sits, clamped
+    |> ignore
+    UnitInterval.saturatingAdd a b              // not closed under +, so this clamps
+| _ -> failwith "unreachable"
 ```
 
 
@@ -224,10 +234,13 @@ belong to the field rather than to each value, so they are supplied once.
 
 `NonBlankString` preserves accepted text exactly, and its operations preserve inhabitation:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-NonBlankString.append first second   // total
-NonBlankString.trim value            // total, trimming inhabited text leaves it inhabited
-NonBlankString.split "," value       // NonEmptyList<NonBlankString>, never empty
+```fsharp
+match NonBlankString.create "hello", NonBlankString.create " world " with
+| Ok first, Ok second ->
+    NonBlankString.append first second |> ignore   // total
+    NonBlankString.trim second |> ignore            // total, trimming inhabited text leaves it inhabited
+    NonBlankString.split "," first                  // NonEmptyList<NonBlankString>, never empty
+| _ -> failwith "unreachable"
 ```
 
 
@@ -242,7 +255,7 @@ Slug does not even get that far, joining two slugs can break the pattern.
 Express them as constraints on a primitive instead, the metadata reaching interpreters is
 identical:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
 field _.DisplayName { constrain Constraint.trimmed }
 
 field _.Slug {

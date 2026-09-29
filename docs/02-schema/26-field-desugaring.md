@@ -10,8 +10,9 @@ targetFramework: net8.0
 The inner field block is syntax for transforming one `Schema<_>` value. It prevents configuration for adjacent fields
 from joining into one pipeline.
 
-Both forms below share this `ContactEmail` and `validateCompanyEmail`, the same worked example
-[Refined Schemas](/schema/refined-values.html) builds in full:
+Both forms below share the `ContactEmail` type and `validateCompanyEmail` function from the worked example
+[Refined Schemas](/schema/refined-values.html) builds in full, `Refinement.define` pairs a constraint with the
+wrap/unwrap functions that make it a type, covered there in detail:
 
 ```fsharp
 open Reified
@@ -93,7 +94,13 @@ field _.Name {
 ```
 
 
-The plain function is `Schema.constrain`.
+The plain function is `Schema.constrain`:
+
+```fsharp
+Schema.text
+|> Schema.constrain Constraint.present
+|> Schema.constrain (Constraint.maxLength 80)
+```
 
 ## `refine`
 
