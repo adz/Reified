@@ -98,14 +98,14 @@ succeeded, so downstream code does not have to wonder whether validation ran.
 
 Now feed it something a real user would send, a malformed address, an age below the limit, a missing field:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-let input =
+```fsharp
+let invalidInput =
     Data.ofNameValues
         [ "email", "ada"
           "age", "11" ]
 
-match Schema.parse signupSchema input with
-| Ok signup -> register signup
+match Schema.parse signupSchema invalidInput with
+| Ok signup -> printfn "%A" signup
 | Error errors ->
     for issue in SchemaErrors.toList errors do
         printfn "%s: %s" (SchemaPath.format issue.Path) (SchemaError.render issue.Error)

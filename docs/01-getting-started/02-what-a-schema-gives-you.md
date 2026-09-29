@@ -14,7 +14,16 @@ a fixture builder, and each has to be told the rules again.
 
 The schema is the source for all seven. You write it once:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+open Reified
+open Reified.SchemaDSL
+open Reified.ConstraintDSL
+
+type Signup =
+    { Email: string
+      Age: int
+      Newsletter: bool }
+
 let signupSchema =
     schema<Signup> {
         field _.Email { constraints [ present; email ] }
@@ -52,12 +61,12 @@ deserialized by something else, those are already `Signup` values, and the type 
 whether the rules hold. `Schema.check` runs the same field rules and the same constructor against a value
 that already exists:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let imported = { Email = "ada"; Age = 11; Newsletter = false }
 
 match Schema.check signupSchema imported with
-| Ok signup -> register signup
-| Error errors -> for issue in SchemaErrors.toList errors do report issue
+| Ok signup -> printfn "%A" signup
+| Error errors -> for issue in SchemaErrors.toList errors do printfn "%s" (SchemaError.render issue.Error)
 // age:   Expected a value at least 13, but was 11.
 // email: Expected an email address, but was ada.
 ```
@@ -71,9 +80,7 @@ the first place, see [Trusted construction](/schema/trusted-construction.html).
 
 ## Read and write JSON
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-open Reified
-
+```fsharp
 let codec = Json.compile signupSchema     // compile once, typically at startup
 
 Json.serialize codec { Email = "ada@example.org"; Age = 36; Newsletter = true }
@@ -91,7 +98,7 @@ as the same path-aware `SchemaErrors`.
 
 ## Publish the shape to other tools
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 JsonSchema.generate signupSchema
 // {"type":"object",
 //  "properties":{"email":{"type":"string", …},
@@ -109,7 +116,7 @@ the same shape the parser and codec use.
 
 ## Describe the model to a form or admin UI
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 Inspect.model signupSchema
 // email      -> [ "present"; "email" ]
 // age        -> [ "atLeast" ]
@@ -128,7 +135,7 @@ enforce it, render the right input control per field, or show the rule beside it
 A schema describes the model you have now. A contract registers the versions you have shipped, with a
 migration from each one, and reads versioned input into the current model:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Illustrative pseudocode: `...` and `use config` are placeholders for the reader's own handling, not valid F#."
 match Contract.parse configContract raw with
 | Ok config -> use config
 | Error (ContractError.VersionUnrecognized version) -> ...
