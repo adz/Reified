@@ -8,11 +8,9 @@ targetFramework: net8.0
 
 # Refined Schemas
 
-A field can be short when its type contributes a canonical schema:
-
-<!-- isolated: forward-references Contact/Contact.create/Email before "Define the domain type"
-     below declares them, which is the point being illustrated (the compact form this page
-     builds toward), not something this fragment can compile standalone in page order. -->
+A field can be short when its type contributes a canonical schema. This is the compact form the rest of the page
+builds toward, so it declares a minimal `Email`/`Contact` ahead of "Define the domain type" below, which walks
+through the same declaration step by step:
 
 ```fsharp isolated
 open Reified
@@ -43,8 +41,8 @@ let contactSchema =
 
 
 This is the form to prefer at use sites. Every built-in refined type from
-[Reified.Refinements](/refined/index.html) works this way, `NonBlankString`,
-`FiniteFloat`, `UnitInterval`, `NonEmptyList<_>`, and the rest resolve without a `withSchema`, as
+[Reified.Refinements](/refined/index.html) works this way: `NonBlankString`,
+`FiniteFloat`, `UnitInterval`, and `NonEmptyList<_>` all resolve without a `withSchema`, as
 [Getting Started](/getting-started/index.html) shows.
 
 Rules that need a parameter, such as a length range or a pattern, are constraints rather than types. They belong on
@@ -113,7 +111,8 @@ Constraints preserve the value type, however. This block still contains a `Schem
 
 ## Refine after constraining the raw value
 
-Add `refine` after the raw-text constraints to perform that type transition:
+Add `refine` after the raw-text constraints to perform that type transition. `Email`/`Contact` are redeclared here
+(and again through the rest of this page) so each section's fragment stands on its own:
 
 ```fsharp isolated
 open Reified
@@ -263,7 +262,9 @@ applicable wire interpreters.
 
 ## Canonical refinement inference inside a field
 
-A type may also contribute one canonical refinement for an underlying/destination pair:
+A type may also contribute one canonical refinement for an underlying/destination pair. Same `ContactEmail` and
+constraint set as the section above, contributing its refinement through a different member so bare `refine` can
+find it:
 
 ```fsharp isolated
 open Reified
@@ -273,7 +274,12 @@ type ContactEmail = private ContactEmail of string
 
 module ContactEmail =
     let value (ContactEmail value) = value
-    let refinement = Refinement.define Constraint.email ContactEmail value
+
+    let refinement =
+        Refinement.define
+            (Constraint.all [ Constraint.present; Constraint.email; Constraint.maxLength 254 ])
+            ContactEmail
+            value
 
 type ContactEmail with
     static member Refinement(_: string, _: ContactEmail) = ContactEmail.refinement

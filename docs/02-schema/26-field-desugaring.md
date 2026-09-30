@@ -10,9 +10,11 @@ targetFramework: net8.0
 The inner field block is syntax for transforming one `Schema<_>` value. It prevents configuration for adjacent fields
 from joining into one pipeline.
 
-Both forms below share the `ContactEmail` type and `validateCompanyEmail` function from the worked example
-[Refined Schemas](/schema/refined-values.html) builds in full, `Refinement.define` pairs a constraint with the
-wrap/unwrap functions that make it a type, covered there in detail:
+Both forms below use a `ContactEmail` type and a `validateCompanyEmail` function shaped like the ones
+[Refined Schemas](/schema/refined-values.html) builds section by section, kept minimal here (one constraint, not
+the full presence-plus-length-plus-format version that page settles on) since this page's subject is the field
+block, not the refinement. `Refinement.define` pairs a constraint with the wrap/unwrap functions that make it a
+type, covered there in detail:
 
 ```fsharp
 open Reified
@@ -83,9 +85,10 @@ The augmentation is intrinsic to the generated file, so it resolves from any ass
 by `[<DeriveSchema>]` on hand-written records are the exception: schemagen cannot add an intrinsic member to a type
 it does not declare, so a field of such a type still selects its schema with `withSchema TheType.schema`.
 
-## `constrain`
+## `constrain` and `constraints`
 
-Portable constraints can be inspected by JSON Schema, documentation, and UI interpreters:
+Portable constraints can be inspected by JSON Schema, documentation, and UI interpreters. `constraints` takes a
+list for several at once; `constrain` takes one:
 
 ```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
 field _.Name {
