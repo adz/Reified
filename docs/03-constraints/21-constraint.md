@@ -44,7 +44,7 @@ Plenty of code does not want a `Violation` at all. It wants a function that retu
 and nothing else. `Constraint.guard` keeps the checked value, and `Result.orError` throws the violation away in favour
 of your error:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="SignupError and InvalidEmail are the application's own error type; not values this page can construct standalone."
 let validateEmail raw : Result<string, SignupError> =
     raw
     |> Constraint.guard Constraint.email
@@ -87,7 +87,7 @@ Reach for the structured path when the extra facts earn their keep, when you wan
 messages in more than one language, or report several field failures at once. Then keep the violation and
 `Result.mapError` it into a case that carries it:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="raw and InvalidEmail are the caller's own binding and error case; not values this page can construct standalone."
 raw
 |> Constraint.guard Constraint.email
 |> Result.mapError InvalidEmail   // InvalidEmail of Violation
@@ -102,14 +102,16 @@ A `Violation` holds the failing constraint atom and, where Reified can represent
 language and no formatting. That is what keeps it comparable data you can retain, assert on in a test, and
 pass across a boundary without dragging a culture or a `ResourceManager` along with it.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+open Reified
+
 match "ab" |> Constraint.check (Constraint.minLength 3: Constraint<string>) with
 | Ok () -> ()
 | Error violation ->
-    Violation.tryExpectation violation
+    printfn "%A" (Violation.tryExpectation violation)
     // Some (CardinalityAtom (Cardinality.Minimum 3))
 
-    Violation.tryActual violation
+    printfn "%A" (Violation.tryActual violation)
     // Some (ConstraintValue.Integer 2L)
 ```
 
@@ -123,7 +125,16 @@ Prose happens at the rendering edge. `Violation.render` is the zero-dependency E
 setup at all. When you need more, a `Renderer` carries the language and the document context while the
 violation carries the facts:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+open Reified
+
+let renderer = Renderer.english
+
+let violation =
+    match "" |> Constraint.check Constraint.present with
+    | Error violation -> violation
+    | Ok () -> failwith "unreachable"
+
 let field = renderer |> Renderer.context "signup" |> Renderer.attribute "name"
 
 violation |> Violation.message field      // "must be present"
@@ -144,14 +155,20 @@ simply never build the resources.
 There is one vocabulary, not several. A rule named in a module works unchanged in a refinement and in a
 schema, and the DSL spelling reads the same in all three places:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+open Reified
+open Reified.Refinements
+open Reified.SchemaDSL
+
 module RetryRules =
     open Reified.ConstraintDSL
 
     let count : Constraint<int> = Constraint.between 0 10
 
+type RetryCount = RetryCount of int
+
 let retryCountRefinement =
-    Refinement.define RetryRules.count RetryCount _.Value
+    Refinement.define RetryRules.count RetryCount (fun (RetryCount value) -> value)
 
 let schema =
     Schema.int |> Schema.constrain RetryRules.count
@@ -173,7 +190,9 @@ Schema.text |> Schema.constrain Constraint.present
 A standalone binding is the exception: the annotation is the only type information there, so it is what
 selects the shape.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+open Reified
+
 module SignupRules =
     open Reified.ConstraintDSL
 

@@ -81,7 +81,7 @@ Nothing else in the localization path needs conditioning. `Violation.message`, `
 The built-in formatter under Fable renders operands with the portable invariant rendering and **ignores placeholder
 format suffixes**. `{divisor:N0}` renders as though it were `{divisor}`.
 
-Placeholder *parsing* is identical on every target, the suffix is recognized and stripped, not left in the output , 
+Placeholder *parsing* is identical on every target, the suffix is recognized and stripped, not left in the output,
 but there is no culture to format through, and inventing one would give the browser and the server two different
 numbers for the same constraint.
 
@@ -116,8 +116,8 @@ the type is still concrete, so the same constraint describes itself identically,
 identically, on both targets. This is checked by the shared Fable surface test, not assumed.
 
 Blankness and text length are the other pair. Text sizes count Unicode code points rather than UTF-16 code units,
-and whitespace is defined the same way on both runtimes, so `constraint.cardinality.between` reports the same
-`{actual}` for the same string in the browser and on the server.
+and whitespace is defined the same way on both runtimes, so the `constraint.actual` value clause the composed
+message adds reports the same `{actual}` for the same string in the browser and on the server.
 
 ## Descriptors and comparison
 
