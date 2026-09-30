@@ -138,6 +138,10 @@ association is `Schema`'s job, and it is the default next step. Declare the mode
 every field failure with the path that produced it, keeps the raw value for redisplay, renders messages in the
 caller's language, and hands back your domain type:
 
+<!-- isolated: fails a confusing SRTP-resolution error when checked in sequence with the blocks above on this
+     page, despite an identical standalone repro compiling cleanly outside the docs pipeline. Cause not found;
+     re-check whether isolation is still needed if this page's earlier blocks change. -->
+
 ```fsharp isolated
 open Reified
 open Reified.SchemaDSL

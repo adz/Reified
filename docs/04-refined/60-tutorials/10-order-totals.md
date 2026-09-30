@@ -46,12 +46,12 @@ because F# cannot carry "greater than zero" through arithmetic, see
 
 ## Admit the input
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let orderLine rawSku rawQuantity rawPrice =
     result {
         let! sku = Refine.nonBlankString rawSku
-        let! _ = Constraint.greaterThan 0 rawQuantity
-        let! _ = Constraint.greaterThan 0m rawPrice
+        let! _ = Constraint.check (Constraint.greaterThan 0) rawQuantity
+        let! _ = Constraint.check (Constraint.greaterThan 0m) rawPrice
         return { Sku = sku; Quantity = rawQuantity; UnitPrice = rawPrice }
     }
 ```
@@ -59,12 +59,12 @@ let orderLine rawSku rawQuantity rawPrice =
 
 Invalid values are rejected here and nowhere else:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-orderLine "SKU-1" 0 9.99m      // Error [ OutOfRange (GreaterThan "0", Some "0") ]
-orderLine "   " 1 9.99m        // Error [ Blank ]
+```fsharp
+orderLine "SKU-1" 0 9.99m      // Error, rejected at greaterThan 0
+orderLine "   " 1 9.99m        // Error, rejected at nonBlankString
 Refine.nonEmptyList ([]: OrderLine list)
-                               // Error [ InvalidLength (MinimumLength 1, Some 0) ]
-UnitInterval.create 1.4        // Error [ OutOfRange (Between ("0", "1"), Some "1.4") ]
+                               // Error, rejected at minimum length 1
+UnitInterval.create 1.4        // Error, outside [0, 1]
 UnitInterval.create Double.NaN // Error, NaN is outside every interval
 ```
 
@@ -72,7 +72,11 @@ UnitInterval.create Double.NaN // Error, NaN is outside every interval
 Two of the four fields have a **total** constructor, which is the one to prefer when the
 input has an obvious correct reading:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+let requestedFrom = DateTimeOffset(2026, 6, 1, 0, 0, 0, TimeSpan.Zero)
+let requestedTo = DateTimeOffset(2026, 6, 5, 0, 0, 0, TimeSpan.Zero)
+let rawDiscount = 0.15
+
 let window = Interval.between requestedFrom requestedTo  // cannot fail: orders the pair
 let discount = UnitInterval.clamp rawDiscount            // cannot fail: clamps into [0, 1]
 ```
@@ -87,7 +91,7 @@ when an inverted pair means the caller made a mistake you would rather report th
 
 The numbers are plain, so the arithmetic is plain:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let lineTotal (line: OrderLine) = decimal line.Quantity * line.UnitPrice
 
 let subtotal (order: Order) =
@@ -100,7 +104,7 @@ without putting a `Result` between every operation.
 
 ### Discount
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let payable (order: Order) =
     let multiplier = UnitInterval.complement order.Discount
     subtotal order * decimal (UnitInterval.value multiplier)
@@ -132,12 +136,14 @@ let averageUnitPrice (order: Order) =
 option, because the divisor is the length and the length is at least one. Each of those is
 a branch the plain-list version would have had to write:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+type OrderLine = { Quantity: int; UnitPrice: decimal }
+
 // what the same three functions cost over an ordinary list
 let largestLine lines = lines |> List.sortByDescending (fun l -> l.Quantity) |> List.tryHead
 let averageUnitPrice lines =
     if List.isEmpty lines then None
-    else Some (List.sumBy _.UnitPrice lines / decimal (List.length lines))
+    else Some (List.sumBy (fun (l: OrderLine) -> l.UnitPrice) lines / decimal (List.length lines))
 ```
 
 
@@ -147,7 +153,7 @@ the total ones, so nothing here converts back to a list to do ordinary work.
 
 ### Delivery window
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let isDeliverable (order: Order) (candidate: DateTimeOffset) =
     Interval.contains candidate order.Delivery
 
