@@ -17,9 +17,10 @@ be redisplayed with the user's original input and per-field errors.
 
 The schema declares each field once: external name, getter, and constraints.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 open Reified
 open Reified.SchemaDSL
+open Reified.ConstraintDSL
 
 type Signup = { Email: string; Age: int }
 
@@ -43,7 +44,7 @@ missing or mistyped arguments fail at `construct`.
 
 Form posts are name/value pairs:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let raw =
     Data.ofNameValues
         [ "email", "not-an-email"
@@ -53,18 +54,18 @@ let raw =
 
 ## Parse
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let parsed = Schema.parseRetainingInput signupSchema raw
 ```
 
 
-`parsed` is a `RetainedParseResult<Signup, SchemaError>`. On success `parsed.Result` is `Ok signup` and every constraint
+`parsed` is a `RetainedParseResult<Signup>`. On success `parsed.Result` is `Ok signup` and every constraint
 already holds. Here both fields fail, so no `Signup` exists anywhere:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 parsed.IsValid              // false
-parsed.ErrorsFor "email"    // [ SchemaError.InvalidFormat "email" ]
-parsed.ErrorsFor "age"      // [ SchemaError.OutOfRange ... ]
+parsed.ErrorsFor "email"    // [ SchemaError.Violation ... ], the email-format constraint
+parsed.ErrorsFor "age"      // [ SchemaError.Violation ... ], the atLeast 13 constraint
 ```
 
 
@@ -72,7 +73,7 @@ parsed.ErrorsFor "age"      // [ SchemaError.OutOfRange ... ]
 
 The original input is retained on the parsed value, addressed by the same paths:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 Data.redisplayPath "email" parsed.Input   // "not-an-email", exactly as typed
 Data.redisplayPath "age" parsed.Input     // "12"
 ```
@@ -83,7 +84,7 @@ Use `SchemaError.render` for field-level messages or `RetainedParseResult.render
 
 ## Use The Trusted Model
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="register and renderForm are the host application's own functions; not values this page can construct standalone."
 match parsed.Result with
 | Ok signup -> register signup      // constraints already hold; no re-checking downstream
 | Error _ -> renderForm parsed

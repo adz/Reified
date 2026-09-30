@@ -52,7 +52,7 @@ let validateEmail raw : Result<string, SignupError> =
 ```
 
 
-The function is no longer, and no more ceremonious, than the equivalent hand-written predicate, and
+The function is no longer and no more ceremonious than the equivalent hand-written predicate, and
 unlike the predicate, `Constraint.email` is still the same value you can later put in a refinement, a schema, or a
 JSON Schema document without rewriting the rule.
 
@@ -146,9 +146,9 @@ Give the renderer a different culture and the identical violation reads `"Le nom
 with contextual fallback, and without any application code walking a violation tree or reproducing Reified's
 key catalogue.
 
-Translation is cheap here because it is not a feature bolted on afterwards, it is the same split that
-removed the duplicated message in the first place. Shipping in one language still gets the benefit; you
-simply never build the resources.
+Translation is cheap here because it reuses the same split that removed the duplicated message in the
+first place, rather than adding a feature on top of it. Shipping in one language still gets the benefit;
+you simply never build the resources.
 
 ## The same declaration is read by everything downstream
 
@@ -188,12 +188,12 @@ Schema.text |> Schema.constrain Constraint.present
 
 
 A standalone binding is the exception: the annotation is the only type information there, so it is what
-selects the shape.
+selects the shape. A fresh, unrelated module name below, not a continuation of `SignupRules` above:
 
 ```fsharp isolated
 open Reified
 
-module SignupRules =
+module PlanRules =
     open Reified.ConstraintDSL
 
     let requiredName : Constraint<string> = present
