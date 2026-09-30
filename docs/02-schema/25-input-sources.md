@@ -57,10 +57,17 @@ let customerSchema =
 
 
 Here `addressSchema` and `contactSchema` are intentionally local value schemas. If `Address` and `Contact` declare
-canonical intrinsic schemas, both lines can use ordinary `field` and the contact list resolves recursively.
+canonical intrinsic schemas, both lines can use ordinary `field` and the contact list resolves recursively, though
+`Contacts`' own `constrain (minLength 1)` would then need to move onto `Contact` or `Contacts` itself, since dropping
+`withSchema`/`constrain` for a bare `field _.Contacts` drops that length check too.
 
 Nested fields expect object-shaped input and prefix their diagnostics with the field name; collection fields expect
 `Data.List`, parse every item, accumulate every item error, and prefix diagnostics with the item index.
+
+The sections below show four adapters, each a complete, standalone example of that source's own syntax. Only
+the last one, Configuration, feeds the closing "One Parse For All Of Them" section directly; the other three are
+shown in isolation so their own `raw` bindings don't collide on one page. Any of them would work the same way there,
+since every adapter below produces the same `Data` shape.
 
 ## HTTP Form-Like Input
 
@@ -143,6 +150,8 @@ segments, never from repetition, repeated names as multi-value input is a wire c
 children, never override those children, so real layered `IConfiguration` output round-trips directly.
 
 ## One Parse For All Of Them
+
+Continuing with the configuration input above:
 
 ```fsharp
 let parsed = Schema.parseRetainingInput customerSchema raw

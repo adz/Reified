@@ -26,7 +26,9 @@ type Data =
 
 `Null` is a present value with no scalar content. In JSON it renders as `null`.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+open Reified
+
 Data.render Data.Null
 // => "null"
 ```
@@ -39,7 +41,7 @@ A null field is different from an absent field. In literal syntax, `"value" => n
 
 `Text` stores a .NET string and renders it as a JSON string with the required escaping.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 Data.render (Data.Text "Ada\nLovelace")
 // => "\"Ada\\nLovelace\""
 ```
@@ -66,7 +68,7 @@ See [Numbers](/data/numbers.html) for conversion rules and examples.
 
 `Bool` stores `true` or `false` and renders it without quotes.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 Data.render (Data.Bool true)
 // => "true"
 ```
@@ -76,7 +78,7 @@ Data.render (Data.Bool true)
 
 `List` stores ordered `Data` values. Order and repeated values are preserved.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 Data.render (Data.List [ Data.Text "author"; Data.Text "admin" ])
 // => "[\"author\", \"admin\"]"
 ```
@@ -89,7 +91,7 @@ subset, every item, or at least one item.
 
 `Object` stores an ordered list of name/value pairs. It preserves declaration order and duplicate field names.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let value =
     Data.Object [
         "name", Data.Text "Ada"
@@ -97,7 +99,7 @@ let value =
     ]
 
 Data.render value
-// => "{ name: \"Ada\", name: \"Grace\" }"
+// => "{{ name: \"Ada\", name: \"Grace\" }}"
 ```
 
 
@@ -109,7 +111,7 @@ duplicates and order. Partial object matching consumes matching duplicate fields
 `DataPath` identifies nested fields and zero-based list indexes. String paths use dots for ordinary field names,
 brackets for indexes, and quoted brackets for names containing punctuation.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 DataPath.parse "customer.roles[1]"
 // => [ DataPathSegment.Name "customer"; DataPathSegment.Name "roles"; DataPathSegment.Index 1 ]
 
