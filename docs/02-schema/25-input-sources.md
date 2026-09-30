@@ -14,14 +14,31 @@ package, useful beyond schemas, see [its docs](/data/index.html).)
 
 ## The Schema
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+open Reified
 open Reified.SchemaDSL
+open Reified.ConstraintDSL
+
+type Address = { City: string }
 type Contact = { Kind: string; Value: string }
 
 type Customer =
     { Name: string
       Address: Address
       Contacts: Contact list }
+
+let addressSchema =
+    schema<Address> {
+        field _.City
+        construct (fun city -> { City = city })
+    }
+
+let contactSchema =
+    schema<Contact> {
+        field _.Kind
+        field _.Value
+        construct (fun kind value -> { Kind = kind; Value = value })
+    }
 
 let customerSchema =
     schema<Customer> {
@@ -49,7 +66,9 @@ Nested fields expect object-shaped input and prefix their diagnostics with the f
 
 Form posts and query strings are name/value pairs; repeated names become `Data.List` values:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+open Reified
+
 let raw =
     Data.ofNameValues
         [ "name", "Ada Lovelace"
@@ -64,7 +83,9 @@ the configuration or JSON adapters below when the input carries nested models or
 
 ## CLI Arguments
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+open Reified
+
 let raw = Data.ofCliArgs [ "--name"; "Ada Lovelace"; "--verbose"; "--no-color" ]
 ```
 
@@ -77,7 +98,7 @@ arguments collect under the `_` field.
 On .NET 8+ targets, adapt a parsed `JsonDocument` or `JsonElement` directly, the natural fit for ASP.NET Core
 request bodies:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Illustrates ASP.NET Core request-body integration (use! inside a task/async CE, request.Body); those are the host application's own, not values this page can construct standalone."
 use! document = JsonDocument.ParseAsync request.Body
 let raw = Data.ofJsonDocument document
 ```
@@ -90,7 +111,7 @@ exact lexical representation. The adapter uses the in-box `System.Text.Json`, so
 
 For the same lossless behavior on .NET and Fable, use `Json.parseData` from the installed `Reified.Schema` package:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
 open Reified
 
 let raw = Json.parseData """{"name":"Ada","score":1.20e+3}"""
@@ -105,7 +126,7 @@ when either distinction matters.
 
 Configuration keys use `:`-separated sections and numeric segments for collection indexes:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let raw =
     Data.ofConfiguration
         [ "name", "Ada Lovelace"
@@ -123,14 +144,14 @@ children, never override those children, so real layered `IConfiguration` output
 
 ## One Parse For All Of Them
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let parsed = Schema.parseRetainingInput customerSchema raw
 
 match parsed.Result with
-| Ok customer -> customer
+| Ok customer -> ignore customer
 | Error diagnostics ->
     // same paths for every source:
-    parsed.ErrorsFor "contacts[0].value" |> render
+    parsed.ErrorsFor "contacts[0].value" |> List.map SchemaError.render |> ignore
 ```
 
 

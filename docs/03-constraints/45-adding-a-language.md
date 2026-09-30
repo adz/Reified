@@ -75,7 +75,7 @@ constraint.fullMessage       = {attribute} {message}
 ```
 
 
-Reorder them freely. A language that puts the actual value first, or the noun last, changes only these entries , 
+Reorder them freely. A language that puts the actual value first, or the noun last, changes only these entries,
 not the twenty-five predicates:
 
 ```text
@@ -172,7 +172,7 @@ constraint.cardinality.minimum.other = doit contenir au moins {minimum} élémen
 Two forms are all ordinary lookup does. A language with more categories, or one where the category depends on more
 than the value, takes an advanced resolver:
 
-```fsharp no-check reason="Illustrates integrating an external ICU-backed catalogue (icu, cldrCategory); those are the host application's own, not values this page can construct standalone."
+```fsharp no-check reason="Illustrates integrating an external ICU-backed catalogue, the library many applications use for language-specific plural rules (Arabic has six categories, not two); icu/cldrCategory are the host application's own, not values this page can construct standalone."
 let renderer =
     Renderer.Advanced.ofResolver (fun request ->
         match request.PluralArgument, icu.TryGet request.BaseKey with
