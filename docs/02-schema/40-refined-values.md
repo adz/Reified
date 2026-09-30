@@ -10,7 +10,30 @@ targetFramework: net8.0
 
 A field can be short when its type contributes a canonical schema:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+<!-- isolated: forward-references Contact/Contact.create/Email before "Define the domain type"
+     below declares them, which is the point being illustrated (the compact form this page
+     builds toward), not something this fragment can compile standalone in page order. -->
+
+```fsharp isolated
+open Reified
+open Reified.SchemaDSL
+open Reified.Refinements
+
+type Email = private Email of string
+
+module Email =
+    let value (Email value) = value
+    let refinement = Refinement.define Constraint.email Email value
+    let create value = Refinement.create refinement value
+
+type Email with
+    static member Schema(_: Email) : Schema<Email> = Schema.text |> Schema.refine Email.refinement
+
+type Contact = { Email: Email }
+
+module Contact =
+    let create email = { Email = email }
+
 let contactSchema =
     schema<Contact> {
         field _.Email
@@ -27,7 +50,7 @@ This is the form to prefer at use sites. Every built-in refined type from
 Rules that need a parameter, such as a length range or a pattern, are constraints rather than types. They belong on
 the field, because the bounds are a property of *this* field rather than of the value:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
 field _.Name {
     constrain Constraint.present
     constrain (Constraint.lengthBetween 2 80)
@@ -73,10 +96,7 @@ The `email` format is intrinsic to `Email`, so its refinement owns that constrai
 
 Expand the field to expose its wire schema:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-open Reified
-open Reified.SchemaDSL
-
+```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
 field _.Email {
     withSchema Schema.text
     constraints [ present; maxLength 80 ]
@@ -95,7 +115,23 @@ Constraints preserve the value type, however. This block still contains a `Schem
 
 Add `refine` after the raw-text constraints to perform that type transition:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+open Reified
+open Reified.SchemaDSL
+open Reified.ConstraintDSL
+open Reified.Refinements
+
+type Email = private Email of string
+
+module Email =
+    let value (Email value) = value
+    let refinement = Refinement.define Constraint.email Email value
+
+type Contact = { Email: Email }
+
+module Contact =
+    let create email = { Email = email }
+
 let contactSchema =
     schema<Contact> {
         field _.Email {
@@ -121,7 +157,7 @@ A raw-text constraint must appear before refinement because it cannot be applied
 
 Suppose only the billing form imposes an 80-character transport limit:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
 field _.BillingEmail {
     withSchema Schema.text
     constraints [ present; maxLength 80 ]
@@ -140,10 +176,14 @@ type, lift it into the refinement instead.
 
 There is no adapter step: Schema takes the same `Constraint` value you would check directly.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+open Reified
+
 let even : Constraint<int> =
     Constraint.custom "must be an even quantity" (fun value -> value % 2 = 0)
+```
 
+```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
 field _.Quantity {
     constrain even
 }
@@ -159,17 +199,18 @@ what lets JSON Schema lower it and SchemaGen generate values that satisfy it. Se
 
 If required presence and the length limit define every `ContactEmail`, put them beside the domain type instead:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+open Reified
+open Reified.Refinements
+
 type ContactEmail = private ContactEmail of string
 
 module ContactEmail =
     let value (ContactEmail value) = value
 
     let refinement =
-        Refinement.defineAll
-            [ Reified.Constraint.Constraint.present
-              Reified.Constraint.Constraint.email
-              Reified.Constraint.Constraint.maxLength 254 ]
+        Refinement.define
+            (Constraint.all [ Constraint.present; Constraint.email; Constraint.maxLength 254 ])
             ContactEmail
             value
 
@@ -177,30 +218,42 @@ module ContactEmail =
 ```
 
 
-The schema then carries the complete invariant through one value:
+The schema then carries the complete invariant through one value. `isolated` below because it redeclares
+`ContactEmail` together with its canonical schema in one place; a fresh `Message` type stands in for `Contact`,
+since this is a different, later invariant than the earlier `Contact`/`Email` example built:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+open Reified
+open Reified.Refinements
+open Reified.SchemaDSL
+
+type ContactEmail = private ContactEmail of string
+
+module ContactEmail =
+    let value (ContactEmail value) = value
+
+    let refinement =
+        Refinement.define
+            (Constraint.all [ Constraint.present; Constraint.email; Constraint.maxLength 254 ])
+            ContactEmail
+            value
+
 let contactEmailSchema : Schema<ContactEmail> =
     Schema.text
     |> Schema.refine ContactEmail.refinement
     |> Schema.withFormat SchemaFormat.email
-```
 
-
-Contribute that canonical schema once:
-
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
 type ContactEmail with
     static member Schema(_: ContactEmail) = contactEmailSchema
-```
 
+type Message = { Email: ContactEmail }
 
-Fields return to the compressed form:
+module Message =
+    let create email = { Email = email }
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-schema<Contact> {
+schema<Message> {
     field _.Email
-    construct Contact.create
+    construct Message.create
 }
 ```
 
@@ -212,7 +265,16 @@ applicable wire interpreters.
 
 A type may also contribute one canonical refinement for an underlying/destination pair:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+open Reified
+open Reified.Refinements
+
+type ContactEmail = private ContactEmail of string
+
+module ContactEmail =
+    let value (ContactEmail value) = value
+    let refinement = Refinement.define Constraint.email ContactEmail value
+
 type ContactEmail with
     static member Refinement(_: string, _: ContactEmail) = ContactEmail.refinement
 ```
@@ -220,7 +282,7 @@ type ContactEmail with
 
 Then an explicitly selected raw schema can use bare `refine`:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
 field _.Email {
     withSchema Schema.text
     refine
