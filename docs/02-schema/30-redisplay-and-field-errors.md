@@ -89,7 +89,7 @@ for field in formFields do
 ```
 
 
-Because failed parses never construct the model, there is no half-valid object to guard against, the template works
+Because failed parses never construct the model, there is no half-valid object to guard against; the template works
 from structured data and diagnostics only.
 
 For summary output, render every failed diagnostic in one line:

@@ -15,7 +15,7 @@ be redisplayed with the user's original input and per-field errors.
 
 ## Declare The Model And Schema
 
-The schema declares each field once: external name, getter, and constraints.
+Declare the model, then attach a wire name, getter, and constraints to each field that needs one:
 
 ```fsharp
 open Reified
@@ -38,9 +38,11 @@ let signupSchema =
 
 
 `schema<Signup>` anchors the model type. The closing constructor must match every field in declaration order, so
-missing or mistyped arguments fail at `construct`.
+missing or mistyped arguments fail at `construct`. `Email` stays a plain `string` here because its rule, a length
+limit alongside the format check, is specific to this field rather than to every email in the codebase; see
+[Getting Started](/getting-started/index.html) for when a rule belongs on a refined type instead.
 
-## Adapt The structured data
+## Adapt The Structured Data
 
 Form posts are name/value pairs:
 
@@ -64,8 +66,8 @@ already holds. Here both fields fail, so no `Signup` exists anywhere:
 
 ```fsharp
 parsed.IsValid              // false
-parsed.ErrorsFor "email"    // [ SchemaError.Violation ... ], the email-format constraint
-parsed.ErrorsFor "age"      // [ SchemaError.Violation ... ], the atLeast 13 constraint
+parsed.ErrorsFor "email"    // [ SchemaError.Violation ... ] for the email-format constraint
+parsed.ErrorsFor "age"      // [ SchemaError.Violation ... ] for the atLeast 13 constraint
 ```
 
 
@@ -79,7 +81,7 @@ Data.redisplayPath "age" parsed.Input     // "12"
 ```
 
 
-A form template needs only `parsed.Input` and `parsed.ErrorsFor`, there is no half-valid model to guard against.
+A form template needs only `parsed.Input` and `parsed.ErrorsFor`; there is no half-valid model to guard against.
 Use `SchemaError.render` for field-level messages or `RetainedParseResult.renderErrors parsed` for a summary list.
 
 ## Use The Trusted Model
@@ -91,11 +93,12 @@ match parsed.Result with
 ```
 
 
-`Signup` here is a public record, so the guarantee belongs to the successful parse result, not to the type, other
-code can still write a `Signup` literal that skips the schema. That is the right trade for a boundary form model.
-When a value's construction history is uncertain, `Schema.check signupSchema value` runs the same constraints over an
-already assembled value; when an invariant must hold for every value of the type, use a private representation with a
-smart constructor. [Construction Guarantees](/schema/trusted-construction.html) covers the full division.
+`Signup` here is a public record, so the guarantee belongs to the successful parse result, not to the type. Other
+code can still write a `Signup` literal that skips the schema, which is fine for a boundary form model whose only
+job is to be parsed once and used. When a value's construction history is uncertain instead, `Schema.check
+signupSchema value` re-runs the same constraints over an already assembled value.
+[Construction Guarantees](/schema/trusted-construction.html) covers the full division, including when an invariant
+that must hold for every value of the type calls for a private representation rather than a public record.
 
 ## Next
 
