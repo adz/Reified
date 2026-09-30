@@ -45,6 +45,24 @@ result {
 }
 ```
 
+`do!` and `return!` in the same block:
+
+```fsharp
+let requireAdult age : Result<unit, SignupError> =
+    if age >= 18 then Ok () else Error (AgeOutOfRange age)
+
+let signupAdultOnly name age =
+    result {
+        let! name = parseName name
+        let! age = parseAge age
+        do! requireAdult age          // unit success, nothing to bind
+        return! Ok { Name = name; Age = age }
+    }
+
+signupAdultOnly "Ada" "36"   // Ok { Name = "Ada"; Age = 36 }
+signupAdultOnly "Ada" "12"   // Error (AgeOutOfRange 12)
+```
+
 
 ```text
 Ok { Name = "Ada"; Age = 36 }
