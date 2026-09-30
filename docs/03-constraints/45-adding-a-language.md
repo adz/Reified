@@ -110,7 +110,13 @@ If your language's joining cannot be expressed this way, the conjunction changes
 group has to be reordered as a whole, patterns are the wrong tool. Project `Violation.toMessageTree` and own the
 traversal:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+open Reified
+
+let lookup (descriptor: MessageDescriptor) = MessageDescriptor.key descriptor
+let yourConjunction first rest = String.concat " and " (first :: rest)
+let yourDisjunction first rest = String.concat " or " (first :: rest)
+
 let rec render tree =
     match tree with
     | MessageTree.Leaf (MessageLeaf.Localized descriptor) -> lookup descriptor
@@ -166,7 +172,7 @@ constraint.cardinality.minimum.other = doit contenir au moins {minimum} élémen
 Two forms are all ordinary lookup does. A language with more categories, or one where the category depends on more
 than the value, takes an advanced resolver:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Illustrates integrating an external ICU-backed catalogue (icu, cldrCategory); those are the host application's own, not values this page can construct standalone."
 let renderer =
     Renderer.Advanced.ofResolver (fun request ->
         match request.PluralArgument, icu.TryGet request.BaseKey with
@@ -184,7 +190,7 @@ rendering.
 
 For .NET resources, one renderer at the composition root:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Illustrates ASP.NET Core DI registration and a .NET ResourceManager; services and resources are the host application's own, not values this page can construct standalone."
 let renderer = Renderer.ofCurrentCulture resources
 services.AddSingleton renderer |> ignore
 ```
@@ -192,18 +198,24 @@ services.AddSingleton renderer |> ignore
 
 For a dictionary, a JSON bundle, or Fable:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+let translations = Map.ofList [ "constraint.presence.present", "doit être renseigné" ]
+
 let renderer = Renderer.ofLookup translations.TryFind
 ```
 
 
 Both are immutable values. Scope them per document and field at the call site, not per request:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let signup = renderer |> Renderer.context "signup"
 
-violation |> Violation.fullMessage (signup |> Renderer.attribute "name")
-errors |> SchemaErrors.fullMessages signup
+let violation =
+    match Constraint.check Constraint.present "" with
+    | Error violation -> violation
+    | Ok () -> failwith "unreachable"
+
+violation |> Violation.fullMessage (signup |> Renderer.attribute "name") |> ignore
 ```
 
 
@@ -211,7 +223,7 @@ errors |> SchemaErrors.fullMessages signup
 
 Base-catalogue coverage is a one-line test:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Illustrates a real xUnit/Unquote test; those test-framework dependencies are not available to this page's own compile check."
 [<Fact>]
 let ``the French catalogue covers every Reified key`` () =
     let missing =
@@ -225,7 +237,9 @@ let ``the French catalogue covers every Reified key`` () =
 Reified cannot enumerate your contexts and fields, it has never seen them. For contextual coverage, enumerate the
 ones you care about and ask the renderer exactly what it will look up:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+let french = Map.ofList [ "constraint.presence.present", "doit être renseigné" ]
+
 let candidates context field key =
     let spec =
         MessageDescriptor.Advanced.create key Map.empty

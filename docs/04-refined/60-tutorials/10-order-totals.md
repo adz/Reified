@@ -60,10 +60,10 @@ let orderLine rawSku rawQuantity rawPrice =
 Invalid values are rejected here and nowhere else:
 
 ```fsharp
-orderLine "SKU-1" 0 9.99m      // Error, rejected at greaterThan 0
-orderLine "   " 1 9.99m        // Error, rejected at nonBlankString
+orderLine "SKU-1" 0 9.99m      // Error, quantity must be positive
+orderLine "   " 1 9.99m        // Error, sku is blank
 Refine.nonEmptyList ([]: OrderLine list)
-                               // Error, rejected at minimum length 1
+                               // Error, an order needs at least one line
 UnitInterval.create 1.4        // Error, outside [0, 1]
 UnitInterval.create Double.NaN // Error, NaN is outside every interval
 ```
@@ -134,7 +134,8 @@ let averageUnitPrice (order: Order) =
 
 `maxBy` returns an `OrderLine`, not an option. `averageBy` returns a `decimal`, not an
 option, because the divisor is the length and the length is at least one. Each of those is
-a branch the plain-list version would have had to write:
+a branch the plain-list version would have had to write. For contrast only, not part of the
+running example:
 
 ```fsharp isolated
 type OrderLine = { Quantity: int; UnitPrice: decimal }
@@ -176,7 +177,7 @@ let skus (order: Order) =
     order.Lines
     |> NonEmptyList.map (fun line -> NonBlankString.value line.Sku)
     |> NonEmptyList.toList
-    |> DistinctList.create      // Error [ Duplicate ] when the same SKU appears twice
+    |> DistinctList.create      // Error, rejected: the same SKU appears twice
 
 let lineBySku (order: Order) =
     order.Lines
@@ -201,6 +202,7 @@ than losing an entry.
 | `UnitInterval` is in `[0, 1]` | no clamping the multiplier before applying it |
 | `Interval` has `Lower <= Upper` | no "did they send these backwards" check |
 | `DistinctList` has no duplicates | no silent collapse building a set; a reported failure building a map |
+| `NonBlankString` is never empty or whitespace | no blank-string guard at every read site |
 
 None of these is a claim about construction. Each is a claim about every line of code
 downstream.
