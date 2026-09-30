@@ -17,8 +17,13 @@ present-and-useless.
 
 `Renderer.ofLookup` is the constructor to use. It takes any key-to-template function:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 open Reified
+
+let violation =
+    match "" |> Constraint.check Constraint.present with
+    | Error violation -> violation
+    | Ok () -> failwith "unreachable"
 
 let translations =
     Map [ "constraint.presence.present", "doit être renseigné"
@@ -45,7 +50,7 @@ inspection surface.
 
 These three constructors do not exist in a Fable build:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Illustrates constructors absent under Fable by design; referencing them bare with no arguments is not something this fragment can compile."
 Renderer.ofResourceManager
 Renderer.ofResourceManagerWithCultures
 Renderer.ofCurrentCulture
@@ -58,7 +63,7 @@ silent no-op would produce untranslated English in production with nothing to ca
 If a codebase is shared between a .NET host and a Fable client, put the constructor behind the one conditional you
 already have:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Illustrates a #if FABLE_COMPILER split; translations and resources are the host application's own values, not ones this page can construct standalone."
 let renderer =
 #if FABLE_COMPILER
     Renderer.ofLookup translations.TryFind
@@ -82,7 +87,14 @@ numbers for the same constraint.
 
 Supply your own formatter when the suffix matters. `Intl.NumberFormat` is usually what you want:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+open Reified
+
+let translations = Map [ "constraint.presence.present", "doit être renseigné" ]
+
+/// Stands in for a real Intl.NumberFormat call under Fable.
+let formatNumber (value: float) = value.ToString()
+
 let renderer =
     Renderer.ofLookup translations.TryFind
     |> Renderer.Advanced.withValueFormatting (fun request ->
@@ -112,7 +124,9 @@ and whitespace is defined the same way on both runtimes, so `constraint.cardinal
 `MessageDescriptor` keeps structural equality under Fable, so violations carrying one compare equal across
 independently constructed values:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+open Reified
+
 MessageDescriptor.Advanced.create "books.isbn.invalid" Map.empty
     = MessageDescriptor.Advanced.ofSegments [ "books"; "isbn"; "invalid" ] Map.empty
 // true, on both targets
@@ -126,7 +140,7 @@ assert on a whole violation value rather than on its rendered text.
 
 The lookup is a plain function, so how the bundle arrives is entirely yours. Two shapes work well:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Illustrates two bundle-delivery shapes; catalogue/culture/loaded are the host application's own values (a generated per-language Map, and a fetch result), not ones this page can construct standalone."
 // Bundled at build time. One Map per language, selected once.
 let renderer = Renderer.ofLookup (catalogue culture).TryFind
 

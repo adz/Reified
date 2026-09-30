@@ -70,7 +70,7 @@ let email : Result<ContactEmail, Violation> =
 
 ## Combine constraints
 
-`Constraint.all` requires at least one constraint and checks every constraint against the same original value; give
+`Constraint.all` checks every listed constraint against the same original value and combines their failures; give
 the combined constraint to the same `Refinement.define` used above:
 
 ```fsharp isolated
@@ -97,13 +97,15 @@ module ContactEmail =
 ```
 
 
-The same constraint values provide executable checks and `ConstraintDetails` metadata.
+The same constraint values provide executable checks and `ConstraintDescription` metadata.
 
 ## Use a metadata-free check
 
 Use `Constraint.customWith` for an invariant no built-in constraint describes, then hand that opaque constraint to
 `Refinement.define` like any other. The check runs, but nothing downstream can read the rule, the trade-off is
-[interpreted versus opaque](/constraints/constraints.html):
+[interpreted versus opaque](/constraints/constraints.html). `customWith`'s own string argument ("even" below) only
+feeds that opaque `ConstraintDescription`; a caller sees the callback's own `Described` text on failure, not that
+string:
 
 ```fsharp isolated
 open Reified
@@ -137,7 +139,13 @@ type ContactEmail =
 
 module ContactEmail =
     let value (ContactEmail value) = value
-    let refinement = Refinement.define Constraint.email ContactEmail value
+
+    let refinement =
+        Refinement.define
+            (Constraint.all [ Constraint.present; Constraint.email; Constraint.maxLength 254 ])
+            ContactEmail
+            value
+
     let create raw = Refinement.create refinement raw
 
 let result =
@@ -166,10 +174,16 @@ type ContactEmail =
 
 module ContactEmail =
     let value (ContactEmail value) = value
-    let refinement = Refinement.define Constraint.email ContactEmail value
+
+    let refinement =
+        Refinement.define
+            (Constraint.all [ Constraint.present; Constraint.email; Constraint.maxLength 254 ])
+            ContactEmail
+            value
+
     let create raw = Refinement.create refinement raw
 
-    // ... as above
+    // ... as in "Combine constraints" above
 
     /// Total: lower-casing inhabited, well-formed text leaves it inhabited and well-formed.
     let normalise (input: ContactEmail) = ContactEmail(value input |> fun text -> text.ToLowerInvariant())
