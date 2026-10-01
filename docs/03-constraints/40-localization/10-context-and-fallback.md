@@ -12,7 +12,11 @@ targetFramework: net8.0
 
 A renderer holds two scoping roles, and they behave differently on purpose.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+open Reified
+
+let renderer = Renderer.english
+
 let signup = renderer |> Renderer.context "signup"     // appends a segment
 let name = signup |> Renderer.attribute "name"         // replaces the whole attribute
 let email = name |> Renderer.attribute "email"         // "name" is gone, not nested
@@ -92,7 +96,7 @@ and encodes the reserved characters before joining:
 `%` is encoded first, so a field literally named `%2E` cannot collide with a field named `.`. Consequently these
 two renderers address different resources:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 renderer |> Renderer.context "address.postcode"
 
 renderer |> Renderer.context "address" |> Renderer.context "postcode"
