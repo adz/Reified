@@ -75,8 +75,7 @@ Data.render customerWithAddress
 The argument to `data` is an ordinary F# list of `DataField`, so every list-expression form works inside it. Mix
 literal fields with `yield!`, `if`, `for`, `match`, and `let` bindings in one declaration.
 
-With `common = data [ "tenant" => "acme"; "region" => "au" ]`, `customerId = "c-1"`, `includeDebug = true`, and
-`names = [ "ada"; "grace" ]`:
+For example:
 
 ```fsharp
 let common = data [ "tenant" => "acme"; "region" => "au" ]
@@ -112,7 +111,8 @@ Points worth knowing:
   in the same list, so no `yield` keyword is needed on the plain lines.
 - An `if` without `else` contributes nothing when the condition is false. Use `?=>` instead when the choice is
   `Some`/`None` on a single field, and `if`/`for` when the shape of the object varies.
-- The same forms build lists: `data [ "ids" => [ for id in ids -> id * 10 ] ]` renders `{ ids: [10, 20, 30] }`.
+- The same forms build lists: with `ids = [ 1; 2; 3 ]`, `data [ "ids" => [ for id in ids -> id * 10 ] ]` renders
+  `{ ids: [10, 20, 30] }`.
 
 Control flow decides which fields exist. `Data.patch` changes fields that already exist. Prefer control flow when
 building a value from inputs, and patching when deriving a variation from a value you already have.

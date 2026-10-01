@@ -11,7 +11,7 @@ targetFramework: net8.0
 `Data` represents structured values with six cases. The model maps directly to JSON and also works for fixtures,
 configuration, command-line input, form values, events, and other tree-shaped data.
 
-The examples below use `Data.render`, a human-readable compact form: unquoted field names, and the same quoting and
+The examples below use `Data.render`, a human-readable compact form: unquoted ordinary field names, and the same quoting and
 escaping JSON uses for text. For scalars it reads the same as JSON output; for `Data.Object` it does not, since JSON
 requires quoted field names and `Data.render` does not produce them. Use `Data.Json.render` when the result must be
 valid JSON, see [Render for people](/data/declaring-and-editing.html#render-for-people).

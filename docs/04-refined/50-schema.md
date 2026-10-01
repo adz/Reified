@@ -36,7 +36,7 @@ and checking project through `NonBlankString.Value`.
 
 A numeric range is a constraint rather than a refined type, so it goes on the primitive:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
 field _.Quantity { constrain (Constraint.greaterThan 0) }
 ```
 
@@ -46,7 +46,16 @@ the schema is inferred from the field's type and each constraint sits on its own
 
 For an application type:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+open Reified
+open Reified.Refinements
+
+type ContactEmail = private ContactEmail of string
+
+module ContactEmail =
+    let value (ContactEmail value) = value
+    let refinement = Refinement.define Constraint.email ContactEmail value
+
 let emailSchema : Schema<ContactEmail> =
     Schema.text
     |> Schema.refine ContactEmail.refinement
@@ -55,7 +64,22 @@ let emailSchema : Schema<ContactEmail> =
 
 A field block receives the refinement explicitly:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+open Reified
+open Reified.SchemaDSL
+open Reified.Refinements
+
+type ContactEmail = private ContactEmail of string
+
+module ContactEmail =
+    let value (ContactEmail value) = value
+    let refinement = Refinement.define Constraint.email ContactEmail value
+
+type Signup = { Email: ContactEmail; Age: int }
+
+module Signup =
+    let create email age = { Email = email; Age = age }
+
 let signupSchema =
     schema<Signup> {
         field _.Email {
@@ -83,7 +107,33 @@ let centsSchema : Schema<decimal> =
 ```
 
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+open Reified
+open Reified.SchemaDSL
+open System
+
+type BookingDraft = { Start: DateTimeOffset; End: DateTimeOffset }
+
+let bookingDraftSchema : Schema<BookingDraft> =
+    schema<BookingDraft> {
+        field _.Start
+        field _.End
+        construct (fun start finish -> { Start = start; End = finish })
+    }
+
+type Booking =
+    private
+        { Start: DateTimeOffset
+          End: DateTimeOffset }
+
+module Booking =
+    let create (draft: BookingDraft) : Result<Booking, SchemaError list> =
+        if draft.Start <= draft.End then Ok { Start = draft.Start; End = draft.End }
+        else Error [ SchemaError.Custom("end-before-start", Some "End must not be before start.") ]
+
+    let toDraft (booking: Booking) : BookingDraft =
+        { Start = booking.Start; End = booking.End }
+
 let bookingSchema : Schema<Booking> =
     bookingDraftSchema
     |> Schema.admit Booking.create Booking.toDraft
