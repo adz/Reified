@@ -107,6 +107,12 @@ let centsSchema : Schema<decimal> =
 ```
 
 
+A draft stays public and freely constructible; only the aggregate it admits into enforces the invariant, see
+[Construction Guarantees](/schema/trusted-construction.html) for the full rationale. `DateTimeOffset`, not
+`DateOnly`, for the same reason [Build A Private Aggregate](/schema/patterns/private-aggregates.html) gives: a
+canonical schema for every target. The draft's own schema is declared before the private `Booking` below it
+reuses the same field names, declaring it after would make `_.Start` resolve against `Booking` instead:
+
 ```fsharp isolated
 open Reified
 open Reified.SchemaDSL
