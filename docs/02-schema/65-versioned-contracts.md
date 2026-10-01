@@ -19,7 +19,7 @@ ordinary `[<DeriveSchema>]` F# records, configure MSBuild, and see every support
 A wire model describes what the format can carry. Keep it public and permissive. A domain model describes what business
 code may rely on and should protect its invariants with refined values or private construction.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Order/OrderError are the application's own domain type and error case; not ones this page can construct standalone."
 // Wire DTO: shaped like persisted input.
 type OrderWire = { Sku: string; Quantity: int }
 
@@ -38,11 +38,26 @@ Parse or migrate to the current wire model first, then call `toDomain`. See
 `Contract.create` starts with the current version and schema. Add each immediately preceding version with
 `Contract.supersedes`, then choose how the input version is discovered with `Contract.build`.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
 open Reified
+open Reified.SchemaDSL
 
 type ConfigV1 = { Host: string }
+
+let configV1Schema : Schema<ConfigV1> =
+    schema<ConfigV1> {
+        field _.Host
+        construct (fun host -> { Host = host })
+    }
+
 type Config = { Host: string; Port: int }
+
+let configSchema : Schema<Config> =
+    schema<Config> {
+        field _.Host
+        field _.Port
+        construct (fun host port -> { Host = host; Port = port })
+    }
 
 let migrateV1ToV2 (v1: ConfigV1) : Result<Config, MigrationError> =
     match v1.Host.Split ':' with
@@ -71,7 +86,7 @@ structural migration.
 | `VersionSource.External` | The caller knows the version out of band and calls `Contract.parseVersion`. |
 | `VersionSource.UnversionedMeans 1` | Treat input without a marker as one registered version. |
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Continues the configContract illustration above; raw is the caller's own structured input, not one this fragment constructs standalone."
 match Contract.parse configContract raw with
 | Ok config -> printfn $"%s{config.Host}:%d{config.Port}"
 | Error ContractError.VersionMissing -> eprintfn "no readable schema version"

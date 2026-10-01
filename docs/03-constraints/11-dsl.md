@@ -84,7 +84,7 @@ This selects a constraint; it does not parse, convert, or refine anything.
 | Membership | `oneOf`, `noneOf`, `notContains` |
 | Format | `email`, `trimmed`, `numeric`, `alphanumeric`, `pattern` |
 | Number | `multipleOf`, `finite`, `finite32` |
-| Opaque | `notWith`, `custom`, `customLocalized`, `customLocalizedWith`, `customWith`, `contramap` |
+| Opaque | `notWith`, `custom`, `customLocalized`, `customWith`, `contramap` |
 | Other | `describe`, `orError`, `mapError` |
 
 The sign and size names are spellings, not new primitives: `positive` is `greaterThan 0` at the value's own numeric
