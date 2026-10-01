@@ -272,4 +272,6 @@ This division keeps schema metadata useful without claiming that metadata overri
 
 For complete project-sized examples, see [Build A Private Aggregate](patterns/private-aggregates/),
 [Model Legal Transitions](patterns/legal-transitions/), and
-[Separate Wire And Domain Models](patterns/wire-and-domain-models/).
+[Separate Wire And Domain Models](patterns/wire-and-domain-models/). Those pages' `Booking` carries a draft type
+and a typed `BookingError`, a fuller shape than this page's own no-draft `Booking` example above; both are the
+same pattern at different levels of completeness, not two different designs.

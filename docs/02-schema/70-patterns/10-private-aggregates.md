@@ -19,14 +19,12 @@ rule with a literal or record-copy update.
 
 The draft is intentionally untrusted. Forms, tests, and mapping code can assemble and edit it freely.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-namespace MyApp.Domain
-
+```fsharp
 open System
 
 type BookingDraft =
-    { Start: DateOnly
-      End: DateOnly }
+    { Start: DateTimeOffset
+      End: DateTimeOffset }
 
 [<RequireQualifiedAccess>]
 type BookingError =
@@ -38,11 +36,21 @@ type BookingError =
 
 Keep the record private and expose functions that return only valid bookings.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+open System
+
+type BookingDraft =
+    { Start: DateTimeOffset
+      End: DateTimeOffset }
+
+[<RequireQualifiedAccess>]
+type BookingError =
+    | EndBeforeStart
+
 type Booking =
     private
-        { Start: DateOnly
-          End: DateOnly }
+        { Start: DateTimeOffset
+          End: DateTimeOffset }
 
 [<RequireQualifiedAccess>]
 module Booking =
@@ -69,14 +77,45 @@ Outside this module, callers cannot construct `Booking` or use `{ booking with E
 ## Build the schema through the same constructor
 
 A **schema** is Reified's typed description of input shape, field constraints, and construction. It parses boundary fields,
-then calls the authoritative constructor.
+then calls the authoritative constructor. `create`, the accessors, and `toDraft` are repeated here from the module
+above so this fragment compiles on its own; in a real `Booking.fs` the `schema` binding joins the same module as
+those functions, not a second copy of it:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+open System
 open Reified
 open Reified.SchemaDSL
 
+type BookingDraft =
+    { Start: DateTimeOffset
+      End: DateTimeOffset }
+
+[<RequireQualifiedAccess>]
+type BookingError =
+    | EndBeforeStart
+
+type Booking =
+    private
+        { Start: DateTimeOffset
+          End: DateTimeOffset }
+
+[<RequireQualifiedAccess>]
 module Booking =
-    // create, accessors, and toDraft from above
+
+    let create (draft: BookingDraft) =
+        if draft.Start <= draft.End then
+            Ok
+                { Start = draft.Start
+                  End = draft.End }
+        else
+            Error BookingError.EndBeforeStart
+
+    let start booking = booking.Start
+    let finish booking = booking.End
+
+    let toDraft booking =
+        { Start = booking.Start
+          End = booking.End }
 
     let schema : Schema<Booking> =
         schema<Booking> {
@@ -92,7 +131,7 @@ module Booking =
 
 Both direct construction and boundary parsing now use `Booking.create`.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="raw/save/display are the caller's own structured input and functions; not values this page can construct standalone."
 match (Schema.parse Booking.schema raw) with
 | Ok booking -> save booking
 | Error diagnostics -> display diagnostics
@@ -104,7 +143,7 @@ match (Schema.parse Booking.schema raw) with
 For an important domain module, an `.fsi` file makes the representation opaque even if the implementation uses a
 normal record. It also gives reviewers a short list of allowed operations.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="A signature file's val-only module members are only meaningful paired with a matching Booking.fs implementation; not a standalone implementation-file compilation unit."
 // Booking.fsi
 namespace MyApp.Domain
 
@@ -112,8 +151,8 @@ open System
 open Reified
 
 type BookingDraft =
-    { Start: DateOnly
-      End: DateOnly }
+    { Start: DateTimeOffset
+      End: DateTimeOffset }
 
 [<RequireQualifiedAccess>]
 type BookingError =
@@ -124,8 +163,8 @@ type Booking
 [<RequireQualifiedAccess>]
 module Booking =
     val create: BookingDraft -> Result<Booking, BookingError>
-    val start: Booking -> DateOnly
-    val finish: Booking -> DateOnly
+    val start: Booking -> DateTimeOffset
+    val finish: Booking -> DateTimeOffset
     val toDraft: Booking -> BookingDraft
     val schema: Schema<Booking>
 ```

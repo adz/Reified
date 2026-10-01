@@ -59,7 +59,8 @@ match Booking.changeEnd proposedEnd booking with
 ## Keep preserving changes total
 
 Some operations preserve the invariant by their construction. Shifting both dates by the same number of days cannot
-reverse their order.
+reverse their order. The same `Booking` as above, `create` and `BookingDraft` omitted since this section adds only
+`shift`:
 
 ```fsharp isolated
 open System
@@ -87,7 +88,8 @@ This function can return `Booking` directly. Keep it inside the module that can 
 ## Use drafts for several user edits
 
 An edit screen often changes several fields before submission. Convert to a draft, edit it, then call the constructor
-once.
+once. `Booking.toDraft` is the same accessor [Build A Private Aggregate](/schema/patterns/private-aggregates.html)
+defines alongside `create`.
 
 ```fsharp no-check reason="booking/proposedStart/proposedEnd/save/redisplay are the caller's own values and functions, and Booking.toDraft needs a toDraft function this fragment doesn't declare; not a standalone compilation unit."
 let edited =
