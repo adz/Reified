@@ -53,7 +53,7 @@ Data.Json.render value
 On .NET 8+, use `Data.ofJsonElement` or `Data.ofJsonDocument` when JSON has already been parsed with
 `System.Text.Json`. These conversion functions are intentionally .NET-only.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Data.ofJsonDocument is #if !FABLE_COMPILER-gated and marked 'netstandard2.1: not available'; unavailable in the netstandard2.1 build this audit pipeline checks isolated blocks against regardless of this page's own net8.0 targetFramework."
 use document = System.Text.Json.JsonDocument.Parse("""{"name":"Ada"}""")
 let value = Data.ofJsonDocument document
 
@@ -193,7 +193,7 @@ Every adapter produces the same source-neutral `Data`. That tree is a shape, not
 typed, checked, or named in your vocabulary yet. `Schema.parse` takes it the rest of the way, converting leaves to
 typed values, applying rules, and reporting failures against field paths.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="argv and Registration.schema are the caller's own process arguments and application schema; not ones this fragment can construct standalone."
 Data.ofCliArgs argv
 |> Schema.parse Registration.schema
 ```

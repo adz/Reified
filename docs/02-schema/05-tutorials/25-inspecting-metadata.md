@@ -100,7 +100,7 @@ an `All`, and dropping a disjunct strengthens an `Any`, which would reject value
 Atoms are shape-neutral. `Cardinality.Maximum 5` becomes `maxLength`, `maxItems`, or `maxProperties` depending on the
 `SchemaShape` it is attached to, so combine the two rather than reading the description alone.
 
-The repository keeps three worked prototypes, a JSON Schema emitter, a docs describer, and a UI metadata producer , 
+The repository keeps three worked prototypes, a JSON Schema emitter, a docs describer, and a UI metadata producer, 
 in `tests/Reified.Schema.Tests/SchemaInterpreterPrototypeTests.fs`, all built only on `Inspect`.
 
 ## Why This Matters

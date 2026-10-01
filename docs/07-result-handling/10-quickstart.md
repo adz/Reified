@@ -33,12 +33,14 @@ the vocabulary around it:
 
 ## Compose dependent steps
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+open System
+
 type QuantityError =
     | InvalidInteger of string
     | NotPositive of int
 
-let quantity raw =
+let quantity (raw: string) =
     result {
         let! parsed =
             Int32.TryParse raw
@@ -59,7 +61,7 @@ Each step's own failure is mapped into one deliberate application error type at 
 
 `let!` fails fast; `and!` accumulates. The boundary is the compiler's, not a setting:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="input/parseName/parseAge are the caller's own structured input and parsing functions; not ones this fragment can construct standalone."
 result.list {
     let! name = parseName input.Name
     and! age  = parseAge input.Age
