@@ -17,7 +17,11 @@ rule with a literal or record-copy update.
 
 ## Define an editable draft
 
-The draft is intentionally untrusted. Forms, tests, and mapping code can assemble and edit it freely.
+The draft is intentionally untrusted. Forms, tests, and mapping code can assemble and edit it freely. This page uses
+`DateTimeOffset` rather than the `DateOnly` [Model Legal Transitions](/schema/patterns/legal-transitions.html) and
+[Construction Guarantees](/schema/trusted-construction.html) use for the same shape, since this page goes on to
+build a schema over the fields, and `DateOnly`'s canonical schema is unavailable on every target `Reified.Schema`
+ships for; the pattern itself is unaffected by that choice.
 
 ```fsharp
 open System

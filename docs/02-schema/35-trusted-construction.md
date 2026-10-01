@@ -270,8 +270,8 @@ The reference app uses all four levels deliberately:
 
 This division keeps schema metadata useful without claiming that metadata overrides F# construction semantics.
 
-For complete project-sized examples, see [Build A Private Aggregate](patterns/private-aggregates/),
-[Model Legal Transitions](patterns/legal-transitions/), and
-[Separate Wire And Domain Models](patterns/wire-and-domain-models/). Those pages' `Booking` carries a draft type
+For complete project-sized examples, see [Build A Private Aggregate](/schema/patterns/private-aggregates.html),
+[Model Legal Transitions](/schema/patterns/legal-transitions.html), and
+[Separate Wire And Domain Models](/schema/patterns/wire-and-domain-models.html). Those pages' `Booking` carries a draft type
 and a typed `BookingError`, a fuller shape than this page's own no-draft `Booking` example above; both are the
 same pattern at different levels of completeness, not two different designs.
