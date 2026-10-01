@@ -41,7 +41,7 @@ type DataCase = { Name: string; Value: Data }
 same variation list can be applied to more than one baseline. `dimension` groups variations into one independent axis
 of a matrix.
 
-`variants` and `matrix` apply those descriptions to a baseline and return `DataCase list`, each case is a name and
+`variants` and `matrix` apply those descriptions to a baseline and return a `DataCase list`: each case is a name and
 the value that resulted. A `DataCase` is what a test iterates over.
 
 ### Why not just `Data list`
@@ -55,8 +55,8 @@ the value means:
   than by a position in a Cartesian product.
 - `variants` can reject duplicate names, which catches two cases that were meant to differ but describe the same thing.
 
-The value is a plain `Data`, so anything on the rest of these pages, `Data.patch`, `matching`, `Data.compare`,
-`Data.Json.render`, applies to `case.Value` directly.
+The value is a plain `Data`, so anything on the rest of these pages (`Data.patch`, `matching`, `Data.compare`,
+`Data.Json.render`) applies to `case.Value` directly.
 
 ```fsharp no-check reason="cases, submit, and test are the caller's own values and test-framework function; not ones this fragment can construct standalone."
 for case in cases do
@@ -116,7 +116,7 @@ let matrixCases =
 
 Names follow dimension order, such as `plan: pro / region: AU / roles: admin`.
 
-The initial matrix limit is 256 combinations. The product is checked before cases are materialized.
+The matrix limit is 256 combinations. The product is checked before cases are materialized.
 
 This matrix produces eight cases. The first is
 `plan: free / region: AU / roles: none`; its value has `plan = "free"`, `region = "au"`, and `roles = []`.
@@ -138,7 +138,7 @@ cases |> List.map _.Name
 ```
 
 
-## Inspect dynamic patch failures
+## Inspect patch failures from an edit list
 
 ```fsharp no-check reason="edits and runCase are the caller's own edit list and test runner; not ones this fragment can construct standalone."
 match Data.tryPatch edits baseline with
