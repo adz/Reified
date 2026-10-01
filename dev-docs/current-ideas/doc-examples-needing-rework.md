@@ -56,7 +56,11 @@ same-shaped domain type exists avoids it; declaring them in the "natural" narrat
 (draft type, then domain type and its schema) does not, even though both types are
 distinct and the schema's own type parameter names `T` explicitly. Hit and fixed in
 `docs/04-refined/50-schema.md` (BookingDraft/Booking) and `docs/02-schema/65-versioned-
-contracts.md` (ConfigV1/Config); likely to recur anywhere else a draft/domain pair shares
+contracts.md` (ConfigV1/Config). The two types don't need identical shape for this to
+happen, only to share the one field name the quotation uses: `ConfigV1 = { Host: string }`
+and `Config = { Host: string; Port: int }` still triggered it, confirmed by the actual
+compiler error (`field<Config,string>` reported for a `schema<ConfigV1> { field _.Host }`
+block) before the declaration order was fixed. Likely to recur anywhere else a draft/domain pair shares
 field names and both get a schema in the same compiled block.
 
 ## Open follow-ups (not yet applied as of this writing)
