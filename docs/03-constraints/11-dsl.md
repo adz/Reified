@@ -39,7 +39,13 @@ returns; it is optional shorthand, not another abstraction.
 `present`, `blank`, `optional`, and the size family pick their shape from the type they are used at, so most of the
 time they just work:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+open Reified
+open Reified.SchemaDSL
+open Reified.ConstraintDSL
+
+type Item = { Sku: string }
+
 let name : Constraint<string> = Constraint.all [ present; maxLength 80 ]
 let tags : Constraint<Item list> = Constraint.all [ atLeastOne; Constraint.distinct ]
 
@@ -53,7 +59,12 @@ The one case that needs help is a binding whose only type information *is* the a
 central story of naming a reusable rule. Dispatch runs on the return type, so without the annotation the compiler
 has nothing to select on:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+open Reified
+open Reified.ConstraintDSL
+
+type Item = { Sku: string }
+
 let requiredName : Constraint<string> = present
 let selectedPlan : Constraint<string option> = present
 let requiredItems : Constraint<Item list> = minLength 1
@@ -122,8 +133,13 @@ core operation is named `notContains`. All constraint *execution*, `Constraint.s
 because `Reified.Constraint` does not depend on `Reified.Result`, so a constraint pipeline can retain its input and
 finish with the application's own error type without adding a package reference:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+open Reified
 open Reified.ConstraintDSL
+
+type SignupError =
+    | NameRequired
+    | InvalidQuantity of Violation
 
 let requiredName (value: string) =
     value |> Constraint.guard present |> orError NameRequired
