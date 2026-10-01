@@ -31,7 +31,9 @@ enumerating every message a second time.
 When the message is derived, a `Violation` carries the failing atom and the actual value rather than any
 prose, and text is produced at the edge:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+open Reified
+
 42
 |> Constraint.check (Constraint.between 0 10)
 |> Result.mapError Violation.render
@@ -46,11 +48,16 @@ renders in that language. Neither required a message to be maintained anywhere.
 
 Because a constraint is an inspectable value rather than a lambda, other machinery can read it:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+open Reified
+open Reified.Refinements
+
+type RetryCount = RetryCount of int
+
 let retryCount : Constraint<int> = Constraint.between 0 10
 
-Schema.int |> Schema.constrain retryCount          // used in a schema
-Refinement.define retryCount RetryCount _.Value    // used in a refined type
+Schema.int |> Schema.constrain retryCount                                // used in a schema
+Refinement.define retryCount RetryCount (fun (RetryCount value) -> value) // used in a refined type
 ```
 
 
@@ -61,7 +68,7 @@ pretending otherwise.
 If you only ever need to answer "is this valid?", the inspectability buys you nothing, but it does not cost you
 anything either. A constraint used that way is still one line, and you never have to see a `Violation`:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="raw and InvalidEmail are the caller's own binding and error case; not values this page can construct standalone."
 raw
 |> Constraint.guard Constraint.email
 |> Result.orError InvalidEmail
@@ -108,7 +115,7 @@ derived from it, and nothing can inspect a validator afterwards. Reified's extra
 They are not, however, an entry fee. A check that ends in your own error case reads the same length in either
 library, and the Reified version leaves you a rule you can reuse in a schema or a refined type later:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="raw and InvalidEmail are the caller's own binding and error case; not values this page can construct standalone."
 raw
 |> Constraint.guard Constraint.email
 |> Result.orError InvalidEmail

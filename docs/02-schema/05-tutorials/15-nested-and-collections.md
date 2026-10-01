@@ -56,8 +56,8 @@ let orderSchema =
 
 ## Adapt Nested Input
 
-Configuration-style keys carry nesting with `:` separators and numeric collection indexes; JSON-like input nests
-naturally. Both produce the same shape:
+Configuration-style keys carry nesting with `:` separators and numeric collection indexes; JSON-like input produces
+the same `Data` shape:
 
 ```fsharp
 let raw =
@@ -73,7 +73,8 @@ let raw =
 
 ## Parse And Read Item Errors
 
-Every item is parsed and every item error is kept, one bad line item does not hide the others:
+Every item is parsed and every item error accumulates into the same `SchemaErrors`; one bad line item does not hide
+the others:
 
 ```fsharp
 let parsed = Schema.parseRetainingInput orderSchema raw
@@ -93,12 +94,18 @@ Data.redisplayPath "items[1].quantity" parsed.Input   // "0"
 
 ## Count Constraints
 
-Collection constraints (`minLength`, `maxLength`, `count`, `distinct`) attach to the collection field itself and report
-on the collection path (`items`), separately from per-item errors.
+Collection constraints (`minLength`, `maxLength`, `lengthBetween`, `distinct`) attach to the collection field itself
+and report on the collection path (`items`), separately from per-item errors.
 
-Use a field block with `withSchema` when a nested field needs a schema local to its parent, when wrapping a third-party
-type, or for recursive composition with `Schema.defer`.
+## When A Nested Field Needs More Than Its Canonical Schema
+
+`Address` and `Item` above resolve through their own `static member Schema`, which is why `Order`'s fields need no
+`withSchema`. Reach for a field block with `withSchema` instead when a nested type has no canonical schema of its
+own, [Input Sources](/schema/input-sources.html) builds one locally for exactly that case, or when the field is
+recursive, [SchemaDSL's recursive schemas](/schema/dsl.html#recursive-schemas) works a `Schema.defer` example
+through in full.
 
 ## Next
 
 - [Input Sources](/schema/input-sources.html) for the full adapter catalog.
+- [SchemaDSL](/schema/dsl.html#recursive-schemas) for `withSchema` and recursive composition with `Schema.defer`.
