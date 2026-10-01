@@ -56,7 +56,8 @@ rejected: AgeNotANumber "abc"
 The value returned is the original `Error (AgeNotANumber "abc")`. `tap` did not run, because the result was not `Ok`;
 `tapError` ran and returned its input untouched.
 
-Both signatures say the same thing, the effect returns `unit`, so it has no way to influence what comes out:
+`tap` and `tapError` say the same thing about each other: the effect returns `unit`, so it has no way to influence
+what comes out:
 
 ```fsharp no-check reason="A bare type signature, not an expression; illustrates the shape rather than compiling as code."
 Result.tap      : ('value -> unit) -> Result<'value, 'error> -> Result<'value, 'error>

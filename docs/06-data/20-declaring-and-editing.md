@@ -75,7 +75,15 @@ Data.render customerWithAddress
 The argument to `data` is an ordinary F# list of `DataField`, so every list-expression form works inside it. Mix
 literal fields with `yield!`, `if`, `for`, `match`, and `let` bindings in one declaration.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+With `common = data [ "tenant" => "acme"; "region" => "au" ]`, `customerId = "c-1"`, `includeDebug = true`, and
+`names = [ "ada"; "grace" ]`:
+
+```fsharp
+let common = data [ "tenant" => "acme"; "region" => "au" ]
+let customerId = "c-1"
+let includeDebug = true
+let names = [ "ada"; "grace" ]
+
 let event =
     data [
         "kind" => "example"
@@ -88,13 +96,7 @@ let event =
         for name in names do
             $"user-{name}" => name
     ]
-```
 
-
-With `common = data [ "tenant" => "acme"; "region" => "au" ]`, `customerId = "c-1"`, `includeDebug = true`, and
-`names = [ "ada"; "grace" ]`:
-
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
 Data.render event
 // => "{ kind: \"example\", customerId: \"c-1\", tenant: \"acme\", region: \"au\", debug: true, user-ada: \"ada\", user-grace: \"grace\" }"
 ```
@@ -121,7 +123,7 @@ building a value from inputs, and patching when deriving a variation from a valu
 returns the same notation with line breaks and indentation. Both preserve object field order, duplicate fields, and
 number tokens. Use `Data.Json.render` when the result must be JSON.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 Data.renderIndented (data [ "name" => "Ada" ])
 // => "{\n  name: \"Ada\"\n}"
 ```
@@ -131,7 +133,7 @@ Data.renderIndented (data [ "name" => "Ada" ])
 
 Use a direct `Data` operation for one change. It returns the changed tree and leaves the original unchanged.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let renamed = customer |> Data.replace "name" "Grace"
 
 Data.lookupPath "name" renamed
