@@ -58,7 +58,7 @@ the value means:
 The value is a plain `Data`, so anything on the rest of these pages, `Data.patch`, `matching`, `Data.compare`,
 `Data.Json.render`, applies to `case.Value` directly.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="cases, submit, and test are the caller's own values and test-framework function; not ones this fragment can construct standalone."
 for case in cases do
     test case.Name (fun () -> case.Value |> submit |> matching [ at "status" "rejected" ])
 ```
@@ -82,7 +82,7 @@ let cases =
 
 The result has four `DataCase` values in the shown order:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```text
 valid             name = "Ada"
 missing name      name is absent
 blank name        name = ""
@@ -140,7 +140,7 @@ cases |> List.map _.Name
 
 ## Inspect dynamic patch failures
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="edits and runCase are the caller's own edit list and test runner; not ones this fragment can construct standalone."
 match Data.tryPatch edits baseline with
 | Ok value -> runCase value
 | Error failures ->

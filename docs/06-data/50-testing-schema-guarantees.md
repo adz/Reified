@@ -47,7 +47,7 @@ module Booking =
 
     let create start finish =
         if start <= finish then Ok { Start = start; End = finish }
-        else Error "Start must not be after end."
+        else Error "End must not be before start."
 
     let shift days booking =
         { Start = (start booking).AddDays days
@@ -57,7 +57,7 @@ module Booking =
         schema<Booking> {
             fieldAs "start" start
             fieldAs "end" finish
-            constructResult (fun start finish -> create start finish)
+            constructResult create
         }
 
 let bookingGenerator =
@@ -68,7 +68,10 @@ let bookings = Gen.sample 100 bookingGenerator
 ```
 
 
-Keep an adapter like this in test code; it is not a runtime dependency.
+Keep an adapter like this in test code; it is not a runtime dependency. This `Booking` uses a simplified two-field
+constructor rather than the draft-plus-typed-error split [Build A Private Aggregate](/schema/patterns/private-aggregates.html)
+and [Model Legal Transitions](/schema/patterns/legal-transitions.html) use for the same shape, since schema
+generation, not construction, is this page's subject.
 
 ## Check total transitions
 
@@ -77,7 +80,7 @@ A transition returning `Booking` claims it always preserves the aggregate invari
 ```fsharp no-check reason="Continues the Booking/bookings illustration above; not a standalone compilation unit."
 let shiftedBookings =
     bookings
-    |> Array.map (Booking.shift 10)
+    |> Array.map (Booking.shift 10.0)
 
 let allRemainValid =
     shiftedBookings
