@@ -45,6 +45,20 @@ already improved in-session; a few are left as open follow-ups. Grouped by file.
   Same page also cited `Refinement.defineAll`/`Refinement.defineWithCheck`, neither of
   which exists.
 
+## A recurring compile bug, not a prose issue, worth a tooling note
+
+Writing self-contained examples for pages that model a draft/aggregate pair (two record
+types sharing field names, e.g. `BookingDraft`/`Booking`, `ConfigV1`/`Config`) repeatedly
+hit the same F# gotcha: `field _.Start` (or `_.Host`, etc.) inside `schema<T> { }` resolves
+its property quotation against the *most recently declared* record with that field name in
+the compiled unit, not necessarily `T`. Declaring the draft type's schema before the
+same-shaped domain type exists avoids it; declaring them in the "natural" narrative order
+(draft type, then domain type and its schema) does not, even though both types are
+distinct and the schema's own type parameter names `T` explicitly. Hit and fixed in
+`docs/04-refined/50-schema.md` (BookingDraft/Booking) and `docs/02-schema/65-versioned-
+contracts.md` (ConfigV1/Config); likely to recur anywhere else a draft/domain pair shares
+field names and both get a schema in the same compiled block.
+
 ## Open follow-ups (not yet applied as of this writing)
 
 - **`docs/03-constraints/45-adding-a-language.md`** — the `Violation.toMessageTree` recipe's
