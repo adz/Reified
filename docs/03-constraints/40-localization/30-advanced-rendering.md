@@ -76,9 +76,9 @@ open Reified
 let renderer = Renderer.english
 
 let format (value: ConstraintValue) (suffix: string option) : string =
-    match suffix with
-    | Some _ -> ConstraintValue.render value
-    | None -> ConstraintValue.render value
+    match value, suffix with
+    | ConstraintValue.Integer value, Some "N0" -> value.ToString("N0")
+    | value, _ -> ConstraintValue.render value
 
 // One uniform callback. Format suffixes are ignored.
 renderer |> Renderer.withValues ConstraintValue.render
@@ -180,7 +180,7 @@ let renderer =
 ```
 
 
-The answer means:
+The resolver's return value means:
 
 - `None`, continue to the next, less specific level;
 - `MessageResolution.Template template`, Reified interpolates and formats it;
@@ -208,25 +208,13 @@ let spec =
 Renderer.Advanced.lookupCandidates renderer spec   // exact encoded keys, in order
 Renderer.Advanced.messageRequests renderer spec    // one request per contextual level
 Renderer.Advanced.attributeCandidates renderer     // encoded attribute-noun keys
-Renderer.Advanced.format spec renderer             // render any catalogue's entry
+Renderer.Advanced.format spec renderer             // render any catalogue's entry: "card has expired"
 ```
 
 
 These take a `MessageFormatSpec`: a message identity and arguments (`MessageDescriptor`) plus the owning
 catalogue's neutral fallback and plural operand. That pairing is what lets Schema, or your own catalogue, reuse
 every renderer mechanic without `Reified.Constraint` knowing a single one of its keys.
-
-```fsharp isolated
-open Reified
-
-let renderer = Renderer.english
-
-let spec =
-    MessageDescriptor.Advanced.ofSegments [ "billing"; "cardExpired" ] Map.empty
-    |> MessageFormatSpec.Advanced.create "card has expired" None
-
-renderer |> Renderer.Advanced.format spec
-```
 
 
 `lookupCandidates` and the rest return *encoded* resource keys. Canonical unencoded identity comes only from

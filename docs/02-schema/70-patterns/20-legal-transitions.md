@@ -19,9 +19,26 @@ as `changeEnd`, `cancel`, or `complete` instead of modifying storage fields.
 
 Changing one end of a booking can break its date relationship, so reuse the constructor.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+open System
+
+type BookingError = EndBeforeStart
+
+type BookingDraft = { Start: DateOnly; End: DateOnly }
+
+type Booking =
+    private
+        { Start: DateOnly
+          End: DateOnly }
+
 [<RequireQualifiedAccess>]
 module Booking =
+    let start booking = booking.Start
+    let finish booking = booking.End
+
+    let create (draft: BookingDraft) =
+        if draft.Start <= draft.End then Ok { Start = draft.Start; End = draft.End }
+        else Error BookingError.EndBeforeStart
 
     let changeEnd newEnd booking =
         create
@@ -32,7 +49,7 @@ module Booking =
 
 The type tells the caller that the change can be refused:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="proposedEnd/booking/save/showDateError are the caller's own values and functions; not ones this page can construct standalone."
 match Booking.changeEnd proposedEnd booking with
 | Ok changed -> save changed
 | Error BookingError.EndBeforeStart -> showDateError ()
@@ -44,9 +61,18 @@ match Booking.changeEnd proposedEnd booking with
 Some operations preserve the invariant by their construction. Shifting both dates by the same number of days cannot
 reverse their order.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+open System
+
+type Booking =
+    private
+        { Start: DateOnly
+          End: DateOnly }
+
 [<RequireQualifiedAccess>]
 module Booking =
+    let start booking = booking.Start
+    let finish booking = booking.End
 
     let shift days booking =
         {
@@ -63,7 +89,7 @@ This function can return `Booking` directly. Keep it inside the module that can 
 An edit screen often changes several fields before submission. Convert to a draft, edit it, then call the constructor
 once.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="booking/proposedStart/proposedEnd/save/redisplay are the caller's own values and functions, and Booking.toDraft needs a toDraft function this fragment doesn't declare; not a standalone compilation unit."
 let edited =
     booking
     |> Booking.toDraft
@@ -84,7 +110,7 @@ Do not pass the draft into business functions that expect the invariant to hold.
 
 When operations differ sharply by state, use separate types so unavailable transitions are absent from the interface.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="val-only member declarations are a signature-file (.fsi) shape; this sketch of Order's public surface is not a standalone implementation-file compilation unit."
 type DraftOrder
 type SubmittedOrder
 type CancelledOrder
