@@ -54,10 +54,11 @@ open Reified.Refinements
 
 type RetryCount = RetryCount of int
 
-let retryCount : Constraint<int> = Constraint.between 0 10
+module RetryRules =
+    let count : Constraint<int> = Constraint.between 0 10
 
-Schema.int |> Schema.constrain retryCount                                // used in a schema
-Refinement.define retryCount RetryCount (fun (RetryCount value) -> value) // used in a refined type
+Schema.int |> Schema.constrain RetryRules.count                                // used in a schema
+Refinement.define RetryRules.count RetryCount (fun (RetryCount value) -> value) // used in a refined type
 ```
 
 
@@ -113,12 +114,13 @@ derived from it, and nothing can inspect a validator afterwards. Reified's extra
 `Renderer`, interpreted versus opaque rules, exist to buy inspectability and derived messages.
 
 They are not, however, an entry fee. A check that ends in your own error case reads the same length in either
-library, and the Reified version leaves you a rule you can reuse in a schema or a refined type later:
+library, and the Reified version leaves you a rule you can reuse in a schema or a refined type later. Keep the
+violation instead of discarding it, when the extra concepts should earn their keep:
 
 ```fsharp no-check reason="raw and InvalidEmail are the caller's own binding and error case; not values this page can construct standalone."
 raw
 |> Constraint.guard Constraint.email
-|> Result.orError InvalidEmail
+|> Result.mapError InvalidEmail   // InvalidEmail of Violation
 ```
 
 

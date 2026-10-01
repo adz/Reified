@@ -17,6 +17,11 @@ open Reified.Result
 type SignupError =
     | AgeNotANumber of string
     | AgeOutOfRange of int
+
+let parseAge (age: string) : Result<int, SignupError> =
+    match Int32.TryParse age with
+    | true, value -> Ok value
+    | false, _ -> Error(AgeNotANumber age)
 ```
 
 
@@ -24,7 +29,7 @@ type SignupError =
 
 Logging mid-pipeline means naming the intermediate value and returning it again:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="raw is the caller's own input; not a value this fragment can construct standalone."
 let logged =
     let outcome = parseAge raw
     match outcome with
@@ -36,7 +41,7 @@ let logged =
 
 ## With them
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 parseAge "abc"
 |> Result.tap (fun age -> printfn "accepted %d" age)
 |> Result.tapError (fun failure -> printfn "rejected: %A" failure)
@@ -53,7 +58,7 @@ The value returned is the original `Error (AgeNotANumber "abc")`. `tap` did not 
 
 Both signatures say the same thing, the effect returns `unit`, so it has no way to influence what comes out:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="A bare type signature, not an expression; illustrates the shape rather than compiling as code."
 Result.tap      : ('value -> unit) -> Result<'value, 'error> -> Result<'value, 'error>
 Result.tapError : ('error -> unit) -> Result<'value, 'error> -> Result<'value, 'error>
 ```
@@ -63,7 +68,7 @@ Result.tapError : ('error -> unit) -> Result<'value, 'error> -> Result<'value, '
 
 At a boundary, where you want a record of what happened but the caller still gets the untouched result:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="logger and buildAccount are the host application's own values; not ones this fragment can construct standalone."
 let handleSignup raw =
     parseAge raw
     |> Result.tapError (fun failure -> logger.Warning("signup rejected: {Failure}", failure))
