@@ -82,8 +82,8 @@ the additional `author` role are allowed because these patterns check only the v
 
 ## Basic syntax
 
-Use `data` to build a `Data` value. Lists represent both objects and lists. A list containing `name => value` fields
-is an object; a list containing ordinary values is a list.
+Use `data` to build a `Data` value. Fields declared with `name => value` make an object; ordinary values in the
+same list position make a `Data.List` instead.
 
 ```fsharp
 open Reified

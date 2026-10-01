@@ -53,7 +53,7 @@ Data.Json.render value
 On .NET 8+, use `Data.ofJsonElement` or `Data.ofJsonDocument` when JSON has already been parsed with
 `System.Text.Json`. These conversion functions are intentionally .NET-only.
 
-```fsharp no-check reason="Data.ofJsonDocument is #if !FABLE_COMPILER-gated and marked 'netstandard2.1: not available'; unavailable in the netstandard2.1 build this audit pipeline checks isolated blocks against regardless of this page's own net8.0 targetFramework."
+```fsharp no-check reason="Data.ofJsonDocument requires .NET 8+ (#if NET8_0_OR_GREATER && !FABLE_COMPILER, where System.Text.Json ships in-box); unavailable in the netstandard2.1 build this audit pipeline checks isolated blocks against, regardless of this page's own net8.0 targetFramework."
 use document = System.Text.Json.JsonDocument.Parse("""{"name":"Ada"}""")
 let value = Data.ofJsonDocument document
 

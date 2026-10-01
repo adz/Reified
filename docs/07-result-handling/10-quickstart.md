@@ -25,7 +25,7 @@ the vocabulary around it:
 
 | Concern | API | Returns |
 | --- | --- | --- |
-| Turn an option, nullable, or `TryParse` tuple into a Result | `Result.orError`, `Result.fromTry` | `Result<'value,'error>` |
+| Turn a `TryParse` tuple into a Result, then name the error | `Result.fromTry`, then `Result.orError` | `Result<'value,'error>` |
 | Compose dependent failures | `result { }` | `Result<'value,'error>` |
 | Collect independent failures | `result.list { }` with `and!` | `Result<'value,'error list>` |
 | Apply a fallible operation across a sequence | `Result.traverse`, `Result.sequence` | `Result<'value list,'error>` |

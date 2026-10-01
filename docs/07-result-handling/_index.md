@@ -64,7 +64,7 @@ Every page below builds on this same `parseName`/`parseAge` pair, so the example
 
 ## Pages
 
-- [Creating a Result](/result-handling/creating.html) - turn options, nullables, `TryParse` tuples, booleans, and predicates into a
+- [Creating a Result](/result-handling/creating.html) - turn options, `TryParse` tuples, booleans, and predicates into a
   `Result` with your own error type.
 - [Transforming values](/result-handling/transforming.html) - `map` and `bind`, and how a chain of fallible steps compose.
 - [Handling errors](/result-handling/handling-errors.html) - change the error type, replace one, and recover.
