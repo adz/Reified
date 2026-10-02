@@ -107,7 +107,7 @@ Fable targets that support quotations:
 
 No compiler flag or define is needed, and a schema means the same thing on every target:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Illustrates field declaration lines shown outside their enclosing schema<T> block."
 // Derives the wire name "email" from the property
 field _.Email
 
