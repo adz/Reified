@@ -18,7 +18,9 @@ open Reified
 /// lower to their underlying primitive representation, nested models to <c>object</c> with <c>properties</c> and
 /// <c>required</c>, collections to <c>array</c> with <c>items</c>, maps to <c>object</c> with
 /// <c>additionalProperties</c>, and tagged unions to <c>oneOf</c> with a <c>const</c>-constrained discriminator
-/// property per case. Constraint metadata lowers to <c>minLength</c>, <c>maxLength</c>, <c>pattern</c>, <c>enum</c>,
+/// property per case. An option lowers to its payload in an omittable record field, where the codec leaves
+/// <c>None</c> out, and to <c>anyOf</c> of its payload and <c>null</c> everywhere the codec writes <c>None</c> as
+/// <c>null</c>. Constraint metadata lowers to <c>minLength</c>, <c>maxLength</c>, <c>pattern</c>, <c>enum</c>,
 /// <c>minimum</c>/<c>maximum</c> (and exclusive variants), <c>multipleOf</c>, <c>minItems</c>/<c>maxItems</c>, and
 /// <c>uniqueItems</c>; constraints without a JSON Schema equivalent, such as <c>trimmed</c>, are skipped.
 /// Default-value metadata attached with <c>Schema.withDefault</c> lowers to <c>default</c>.
@@ -427,7 +429,16 @@ module JsonSchema =
         | None, SchemaShape.Refined underlying -> boundaryDefault underlying
         | None, _ -> None
 
-    let rec private valueKeywords (fieldConstraints: ConstraintDescription list) (description: SchemaDescription) =
+    let private declaresPresence (constraints: ConstraintDescription list) =
+        constraints |> List.collect ConstraintDescription.atoms |> List.contains (PresenceAtom Present)
+
+    /// Lowers one value. `noneAsNull` says whether the JSON codec writes `None` as `null` at this position, so the
+    /// schema must accept it.
+    ///
+    /// The codec writes `null` wherever an option cannot be left out: collection items, map values, union payloads,
+    /// positional fields, and fields that must be supplied. Only an omittable record field leaves `None` out, so
+    /// only there does the option lower to its payload alone.
+    let rec private valueKeywordsWith (noneAsNull: bool) (fieldConstraints: ConstraintDescription list) (description: SchemaDescription) =
         let constraints = fieldConstraints @ boundaryConstraints description
 
         // Annotation and enforcement are separate concepts and lower separately. `SchemaFormat.email` makes no
@@ -503,7 +514,14 @@ module JsonSchema =
             | SchemaShape.Enum enum ->
                 let tags = enum.Cases |> List.map (fun case -> literal case.Tag) |> String.concat ","
                 [ "\"type\":\"string\""; sprintf "\"enum\":[%s]" tags ] @ constraintKeywords (SchemaShape.Enum enum) constraints
-            | SchemaShape.Optional payload -> valueKeywords constraints payload
+            | SchemaShape.Optional payload ->
+                let payloadKeywords = valueKeywords constraints payload
+
+                // A present option is always `Some`, so `null` is never valid for it.
+                if noneAsNull && not (declaresPresence constraints) then
+                    [ sprintf "\"anyOf\":[{%s},{\"type\":\"null\"}]" (String.concat "," payloadKeywords) ]
+                else
+                    payloadKeywords
             | SchemaShape.MapOf item ->
                 [ "\"type\":\"object\""
                   sprintf "\"additionalProperties\":{%s}" (valueKeywords [] item |> String.concat ",") ]
@@ -513,6 +531,13 @@ module JsonSchema =
             | SchemaShape.Refined _ -> failwith "underlyingShape never returns a refined shape."
 
         descriptionKeyword @ defaultKeyword @ shapeKeywords
+
+    and private valueKeywords fieldConstraints description = valueKeywordsWith true fieldConstraints description
+
+    /// A record field's value. The codec omits a `None` field unless the field must be supplied.
+    and private fieldValueKeywords (field: FieldDescription) =
+        let mustSupply = field.Supply = Some Supply.Supplied || field.Schema.Supply = Some Supply.Supplied
+        valueKeywordsWith mustSupply field.Constraints field.Schema
 
     /// Optional and default-supplied fields stay out of the object's `required` list. Other fields are required unless
     /// their supply constraints explicitly make them omittable.
@@ -530,13 +555,10 @@ module JsonSchema =
         | SchemaShape.Recursive _ -> false
 
     and private fieldIsRequired (field: FieldDescription) =
-        let declaresPresence =
-            field.Constraints @ boundaryConstraints field.Schema
-            |> List.collect ConstraintDescription.atoms
-            |> List.contains (PresenceAtom Present)
-
         let explicitlySupplied =
-            field.Supply = Some Supply.Supplied || field.Schema.Supply = Some Supply.Supplied || declaresPresence
+            field.Supply = Some Supply.Supplied
+            || field.Schema.Supply = Some Supply.Supplied
+            || declaresPresence (field.Constraints @ boundaryConstraints field.Schema)
 
         match boundaryDefault field.Schema with
         | Some _ -> false
@@ -548,7 +570,7 @@ module JsonSchema =
         let payloadProperties =
             model |> Option.map _.Fields |> Option.defaultValue []
             |> List.map (fun field ->
-                sprintf "\"%s\":{%s}" (escape field.Name) (valueKeywords field.Constraints field.Schema |> String.concat ","))
+                sprintf "\"%s\":{%s}" (escape field.Name) (fieldValueKeywords field |> String.concat ","))
 
         let properties = discriminatorProperty :: payloadProperties |> String.concat ","
 
@@ -596,9 +618,7 @@ module JsonSchema =
         let properties =
             model.Fields
             |> List.map (fun field ->
-                let constraints = field.Constraints
-
-                sprintf "\"%s\":{%s}" (escape field.Name) (valueKeywords constraints field.Schema |> String.concat ","))
+                sprintf "\"%s\":{%s}" (escape field.Name) (fieldValueKeywords field |> String.concat ","))
             |> String.concat ","
 
         let required =

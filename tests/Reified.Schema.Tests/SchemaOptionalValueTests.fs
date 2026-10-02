@@ -103,3 +103,52 @@ module SchemaOptionalValueTests =
 
         test <@ Schema.parse constrained omitted |> Result.isError @>
         test <@ Schema.parse constrained explicitNull = Ok { Name = "Ada"; Nickname = None } @>
+
+    type private Step =
+        | Written of publishesTo: string option
+
+    let private unwrappedStepSchema () =
+        Schema.unionWith (UnionRepresentation.External(UnionPayloadStyle.NamedWithUnwrappedSingle, true)) [
+            case "written" {
+                tryExtract (function Written publishesTo -> Some publishesTo)
+                fieldAs "publishesTo" id {
+                    withSchema (Schema.option Schema.text)
+                }
+                construct Written
+            }
+        ]
+
+    [<Fact>]
+    let ``json schema accepts null where an unwrapped union payload writes None`` () =
+        let codec = Json.compile (unwrappedStepSchema ())
+        let generated = JsonSchema.generate (unwrappedStepSchema ())
+
+        test <@ Json.serialize codec (Written None) = "{\"written\":null}" @>
+        test <@ generated.Contains "\"written\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"null\"}]}" @>
+
+    [<Fact>]
+    let ``json schema accepts null for an optional collection item`` () =
+        let generated = JsonSchema.generate (Schema.listWith (Schema.option Schema.text))
+
+        test <@ generated.Contains "\"items\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"null\"}]}" @>
+
+    [<Fact>]
+    let ``json schema accepts null for a supplied option field`` () =
+        let constrained =
+            schema<Profile> {
+                field _.Name
+                field _.Nickname {
+                    withSchema (Schema.option Schema.text |> Schema.mustSupply)
+                }
+                construct (fun name nickname -> { Name = name; Nickname = nickname })
+            }
+
+        let generated = JsonSchema.generate constrained
+        test <@ generated.Contains "\"nickname\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"null\"}]}" @>
+
+    [<Fact>]
+    let ``json schema rejects null for a present option item`` () =
+        let presentOption: Constraint<string option> = Constraint.present
+        let generated = JsonSchema.generate (Schema.listWith (Schema.option Schema.text |> Schema.constrain presentOption))
+
+        test <@ not (generated.Contains "\"type\":\"null\"") @>
