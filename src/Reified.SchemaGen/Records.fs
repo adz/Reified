@@ -308,10 +308,46 @@ module Records =
 
         resolved, List.ofSeq diagnostics
 
-    let private knownTypesIn (filePath: string) (sourceText: string) =
+    type private ParsedSource =
+        { FilePath: string
+          Source: ISourceText
+          ParseResults: FSharpParseFileResults }
+
+    /// Parses a source file once so the catalogue pass and the lowering pass share the syntax tree.
+    let private parseSource (filePath: string) (sourceText: string) =
         let source = SourceText.ofString sourceText
         let options = { FSharpParsingOptions.Default with SourceFiles = [| filePath |] }
-        let result = checker.Value.ParseFile(filePath, source, options) |> Async.RunSynchronously
+        let parseResults = checker.Value.ParseFile(filePath, source, options) |> Async.RunSynchronously
+
+        { FilePath = filePath
+          Source = source
+          ParseResults = parseResults }
+
+    /// True when the parsed file declares at least one [<DeriveSchema>] type, including inside nested modules.
+    let private hasSchemaDeclaration (result: FSharpParseFileResults) =
+        let hasSchemaAttribute attributes =
+            attributesOf attributes |> List.exists (fun (name, _) -> name = "DeriveSchema")
+
+        let rec hasSchemaDeclarationIn (declaration: SynModuleDecl) =
+            match declaration with
+            | SynModuleDecl.Types(typeDefns, _) ->
+                typeDefns
+                |> List.exists (fun (SynTypeDefn(SynComponentInfo(attributes = attributes), _, _, _, _, _)) ->
+                    hasSchemaAttribute attributes)
+            | SynModuleDecl.NestedModule(_, _, declarations, _, _, _) ->
+                declarations |> List.exists hasSchemaDeclarationIn
+            | _ -> false
+
+        match result.ParseTree with
+        | ParsedInput.ImplFile(ParsedImplFileInput(contents = modules)) ->
+            modules
+            |> List.exists (fun (SynModuleOrNamespace(decls = declarations)) ->
+                declarations |> List.exists hasSchemaDeclarationIn)
+        | ParsedInput.SigFile _ -> false
+
+    let private knownTypesIn (parsed: ParsedSource) =
+        let source = parsed.Source
+        let result = parsed.ParseResults
 
         if result.Diagnostics |> Array.exists (fun diagnostic -> diagnostic.Severity = FSharp.Compiler.Diagnostics.FSharpDiagnosticSeverity.Error) then
             emptyKnownTypes
@@ -339,7 +375,7 @@ module Records =
                                     Some(name, Choice2Of2(unionInfo source (List.last typeId).idText deriveUnion isRequireQualifiedAccess cases range.StartLine))
                                 | _ when record ->
                                     let deriveSchema = attrs |> List.pick (fun (attributeName, attribute) -> if attributeName = "DeriveSchema" then Some attribute else None)
-                                    Some(name, Choice1Of2(versionSpecOf source deriveSchema filePath containerName (List.last typeId).idText range.StartLine))
+                                    Some(name, Choice1Of2(versionSpecOf source deriveSchema parsed.FilePath containerName (List.last typeId).idText range.StartLine))
                                 | _ -> None)
                         | _ -> []))
                 { Records = entries |> List.choose (function | name, Choice1Of2 _ -> Some name | _ -> None) |> Set.ofList
@@ -350,12 +386,10 @@ module Records =
 
     /// <summary>Parses one F# source file and lowers its marked records. Returns a contract file whose
     /// <c>Contracts</c> list is empty when the file declares no <c>[&lt;DeriveSchema&gt;]</c> records.</summary>
-    let private parseWithKnownTypes (knownTypes: KnownTypes) (naming: SchemaNaming) (filePath: string) (sourceText: string) : Result<ContractFile, ContractDiagnostic list> =
-        let source = SourceText.ofString sourceText
-        let parsingOptions = { FSharpParsingOptions.Default with SourceFiles = [| filePath |] }
-
-        let parseResults =
-            checker.Value.ParseFile(filePath, source, parsingOptions) |> Async.RunSynchronously
+    let private parseMarkedWithKnownTypes (knownTypes: KnownTypes) (naming: SchemaNaming) (parsed: ParsedSource) : Result<ContractFile, ContractDiagnostic list> =
+        let filePath = parsed.FilePath
+        let source = parsed.Source
+        let parseResults = parsed.ParseResults
 
         let syntaxErrors =
             parseResults.Diagnostics
@@ -917,6 +951,19 @@ module Records =
                   DeclaredTypes = declaredTypes
                   Contracts = contracts }
 
+    /// Lowers a parsed file when it contains a schema declaration. Files without one are ordinary project
+    /// sources supplied so cross-file references resolve; they contribute no diagnostics.
+    let private parseWithKnownTypes (knownTypes: KnownTypes) (naming: SchemaNaming) (parsed: ParsedSource) : Result<ContractFile, ContractDiagnostic list> =
+        if hasSchemaDeclaration parsed.ParseResults then
+            parseMarkedWithKnownTypes knownTypes naming parsed
+        else
+            Ok
+                { FilePath = parsed.FilePath
+                  Namespace = None
+                  Module = None
+                  DeclaredTypes = Set.empty
+                  Contracts = [] }
+
     let private withDiagnostics (extra: ContractDiagnostic list) (result: Result<ContractFile, ContractDiagnostic list>) =
         match extra, result with
         | [], _ -> result
@@ -925,18 +972,20 @@ module Records =
 
     /// Parses one source file without project-wide references. Prefer <c>parseSet</c> for build generation.
     let parse naming filePath sourceText =
-        let versions, versionDiagnostics = resolveVersions (knownTypesIn filePath sourceText).Specs
+        let parsed = parseSource filePath sourceText
+        let versions, versionDiagnostics = resolveVersions (knownTypesIn parsed).Specs
 
-        parseWithKnownTypes { emptyKnownTypes with Versions = versions } naming filePath sourceText
+        parseMarkedWithKnownTypes { emptyKnownTypes with Versions = versions } naming parsed
         |> withDiagnostics versionDiagnostics
 
-    /// Parses a project set. The first pass builds a catalogue keyed by each derived type's fully qualified
-    /// namespace/module path and resolves every contract version across the set; the second pass only
-    /// accepts cross-file references written with that full path.
+    /// Parses a project set. Each source is parsed once; the catalogue pass resolves every contract version
+    /// across the set, then only files with a schema declaration are lowered.
     let parseSet naming (sources: (string * string) list) =
+        let parsedSources = sources |> List.map (fun (path, text) -> parseSource path text)
+
         let catalogue =
-            sources
-            |> List.map (fun (path, text) -> knownTypesIn path text)
+            parsedSources
+            |> List.map knownTypesIn
             |> List.fold (fun state current ->
                 { Records = Set.union state.Records current.Records
                   Unions = Map.fold (fun unions key value -> Map.add key value unions) state.Unions current.Unions
@@ -947,7 +996,7 @@ module Records =
         let versions, versionDiagnostics = resolveVersions catalogue.Specs
         let knownTypes = { catalogue with Versions = versions }
 
-        sources
-        |> List.map (fun (path, text) ->
-            let fileDiagnostics = versionDiagnostics |> List.filter (fun diagnostic -> diagnostic.File = path)
-            path, parseWithKnownTypes knownTypes naming path text |> withDiagnostics fileDiagnostics)
+        parsedSources
+        |> List.map (fun parsed ->
+            let fileDiagnostics = versionDiagnostics |> List.filter (fun diagnostic -> diagnostic.File = parsed.FilePath)
+            parsed.FilePath, parseWithKnownTypes knownTypes naming parsed |> withDiagnostics fileDiagnostics)

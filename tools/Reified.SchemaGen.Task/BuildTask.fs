@@ -2,7 +2,6 @@ namespace Reified.SchemaGen.MSBuild
 
 open System
 open System.IO
-open System.Text.RegularExpressions
 open Microsoft.Build.Framework
 open Microsoft.Build.Utilities
 open Reified.SchemaGen
@@ -62,19 +61,12 @@ type GenerateSchemas() =
                 let sourcePaths =
                     sources
                     |> Array.map (fun item -> Path.GetFullPath item.ItemSpec)
-                    |> Array.filter (fun path -> not (path.EndsWith(".g.fs", StringComparison.OrdinalIgnoreCase)))
-                    // Avoid asking the declaration frontend to parse unrelated application files. In
-                    // particular, a final Program.fs may legally omit a namespace/module declaration.
+                    // The generated F# frontend skips files without a schema declaration, so pass every
+                    // ordinary source through. In particular, a final Program.fs may legally omit a
+                    // namespace/module declaration.
                     |> Array.filter (fun path ->
-                        File.ReadLines path
-                        |> Seq.exists (fun line ->
-                            let trimmed = line.TrimStart()
-
-                            not (trimmed.StartsWith("//", StringComparison.Ordinal))
-                            && Regex.IsMatch(
-                                line,
-                                @"\[<\s*(?:[A-Za-z0-9_.]+\.)?DeriveSchema(?:Attribute)?(?:\s|[;(>,])"
-                            )))
+                        path.EndsWith(".fs", StringComparison.OrdinalIgnoreCase)
+                        && not (path.EndsWith(".g.fs", StringComparison.OrdinalIgnoreCase)))
                     |> Array.distinct
 
                 let contractPaths = contracts |> Array.map (fun item -> Path.GetFullPath item.ItemSpec) |> Array.distinct
@@ -82,32 +74,22 @@ type GenerateSchemas() =
                 if contractPaths.Length > 0 && String.IsNullOrWhiteSpace contractNamespace then
                     this.Fail "ReifiedContractNamespace must be set when ReifiedContract items are declared."
                 else
-                    let parsed =
-                        [ yield! [ for path in contractPaths -> path, Parser.parse path (File.ReadAllText path) ]
-                          yield! Records.parseSet schemaNaming [ for path in sourcePaths -> path, File.ReadAllText path ] ]
+                    let fallbackNamespace = if String.IsNullOrWhiteSpace contractNamespace then "Generated" else contractNamespace
 
-                    let parseErrors =
-                        parsed
-                        |> List.collect (fun (_, result) ->
-                            match result with
-                            | Error diagnostics -> diagnostics
-                            | Ok _ -> [])
+                    let generated =
+                        GenerationPipeline.generate
+                            schemaNaming
+                            fallbackNamespace
+                            [ for path in contractPaths -> path, File.ReadAllText path ]
+                            [ for path in sourcePaths -> path, File.ReadAllText path ]
 
-                    let files =
-                        parsed
-                        |> List.choose (fun (_, result) ->
-                            match result with
-                            | Ok file when not file.Contracts.IsEmpty -> Some file
-                            | _ -> None)
-
-                    let errors = if parseErrors.IsEmpty then Resolver.resolve files else parseErrors
-
-                    if not errors.IsEmpty then
+                    match generated with
+                    | Error errors ->
                         for error in errors do
                             this.Log.LogError(string error)
 
                         false
-                    else
+                    | Ok generatedFiles ->
                         let checkedIn = outputMode.Equals("CheckedIn", StringComparison.OrdinalIgnoreCase)
 
                         if not checkedIn && not (outputMode.Equals("Intermediate", StringComparison.OrdinalIgnoreCase)) then
@@ -115,7 +97,6 @@ type GenerateSchemas() =
                         else
                             let projectRoot = Path.GetFullPath projectDirectory
                             let generatedRoot = Path.GetFullPath(Path.Combine(projectRoot, intermediateOutputPath, "Reified.Schema"))
-                            let fallbackNamespace = if String.IsNullOrWhiteSpace contractNamespace then "Generated" else contractNamespace
 
                             let outputPath (inputPath: string) =
                                 if checkedIn then
@@ -131,16 +112,15 @@ type GenerateSchemas() =
                                     Path.ChangeExtension(Path.Combine(generatedRoot, safeRelative), ".g.fs")
 
                             let outputsByInput =
-                                files
+                                generatedFiles
                                 |> List.map (fun file ->
-                                    let input = Path.GetFullPath file.FilePath
+                                    let input = Path.GetFullPath file.SourcePath
                                     let output = outputPath input
                                     Directory.CreateDirectory(Path.GetDirectoryName output) |> ignore
-                                    let emitted = Emitter.emit fallbackNamespace files file
                                     let existing = if File.Exists output then File.ReadAllText(output).Replace("\r\n", "\n") else ""
 
-                                    if existing <> emitted then
-                                        File.WriteAllText(output, emitted)
+                                    if existing <> file.Content then
+                                        File.WriteAllText(output, file.Content)
                                         this.Log.LogMessage(MessageImportance.High, $"Generated {output}")
 
                                     input, output)
