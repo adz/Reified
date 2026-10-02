@@ -36,22 +36,30 @@ exists and can leak.
 An Reified schema owns construction. Parsing either produces a trusted model or path-aware issues; there is no
 intermediate invalid object:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 open Reified.SchemaDSL
+
+type Customer = { Name: string; Age: int }
+
 let customerSchema =
     schema<Customer> {
         field _.Name {
-            constrain (maxLength 80)
+            constrain (Constraint.maxLength 80)
         }
         field _.Age {
-            constrain (between 13 120)
+            constrain (Constraint.between 13 120)
         }
         construct (fun name age -> { Name = name; Age = age })
     }
 
-match (Schema.parse customerSchema raw) with
-| Ok customer -> customer          // every Customer in the program passed the boundary
-| Error errors -> reject errors
+let raw =
+    Data.ofNameValues
+        [ "name", "Ada"
+          "age", "36" ]
+
+match Schema.parse customerSchema raw with
+| Ok customer -> printfn "accepted %s" customer.Name   // every Customer in the program passed the boundary
+| Error errors -> printfn "%A" errors
 ```
 
 
