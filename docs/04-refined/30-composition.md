@@ -54,7 +54,7 @@ remain distinct.
 
 Application-defined types expose a named refinement value:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="CustomerId.refinement and the InvalidCustomerId* cases are the application's own refined type and error vocabulary; see the Customer Id tutorial for the full definition."
 let customerId raw =
     result {
         let! parsed = Parse.int raw |> Result.mapError InvalidCustomerIdText

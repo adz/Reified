@@ -30,7 +30,7 @@ type Signup =
 
 The generated companion module provides:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Generated companion members produced by the schemagen build package; the generator does not run in this audit."
 Signup.schema    // Schema<Signup>
 Signup.parse     // Data -> Result<Signup, SchemaErrors>
 Signup.validate  // Signup -> Result<Signup, SchemaErrors>
