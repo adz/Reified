@@ -30,7 +30,10 @@ Enforce project wide.</h1>
 
 <div class="docs-home-example" style="max-width: 78ch; margin: 0 auto 2rem;">
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+open Reified.SchemaDSL
+open Reified.ConstraintDSL
+
 type Signup = { Email: string; Age: int; Newsletter: bool }
 
 let signupSchema =
@@ -42,11 +45,17 @@ let signupSchema =
             { Email = email; Age = age; Newsletter = newsletter })
     }
 
-Schema.parse signupSchema input
+let input =
+    Data.ofNameValues
+        [ "email", "ada"
+          "age", "11" ]
+
+let result = Schema.parse signupSchema input
 // age: Expected a value at least 13, but was 11.
 // email: Expected an email address, but was ada.
 // newsletter: This value was omitted.
 
+let signup = { Email = "ada@example.org"; Age = 36; Newsletter = true }
 let codec = Json.compile signupSchema     // compile once, typically at startup
 Json.serialize codec signup
 // {"email":"ada@example.org","age":36,"newsletter":true}
@@ -62,7 +71,7 @@ allocated less, because a schema-derived codec skips per-call reflection and box
 
 <div class="docs-home-example" style="max-width: 78ch; margin: 0 auto 2rem;">
 
-```fsharp no-check reason="The homepage excerpt shares signupSchema from the preceding example; the complete program is verified in examples/Reified.GettingStarted."
+```fsharp
 JsonSchema.generate signupSchema
 // {"type":"object",
 //  "properties":{"email":{"type":"string"},
