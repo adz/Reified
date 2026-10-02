@@ -79,44 +79,30 @@ let main argv =
                 eprintfn "--namespace is required when .contract files are among the inputs"
                 usage ()
             else
-                let parsed =
-                    [ yield! [ for path in contractInputs -> path, Parser.parse path (File.ReadAllText path) ]
-                      yield! Records.parseSet naming [ for path in sourceInputs -> path, File.ReadAllText path ] ]
+                let fallbackNamespace = namespaceName |> Option.defaultValue "Generated"
 
-                let parseErrors =
-                    parsed
-                    |> List.collect (fun (_, result) ->
-                        match result with
-                        | Error diagnostics -> diagnostics
-                        | Ok _ -> [])
+                let generated =
+                    GenerationPipeline.generate
+                        naming
+                        fallbackNamespace
+                        [ for path in contractInputs -> path, File.ReadAllText path ]
+                        [ for path in sourceInputs -> path, File.ReadAllText path ]
 
-                let files =
-                    parsed
-                    |> List.choose (fun (_, result) ->
-                        match result with
-                        | Ok file when not (List.isEmpty file.Contracts) -> Some file
-                        | _ -> None)
-
-                let resolveErrors = if List.isEmpty parseErrors then Resolver.resolve files else []
-                let allErrors = parseErrors @ resolveErrors
-
-                if not (List.isEmpty allErrors) then
-                    for diagnostic in allErrors do
+                match generated with
+                | Error diagnostics ->
+                    for diagnostic in diagnostics do
                         eprintfn $"{diagnostic}"
 
                     1
-                else
-                    let fallbackNamespace = namespaceName |> Option.defaultValue "Generated"
+                | Ok files ->
                     let mutable drifted = false
 
                     for file in files do
                         let outputPath =
-                            if file.FilePath.EndsWith ".fs" then
-                                file.FilePath.Substring(0, file.FilePath.Length - 3) + ".g.fs"
+                            if file.SourcePath.EndsWith ".fs" then
+                                file.SourcePath.Substring(0, file.SourcePath.Length - 3) + ".g.fs"
                             else
-                                Path.ChangeExtension(file.FilePath, ".g.fs")
-
-                        let emitted = Emitter.emit fallbackNamespace files file
+                                Path.ChangeExtension(file.SourcePath, ".g.fs")
 
                         if check then
                             let existing =
@@ -125,11 +111,11 @@ let main argv =
                                 else
                                     ""
 
-                            if existing <> emitted then
+                            if existing <> file.Content then
                                 eprintfn $"drift: {outputPath} is out of date; run schemagen to regenerate"
                                 drifted <- true
                         else
-                            File.WriteAllText(outputPath, emitted)
+                            File.WriteAllText(outputPath, file.Content)
                             printfn $"generated {outputPath}"
 
                     if drifted then 2 else 0

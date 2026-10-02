@@ -20,6 +20,7 @@
     <Compile Include="Records.fs" />
     <Compile Include="Resolver.fs" />
     <Compile Include="Emitter.fs" />
+    <Compile Include="GenerationPipeline.fs" />
   </ItemGroup>
 
   <ItemGroup>

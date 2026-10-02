@@ -1482,3 +1482,28 @@ type Account = { Owner: My.Wire.Profile; Previous: My.Wire.ProfileV1 }
             <@ fields = [ Reference { RefName = "My.Wire.Profile"; RefVersion = 2 }
                           Reference { RefName = "My.Wire.Profile"; RefVersion = 1 } ] @>
 
+    [<Fact>]
+    let ``a source with no schema declaration is not lowered and reports no diagnostics`` () =
+        // Project sets include ordinary sources so cross-file references resolve. A file with no
+        // [<DeriveSchema>] contributes its types without becoming a generator diagnostic, even when
+        // it does not parse - compiling it is the compiler's job, not the generator's.
+        let appSource =
+            """
+module My.App
+let broken: = 1
+"""
+
+        let domainSource =
+            """
+module My.Domain
+open Reified.DerivedSchema
+
+[<DeriveSchema>]
+type User = { Name: string }
+"""
+
+        let sources = [ "app.fs", appSource; "domain.fs", domainSource ]
+
+        test <@ parseFileErrors sources = [] @>
+        let domain = parseFiles sources |> List.find (fun file -> file.FilePath = "domain.fs")
+        test <@ domain.Contracts |> List.map _.QualifiedName = [ "My.Domain.User" ] @>
