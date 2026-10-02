@@ -118,8 +118,10 @@ let port raw : Result<int, PortError> =
 
 `Result.orError` from `Reified.Result` is shorter when the error case carries nothing:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-Parse.int raw |> Result.orError PortMissing
+```fsharp
+type MissingPort = PortMissing
+
+Parse.int "abc" |> Result.orError PortMissing
 ```
 
 
