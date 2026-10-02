@@ -33,7 +33,7 @@ Only the first changes what later code can assume. The second is real validation
 downstream consequence; the third is validation that arithmetic immediately undoes. Both
 stay constraints on the underlying value:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
 field _.Email {
     constrain Constraint.present
     constrain Constraint.email
@@ -76,21 +76,36 @@ The case is private, so `CustomerId.create` is the only way in:
 
 ```fsharp
 CustomerId.create 42   // Ok
-CustomerId.create 0    // Error [ OutOfRange (GreaterThan "0", Some "0") ]
+CustomerId.create 0    // Error (Atomic (Expected (RelationAtom (Compared (GreaterThan, Integer 0L)), Some (Integer 0L))))
 ```
 
 
-Use `Refinement.defineAll` when several constraints describe admission, or
-`Refinement.defineWithCheck` for an invariant no built-in constraint describes. See
-[Define Refined Types](/refined/domain-values.html) for both.
+Use `Constraint.all [ ... ]` when several constraints describe admission, or
+`Constraint.customWith` for an invariant no built-in constraint describes, then hand either to the same
+`Refinement.define`. See [Define Refined Types](/refined/domain-values.html) for both.
 
 ## Give it the operations that justify it
 
 This is the step that separates a useful type from a wrapper. `CustomerId` is a key, so
 what it owes callers is lookup and identity, not arithmetic:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+open Reified
+open Reified.Refinements
+
+type CustomerId =
+    private
+    | CustomerId of int
+
+    member this.Value =
+        let (CustomerId value) = this
+        value
+
 module CustomerId =
+    let refinement = Refinement.define (Constraint.greaterThan 0) CustomerId _.Value
+    let create value = Refinement.create refinement value
+    let value (input: CustomerId) = input.Value
+
     // ... as above
 
     /// Total: distinct ids stay distinct, so no entry can be lost.
@@ -108,7 +123,7 @@ evidence the concept should be a constraint instead.
 
 ## Use it in domain code
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="repository is the caller's own data-access value; not one this fragment can construct standalone."
 let loadCustomer (id: CustomerId) =
     // No guard: id is known to be above zero.
     repository.load id.Value

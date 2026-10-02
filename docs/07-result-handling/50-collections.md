@@ -106,7 +106,7 @@ To accumulate across differently-typed independent steps rather than across one 
 
 Both take any `seq<_>` and produce a **list**:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Shows the functions' type signatures, not a compilation unit."
 Result.traverse    : ('a -> Result<'b, 'e>) -> seq<'a> -> Result<'b list, 'e>
 Result.sequence    : seq<Result<'a, 'e>> -> Result<'a list, 'e>
 Result.traverseAll : ('a -> Result<'b, 'e>) -> seq<'a> -> Result<'b list, 'e list>

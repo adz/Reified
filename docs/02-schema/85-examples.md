@@ -201,7 +201,7 @@ Source:
 
 Source code:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Reproduces examples/Reified.Schema.Examples/RefinedValueSchemaExample.fs; its module declaration and repeated type names cannot share the page's compiled unit."
 module RefinedValueSchemaExample
 
 open Reified

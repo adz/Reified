@@ -57,7 +57,7 @@ Fable surface and repository coverage to keep it working.
 
 Both field forms compile with Fable:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Illustrates field declaration lines shown outside their enclosing schema<T> block."
 field _.Email                     // derives the wire name "email"
 fieldAs "email_address" _.Email   // declares it
 ```

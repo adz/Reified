@@ -28,9 +28,37 @@ published on NuGet. The example below documents the adapter used by Reified's ow
 adapt locally. `SchemaGen.model` derives values by generating structured data, parsing it, and immediately checking the
 result.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="FsCheck is a test-only dependency of Reified.Schema.Testing; it's not among the assemblies this audit pipeline resolves, so this block can't be checked here even though the pattern is real."
+open System
+open Reified
+open Reified.SchemaDSL
 open Reified.Schema.Testing
 open FsCheck.FSharp
+
+type Booking =
+    private
+        { Start: DateTimeOffset
+          End: DateTimeOffset }
+
+[<RequireQualifiedAccess>]
+module Booking =
+    let start booking = booking.Start
+    let finish booking = booking.End
+
+    let create start finish =
+        if start <= finish then Ok { Start = start; End = finish }
+        else Error "End must not be before start."
+
+    let shift days booking =
+        { Start = (start booking).AddDays days
+          End = (finish booking).AddDays days }
+
+    let schema : Schema<Booking> =
+        schema<Booking> {
+            fieldAs "start" start
+            fieldAs "end" finish
+            constructResult create
+        }
 
 let bookingGenerator =
     SchemaGen.model Booking.schema
@@ -40,16 +68,19 @@ let bookings = Gen.sample 100 bookingGenerator
 ```
 
 
-Keep an adapter like this in test code; it is not a runtime dependency.
+Keep an adapter like this in test code; it is not a runtime dependency. This `Booking` uses a simplified two-field
+constructor rather than the draft-plus-typed-error split [Build A Private Aggregate](/schema/patterns/private-aggregates.html)
+and [Model Legal Transitions](/schema/patterns/legal-transitions.html) use for the same shape, since schema
+generation, not construction, is this page's subject.
 
 ## Check total transitions
 
 A transition returning `Booking` claims it always preserves the aggregate invariant.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Continues the Booking/bookings illustration above; not a standalone compilation unit."
 let shiftedBookings =
     bookings
-    |> Array.map (Booking.shift 10)
+    |> Array.map (Booking.shift 10.0)
 
 let allRemainValid =
     shiftedBookings
@@ -74,7 +105,7 @@ or hand-picked inputs for malformed data, constraint edges, and constructor fail
 Patterns, custom constraints, and application-specific distributions cannot always be reversed automatically.
 `SchemaGen.rawWith` accepts generators keyed by field path.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="bookingDeriveSchema is the caller's own DeriveSchema-generated wire schema; not one this fragment can construct standalone."
 let overrides =
     Map.ofList [ "reference", Gen.constant (Data.Text "BK-42") ]
 

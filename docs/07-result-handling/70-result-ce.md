@@ -21,6 +21,14 @@ type SignupError =
     | AgeOutOfRange of int
 
 type Signup = { Name: string; Age: int }
+
+let parseName (name: string) : Result<string, SignupError> =
+    if String.IsNullOrEmpty name then Error NameMissing else Ok name
+
+let parseAge (age: string) : Result<int, SignupError> =
+    match Int32.TryParse age with
+    | true, value -> Ok value
+    | false, _ -> Error(AgeNotANumber age)
 ```
 
 
@@ -29,12 +37,30 @@ type Signup = { Name: string; Age: int }
 `let!` binds the value inside `Ok` to the name on its left. `do!` runs a step whose success value is `unit`, so there
 is no name. `return` wraps a plain value back up as `Ok`. `return!` uses a complete `Result` as the block's result.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 result {
     let! name = parseName "Ada"
     let! age = parseAge "36"
     return { Name = name; Age = age }
 }
+```
+
+`do!` and `return!` in the same block:
+
+```fsharp
+let requireAdult age : Result<unit, SignupError> =
+    if age >= 18 then Ok () else Error (AgeOutOfRange age)
+
+let signupAdultOnly name age =
+    result {
+        let! name = parseName name
+        let! age = parseAge age
+        do! requireAdult age          // unit success, nothing to bind
+        return! Ok { Name = name; Age = age }
+    }
+
+signupAdultOnly "Ada" "36"   // Ok { Name = "Ada"; Age = 36 }
+signupAdultOnly "Ada" "12"   // Error (AgeOutOfRange 12)
 ```
 
 
@@ -45,7 +71,7 @@ Ok { Name = "Ada"; Age = 36 }
 
 The same block with the types written out, to show what is on each side of the binding:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 result {
     let! (name: string) = (parseName "Ada": Result<string, SignupError>)
     let! (age: int) = (parseAge "36": Result<int, SignupError>)
@@ -61,7 +87,7 @@ On the right of `let!` is a `Result<'value, 'error>`; on the left is the `'value
 
 ## Failure stops the block
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let signup name age =
     result {
         let! name = parseName name
@@ -80,7 +106,7 @@ at the first one.
 
 That short-circuit is observable, not just a description of the result:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let mutable calls = 0
 
 let track raw =
@@ -105,7 +131,7 @@ calls
 
 The builder supports the ordinary constructs, so a block is not restricted to a straight run of bindings:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="openReader/path/readHeader/lines/validate/isDone/step are illustrative placeholders for the caller's own I/O; not values this page can construct standalone."
 result {
     use reader = openReader path          // disposed on the way out, success or failure
     let! header = readHeader reader

@@ -15,7 +15,7 @@ callers unwrapping it at first use, and the invariant buys nothing after the bou
 
 The types here are chosen so that later code can be simpler:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Illustrative signatures; lines/a/b are the caller's own already-refined values, not ones this page can construct standalone."
 let total = NonEmptyList.reduce (+) lines   // no seed, no empty case, no option
 let largest = NonEmptyList.max lines        // total
 let ratio = UnitInterval.multiply a b       // closed: still in [0, 1]
@@ -56,15 +56,15 @@ Every built-in type has a constructor returning `Result<'refined, Violation>`:
 let name : Result<NonBlankString, Violation> = Refine.nonBlankString "Ada"
 let lines : Result<NonEmptyList<string>, Violation> = Refine.nonEmptyList [ "a"; "b" ]
 
-Refine.nonBlankString "  "  // Error [ Blank ]
-Refine.nonEmptyList []      // Error [ InvalidLength (MinimumLength 1, Some 0) ]
+Refine.nonBlankString "  "               // Error (Atomic (Expected (PresenceAtom Present, None)))
+Refine.nonEmptyList ([]: string list)    // Error (Atomic (Expected (CardinalityAtom (Minimum 1), Some (Integer 0L))))
 ```
 
 
 Some types also offer a **total** constructor, which is the one to prefer when the input
 has an obvious correct reading:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Illustrative signatures; first/rest/finish/start are the caller's own values, not ones this page can construct standalone."
 let lines = NonEmpty(first, rest)              // cannot fail
 let window = Interval.between finish start     // cannot fail: orders the pair
 let ratio = UnitInterval.clamp 1.5             // cannot fail: clamps to 1.0
@@ -77,7 +77,7 @@ Read the underlying value through the `Value` member or the module's `value` fun
 
 The smallest contrast is one partial operation becoming total:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Illustrative signatures; lines is the caller's own list, plain on the left and refined on the right, not one value this page can construct standalone."
 List.max lines            // throws on an empty list
 NonEmptyList.max lines    // total: returns the value
 ```
@@ -97,14 +97,18 @@ construction, and every later caller reads a value.
 
 The same saving shows up in aggregates:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+open Reified.Refinements
+
+type OrderLine = { Total: decimal }
+
 // plain: every caller re-establishes what is already true
-let averageLine (lines: OrderLine list) =
+let averageLinePlain (lines: OrderLine list) =
     if List.isEmpty lines then None
     else Some (List.sumBy _.Total lines / decimal lines.Length)
 
 // refined: the empty case cannot arise, so there is nothing to return an option for
-let averageLine (lines: NonEmptyList<OrderLine>) =
+let averageLineRefined (lines: NonEmptyList<OrderLine>) =
     NonEmptyList.averageBy _.Total lines
 ```
 
@@ -128,7 +132,7 @@ rather than catching them.
 
 Numeric ranges are constraints instead:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
 field _.Quantity { constrain (Constraint.greaterThan 0) }
 ```
 

@@ -26,7 +26,13 @@ dotnet run --project examples/Reified.ReferenceApp.Wire/Reified.ReferenceApp.Wir
 The wire slice answers the question the hand-written tier leaves open: what does the day-to-day authoring
 experience look like once wire schemas are generated? You own an ordinary record with constraint attributes:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+open Reified.DerivedSchema
+
+type Visibility =
+    | Private
+    | Public
+
 [<DeriveSchema>]
 type WorkspaceCard =
     { [<Min 1; Max 60>] Name: string

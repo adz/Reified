@@ -17,7 +17,9 @@ The built-in catalogue is a closed algebra. Each constructor builds exactly one 
 value in both its description and any violation it produces, so a primitive's identity and its failure cannot drift
 apart.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+open Reified
+
 let nameLength : Constraint<string> = Constraint.maxLength 80
 
 (Constraint.inspect nameLength).Expression
@@ -43,7 +45,9 @@ with the surrounding schema shape to reach `maxLength`, `maxItems`, or `maxPrope
 
 Anything else runs perfectly well and is honestly invisible to export and proof.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+let isValidIsbn (value: string) = value.Length = 13 && value.StartsWith "978"
+
 let isbn : Constraint<string> =
     Constraint.custom "must be a valid ISBN" isValidIsbn
 ```
@@ -54,9 +58,11 @@ own violation, for when the failure deserves a structured reason. Its callback i
 `Constraint.check` applied to a rule, so the usual way to supply one is to reuse a built-in rather than build a
 violation by hand:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+let supportedCurrencies = [ "USD"; "EUR"; "GBP" ]
+
 let currency : Constraint<string> =
-    Constraint.customWith "must be a supported currency" (Constraint.check (Constraint.oneOf supported))
+    Constraint.customWith "must be a supported currency" (Constraint.check (Constraint.oneOf supportedCurrencies))
 ```
 
 
@@ -86,21 +92,23 @@ to something else:
 
 Reach for the specific one whenever it says what you mean. A reserved-name rule is `noneOf`, not a negated `oneOf`:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let handle : Constraint<string> =
     Constraint.noneOf [ "admin"; "root" ]
 ```
 
 
-Both run the same predicate, but only the primitive is inspectable, it lowers to JSON Schema, generates, and
+Both run the same predicate, but only the primitive is inspectable: it lowers to JSON Schema, generates, and
 documents itself, where a negated rule can do none of those.
 
 ### Why there is no general `not`
 
 `Constraint.notWith` is the only general negation, and it requires prose because its failure has no reason to derive:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-Constraint.notWith "must not be a supported ISBN prefix" isbnPrefix
+```fsharp
+let isbnPrefixAllowed : Constraint<string> = Constraint.oneOf [ "978-0-"; "978-1-" ]
+
+Constraint.notWith "must not be a supported ISBN prefix" isbnPrefixAllowed
 ```
 
 
@@ -120,10 +128,10 @@ those. It is deliberately small, because every interpreter has to understand all
 A rule can compare values that do not fit. `Constraint.atLeast` works on anything comparable, and plenty of comparable
 types are not in that list:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 type Version = { Major: int; Minor: int }   // comparable, but not a ConstraintValue
 
-let supported : Constraint<Version> =
+let supportedVersion : Constraint<Version> =
     Constraint.atLeast { Major = 2; Minor = 0 }
 ```
 
@@ -131,8 +139,8 @@ let supported : Constraint<Version> =
 The rule runs perfectly well. `Version` compares, so checking a value is exact. What Reified cannot do is convert
 `{ Major = 2; Minor = 0 }` into `ConstraintValue`, so the description declines to name it:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-(Constraint.inspect supported).Expression
+```fsharp
+(Constraint.inspect supportedVersion).Expression
 // Opaque (UnsupportedOperand (Relation AtLeast))
 ```
 
@@ -149,8 +157,8 @@ Nothing is silently approximated, and no boxed value escapes through the inspect
 
 If that message is not good enough for your users, author the rule with prose instead, and keep the typed check:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-let supported : Constraint<Version> =
+```fsharp
+let supportedVersionProse : Constraint<Version> =
     Constraint.custom "must be version 2.0 or later" (fun value -> value >= { Major = 2; Minor = 0 })
 ```
 
@@ -161,7 +169,7 @@ That is opaque either way, so you lose nothing by saying what you mean.
 
 `Constraint.describe` attaches documentation:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 Constraint.between 0 10
 |> Constraint.describe "Retries before the call is abandoned."
 ```

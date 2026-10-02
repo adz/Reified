@@ -10,7 +10,32 @@ targetFramework: net8.0
 The inner field block is syntax for transforming one `Schema<_>` value. It prevents configuration for adjacent fields
 from joining into one pipeline.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+Both forms below use a `ContactEmail` type and a `validateCompanyEmail` function shaped like the ones
+[Refined Schemas](/schema/refined-values.html) builds section by section, kept minimal here (one constraint, not
+the full presence-plus-length-plus-format version that page settles on) since this page's subject is the field
+block, not the refinement. `Refinement.define` pairs a constraint with the wrap/unwrap functions that make it a
+type, covered there in detail:
+
+```fsharp
+open Reified
+open Reified.Refinements
+
+type ContactEmail =
+    private
+    | ContactEmail of string
+
+module ContactEmail =
+    let value (ContactEmail value) = value
+
+    let refinement =
+        Refinement.define Constraint.email ContactEmail value
+
+let validateCompanyEmail (email: ContactEmail) : Result<unit, SchemaError> =
+    if (ContactEmail.value email).EndsWith("@example.com") then Ok ()
+    else Error (SchemaError.Custom("company-email", Some "Company email must end with @example.com."))
+```
+
+```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; shown here for comparison with the verified plain-function pipeline below, not as a standalone unit."
 field _.Email {
     withSchema Schema.text
     refine ContactEmail.refinement
@@ -21,7 +46,7 @@ field _.Email {
 
 Its schema transformation is:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 Schema.text
 |> Schema.refine ContactEmail.refinement
 |> Schema.validate validateCompanyEmail
@@ -34,7 +59,7 @@ The outer declaration then attaches that `Schema<ContactEmail>` to the `"email"`
 
 `withSchema` replaces canonical type resolution for this field:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
 field _.Children {
     withSchema (Schema.listWith childSchema)
 }
@@ -50,7 +75,7 @@ its built-in types, and `reified schemagen` emits it for every record it owns (t
 file). A field whose type is such a contract, directly, or wrapped in `list`, `option`, or `Map`, therefore needs
 no `withSchema`:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Illustrates field declaration lines shown outside their enclosing schema<T> block."
 field _.Origin        // Origin: Geo            - Geo is a generated contract type
 field _.Waypoints     // Waypoints: Geo list
 field _.Destination   // Destination: Geo option
@@ -60,24 +85,31 @@ The augmentation is intrinsic to the generated file, so it resolves from any ass
 by `[<DeriveSchema>]` on hand-written records are the exception: schemagen cannot add an intrinsic member to a type
 it does not declare, so a field of such a type still selects its schema with `withSchema TheType.schema`.
 
-## `constrain`
+## `constrain` and `constraints`
 
-Portable constraints can be inspected by JSON Schema, documentation, and UI interpreters:
+Portable constraints can be inspected by JSON Schema, documentation, and UI interpreters. `constraints` takes a
+list for several at once; `constrain` takes one:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
 field _.Name {
     constraints [ present; maxLength 80 ]
 }
 ```
 
 
-The plain function is `Schema.constrain`.
+The plain function is `Schema.constrain`:
+
+```fsharp
+Schema.text
+|> Schema.constrain Constraint.present
+|> Schema.constrain (Constraint.maxLength 80)
+```
 
 ## `refine`
 
 The plain function receives a descriptor explicitly:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let contactEmailSchema =
     Schema.text
     |> Schema.refine ContactEmail.refinement
@@ -86,7 +118,7 @@ let contactEmailSchema =
 
 Inside the field block, either supply the same value or use the destination type's canonical contribution:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
 field _.Email {
     withSchema Schema.text
     refine ContactEmail.refinement
@@ -94,10 +126,12 @@ field _.Email {
 ```
 
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 type ContactEmail with
     static member Refinement(_: string, _: ContactEmail) = ContactEmail.refinement
+```
 
+```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
 field _.Email {
     withSchema Schema.text
     refine
@@ -111,7 +145,7 @@ The bare form uses the current `string` schema and the `ContactEmail` getter typ
 
 Executable validation preserves the current type:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let companyEmailSchema =
     contactEmailSchema
     |> Schema.validate validateCompanyEmail
@@ -120,7 +154,7 @@ let companyEmailSchema =
 
 Inside the block:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
 field _.Email {
     validate validateCompanyEmail
 }

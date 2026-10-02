@@ -70,7 +70,16 @@ defects, not resource misses, and swallowing one would hide the bug in whichever
 Operands are `ConstraintValue`. The built-in formatter uses the renderer's value culture and honours format
 suffixes. Two hooks replace it:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+open Reified
+
+let renderer = Renderer.english
+
+let format (value: ConstraintValue) (suffix: string option) : string =
+    match value, suffix with
+    | ConstraintValue.Integer value, Some "N0" -> value.ToString("N0")
+    | value, _ -> ConstraintValue.render value
+
 // One uniform callback. Format suffixes are ignored.
 renderer |> Renderer.withValues ConstraintValue.render
 
@@ -106,7 +115,17 @@ deterministic:
 | two | `pair` |
 | three or more | combine the last two with `end`, fold the preceding items right-to-left with `middle`, and apply `start` to the first |
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+open Reified
+open Reified.ConstraintDSL
+
+let name : Constraint<string> = Constraint.all [ present; lengthBetween 2 40; email ]
+
+let group =
+    match "" |> Constraint.check name with
+    | Error violation -> violation
+    | Ok () -> failwith "unreachable"
+
 Violation.message Renderer.english group
 // "must be present, must have a size between 2 and 40 and must be an email address"
 ```
@@ -147,7 +166,7 @@ resolver.
 system wants to select plural categories and render entries itself, ICU, for instance, take a resolver instead.
 It receives one request per contextual level:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="icu is the host application's own ICU-backed resolver, the library many applications use for language-specific plural rules (Arabic has six categories, not two); not a value this page can construct standalone."
 type MessageRequest =
     { BaseKey: string                              // encoded contextual key, no plural suffix
       Arguments: Map<string, ConstraintValue>
@@ -161,7 +180,7 @@ let renderer =
 ```
 
 
-The answer means:
+The resolver's return value means:
 
 - `None`, continue to the next, less specific level;
 - `MessageResolution.Template template`, Reified interpolates and formats it;
@@ -177,25 +196,25 @@ A resolver does not replace group traversal. A system that must reorder or reint
 
 ### Inspecting what will be asked for
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+open Reified
+
+let renderer = Renderer.english
+
+let spec =
+    MessageDescriptor.Advanced.ofSegments [ "billing"; "cardExpired" ] Map.empty
+    |> MessageFormatSpec.Advanced.create "card has expired" None
+
 Renderer.Advanced.lookupCandidates renderer spec   // exact encoded keys, in order
 Renderer.Advanced.messageRequests renderer spec    // one request per contextual level
 Renderer.Advanced.attributeCandidates renderer     // encoded attribute-noun keys
-Renderer.Advanced.format spec renderer             // render any catalogue's entry
+Renderer.Advanced.format spec renderer             // render any catalogue's entry: "card has expired"
 ```
 
 
 These take a `MessageFormatSpec`: a message identity and arguments (`MessageDescriptor`) plus the owning
 catalogue's neutral fallback and plural operand. That pairing is what lets Schema, or your own catalogue, reuse
 every renderer mechanic without `Reified.Constraint` knowing a single one of its keys.
-
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-let spec =
-    MessageDescriptor.Advanced.ofSegments [ "billing"; "cardExpired" ] Map.empty
-    |> MessageFormatSpec.Advanced.create "card has expired" None
-
-renderer |> Renderer.Advanced.format spec
-```
 
 
 `lookupCandidates` and the rest return *encoded* resource keys. Canonical unencoded identity comes only from

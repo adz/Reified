@@ -104,7 +104,7 @@ value failed every permitted alternative.
 Built-in failures carry the failing constraint atom and, when Reified can represent it, the actual value. Use the projections when
 code needs those facts:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 match "ab" |> Constraint.check (Constraint.minLength 3: Constraint<string>) with
 | Ok () -> ()
 | Error violation ->
@@ -113,6 +113,8 @@ match "ab" |> Constraint.check (Constraint.minLength 3: Constraint<string>) with
 
     let actual = Violation.tryActual violation
     // Some (ConstraintValue.Integer 2L)
+
+    printfn "%A, %A" expectation actual
 ```
 
 
@@ -129,7 +131,16 @@ directly.
 `Violation.render` is the zero-dependency English default, not the only option. A `Renderer` carries the language
 and the document context; the violation carries the facts:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+open Reified
+
+let renderer = Renderer.english
+
+let violation =
+    match "" |> Constraint.check Constraint.present with
+    | Error violation -> violation
+    | Ok () -> failwith "unreachable"
+
 let signup = renderer |> Renderer.context "signup"
 
 violation |> Violation.message (signup |> Renderer.attribute "name")

@@ -11,7 +11,10 @@ targetFramework: net8.0
 `Constraint.custom` hands Reified prose and nothing else, so prose is all Reified can give back: it renders verbatim in
 every language. Name a key and the rule becomes translatable:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+let isValidIsbn (value: string) =
+    value.Length = 13
+
 let isbn =
     Constraint.customLocalized
         "books.isbn.invalid"

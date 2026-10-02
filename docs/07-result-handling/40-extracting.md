@@ -45,7 +45,14 @@ being deliberate: once the error is gone it cannot be reported, logged, or retur
 
 Nothing stops you matching the value directly, and for a final branch that handles both sides it is usually clearest:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+open System
+
+let parseAge (raw: string) =
+    Int32.TryParse raw
+    |> Result.fromTry
+    |> Result.orError AgeMissing
+
 match parseAge "abc" with
 | Ok age -> printfn "age is %d" age
 | Error failure -> printfn "rejected: %A" failure

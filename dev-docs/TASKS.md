@@ -51,6 +51,23 @@ From the same ZIO comparison; these belong *with* the remote-config milestone, n
 
 ## Smaller queue items
 
+- **`dev-docs/current-ideas/format-and-json-runtime.md`'s "one package per format" policy** stands as written;
+  nothing to act on until a second wire format has a real consumer.
+  Correction, 2026-09-29: an earlier pass of this entry claimed the JSON codec runs one portable
+  byte-array-cursor implementation with no platform split, and proposed that as the explanation for the
+  serialize-path narrowing the multi-runtime benchmark showed on .NET 11 RC. That was wrong, a grep for the
+  exact substring `"#if FABLE_COMPILER"` missed this codebase's actual pattern, `#if !FABLE_COMPILER` and
+  `#if NET8_0_OR_GREATER && !FABLE_COMPILER`. `Buffers.fs` already rents from `ArrayPool<byte>.Shared`, writes
+  `int`/`int64`/`float`/`decimal` with `Utf8Formatter.TryFormat` straight into a `Span<byte>`, and decodes with
+  `Utf8Parser.TryParse` and `MemoryExtensions.IndexOfAny`/`SequenceEqual`, all on .NET, with Fable-appropriate
+  fallbacks. There is no portable-baseline lift to make here; whatever explains the .NET-11-RC narrowing is
+  something else, not investigated yet.
+- **A systematic "next step" sweep across the docs.** Carried over from `dev-docs/current-ideas/tidy-up.md`
+  (deleted 2026-09-29; everything else in it was applied and is recorded in `dev-docs/decisions/README.md`).
+  The obvious hand-offs are linked; nobody has walked every page asking where a reader is left holding an
+  intermediate value with no onward link. That file's other open item, a compile check for hand-written
+  snippets on landing pages/`llms.txt`, is superseded: FsLiveDocs checks fenced F# blocks by default now
+  (opting out needs an explicit `no-check reason=...`), and `llms.txt` is generated, not hand-written.
 - **Re-run the Across .NET versions table in `docs/95-notes/80-benchmarks.md` on .NET 11 GA.** It currently uses
   an RC toolchain (2026-09-29), which the page itself says is not representative of shipped performance. Follow
   [`dev-docs/BenchmarkProcess.md`](BenchmarkProcess.md) for the multi-runtime setup and the two BenchmarkDotNet

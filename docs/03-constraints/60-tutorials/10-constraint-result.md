@@ -84,7 +84,7 @@ how, and in which language, to say it. Rendering it here would settle that quest
 
 When the application only wants its own error case, discard the violation instead with `Result.orError`:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="EmailNotValid is an application-specific error case this page doesn't declare; illustrates the alternative to InvalidEmail of Violation, not a standalone compilation unit."
 let validateEmail (request: SignupRequest) =
     request.Email
     |> Constraint.guard email
@@ -121,16 +121,16 @@ Use Schema when independent fields should accumulate path-aware sibling diagnost
 
 ## Render at the edge
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let describe (renderer: Renderer) error =
     let field name violation =
         violation |> Violation.fullMessage (renderer |> Renderer.attribute name)
 
     match error with
     | TermsNotAccepted -> "The terms must be accepted."
-    | InvalidName violation -> fieldAs "name" violation
-    | InvalidEmail violation -> fieldAs "email" violation
-    | InvalidAge violation -> fieldAs "age" violation
+    | InvalidName violation -> field "name" violation
+    | InvalidEmail violation -> field "email" violation
+    | InvalidAge violation -> field "age" violation
 ```
 
 

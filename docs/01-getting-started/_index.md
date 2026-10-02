@@ -41,7 +41,9 @@ Refinements ┘
 </div>
 
 Use Schema when structured input must become a trusted model. Constraint, Parse, Data, and Refinements can each
-be used alone without Schema, but they are designed to work together consistently.
+be used alone without Schema, but they are designed to work together consistently. "Contract tooling" is the
+generated derivation, versioning, and MSBuild pipeline built on Schema, covered from
+[Derived Schemas](/schema/derivation/index.html) onward, not a separate package.
 
 Install the complete runtime set for this walkthrough:
 
@@ -78,8 +80,8 @@ let signupSchema =
 ```
 
 
-Feed it something realistic. `Data` is a source-neutral input tree, so the same schema reads a form post, a
-query string, JSON, or configuration:
+Feed it something realistic. `Data` is a source-neutral input tree, so the same schema reads a form post, CLI
+arguments, JSON, or configuration:
 
 ```fsharp
 let input =
@@ -98,14 +100,14 @@ succeeded, so downstream code does not have to wonder whether validation ran.
 
 Now feed it something a real user would send, a malformed address, an age below the limit, a missing field:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-let input =
+```fsharp
+let invalidInput =
     Data.ofNameValues
         [ "email", "ada"
           "age", "11" ]
 
-match Schema.parse signupSchema input with
-| Ok signup -> register signup
+match Schema.parse signupSchema invalidInput with
+| Ok signup -> printfn "%A" signup
 | Error errors ->
     for issue in SchemaErrors.toList errors do
         printfn "%s: %s" (SchemaPath.format issue.Path) (SchemaError.render issue.Error)
@@ -261,13 +263,13 @@ Three operations sound similar and are not. The rest of the documentation uses t
 "Validation" is the everyday word for all of this, and the documentation uses it that way when talking about the
 area as a whole. When the distinction matters, it will be one of the three above instead.
 
-## Where to go next
+## Continue from here
 
 Continue with Schema for structured boundary models, or choose another focused capability from the library map.
 
 → [Continue with Schema](/schema/index.html)
 
-→ [Where to go next](/getting-started/where-to-go-next.html)
+→ [More on where to go next](/getting-started/where-to-go-next.html)
 
 The focused packages are independently installable when you need only one capability. See
 [Packages and platforms](/notes/packages-and-platforms.html) for the complete inventory and platform support.

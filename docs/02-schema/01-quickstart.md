@@ -23,6 +23,7 @@ dotnet add package Reified.Schema
 ```fsharp
 open Reified
 open Reified.SchemaDSL
+open Reified.ConstraintDSL
 ```
 
 
@@ -62,7 +63,7 @@ quotations, including JavaScript; reach for `fieldAs` on Fable's Rust and PHP ta
 
 ### Parse
 
-`Data` is a source-neutral input tree. The same schema reads form posts, CLI arguments, JSON, and configuration , 
+`Data` is a source-neutral input tree. The same schema reads form posts, CLI arguments, JSON, and configuration,
 see [Input Sources](/schema/input-sources.html).
 
 ```fsharp
@@ -87,9 +88,9 @@ No `Signup` is produced unless every field succeeds and the constructor succeeds
 
 Independent fields are all interpreted, so one parse reports every problem rather than the first:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 match Schema.parse signupSchema input with
-| Ok signup -> save signup
+| Ok signup -> printfn "%A" signup
 | Error errors ->
     for issue in SchemaErrors.toList errors do
         printfn "%s: %s" (SchemaPath.format issue.Path) (SchemaError.render issue.Error)
@@ -113,12 +114,10 @@ indexes, or map keys alongside separate validation expressions. For nesting and 
 The `Json` module compiles the same declaration into a JSON codec. It uses no runtime reflection, so it works under
 NativeAOT, trimming, and Fable.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-open Reified
-
+```fsharp
 let codec = Json.compile signupSchema
 
-Json.serialize codec signup
+let json = Json.serialize codec { Email = "ada@example.org"; Age = 36; Newsletter = true }
 // {"email":"ada@example.org","age":36,"newsletter":true}
 
 Json.deserialize codec json
@@ -156,7 +155,8 @@ Inspect.model signupSchema
 `Schema.check` is for values that did not arrive as `Data`, a record literal, a database mapper's output, an import.
 It runs the same field rules and calls the same constructor:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+let existingValue = { Email = "ada@example.org"; Age = 36; Newsletter = true }
 Schema.check signupSchema existingValue
 ```
 
@@ -238,7 +238,7 @@ Your own domain types participate the same way. See [Refined Schemas](/schema/re
 A refinement holds for every value of its type. A constraint holds at one boundary. Use a constraint when the rule
 belongs to this form rather than to the domain type:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 type Profile =
     { DisplayName: string
       Age: int }
@@ -250,7 +250,7 @@ let profileSchema =
         }
 
         field _.Age {
-            constrain (between 13 120)
+            constrain (Constraint.between 13 120)
         }
 
         construct (fun displayName age -> { DisplayName = displayName; Age = age })
@@ -262,7 +262,7 @@ A field block is the expanded form of `field _.DisplayName`. `constrain` adds on
 
 Constraints reach the interpreters just as refinements do:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 JsonSchema.generate profileSchema
 // "displayName": {"type":"string","maxLength":40}
 // "age":         {"type":"integer","minimum":13,"maximum":120}
@@ -295,7 +295,14 @@ nowhere field-local to live, and no field type can carry it.
 
 Make the representation private so the only way to build the type runs the rule:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+open System
+
+type BookingDraft =
+    { Guest: NonBlankString
+      Start: DateOnly
+      End: DateOnly }
+
 type Booking =
     private
         { Guest: NonBlankString
@@ -307,7 +314,7 @@ type Booking =
 Now `{ Guest = g; Start = s; End = e }` will not compile outside the defining module, and `constructResult` becomes the
 one entrance:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 module Booking =
     let create (draft: BookingDraft) =
         if draft.Start <= draft.End then
@@ -318,6 +325,9 @@ module Booking =
     let guest (booking: Booking) = booking.Guest
     let start (booking: Booking) = booking.Start
     let finish (booking: Booking) = booking.End
+
+    let toDraft (booking: Booking) : BookingDraft =
+        { Guest = booking.Guest; Start = booking.Start; End = booking.End }
 
     let schema =
         schema<Booking> {
@@ -346,29 +356,25 @@ A private record costs record syntax: callers lose `{ Guest = g; ... }` and `{ b
 `create guest start finish` loses the names that make call sites readable.
 
 A draft is a public record that exists to be assembled and edited freely, with `create` as the one way across:
-
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-type BookingDraft =
-    { Guest: NonBlankString
-      Start: DateOnly
-      End: DateOnly }
-
-module Booking =
-    let toDraft (booking: Booking) : BookingDraft =
-        { Guest = booking.Guest; Start = booking.Start; End = booking.End }
-```
+`BookingDraft` and `Booking.toDraft` are already declared above, alongside `Booking` itself, since a private
+record's draft counterpart belongs with it.
 
 
 Construction keeps its field names:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-Booking.create { Guest = guest; Start = arrival; End = departure }
+```fsharp
+match Refine.nonBlankString "Ada Lovelace" with
+| Ok guest ->
+    let arrival = DateOnly(2026, 6, 1)
+    let departure = DateOnly(2026, 6, 5)
+    Booking.create { Guest = guest; Start = arrival; End = departure }
+| Error _ -> Error "unreachable"
 ```
 
 
 Edits drop to the draft, use ordinary `with`, and come back through the same constructor:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let shift days booking =
     let draft = Booking.toDraft booking
     Booking.create { draft with Start = draft.Start.AddDays days; End = draft.End.AddDays days }

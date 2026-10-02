@@ -49,7 +49,22 @@ let validateBadgeName (name: string) : Result<string, BadgeError> =
 
 `result { }` sequences steps that depend on each other, so the first failure stops the pipeline:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+type TicketError =
+    | UnknownTier of string
+    | QuantityNotANumber of string
+    | QuantityOutOfRange of int
+
+type Tier =
+    | General
+    | Speaker
+
+let parseTier (raw: string) : Result<Tier, TicketError> =
+    match raw.Trim().ToLowerInvariant() with
+    | "general" -> Ok General
+    | "speaker" -> Ok Speaker
+    | other -> Error(UnknownTier other)
+
 let parseTicketRequest (rawTier: string) (rawQuantity: string) : Result<Tier * int, TicketError> =
     result {
         let! tier = parseTier rawTier
@@ -68,7 +83,7 @@ let parseTicketRequest (rawTier: string) (rawQuantity: string) : Result<Tier * i
 Parsing and refinement stay separate steps: `Parse.int` turns text into an `int`, and the refinement decides whether
 that `int` is an `AttendeeId`.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 type AttendeeId =
     private
     | AttendeeId of int
@@ -80,6 +95,11 @@ type AttendeeId =
 module AttendeeId =
     let refinement = Refinement.define (Constraint.greaterThan 0) AttendeeId _.Value
     let create value = Refinement.create refinement value
+
+type ContactEmail = ContactEmail of NonBlankString
+type ContactError = InvalidId | InvalidEmail
+
+type Contact = { Id: AttendeeId; Email: ContactEmail }
 
 let createContact (rawId: string) (rawEmail: string) : Result<Contact, ContactError> =
     result {

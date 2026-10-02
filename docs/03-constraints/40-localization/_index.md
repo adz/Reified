@@ -16,7 +16,9 @@ carry the prose their author wrote. Turning either into a sentence happens at th
 
 `Violation.render` needs no renderer, no resources, and no setup:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+open Reified
+
 42
 |> Constraint.check (Constraint.between 0 10)
 |> Result.mapError Violation.render
@@ -27,7 +29,12 @@ carry the prose their author wrote. Turning either into a sentence happens at th
 `Renderer.english` is the same idea with the renderer mechanics available, bare predicates, composed nouns, and
 group joining, still without a resource file:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+let violation =
+    match Constraint.check (Constraint.atLeast 13) 11 with
+    | Error violation -> violation
+    | Ok () -> failwith "unreachable"
+
 violation |> Violation.fullMessage Renderer.english
 // "value must be at least 13, but was 11"
 ```
@@ -39,7 +46,7 @@ Everything below is for applications that want something other than Reified's En
 
 A renderer is a key-to-template lookup. The smallest useful one is a map:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let french =
     Map.ofList
         [ "constraint.presence.present", "doit être renseigné"
@@ -59,12 +66,13 @@ Look keys up in [the catalogue](/constraints/localization/catalogue.html).
 ## The two messages
 
 `Violation.message` renders a bare predicate. `Violation.fullMessage` composes the attribute noun around it once.
+Using the `violation` and `renderer` from above:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let field = renderer |> Renderer.context "signup" |> Renderer.attribute "name"
 
-violation |> Violation.message field      // "must be present"
-violation |> Violation.fullMessage field  // "Name must be present"
+violation |> Violation.message field      // "must be at least 13"
+violation |> Violation.fullMessage field  // "Name must be at least 13"
 ```
 
 
@@ -73,7 +81,7 @@ it. Use `fullMessage` for API payloads, logs, and anywhere the message stands al
 
 The noun is composed once, never per leaf, so a group of three failures still names the field once:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let name : Constraint<string> =
     Constraint.all [ Constraint.present; Constraint.lengthBetween 2 40 ]
 
@@ -86,7 +94,7 @@ let name : Constraint<string> =
 
 Four constructors cover the ordinary cases.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Illustrates each constructor's call shape; translations/resources/culture are the caller's own ResourceManager and CultureInfo, not values this page can construct standalone."
 // Any key-to-template lookup. The portable constructor, and the one Fable uses.
 Renderer.ofLookup translations.TryFind
 
@@ -111,7 +119,7 @@ effects.
 Register a renderer as an ordinary immutable value. Reified introduces no renderer interface, no ambient registry,
 and no global configuration:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Illustrates ASP.NET Core DI registration; services and resources are the host application's own, not values this page can construct standalone."
 services.AddSingleton(Renderer.ofCurrentCulture resources) |> ignore
 ```
 
@@ -125,7 +133,7 @@ Small things applications ask for, in the order they usually ask.
 By default a failure that carries an actual value reads "must be at least 13, but was 11". The value clause is its
 own entry, so removing it is one override:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let quiet = Map.ofList [ "constraint.actual", "{message}" ]
 
 violation |> Violation.message (Renderer.ofLookup quiet.TryFind)

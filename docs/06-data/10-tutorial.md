@@ -209,7 +209,10 @@ Data.tryMatch [ at "customer.plan" "free"; absent "customer.id" ] response
 
 Use exact comparison when every field is part of the contract:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+let expected =
+    data [ "customer" => [ "plan" => "free" ] ]
+
 match Data.compare expected response with
 | Ok () -> ()
 | Error differences ->

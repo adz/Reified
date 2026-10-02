@@ -13,9 +13,20 @@ takes a `Data` value, and every source that can become `Data` can therefore feed
 
 ## Feeding a schema
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 open Reified
 open Reified.DataDSL
+open Reified.SchemaDSL
+open Reified.ConstraintDSL
+
+type Signup = { Email: string; Age: int }
+
+let signupSchema =
+    schema<Signup> {
+        field _.Email { constraints [ email ] }
+        field _.Age
+        construct (fun email age -> { Email = email; Age = age })
+    }
 
 let input =
     data [

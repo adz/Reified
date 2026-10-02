@@ -17,7 +17,22 @@ When boundary input fails to parse, a form should show the user's original text 
 
 Use `Schema.parseRetainingInput` when the boundary needs the submitted representation after parsing:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+open Reified
+open Reified.SchemaDSL
+open Reified.ConstraintDSL
+
+type Customer = { Email: string; Age: int }
+
+let customerSchema =
+    schema<Customer> {
+        field _.Email { constraints [ present; email ] }
+        field _.Age { constrain (atLeast 13) }
+        construct (fun email age -> { Email = email; Age = age })
+    }
+
+let raw = Data.ofNameValues [ "email", "not-an-email"; "age", "12" ]
+
 let parsed = Schema.parseRetainingInput customerSchema raw
 
 parsed.IsValid        // true when a trusted model exists
@@ -34,9 +49,9 @@ failures, and value-level `Violation` values all lower to the same boundary taxo
 
 `ErrorsFor` addresses errors with the same path text used by structured data, including collection indexes:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 parsed.ErrorsFor "email"                // errors attached exactly to the email field
-parsed.ErrorsFor "contacts[1].value"    // errors on the second contact's value
+parsed.ErrorsFor "contacts[1].value"    // errors on the second contact's value, if this model had one
 ```
 
 
@@ -47,7 +62,7 @@ renders correctly wherever it is attached.
 
 `Data` addresses submitted values by the same paths:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 Data.redisplayPath "email" parsed.Input          // "not-an-email", exactly as typed
 Data.redisplayPath "contacts[1].value" parsed.Input
 ```
@@ -59,7 +74,14 @@ Absent input looks up as `Data.Null` and redisplays as blank text, so form templ
 
 The typical loop over a failed parse:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+type FormField = { Path: string }
+
+let formFields = [ { Path = "email" }; { Path = "age" } ]
+
+let render (field: FormField) (value: string) (errors: string list) =
+    printfn "%s = %A (%A)" field.Path value errors
+
 for field in formFields do
     let value = Data.redisplayPath field.Path parsed.Input
     let errors = parsed.ErrorsFor field.Path |> List.map SchemaError.render
@@ -67,14 +89,13 @@ for field in formFields do
 ```
 
 
-Because failed parses never construct the model, there is no half-valid object to guard against, the template works
+Because failed parses never construct the model, there is no half-valid object to guard against; the template works
 from structured data and diagnostics only.
 
 For summary output, render every failed diagnostic in one line:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let messages = RetainedParseResult.renderErrors parsed
-// [ "email: Expected email format."; "age: Must satisfy atLeast 13; got 12." ]
 ```
 
 
@@ -83,20 +104,15 @@ let messages = RetainedParseResult.renderErrors parsed
 `SchemaError.render` is the zero-dependency English default. To render in a language, pass a `Renderer` and let
 Schema fold its typed path in as the attribute:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-open Reified
+```fsharp
+let signup = Renderer.english |> Renderer.context "signup"
 
-let signup = renderer |> Renderer.context "signup"
-
-errors |> SchemaErrors.messages signup
-// [ SchemaPath "email",              "must be a valid email"
-//   SchemaPath "contacts[1].value",  "must be present" ]
-
-errors |> SchemaErrors.fullMessages signup
-// [ SchemaPath "email",              "Email must be a valid email"
-//   SchemaPath "contacts[1].value",  "Value must be present" ]
-
-errors |> SchemaErrors.toStringWith signup   // one full message per line
+match parsed.Result with
+| Error errors ->
+    errors |> SchemaErrors.messages signup |> ignore
+    errors |> SchemaErrors.fullMessages signup |> ignore
+    errors |> SchemaErrors.toStringWith signup |> ignore   // one full message per line
+| Ok _ -> ()
 ```
 
 
@@ -108,7 +124,7 @@ You supply only the document context. Index components stay out of resource keys
 `contacts[1].value` are one field for a translator, and stay in every returned path, so field lookup and redisplay
 still work:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Continues the match branch above (errors : SchemaErrors is only in scope inside it); shown flattened here to focus on the filter."
 for field in formFields do
     let value = Data.redisplayPath field.Path parsed.Input
     let messages =
@@ -128,7 +144,7 @@ below. Both render through the same mechanics, so one renderer covers both. See
 
 ## The Schema catalogue
 
-`Reified.Schema` owns its own keys for parse, boundary-supply, and structural failures. They stay in that package , 
+`Reified.Schema` owns its own keys for parse, boundary-supply, and structural failures. They stay in that package;
 Schema depends on Constraint and never the reverse.
 
 | Key | Arguments | Default English |
@@ -152,7 +168,7 @@ At `SchemaPath.root`, full rendering uses `constraint.attribute.default`, "value
 `RetainedParseResult.mapErrors` translates interpreter errors into a domain or application error type at the boundary while
 preserving the structured data and paths:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="SignupError is an application-owned error type this page cannot declare on its own; illustrates the mapping shape, not a standalone unit."
 let domainParsed = parsed |> RetainedParseResult.mapErrors SignupError.ofSchemaError
 ```
 

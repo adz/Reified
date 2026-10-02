@@ -25,7 +25,7 @@ dotnet add package Reified.Result
 
 ## A first example
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 open System
 open Reified.Result
 open Reified.ResultDSL
@@ -35,12 +35,12 @@ type SignupError =
     | AgeNotANumber of string
     | AgeOutOfRange of int
 
-let parseName raw =
+let parseName (raw: string) =
     raw
     |> Result.failIf String.IsNullOrWhiteSpace
     |> Result.orError NameMissing
 
-let parseAge raw =
+let parseAge (raw: string) =
     Int32.TryParse raw
     |> Result.fromTry
     |> Result.orError (AgeNotANumber raw)
@@ -64,7 +64,7 @@ Every page below builds on this same `parseName`/`parseAge` pair, so the example
 
 ## Pages
 
-- [Creating a Result](/result-handling/creating.html) - turn options, nullables, `TryParse` tuples, booleans, and predicates into a
+- [Creating a Result](/result-handling/creating.html) - turn options, `TryParse` tuples, booleans, and predicates into a
   `Result` with your own error type.
 - [Transforming values](/result-handling/transforming.html) - `map` and `bind`, and how a chain of fallible steps compose.
 - [Handling errors](/result-handling/handling-errors.html) - change the error type, replace one, and recover.

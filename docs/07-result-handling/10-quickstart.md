@@ -25,7 +25,7 @@ the vocabulary around it:
 
 | Concern | API | Returns |
 | --- | --- | --- |
-| Turn an option, nullable, or `TryParse` tuple into a Result | `Result.orError`, `Result.fromTry` | `Result<'value,'error>` |
+| Turn a `TryParse` tuple into a Result, then name the error | `Result.fromTry`, then `Result.orError` | `Result<'value,'error>` |
 | Compose dependent failures | `result { }` | `Result<'value,'error>` |
 | Collect independent failures | `result.list { }` with `and!` | `Result<'value,'error list>` |
 | Apply a fallible operation across a sequence | `Result.traverse`, `Result.sequence` | `Result<'value list,'error>` |
@@ -33,12 +33,14 @@ the vocabulary around it:
 
 ## Compose dependent steps
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+open System
+
 type QuantityError =
     | InvalidInteger of string
     | NotPositive of int
 
-let quantity raw =
+let quantity (raw: string) =
     result {
         let! parsed =
             Int32.TryParse raw
@@ -59,7 +61,7 @@ Each step's own failure is mapped into one deliberate application error type at 
 
 `let!` fails fast; `and!` accumulates. The boundary is the compiler's, not a setting:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="input/parseName/parseAge are the caller's own structured input and parsing functions; not ones this fragment can construct standalone."
 result.list {
     let! name = parseName input.Name
     and! age  = parseAge input.Age

@@ -15,8 +15,21 @@ UI metadata.
 
 `Inspect.model` turns a built schema into a plain metadata tree:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 open Reified
+open Reified.SchemaDSL
+open Reified.ConstraintDSL
+
+type Signup = { Email: string; Age: int }
+
+let signupSchema =
+    schema<Signup> {
+        field _.Email {
+            withSchema (Schema.text |> Schema.withFormat SchemaFormat.email)
+        }
+        field _.Age
+        construct (fun email age -> { Email = email; Age = age })
+    }
 
 let description = Inspect.model signupSchema
 
@@ -31,7 +44,7 @@ Nothing executes: no getters run, no constructors are called, no checks fire. Th
 
 Each field carries a `SchemaDescription`, shape, declared format, and constraint metadata:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Continues the description/signupSchema illustration above; not a standalone compilation unit."
 let email = description.Fields |> List.find (fun field -> field.Name = "email")
 
 email.Schema.Format          // Some SchemaFormat.email (when declared with Schema.withFormat)
@@ -64,7 +77,9 @@ them.
 A description is a small recursive tree, atoms, `All`, `Any`, `Optional`, and `Opaque`, and every interpreted atom
 reuses the same expectation types the violations use, so lowering is one traversal:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+open Reified
+
 let jsonKeyword (atom: ConstraintAtom) =
     match atom with
     | CardinalityAtom (Cardinality.Maximum maximum) -> Some $"\"maxLength\":{maximum}"
@@ -85,7 +100,7 @@ an `All`, and dropping a disjunct strengthens an `Any`, which would reject value
 Atoms are shape-neutral. `Cardinality.Maximum 5` becomes `maxLength`, `maxItems`, or `maxProperties` depending on the
 `SchemaShape` it is attached to, so combine the two rather than reading the description alone.
 
-The repository keeps three worked prototypes, a JSON Schema emitter, a docs describer, and a UI metadata producer , 
+The repository keeps three worked prototypes, a JSON Schema emitter, a docs describer, and a UI metadata producer, 
 in `tests/Reified.Schema.Tests/SchemaInterpreterPrototypeTests.fs`, all built only on `Inspect`.
 
 ## Why This Matters

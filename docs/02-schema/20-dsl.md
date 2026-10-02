@@ -17,7 +17,13 @@ open Reified.SchemaDSL
 
 A record schema is one constructor-last computation expression:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
+type Signup =
+    { Email: string
+      Age: int }
+
+    static member create email age = { Email = email; Age = age }
+
 schema<Signup> {
     field _.Email
     field _.Age
@@ -31,7 +37,7 @@ schema<Signup> {
 `field` takes the getter and nothing else. The getter fixes the field type, Schema resolves that type's canonical
 schema, and the wire name is the property name, camelCased:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Illustrates field declaration lines shown outside their enclosing schema<T> block."
 field _.Name        // wire name "name"
 field _.Age         // wire name "age"
 field _.Tags        // wire name "tags"
@@ -45,7 +51,7 @@ static `Schema` member.
 
 `fieldAs` sets the wire name when it is not the camelCased property name. Explicit names are never transformed:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Illustrates field declaration lines shown outside their enclosing schema<T> block."
 fieldAs "email_address" _.Email
 fieldAs "type" _.Number
 ```
@@ -89,7 +95,7 @@ format rather than a short compatibility window.
 
 A block groups transformations for one field:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Shows the field block's typed pipeline shape against an application-owned ContactEmail refinement and validator; see Refined Schemas for a working refine+validate example."
 field _.Email {
     withSchema Schema.text
     constrain present
@@ -135,19 +141,33 @@ at `Schema<ContactEmail>`, so a block that starts at `Schema.text` and never ref
 
 A plain `int` field needs no refinement, because it starts and ends at the same type:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-field _.Age {
-    withSchema Schema.int
-    constrain (atLeast 18)
+```fsharp
+open Reified.ConstraintDSL
+
+type WithAge = { Age: int }
+
+schema<WithAge> {
+    field _.Age {
+        withSchema Schema.int
+        constrain (atLeast 18)
+    }
+    construct (fun age -> { Age = age })
 }
 ```
 
 
 Group adjacent rules with `constraints`:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-field _.Email {
-    constraints [ present; email; maxLength 254 ]
+```fsharp
+open Reified.ConstraintDSL
+
+type WithGroupedEmail = { Email: string }
+
+schema<WithGroupedEmail> {
+    field _.Email {
+        constraints [ present; email; maxLength 254 ]
+    }
+    construct (fun email -> { Email = email })
 }
 ```
 
@@ -178,7 +198,7 @@ See [Derivation Attributes](/schema/derivation/attributes.html) for the complete
 
 ## Refinement changes the type
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="Shows the field block's typed pipeline shape against an application-owned ContactEmail refinement and validator; see Refined Schemas for a working refine+validate example."
 field _.Email {
     withSchema Schema.text
     constrain present                   // operates on string
@@ -197,15 +217,32 @@ compile error; Schema does not use reflection or a runtime registry.
 
 `construct` accepts a total constructor:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-construct (fun email age -> { Email = email; Age = age })
+```fsharp
+type WithEmailAge = { Email: string; Age: int }
+
+schema<WithEmailAge> {
+    field _.Email
+    field _.Age
+    construct (fun email age -> { Email = email; Age = age })
+}
 ```
 
 
 `constructResult` accepts cross-field construction that can fail:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-constructResult Signup.createChecked
+```fsharp
+type CheckedSignup = { Email: string; Age: int }
+
+module CheckedSignup =
+    let createChecked email age =
+        if age >= 13 then Ok { Email = email; Age = age }
+        else Error "Age must be at least 13."
+
+schema<CheckedSignup> {
+    field _.Email
+    field _.Age
+    constructResult CheckedSignup.createChecked
+}
 ```
 
 
@@ -218,18 +255,23 @@ The field chain is recursive and has no fixed arity limit.
 
 Use `Schema.defer` where a field refers back to the schema being defined:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-let rec schema : Lazy<Schema<Category>> =
-    lazy (
-        SchemaDSL.schema<Category> {
-            field _.Name
-            field _.Children {
-                withSchema (Schema.listWith (Schema.defer schema))
-            }
-            construct Category.create
-        })
+```fsharp
+type Category =
+    { Name: string
+      Children: Category list }
+
+    static member create name children = { Name = name; Children = children }
+
+let rec categorySchema () =
+    schema<Category> {
+        field _.Name
+        field _.Children {
+            withSchema (Schema.listWith (Schema.defer categorySchema))
+        }
+        construct Category.create
+    }
 ```
 
 
-Only the opening builder is qualified here because the binding named `schema` shadows the unqualified builder.
-Ordinary declarations use unqualified `schema`, `field`, and `construct`.
+`Schema.defer` takes a thunk, `unit -> Schema<'model>`, evaluated at most once, not a `Lazy` value: `categorySchema`
+is declared as a zero-argument function specifically so `Schema.defer categorySchema` can pass it directly.

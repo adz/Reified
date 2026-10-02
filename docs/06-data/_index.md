@@ -82,8 +82,8 @@ the additional `author` role are allowed because these patterns check only the v
 
 ## Basic syntax
 
-Use `data` to build a `Data` value. Lists represent both objects and lists. A list containing `name => value` fields
-is an object; a list containing ordinary values is a list.
+Use `data` to build a `Data` value. Fields declared with `name => value` make an object; ordinary values in the
+same list position make a `Data.List` instead.
 
 ```fsharp
 open Reified
@@ -112,7 +112,15 @@ Data.render account
 object's fields with `yield!`, add a field only under a condition with `if`, and generate fields from a sequence with
 `for`. No builder, no intermediate dictionary, no post-hoc filtering of nulls.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+With `common = data [ "tenant" => "acme"; "region" => "au" ]`, `customerId = "c-1"`, `includeDebug = true`, and
+`names = [ "ada"; "grace" ]`:
+
+```fsharp
+let common = data [ "tenant" => "acme"; "region" => "au" ]
+let customerId = "c-1"
+let includeDebug = true
+let names = [ "ada"; "grace" ]
+
 let event =
     data [
         "kind" => "example"
@@ -125,13 +133,7 @@ let event =
         for name in names do
             $"user-{name}" => name
     ]
-```
 
-
-With `common = data [ "tenant" => "acme"; "region" => "au" ]`, `customerId = "c-1"`, `includeDebug = true`, and
-`names = [ "ada"; "grace" ]`:
-
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
 Data.render event
 // => "{ kind: \"example\", customerId: \"c-1\", tenant: \"acme\", region: \"au\", debug: true, user-ada: \"ada\", user-grace: \"grace\" }"
 ```

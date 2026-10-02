@@ -63,7 +63,7 @@ operational libraries that Domain cannot reference.
 Resolve container-managed objects while constructing the application environment. Application workflows then use typed
 fields or `Service.get`, not arbitrary lookups.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp no-check reason="The example depends on an application-owned service provider and repository/clock interfaces; Microsoft.Extensions.DependencyInjection is not among the assemblies this audit resolves."
 type AppEnv =
     { Bookings: IBookingRepository
       Clock: IClock }

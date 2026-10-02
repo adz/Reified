@@ -75,7 +75,14 @@ Data.render customerWithAddress
 The argument to `data` is an ordinary F# list of `DataField`, so every list-expression form works inside it. Mix
 literal fields with `yield!`, `if`, `for`, `match`, and `let` bindings in one declaration.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+For example:
+
+```fsharp
+let common = data [ "tenant" => "acme"; "region" => "au" ]
+let customerId = "c-1"
+let includeDebug = true
+let names = [ "ada"; "grace" ]
+
 let event =
     data [
         "kind" => "example"
@@ -88,13 +95,7 @@ let event =
         for name in names do
             $"user-{name}" => name
     ]
-```
 
-
-With `common = data [ "tenant" => "acme"; "region" => "au" ]`, `customerId = "c-1"`, `includeDebug = true`, and
-`names = [ "ada"; "grace" ]`:
-
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
 Data.render event
 // => "{ kind: \"example\", customerId: \"c-1\", tenant: \"acme\", region: \"au\", debug: true, user-ada: \"ada\", user-grace: \"grace\" }"
 ```
@@ -110,7 +111,8 @@ Points worth knowing:
   in the same list, so no `yield` keyword is needed on the plain lines.
 - An `if` without `else` contributes nothing when the condition is false. Use `?=>` instead when the choice is
   `Some`/`None` on a single field, and `if`/`for` when the shape of the object varies.
-- The same forms build lists: `data [ "ids" => [ for id in ids -> id * 10 ] ]` renders `{ ids: [10, 20, 30] }`.
+- The same forms build lists: with `ids = [ 1; 2; 3 ]`, `data [ "ids" => [ for id in ids -> id * 10 ] ]` renders
+  `{ ids: [10, 20, 30] }`.
 
 Control flow decides which fields exist. `Data.patch` changes fields that already exist. Prefer control flow when
 building a value from inputs, and patching when deriving a variation from a value you already have.
@@ -121,7 +123,7 @@ building a value from inputs, and patching when deriving a variation from a valu
 returns the same notation with line breaks and indentation. Both preserve object field order, duplicate fields, and
 number tokens. Use `Data.Json.render` when the result must be JSON.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 Data.renderIndented (data [ "name" => "Ada" ])
 // => "{\n  name: \"Ada\"\n}"
 ```
@@ -131,7 +133,7 @@ Data.renderIndented (data [ "name" => "Ada" ])
 
 Use a direct `Data` operation for one change. It returns the changed tree and leaves the original unchanged.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let renamed = customer |> Data.replace "name" "Grace"
 
 Data.lookupPath "name" renamed

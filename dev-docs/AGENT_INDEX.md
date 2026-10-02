@@ -19,7 +19,9 @@ Working on `src/Reified.Schema`? Read `dev-docs/schema/internals.md` first (impl
 `Reified.Schema`, `Reified.Constraint`, `Reified.Data`, and `Reified.Parse` declare `namespace Reified`, so
 `open Reified` reaches the whole core surface. Each package's vocabulary is a separate opt-in module named for
 its package — `Reified.SchemaDSL`, `Reified.ConstraintDSL`, `Reified.DataDSL`. `Reified.Refinements`,
-`Reified.Result`, `Reified.DerivedSchema`, and the `Reified.Schema.*` satellites keep their own namespaces.
+`Reified.Result`, `Reified.DerivedSchema`, the `Reified.Schema.*` satellites (`Http`, `Testing`), and
+`Reified.SchemaGen`/`Reified.SchemaGen.MSBuild` (renamed from `Reified.Schema.Contracts`/`.Build` 2026-09-29;
+no longer under the `Reified.Schema.*` prefix) keep their own namespaces.
 
 A child namespace shadows a same-named type for anyone declaring or opening the parent, which is why `Data`
 could not stay in `Reified.Data`. Keep that in mind before adding a `Reified.X` namespace whose package also
@@ -55,6 +57,8 @@ exports a type called `X`. See `dev-docs/namespace-flatten.md`.
   FCS stays tool-tier only: never referenced from a packable library.
 - `Reified.SchemaGen.MSBuild` (`src/Reified.SchemaGen.MSBuild/`): packable targets-only MSBuild package
   running `tools/Reified.SchemaGen.Task` before compile over `<ReifiedDeriveSchema>`/`<ReifiedContract>` items.
+  The CLI command stays lowercase `schemagen` (the published exe is `schemagen.dll`), not `SchemaGen`; don't
+  guess the casing from the package name.
 - `Reified` is the only umbrella. `Reified.ErrorHandling` is gone and does not come back: a grouping that is not a
   capability does not earn a package. **Values** — Constraint, Refinements, and Parse — is a documentation grouping
   only: no package, no namespace.

@@ -76,11 +76,11 @@ The composition and joining entries:
 
 The same data is available at runtime, so a coverage test never has to copy this page:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
-Catalogue.keys            // string list
-Catalogue.arguments       // Map<string, string list>
-Catalogue.english         // Map<string, string>
-Catalogue.pluralArgument  // Map<string, string option>
+```fsharp
+let keys : string list = Catalogue.keys
+let arguments : Map<string, string list> = Catalogue.arguments
+let english : Map<string, string> = Catalogue.english
+let pluralArgument : Map<string, string option> = Catalogue.pluralArgument
 ```
 
 

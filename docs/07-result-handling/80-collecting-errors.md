@@ -12,7 +12,7 @@ columns of a row, the caller usually wants every problem at once, not the first 
 
 `result.list { }` collects them. Join the independent bindings with `and!` instead of `let!`.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 open System
 open Reified.Result
 open Reified.ResultDSL
@@ -23,6 +23,14 @@ type SignupError =
     | AgeOutOfRange of int
 
 type Signup = { Name: string; Age: int }
+
+let parseName (name: string) : Result<string, SignupError> =
+    if String.IsNullOrEmpty name then Error NameMissing else Ok name
+
+let parseAge (age: string) : Result<int, SignupError> =
+    match Int32.TryParse age with
+    | true, value -> Ok value
+    | false, _ -> Error(AgeNotANumber age)
 
 let signupAll name age =
     result.list {
@@ -35,7 +43,7 @@ let signupAll name age =
 
 Both bindings run, whatever the other one does:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 signupAll "Ada" "36"   // Ok { Name = "Ada"; Age = 36 }
 signupAll "" "abc"     // Error [NameMissing; AgeNotANumber "abc"]
 signupAll "" "36"      // Error [NameMissing]
@@ -54,7 +62,7 @@ The builder name picks the container, and it shows up in the block's type:
 | `result.list { }` | `Result<'value, 'error list>` |
 | `result.array { }` | `Result<'value, 'error[]>` |
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 result.array {
     let! name = parseName ""
     and! age = parseAge "abc"
@@ -73,7 +81,7 @@ Both keywords work in the same block and they mean different things. Bindings jo
 of them run and their errors combine. A `let!` that follows depends on what came before, so it cannot run until those
 bindings have succeeded.
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let mixed name age =
     result.list {
         let! name = parseName name
@@ -87,7 +95,7 @@ let mixed name age =
 ```
 
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 mixed "Ada" "36"   // Ok { Name = "Ada"; Age = 36 }
 mixed "" "abc"     // Error [NameMissing; AgeNotANumber "abc"]
 mixed "Ada" "12"   // Error [AgeOutOfRange 12]
@@ -106,7 +114,7 @@ hides every later one.
 A binding that already carries the collected type passes through without being wrapped again, so the output of one
 accumulating block can feed another:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp
 let already: Result<int, SignupError list> = Error [ NameMissing ]
 
 result.list {
@@ -130,13 +138,25 @@ association is `Schema`'s job, and it is the default next step. Declare the mode
 every field failure with the path that produced it, keeps the raw value for redisplay, renders messages in the
 caller's language, and hands back your domain type:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+<!-- isolated: fails a confusing SRTP-resolution error when checked in sequence with the blocks above on this
+     page, despite an identical standalone repro compiling cleanly outside the docs pipeline. Cause not found;
+     re-check whether isolation is still needed if this page's earlier blocks change. -->
+
+```fsharp isolated
+open Reified
+open Reified.SchemaDSL
+open Reified.ConstraintDSL
+
+type Signup = { Name: string; Age: int }
+
 let signupSchema =
     schema<Signup> {
         field _.Name { constrain Constraint.present }
         field _.Age { constrain (Constraint.atLeast 18) }
         construct (fun name age -> { Name = name; Age = age })
     }
+
+let form = [ "name", ""; "age", "12" ]
 
 Data.ofNameValues form |> Schema.parse signupSchema
 // Error carries name -> present, age -> atLeast 18
