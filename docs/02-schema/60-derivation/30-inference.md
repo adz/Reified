@@ -80,7 +80,9 @@ comments become `Schema.describe` metadata and generated XML documentation.
 
 A union whose cases have no payload can be used as a field type without marking the union:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+open Reified.DerivedSchema
+
 type Plan = Free | Team | Enterprise
 
 [<DeriveSchema>]
@@ -94,7 +96,9 @@ Payload unions opt into generation with `[<DeriveUnion>]`. A fieldless case may 
 fields or cases carrying a marked record. Derived unions may also appear below another union payload or inside a list
 or map:
 
-```fsharp no-check reason="Not yet re-verified against the FsLiveDocs pipeline after the docs migration from the old docgen tool; port the correct fsharp/run/isolated mode by hand."
+```fsharp isolated
+open Reified.DerivedSchema
+
 [<DeriveSchema>]
 type Card = { LastFour: string }
 
