@@ -14,6 +14,15 @@
 - `[<DeriveSchema>]` and its `Contract`/`Version` arguments are unaffected: they live in the base `Reified.Schema`
   package, not in the renamed one, and always have.
 
+### JSON Schema accepts the `null` the codec writes for `None`
+
+- The JSON codec writes `None` as `null` wherever an option cannot be omitted: collection items, map values, union
+  payloads (including an unwrapped single-field case such as `{"stepWritten":null}`), positional fields, and
+  `Schema.mustSupply` fields. `JsonSchema.generate` previously lowered every option to its payload alone, so a
+  validator rejected those documents. Those positions now lower to `anyOf` of the payload and `{"type":"null"}`.
+- An omittable optional record field still lowers to its payload alone, because the codec leaves `None` out. A
+  present option (`Constraint.present`) never accepts `null`.
+
 ### Documentation
 
 - The API reference now organizes each package into explicit conceptual sections instead of a flat entity list.
