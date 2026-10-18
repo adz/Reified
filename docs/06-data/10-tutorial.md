@@ -121,12 +121,12 @@ let nameCases =
 Each `DataCase` is a record of `Name` and the materialized `Value`, so a failing test can report which case it was.
 Declaration order is preserved. See [Build variations and matrices](/data/how-to-build-test-cases.html) for the case types.
 
-Their `name` values are, in order, `"Ada"`, absent, `""`, and `Data.List [ Data.Text "Ada" ]`.
+The `name` field of each case is, in order, `"Ada"`, absent, `""`, and `Data.List [ Data.Text "Ada" ]`.
 
 ```fsharp
 nameCases |> List.map (fun case -> case.Name, Data.tryFindPath "name" case.Value)
 // =>
-// [ ("valid", Some (Data.Text "Ada"))
+// [ ("present", Some (Data.Text "Ada"))
 //   ("missing", None)
 //   ("blank", Some (Data.Text ""))
 //   ("wrong shape", Some (Data.List [ Data.Text "Ada" ])) ]
@@ -220,9 +220,10 @@ match Data.compare expected response with
 `Data.diff` returns the same differences directly. Exact comparison observes number tokens, object order, duplicate
 fields, list length, and list order.
 
-For equal trees, `Data.compare` returns `Ok ()`. If the actual plan is `"free"`, it returns `Error` with a
-`DataDifference` whose path is `customer.plan`, expected value is `Data.Text "pro"`, and actual value is
-`Data.Text "free"`.
+For equal trees, `Data.compare` returns `Ok ()`. In the match above, `expected` supplies plan `"free"` while
+`response` supplies plan `"pro"`, so `Data.compare expected response` reports a `DataDifference` at `customer.plan`
+with expected value `Data.Text "free"` and actual value `Data.Text "pro"`. Swapping the two arguments reports the
+same path with the expected and actual values reversed:
 
 ```fsharp
 Data.compare

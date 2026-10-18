@@ -120,7 +120,7 @@ The last is `plan: pro / region: US / roles: admin`; its value has `plan = "pro"
 `roles = ["admin"]`.
 
 ```fsharp
-cases |> List.map _.Name
+matrixCases |> List.map _.Name
 // =>
 // [ "plan: free / region: AU / roles: none"
 //   "plan: free / region: AU / roles: admin"

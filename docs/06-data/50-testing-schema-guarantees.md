@@ -24,7 +24,10 @@ Use generated examples to check those claims near the owning module.
 ## Generate accepted models
 
 Reified's tests use the non-packable `Reified.Schema.Testing` FsCheck adapter. Applications can adapt this pattern
-locally. `SchemaGen.model` generates structured data, parses it, and checks the result.
+locally. `SchemaGen.model` generates structured data, parses it through the schema, discards samples the schema
+rejects (constructor failures included), and runs `Schema.check` on each surviving model before yielding it. The
+outer `Result` reports generation-support failures such as `UnsupportedConstraint`; a model the generator yields has
+already passed both parse and check.
 
 ```fsharp no-check reason="FsCheck is a test-only dependency of Reified.Schema.Testing; it's not among the assemblies this audit pipeline resolves, so this block can't be checked here even though the pattern is real."
 open System
@@ -73,7 +76,11 @@ generation, not construction, is this page's subject.
 
 ## Check total transitions
 
-A transition returning `Booking` claims it always preserves the aggregate invariant.
+A transition returning `Booking` claims it always preserves the aggregate invariant. `shift` keeps `start <= finish`
+because it adds the same number of days to both endpoints, but it is only total while both results stay inside the
+`DateTimeOffset` range: `AddDays` throws `ArgumentOutOfRangeException` at the limits. The generated samples on this
+page stay far from those limits, so the example below does not throw. A production transition should bound its inputs
+or return a result rather than rely on generated values landing in a safe range.
 
 ```fsharp no-check reason="Continues the Booking/bookings illustration above; not a standalone compilation unit."
 let shiftedBookings =
@@ -113,4 +120,5 @@ let rawGenerator =
 ```
 
 
-The adapter reports `UnsupportedConstraint` instead of guessing a generator that might disagree with the schema.
+The adapter reports `Error (SchemaGenerationError.UnsupportedConstraint (path, rule))` instead of guessing a generator
+that might disagree with the schema.

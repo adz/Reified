@@ -36,7 +36,7 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - [fixed] `docs/02-schema/65-versioned-contracts.md:68` — migrations are followed by checking the current schema; confirm intermediate versions and path preservation on migration failures.
 - [fixed] `docs/02-schema/70-patterns/20-legal-transitions.md:64` — shifting dates “cannot reverse their order”; confirm overflow behavior at date limits.
 
-- `docs/06-data/50-testing-schema-guarantees.md:26-27,116` — confirm whether `SchemaGen.model` checks generated results with `Schema.check` after parsing, and how unsupported constraints or constructor failures are surfaced; the prose promises accepted models but the example unwraps generation only.
+- [fixed] `docs/06-data/50-testing-schema-guarantees.md:26-27,116` — confirm whether `SchemaGen.model` checks generated results with `Schema.check` after parsing, and how unsupported constraints or constructor failures are surfaced; the prose promises accepted models but the example unwraps generation only.
 
 ## Unclear or misleading
 
@@ -95,11 +95,11 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - [fixed] `docs/02-schema/05-tutorials/25-inspecting-metadata.md:70` says lowering `Any` by dropping a disjunct “strengthens” it; useful caveat, but the preceding `keywords` example does precisely a lossy flattening without showing the safe full-expression alternative.
 - [fixed] `docs/02-schema/50-json-codecs.md:23` calls storage and queues trusted producers; persistence and queues can contain stale or externally produced bytes. Define trust as a property of the producer and admission history, not transport.
 
-- `docs/06-data/10-tutorial.md:126-133` — `variant "present"` is declared, but the displayed case list starts with `"valid"`; update the expected output.
-- `docs/06-data/10-tutorial.md:203-225` — the narrative says “If the actual plan is `"free"`” while the shown `expected` plan is `"free"` and the actual response has `"pro"`; the following example reverses both values. Separate the illustrative comparison from the preceding one.
-- `docs/06-data/31-how-to-build-test-cases.md:122-133` — `cases |> List.map _.Name` refers to the four independent cases, not the eight `matrixCases` whose names are printed. Use `matrixCases`.
-- `docs/06-data/21-how-to-test-produced-json.md:62-63` — calls `customer.id` a generated identifier, though the fixture fixes it to `"c-123"`; say “present identifier” or introduce generation.
-- `docs/06-data/50-testing-schema-guarantees.md:46-52,74-89` — `Booking.shift` uses `DateTimeOffset.AddDays`, which can throw near date limits; describing it as a total transition is misleading. Bound the input or make failure explicit.
+- [fixed] `docs/06-data/10-tutorial.md:126-133` — `variant "present"` is declared, but the displayed case list starts with `"valid"`; update the expected output.
+- [fixed] `docs/06-data/10-tutorial.md:203-225` — the narrative says “If the actual plan is `"free"`” while the shown `expected` plan is `"free"` and the actual response has `"pro"`; the following example reverses both values. Separate the illustrative comparison from the preceding one.
+- [fixed] `docs/06-data/31-how-to-build-test-cases.md:122-133` — `cases |> List.map _.Name` refers to the four independent cases, not the eight `matrixCases` whose names are printed. Use `matrixCases`.
+- [fixed] `docs/06-data/21-how-to-test-produced-json.md:62-63` — calls `customer.id` a generated identifier, though the fixture fixes it to `"c-123"`; say “present identifier” or introduce generation.
+- [fixed] `docs/06-data/50-testing-schema-guarantees.md:46-52,74-89` — `Booking.shift` uses `DateTimeOffset.AddDays`, which can throw near date limits; describing it as a total transition is misleading. Bound the input or make failure explicit.
 
 ## Too long
 

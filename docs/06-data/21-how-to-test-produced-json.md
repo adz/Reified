@@ -60,7 +60,7 @@ let result =
 
 
 `result` is `Error` containing two `DataMismatch` values: one at `customer.name` with the actual text `"Ada"`, and one
-at `customer.id` with the generated identifier that was expected to be absent.
+at `customer.id` with the present identifier `"c-123"` that was expected to be absent.
 
 ```fsharp
 result
