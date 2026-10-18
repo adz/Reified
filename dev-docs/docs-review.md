@@ -24,6 +24,13 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 ## Unclear or misleading
 
+- `docs/03-constraints/_index.md:30-35` — quick example prints `Error [ Blank; InvalidLength ... ]` as if `check` returned a list, but this page says it returns `Result<unit, Violation>`; the structured `Atomic`/group representation shown in the interpreted-rules guide differs. Show the actual `Violation` or label this as schematic output.
+- `docs/03-constraints/40-localization/_index.md:65-73` — “Using the violation and renderer from above” mixes an `atLeast 13` violation with a French renderer containing only presence/cardinality/email/name translations; the quoted English outputs for `message` and capitalized `Name` are not what that lookup demonstrates. Use `Renderer.english` for those outputs or show the actual fallback/translated noun.
+- `docs/03-constraints/30-constraints.md:55-69` — `customWith` is described as returning its own violation, yet the example wraps `Constraint.check (Constraint.oneOf ...)` and says the enclosing rule is opaque. Explain whether a failed custom rule exposes an interpreted atom and how that differs from inspectability of the rule itself.
+- `docs/03-constraints/40-localization/40-catalogue.md:11` — “Every key Reified can produce” omits keys supplied through `Constraint.customLocalized`; qualify this as every built-in key.
+- `docs/03-constraints/45-adding-a-language.md:261-267` — “What the catalogue handles” lists imperative actions without a lead-in or negation; “reproduce the key list by hand” contradicts the page’s generation advice. Introduce the list as things readers need *not* do.
+
+
 - `docs/02-schema/47-schema-or-generated-dto.md:64-77` — `toDomain` promises `Result<Signup, string>` but builds `Signup` with a `ContactEmail` where `Email` was declared `string`; `bytes` is undeclared, and `Json.deserialize` is used as though it returned `Result`. Show a complete type-correct conversion using `Json.tryDeserialize` and explicit error mapping.
 - `docs/02-schema/25-input-sources.md:48-51` — suggests moving `Contacts`' collection-level `minLength 1` constraint onto `Contact` when removing `withSchema`; an individual `Contact` cannot enforce the length of its containing list. Keep the field block with `constrain` and omit only `withSchema`.
 - `docs/02-schema/90-reference-apps.md:48-55` — says generated wire schemas carry constraints and are written via a compiled codec, but `docs/02-schema/47-schema-or-generated-dto.md:39-55` warns that trusted codecs skip wire constraints. Explain whether this app validates with `Schema.parse` before writing and why this differs from the recommended permissive DTO strategy.
@@ -46,6 +53,9 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 ## Too long
 
+- `docs/03-constraints/21-constraint.md:53-85,140-191` — the same DSL/module/type-directed-binding introduction appears twice on the core type page and again in `dsl.md`. Keep one small example here and direct readers to the DSL guide for details.
+
+
 - `docs/01-getting-started/_index.md:137-232` — after the complete Signup walkthrough, the page restarts with a problem statement, a standalone constraint, a refinement, and another schema. Consider retaining one short conceptual contrast here and linking to focused guides for the second set of examples.
 
 - `docs/02-schema/01-quickstart.md` spans plain parsing, refined types, constraints, private aggregates, drafts, updates, and JSON Schema. Keep “First schema and parse” and “Read failures” here; move refined fields to “Refined fields in Schema,” field constraints to “Boundary-specific field rules,” and private Booking/draft/update flow to “Construction guarantees.”
@@ -53,6 +63,9 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/02-schema/85-examples.md` embeds entire example program files. Replace with a short explanation, link to runnable source, and focused relevant excerpts; keep the complete program at the linked location.
 
 ## Reference material in guides
+
+- `docs/03-constraints/40-localization/40-catalogue.md:14-95` — the exhaustive key/argument/default-English tables are reference data (also exposed by `Catalogue.keys`/maps); keep the runtime maps discoverable and consider placing the tables beside the catalogue API reference rather than in the localization walkthrough.
+
 
 - `docs/01-getting-started/02-what-a-schema-gives-you.md:37-45` — the seven-API inventory is useful orientation, not an exhaustive reference; keep it here, but link the `SchemaGen` entry directly to its own usage/reference page rather than only the generic Data section at line 152.
 
@@ -65,6 +78,10 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 ## Missing
 
+- `docs/03-constraints/40-localization/20-custom-rules.md:14-30` — the page’s first F# example omits `open Reified`, unlike adjacent pages, and does not show a check and rendered translation. Add a complete minimal invocation so a new reader can verify the custom key and argument path.
+- `docs/03-constraints/45-adding-a-language.md:219-259` — the coverage test checks only bare `Catalogue.keys`, while the skeleton emits `.one`/`.other` instead of the bare key for pluralized entries; a fully filled skeleton fails this proposed test. Supply a coverage predicate that accepts bare OR both required plural forms, and distinguish contextual overrides from base coverage.
+
+
 - `docs/02-schema/47-schema-or-generated-dto.md:51-77` — strategy 2 lacks a runnable boundary example with a defined byte payload, actual wire-to-domain types, and structural decode error handling; the current fragment cannot serve as a copyable starting point.
 
 - `docs/01-getting-started/02-what-a-schema-gives-you.md:150-152` — the seventh promised job has no runnable generation example, unlike the preceding jobs. Add a minimal `SchemaGen` call or label this section as a pointer to a separate recipe.
@@ -76,6 +93,10 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - A single glossary for “trusted,” “admission,” “interpreted,” “opaque,” “canonical,” “wire,” and “domain.”
 
 ## Suggestions for humans and LLMs
+
+- `docs/03-constraints/60-reference-app.md:39-45` — “must print on one line” is not enforced by the length-only checks shown; remove that claim or add a newline rule, so copied validation does what its comment promises.
+- `docs/03-constraints/40-localization/30-advanced-rendering.md:169-180` — the `MessageRequest` type sketch and host-owned `icu` in a `no-check` block look like an API declaration plus runnable resolver. Label the type as illustrative and show a concrete `Map`-based resolver separately for readers copying code.
+
 
 - `docs/02-schema/85-examples.md:147-148` — the mirrored example invokes `DateTimeOffset.UtcNow` twice for a publish interval. Use fixed endpoints in teaching examples so copied examples are deterministic and the interval is unambiguous.
 
