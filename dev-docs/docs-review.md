@@ -4,6 +4,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 ## Assumptions
 
+- `docs/api/Reified.Schema.Json.Json.md:40-41` — verify whether “preserves schema paths in decoding failures” applies to every listed deserialize variant, including the string-error `tryDeserialize` form, or only to exception diagnostics.
+
 - `docs/95-notes/82-aot-trimming-fable.md:29-36` — verify whether every push runs the NativeAOT probe and whether its trimmer warnings are treated as errors; “if a change introduced reflection ... CI fails” is stronger than merely publishing and running the probe.
 - `docs/95-notes/95-packages-and-platforms.md:38-40` — verify the claim that each listed package is exercised in a browser, not only on Node; the coverage claim affects platform choice.
 
@@ -37,6 +39,10 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/06-data/50-testing-schema-guarantees.md:26-27,116` — confirm whether `SchemaGen.model` checks generated results with `Schema.check` after parsing, and how unsupported constraints or constructor failures are surfaced; the prose promises accepted models but the example unwraps generation only.
 
 ## Unclear or misleading
+
+- `docs/api/Reified.Contract.md:6-7` — the listed outcomes omit migration failures, despite `MigrationError` being listed in the Schema package inventory; explain their result case and whether paths survive migration.
+- `docs/api/Reified.Inspect.md:23-24` — “without ... running application code” sounds absolute, while schemas may contain authored callbacks; clarify whether inspection forces deferred declarations or invokes any getters/constructors.
+- `docs/api/Reified.Schema.Json.Json.md:37-43` — “deserialize JSON into the same field plan used by `Schema.parse`” can imply the same admission guarantees; state here that trusted codec decoding does not enforce value constraints.
 
 - `docs/95-notes/_index.md:23` — promises benchmarks “on .NET and Fable,” but the benchmarks page contains only .NET runtime tables; remove Fable or link Fable measurements.
 - `docs/95-notes/95-packages-and-platforms.md:64-67` — “Everything else ... is available on every target” extends beyond the listed tested JavaScript surface and conflicts with the AOT/Fable page's .NET-only `DateOnly` and `Data.ofJsonDocument` caveat; scope the statement to supported field types and verified targets.
@@ -97,6 +103,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 ## Too long
 
+- `docs/api/Reified.Schema.md:7-54` — the package entity inventory is extensive front matter rather than introductory prose; if surfaced to readers or LLMs, offer a short task-based index and leave the exhaustive entity list to generated navigation.
+
 - `docs/95-notes/95-packages-and-platforms.md:54-67` and `docs/95-notes/82-aot-trimming-fable.md:92-116` — repeat the same Fable quotation target/version table and `field`/`fieldAs` example; keep detailed compatibility in one page and link it from the package inventory.
 
 - `docs/90-comparisons/05-dataannotations-fluentvalidation-comparison.md:64-76,108-120` — repeats the same `Constraint.guard Constraint.email` example twice with only error mapping changed. Show both mappings together once.
@@ -118,6 +126,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/06-data/_index.md:106-140` and `docs/06-data/20-declaring-and-editing.md:73-114` repeat the same control-flow fixture and output. Keep the full example in the focused page and shorten the landing-page example.
 
 ## Reference material in guides
+
+- `docs/api/Reified.Schema.Json.Json.md:11-26` — the front matter already inventories serialize/deserialize variants; add an API-facing comparison of input, output, and failure behavior for `deserialize`, `tryDeserialize`, and `parseData`, rather than leaving this distinction solely to the linked guide.
 
 - `docs/95-notes/95-packages-and-platforms.md:42-49,74-78` — package/install and tooling availability tables are useful reference material; keep them in Notes as the central install inventory and link them from guides rather than repeating setup lists.
 
@@ -143,6 +153,10 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/06-data/21-how-to-test-produced-json.md:169-199` — the complete pattern inventory and return-type summary belong beside the matching API reference; retain a few representative patterns in the walkthrough.
 
 ## Missing
+
+- `docs/api/Reified.Schema.md:85-99` — `Schema.check` has no direct link or example explaining what gets rechecked versus `Schema.parse`; include a minimal parse/check contrast and their failure types.
+- `docs/api/Reified.JsonSchema.md:14-29` — `generateValue` appears in the page metadata but not the text; explain when to export a value schema rather than a model schema and what each returns.
+- `docs/api/Reified.Inspect.md:13-27` — `Inspect.schema` is listed under value inspection but never explained; distinguish its return shape and use from `Inspect.model`.
 
 - `docs/95-notes/95-packages-and-platforms.md:11-18,69-84` — give a minimal Fable project install/compile recipe or point to one; `dotnet add package` alone does not show how a JavaScript client consumes these packages or generated output.
 - `docs/95-notes/82-aot-trimming-fable.md:78-90` — bundle-size estimates omit esbuild/Fable versions, build settings, and a reproducible command or linked recipe; readers cannot compare their own bundles to these numbers.
@@ -179,6 +193,9 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/06-data/31-how-to-build-test-cases.md:112-114` — explain the error type/exception when `matrix` exceeds 256 combinations or a dimension has no variations, so test authors can diagnose case-generation failure.
 
 ## Suggestions for humans and LLMs
+
+- `docs/api/Reified.Contract.md:4-9` — show a small `Contract.parse` result match including version, parse, and migration failures, so assistants do not treat the three prose outcomes as an exhaustive union.
+- `docs/api/Reified.Schema`1.md:9-10` — pair the interpreter names with a compact trust/enforcement table: inspection describes, JSON Schema exports portable rules, and trusted codec decoding does not admit untrusted values.
 
 - `docs/95-notes/80-benchmarks.md:31-46,126-152` — put a short “which path to benchmark” reminder beside the multi-runtime comparison: its trusted codec figures do not measure untrusted boundary admission, whose costs are reported separately at lines 60-79.
 - `docs/95-notes/82-aot-trimming-fable.md:40-55` — separate published-package advice from the repo-only `ProjectReference` props path; an assistant copying the latter into an installed application will point at a nonexistent local file.
