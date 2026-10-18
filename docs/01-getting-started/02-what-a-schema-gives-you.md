@@ -11,7 +11,7 @@ A model needs input parsing, validation of existing values, serialization, a pub
 older-payload support, and test data. Separate configuration, attributes, serializer contracts, Swagger annotations,
 and fixture builders repeat its rules.
 
-The schema is the source for all seven. You write it once:
+One schema supplies all seven:
 
 ```fsharp
 open Reified
@@ -48,17 +48,16 @@ let signupSchema =
 
 `Schema.parse` takes a `Data` tree from a form post, query string, JSON, or configuration. It converts each field,
 checks each rule, and calls the constructor.
-Every independent field is checked, so a failure carries *all* the problems with their paths, not just the
-first. Nothing downstream has to wonder whether validation ran: no `Signup` exists unless it passed.
+Every independent field is checked, so a failure carries *all* problems with their paths, rather than only the
+first. No `Signup` exists unless it passed the checks.
 
 → [Schema quickstart](/schema/quickstart.html) · [Input sources](/schema/input-sources.html)
 
 ## Check a value you already hold
 
-Not every model arrives as input. A record literal in a test, a row mapped out of a database, a payload
-deserialized by something else, those are already `Signup` values, and the type system has no opinion about
-whether the rules hold. `Schema.check` runs the same field rules and the same constructor against a value
-that already exists:
+A record literal in a test, a row mapped from a database, or a payload deserialized elsewhere is already a
+`Signup` value. Its type does not establish whether the rules hold. `Schema.check` runs the same field rules
+and the same constructor against a value that already exists:
 
 ```fsharp
 let imported = { Email = "ada"; Age = 11; Newsletter = false }
@@ -71,9 +70,9 @@ match Schema.check signupSchema imported with
 ```
 
 
-Same rules, same error shape, same paths as parsing, only the input differs. This is the admission decision
-for models that stay publicly constructible; when you would rather make the invalid value unrepresentable in
-the first place, see [Trusted construction](/schema/trusted-construction.html).
+`Schema.check` uses the parsing rules, error shape, and paths on an existing value. For models that remain publicly
+constructible, this is the admission check. To make invalid values unrepresentable, see
+[Trusted construction](/schema/trusted-construction.html).
 
 → [Trusted construction](/schema/trusted-construction.html)
 
@@ -107,9 +106,8 @@ JsonSchema.generate signupSchema
 ```
 
 
-`"minimum": 13` was not written twice, it is the `atLeast 13` from the declaration, which is why the
-published document cannot drift from the code that enforces it. Clients generated from it are generated from
-the same shape the parser and codec use.
+`"minimum": 13` comes from the declaration's `atLeast 13`, so the published document uses the rule the code
+enforces. Clients generated from it use the same shape as the parser and codec.
 
 → [`JsonSchema` API reference](/api/Reified.JsonSchema.html)
 
@@ -123,9 +121,9 @@ Inspect.model signupSchema
 ```
 
 
-Finite metadata: field names, shapes, the constraints on each. Nothing is parsed and nothing is checked. This
-is what forms, admin UIs, and documentation generators read when they need to *describe* the model rather than
-enforce it, render the right input control per field, or show the rule beside it before the user submits.
+Finite metadata: field names, shapes, the constraints on each. Nothing is parsed and nothing is checked. Forms,
+admin UIs, and documentation generators use it to *describe* the model, choose an input control per field, or show
+the rule before submission.
 
 → [`Inspect` API reference](/api/Reified.Inspect.html)
 
@@ -142,7 +140,7 @@ match Contract.parse configContract raw with
 ```
 
 
-Old clients keep working without the current model carrying the scar tissue. Migration failures and malformed
+Old clients keep working without version-specific fields in the current model. Migration failures and malformed
 payloads carry the same `SchemaErrors` with the same paths.
 
 → [Contracts and versioning](/schema/versioned-contracts.html)
@@ -152,8 +150,3 @@ payloads carry the same `SchemaErrors` with the same paths.
 `SchemaGen` produces values that satisfy the declaration. Raise the minimum age and the generated fixtures follow.
 
 → [Data](/data/index.html) · [Building test cases](/data/how-to-build-test-cases.html)
-
-## Why one declaration and not seven
-
-Separate configurations can disagree about the same model. A schema keeps the rules in one declaration that
-parsing, checking, codecs, contracts, inspection, and test generation can read.

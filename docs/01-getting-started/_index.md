@@ -13,17 +13,13 @@ menu:
 Reified gives F# applications one model for trusted values and structured boundaries on .NET and Fable. Declare an
 invariant once; checking, diagnostics, codecs, contract documents, and test data read the same declaration.
 
-In the order they usually matter: a compiled JSON codec that runs under NativeAOT and trimming with no runtime
-reflection, competitive with `System.Text.Json` on serialization and ahead of it on decode time in the recorded
-benchmark, because it skips the reflection and boxing a general-purpose serializer performs on every call; a
-schema that field-aware diagnostics, JSON Schema export, and localizable messages are all read from, in addition
-to running as a parser; refined types that prove an invariant once at construction, so later code relies on the
-proof instead of re-checking it;
-`Parse` and `Result` for ordinary typed conversion and composition; and `Data`, a source-neutral structured value
-used alongside the four above.
+A compiled JSON codec runs under NativeAOT and trimming without runtime reflection. In the recorded benchmark,
+it is competitive with `System.Text.Json` on serialization and faster on decode because it avoids reflection and
+boxing on each call. A schema parses input and provides field-aware diagnostics, JSON Schema export, and
+localizable messages. Refined types prove an invariant at construction, so later code need not re-check it.
+`Parse` and `Result` handle typed conversion and composition; `Data` is a source-neutral structured value.
 
-This page walks one complete transaction end to end, then widens out to the pieces it used. Everything on it
-is compiled and executed on every CI run from
+The example below is compiled and executed on every CI run from
 [`examples/Reified.GettingStarted`](https://github.com/adz/Reified/blob/main/examples/Reified.GettingStarted/Program.fs);
 the outputs below are that program's real output.
 
@@ -41,7 +37,7 @@ Refinements ┘
 </div>
 
 Use Schema when structured input must become a trusted model. Constraint, Parse, Data, and Refinements can each
-be used alone without Schema, but they are designed to work together consistently. "Contract tooling" is the
+be used alone without Schema, and work together. "Contract tooling" is the
 generated derivation, versioning, and MSBuild pipeline built on Schema, covered from
 [Derived Schemas](/schema/derivation/index.html) onward, not a separate package.
 
@@ -80,8 +76,8 @@ let signupSchema =
 ```
 
 
-Feed it something realistic. `Data` is a source-neutral input tree, so the same schema reads a form post, CLI
-arguments, JSON, or configuration:
+`Data` is a source-neutral input tree, so the same schema reads a form post, CLI arguments, JSON, or
+configuration:
 
 ```fsharp
 let input =
@@ -96,9 +92,9 @@ Schema.parse signupSchema input
 
 
 `"36"` arrived as text and landed as an `int`. No `Signup` exists unless every field and the constructor
-succeeded, so downstream code does not have to wonder whether validation ran.
+succeeded, so downstream code can rely on validation having run.
 
-Now feed it something a real user would send, a malformed address, an age below the limit, a missing field:
+For a malformed address, an age below the limit, and a missing field:
 
 ```fsharp
 let invalidInput =
@@ -122,11 +118,10 @@ newsletter: This value was omitted.
 
 
 Every independent field is checked, so one parse reports every problem rather than the first. The paths come
-from the structure of the declaration, application code never repeats field names alongside the checks.
-Nobody wrote those three sentences: each one is rendered from the rule that failed.
+from the declaration's structure; application code need not repeat field names alongside checks.
+Each sentence is rendered from the rule that failed.
 
-And now the declaration pays for itself. The same `signupSchema`, read by a different interpreter, is a JSON
-codec:
+The same `signupSchema` also produces a JSON codec:
 
 ```fsharp
 open Reified
@@ -141,8 +136,6 @@ Json.serialize codec { Email = "ada@example.org"; Age = 36; Newsletter = true }
 There is no second description of the wire shape to keep in step, and no runtime reflection: the codec is
 compiled from the schema's typed field plan, so it works under NativeAOT, trimming, and Fable.
 
-The rest of this page walks the same declaration at smaller and larger scales.
-
 ## The problem it solves
 
 One rule, "an age is at least 13", usually ends up written four times: in the parser that reads the request,
@@ -150,13 +143,12 @@ in the validator that guards the domain, in the form that shows the message, and
 fixture. They start identical and drift. When they drift, the parser accepts what the validator rejects, or the
 form shows a message no code enforces.
 
-Reified's answer is to make the rule a value. A rule you can inspect can be *executed* by a checker,
-*explained* by a renderer, *exported* to JSON Schema or OpenAPI, and *sampled* by a generator, from one
-declaration.
+Reified makes the rule a value. A checker can *execute* it, a renderer can *explain* it, and interpreters can
+*export* it to JSON Schema or OpenAPI or *sample* it to generate values.
 
 ## One rule on one value
 
-The smallest version needs no schema at all. Install `Reified.Constraint`:
+For one value, install `Reified.Constraint`; no schema is needed:
 
 ```fsharp
 open Reified
@@ -173,9 +165,8 @@ let retryCount : Constraint<int> = Constraint.between 0 10
 ```
 
 
-Nobody wrote that failure sentence separately. A `Constraint` carries its own description, and a `Violation`
-carries the rule that failed and the offending value as data, so the message cannot fall out of step with the
-check, and it can be localized or reformatted without touching the rule.
+A `Constraint` carries its description, and a `Violation` carries the failed rule and offending value as data.
+The message comes from the rule and can be localized or reformatted without changing it.
 
 → [Constraint](/constraints/constraint.html)
 
@@ -192,8 +183,8 @@ Refine.nonBlankString "  "     // Error ...
 ```
 
 
-Downstream code takes `NonBlankString` and stops re-checking. Your own domain types work the same way , 
-`CustomerId`, `Email`, `WorkspaceName`, each defined over a constraint and constructed through it.
+Downstream code takes `NonBlankString` without re-checking it. Domain types such as `CustomerId`, `Email`, and
+`WorkspaceName` can each be defined over a constraint and constructed through it.
 
 → [Refined values](/refined/index.html)
 
@@ -235,15 +226,16 @@ JsonSchema.generate signupSchema
 ```
 
 
-`"minimum": 13` was not written twice, it is the `atLeast 13` from the declaration, read for a different
-purpose. The same declaration does four more jobs: checking a value you already hold, accepting payloads from
-older versions, describing the model to a form, and generating test data that obeys the rules.
+`"minimum": 13` comes from the declaration's `atLeast 13`. The same declaration supports checking an existing
+value, accepting payloads from older versions, describing the model to a form, and generating test data that obeys
+the rules.
 
 → [What a schema gives you](/getting-started/what-a-schema-gives-you.html)
 
 ## Failures are ordinary F# values
 
-There is no exception model and no framework result type. `Schema.parse` returns
+Failures use the standard F# `Result` type rather than exceptions or a framework result type. `Schema.parse`
+returns
 `Result<'model, SchemaErrors>`; a value check returns `Result<'value, Violation>`. Both errors are data you can
 match on, group by path, translate, or serialize into a problem-details response.
 [`Reified.Result`](/result-handling/index.html) adds the composition, `result { }` for fail-fast sequencing, accumulating
@@ -251,7 +243,7 @@ builders for collecting every error at once, over the standard `Result` type rat
 
 ## The words this documentation uses
 
-Three operations sound similar and are not. The rest of the documentation uses these words precisely:
+The documentation distinguishes three operations:
 
 | Word | Operation | Example |
 | --- | --- | --- |
@@ -261,11 +253,11 @@ Three operations sound similar and are not. The rest of the documentation uses t
 | **refine** | Give a checked value a type that carries the rule from then on, so nothing downstream re-checks it. | `ContactEmail.create raw` |
 
 "Validation" is the everyday word for all of this, and the documentation uses it that way when talking about the
-area as a whole. When the distinction matters, it will be one of the three above instead.
+area as a whole. Use the three terms above when the distinction matters.
 
 ## Continue from here
 
-Continue with Schema for structured boundary models, or choose another focused capability from the library map.
+For structured boundary models, continue with Schema.
 
 → [Continue with Schema](/schema/index.html)
 
