@@ -7,9 +7,6 @@ targetFramework: net8.0
 
 # Signup Form Tutorial
 
-This page shows how to declare a schema, parse form input, and redisplay boundary errors without constructing invalid
-models.
-
 This tutorial parses a signup form into a trusted model. If any field fails, no model is constructed and the form can
 be redisplayed with the user's original input and per-field errors.
 

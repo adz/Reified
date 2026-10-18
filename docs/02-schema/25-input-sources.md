@@ -64,10 +64,8 @@ canonical intrinsic schemas, both lines can use ordinary `field` and the contact
 Nested fields expect object-shaped input and prefix their diagnostics with the field name; collection fields expect
 `Data.List`, parse every item, accumulate every item error, and prefix diagnostics with the item index.
 
-The sections below show four adapters, each a complete, standalone example of that source's own syntax. Only
-the last one, Configuration, feeds the closing "One Parse For All Of Them" section directly; the other three are
-shown in isolation so their own `raw` bindings don't collide on one page. Any of them would work the same way there,
-since every adapter below produces the same `Data` shape.
+Each adapter below produces `Data`. The closing parse example uses the configuration input; the other examples
+are isolated so their `raw` bindings do not collide.
 
 ## HTTP Form-Like Input
 

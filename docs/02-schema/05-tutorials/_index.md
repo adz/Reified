@@ -7,11 +7,8 @@ targetFramework: net8.0
 
 # Schema Tutorials
 
-[The quickstart](/schema/quickstart.html) is the first thing to read: it builds one model up through
-plain fields, refined fields, field constraints, and a private model behind a checked constructor.
-
-These tutorials then take single topics further, a complete form, nested models and collections, and reading schema
-metadata without running validation.
+Start with [the quickstart](/schema/quickstart.html) for plain fields, refined fields, constraints, and a private model
+behind a checked constructor. The tutorials cover a form, nested models and collections, and schema metadata.
 
 ## Guides
 

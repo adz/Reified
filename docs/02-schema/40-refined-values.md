@@ -8,9 +8,8 @@ targetFramework: net8.0
 
 # Refined Schemas
 
-A field can be short when its type contributes a canonical schema. This is the compact form the rest of the page
-builds toward, so it declares a minimal `Email`/`Contact` ahead of "Define the domain type" below, which walks
-through the same declaration step by step:
+A type with a canonical schema needs only a bare field declaration. This minimal `Email`/`Contact` example shows
+the result; the sections below build it step by step:
 
 ```fsharp isolated
 open Reified
@@ -64,8 +63,6 @@ Where a length or format rule *should* be part of a type, define your own refine
 [Lift universal constraints into the refinement](#lift-universal-constraints-into-the-refinement) shows. The test is
 whether any later operation relies on the rule; see
 [When not to make a type](/refined/catalog.html#when-not-to-make-a-type).
-
-The rest of this page expands what a domain type like `Email` contributes and shows where schema-local constraints fit.
 
 ## Define the domain type
 

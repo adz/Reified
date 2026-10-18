@@ -7,12 +7,8 @@ targetFramework: net8.0
 
 # Runnable Examples
 
-This page shows the examples that are executed during the docs build, so the public docs stay tied to real code and observed output.
-
-The examples below are built from the repository projects, run with the current source, and then written back into this page.
-
-The code blocks keep the important API calls on the same lines as the values they bind, with trailing comments where that makes the signature easier to read.
-The examples prefer the normal direct-bind style inside computation expressions, so the docs reflect the recommended day-to-day usage.
+The docs build runs these examples from the repository projects and writes them back into this page. Code blocks
+keep API calls beside their bindings, with trailing comments where useful. Computation expressions use direct bindings.
 
 ## Refined Catalog Example
 

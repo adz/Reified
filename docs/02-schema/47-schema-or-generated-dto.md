@@ -9,10 +9,9 @@ targetFramework: net8.0
 
 # Schema or generated DTO
 
-Reified supports two different strategies for a structured boundary, and a model in this codebase should use exactly
-one of them. Mixing them, an attribute-validated generated record decoded with the trusted JSON path, or a
-hand-written schema wrapped in a migration chain it does not need, produces a model that looks validated in one
-place and is not.
+Choose one boundary strategy per model. An attribute-validated generated record decoded with the trusted JSON path
+looks validated but skips its constraints. A hand-written schema needs no migration chain unless old wire shapes must
+remain readable.
 
 ## Strategy 1: the schema is the contract
 

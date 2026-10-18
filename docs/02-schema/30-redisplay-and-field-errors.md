@@ -8,8 +8,6 @@ targetFramework: net8.0
 
 # Redisplay And Field Errors
 
-This page shows how failed schema parses retain structured data, path-aware field errors, and default display strings.
-
 When boundary input fails to parse, a form should show the user's original text next to each field's errors. Reified's
 `RetainedParseResult` keeps both: the structured data exactly as submitted, and diagnostics addressed by path.
 

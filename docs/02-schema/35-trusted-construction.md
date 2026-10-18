@@ -8,8 +8,6 @@ targetFramework: net8.0
 
 # Construction guarantees
 
-This page shows which correctness claims Schema can enforce and which claims require an invariant-preserving F# type.
-
 An **invariant** is a rule that must hold for every valid value, such as a booking start date not following its end date.
 An **aggregate** is a group of related values created and updated as one thing.
 
@@ -204,8 +202,8 @@ match WorkspaceName.create "Ada's Workspace", WorkspaceName.create "New Name" wi
 ```
 
 
-This is why refined field types should be the first resort: they leave record syntax, `with`, and structural equality
-untouched while making the invalid states unrepresentable.
+Refined field types leave record syntax, `with`, and structural equality untouched while making invalid field values
+unrepresentable.
 
 **Schema-described public record.** Update the record with ordinary `with`, then re-check it to run the schema's
 constraints and record constructor against the changed value. With the public `Booking` from the first section:
@@ -236,8 +234,8 @@ let shift days reservation =
 The `with` expression works on the draft, so callers keep familiar syntax, and the result passes back through the one
 authoritative constructor.
 
-Every gated update returns `Result`. That is the honest cost of a cross-field invariant: an edit can break the
-relationship, so an infallible `with` on the validated type would be the bypass this page exists to close. When a
+Every gated update returns `Result`: an edit can break the relationship, so an infallible `with` on the validated
+type would bypass the check. When a
 specific transition provably preserves the invariant, shifting both dates by the same amount cannot reorder them,
 the owning module can expose it as a total function and keep the proof next to the representation.
 

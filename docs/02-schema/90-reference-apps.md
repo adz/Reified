@@ -7,8 +7,7 @@ targetFramework: net8.0
 
 # Walkthrough: Reference Apps
 
-The reference apps exercise the schema group the way an application does, values crossing CLI, form, JSON, and
-storage boundaries, so that API friction invisible in a snippet has nowhere to hide. Two tiers are runnable here:
+The reference apps exercise CLI, form, JSON, and storage boundaries. Two tiers are runnable:
 
 1. [`Reified.ReferenceApp.Intro`](/constraints/reference-app.html), plain `Result`, checks,
    refined values, and accumulated validation, with no schemas at all. Start there if you are new; this page
@@ -23,8 +22,7 @@ dotnet run --project examples/Reified.ReferenceApp.Wire/Reified.ReferenceApp.Wir
 ```
 
 
-The wire slice answers the question the hand-written tier leaves open: what does the day-to-day authoring
-experience look like once wire schemas are generated? You own an ordinary record with constraint attributes:
+The wire slice generates schemas from ordinary records with constraint attributes:
 
 ```fsharp
 open Reified.DerivedSchema
@@ -49,11 +47,9 @@ type WorkspaceCard =
 
 `schemagen` writes the sibling `workspace.g.fs`: the schema pipeline you would have written by hand, `parse` and
 `validate`, typed `Fields` references, and, because `WorkspaceCardV1`/`WorkspaceCard` follow the version-chain
-naming convention, a `WorkspaceCard.contract` builder that takes your typed v1 → v2 migration. The hand-written
-surface shrinks to exactly the parts that carry meaning: the migration, the strict domain mapping (`TrustedCard`
-rejects an owner listed as a member, a rule the wire deliberately cannot express), and a head-version write
-through a compiled codec. Generated schemas are ordinary schemas, so `JsonSchema.generate` and `Json.compile`
-come along for free.
+naming convention, a `WorkspaceCard.contract` builder that takes your typed v1 → v2 migration. You write the migration, the strict domain mapping (`TrustedCard` rejects an owner listed as a member, a rule the
+wire deliberately cannot express), and a head-version write through a compiled codec. Generated schemas work with
+`JsonSchema.generate` and `Json.compile`.
 
 See [Versioned Contracts](/schema/versioned-contracts.html) for the full attribute vocabulary, the
 `.contract` grammar alternative, and running generation in your build with `Reified.SchemaGen.MSBuild`.

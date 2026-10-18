@@ -7,7 +7,7 @@ targetFramework: net8.0
 
 # SchemaDSL
 
-Reified provides a DSL for more concise schema declarations:
+Open `Reified.SchemaDSL` to declare schemas:
 
 ```fsharp
 open Reified

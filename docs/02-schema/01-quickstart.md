@@ -13,7 +13,7 @@ constraints and refinements, accumulates failures with paths, and calls your con
 The same declaration drives several interpreters, so parsing, JSON serialization, JSON Schema generation, and metadata
 inspection stay in step with no second source of truth.
 
-This page builds one model up in four stages. Each stage adds one idea and shows what the interpreters do with it.
+The four stages below add fields, refinements, constraints, and a checked constructor.
 
 ```bash
 dotnet add package Reified.Schema
@@ -163,8 +163,6 @@ Schema.check signupSchema existingValue
 
 `Inspect.model` is what forms, admin UIs, and documentation generators read.
 
-Everything after this point is added to the declaration once and shows up in all of these interpreters.
-
 ## 2. Refined fields
 
 `Signup.Email` is a `string`, so nothing stops `{ Email = ""; Age = 36; Newsletter = true }`. A refined type moves that
@@ -226,8 +224,7 @@ aliases: Length must be at least 1; got 0.
 ```
 
 
-Nothing in the schema declares any of this. A refined type means the same thing wherever it appears, and the
-generated JSON Schema, the inspection metadata, and the parse diagnostics all read that one definition. Each check runs
+The generated JSON Schema, inspection metadata, and parse diagnostics all read the refinement definition. Each check runs
 once, at the layer that owns it.
 
 Your own domain types participate the same way. See [Refined Schemas](/schema/refined-values.html) for defining `Email` or
@@ -390,7 +387,7 @@ relationship, so an infallible `with` on the checked type would be exactly the b
 
 ## Where to go next
 
-The four stages are a ladder, not a target. Take the lowest rung that prevents a real problem:
+Choose the least restrictive representation that prevents the problem:
 
 1. Plain fields, the schema is the admission decision.
 2. Refined fields, field-local invariants hold everywhere, and the record stays public with `with` intact.

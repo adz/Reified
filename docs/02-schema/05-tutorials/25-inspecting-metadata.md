@@ -7,9 +7,8 @@ targetFramework: net8.0
 
 # Inspecting Schema Metadata Tutorial
 
-A schema is data, not a validator. This tutorial reads a schema's fields, shapes, formats, and constraints without
-parsing any input or constructing any model, the foundation for JSON Schema emitters, documentation generators, and
-UI metadata.
+`Inspect.model` reads a schema's fields, shapes, formats, and constraints without parsing input or constructing a model.
+JSON Schema emitters, documentation generators, and UI tools can use this metadata.
 
 ## Describe A Schema
 
@@ -102,11 +101,6 @@ Atoms are shape-neutral. `Cardinality.Maximum 5` becomes `maxLength`, `maxItems`
 
 The repository keeps three worked prototypes, a JSON Schema emitter, a docs describer, and a UI metadata producer, 
 in `tests/Reified.Schema.Tests/SchemaInterpreterPrototypeTests.fs`, all built only on `Inspect`.
-
-## Why This Matters
-
-One declaration now serves parsing, validation, rules, and every metadata consumer. When a constraint changes, the
-form control, the JSON Schema, the docs table, and the parser all change together.
 
 ## Next
 
