@@ -143,18 +143,8 @@ below. Both render through the same mechanics, so one renderer covers both. See
 ## The Schema catalogue
 
 `Reified.Schema` owns its own keys for parse, boundary-supply, and structural failures. They stay in that package;
-Schema depends on Constraint and never the reverse.
-
-| Key | Arguments | Default English |
-| --- | --- | --- |
-| `schema.omitted` | n/a | must be supplied |
-| `schema.blank` | n/a | must be present |
-| `schema.expectedScalar` | n/a | must be a single value |
-| `schema.expectedObject` | n/a | must be an object |
-| `schema.expectedMany` | n/a | must be a collection |
-| `schema.invalidFormat` | `expected` | must be a valid {expected} |
-| `schema.parseOutOfRange` | `target` | must be within the range of {target} |
-| `schema.unknownTag` | `choices` | must be one of {choices} |
+Schema depends on Constraint and never the reverse. The key, argument, and default-English table is in the
+[`SchemaMessages` API reference](/api/Reified.SchemaMessages.html).
 
 `SchemaMessages.keys`, `.arguments`, and `.english` expose the same data. Constructor failures and custom errors
 carrying authored prose have no catalogue entry: Schema does not invent a key for text your application wrote.

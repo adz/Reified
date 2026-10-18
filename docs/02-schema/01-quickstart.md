@@ -1,7 +1,7 @@
 ---
 weight: 10
 title: Quickstart
-description: Build one schema up in four stages, plain fields, refined fields, constraints, and a private model behind a checked constructor.
+description: Declare one record schema, parse untrusted input into it, and compile the same declaration into a JSON codec.
 targetFramework: net8.0
 ---
 
@@ -12,8 +12,6 @@ constraints and refinements, accumulates failures with paths, and calls your con
 
 The same declaration drives several interpreters, so parsing, JSON serialization, JSON Schema generation, and metadata
 inspection stay in step with no second source of truth.
-
-The four stages below add fields, refinements, constraints, and a checked constructor.
 
 ```bash
 dotnet add package Reified.Schema
@@ -27,7 +25,7 @@ open Reified.ConstraintDSL
 ```
 
 
-## 1. Plain fields
+## First schema and parse
 
 A schema can consist of primitives alone:
 
@@ -169,227 +167,6 @@ Schema.check signupSchema existingValue
 
 `Inspect.model` is what forms, admin UIs, and documentation generators read.
 
-## 2. Refined fields
-
-`Signup.Email` is a `string`, so nothing stops `{ Email = ""; Age = 36; Newsletter = true }`. A refined type moves that
-guarantee into the model, where it holds no matter how the value was built.
-
-[Reified.Refinements](/refined/index.html) ships the common ones. Use them as field types directly:
-
-```fsharp
-open Reified.Refinements
-
-type Registration =
-    { Owner: NonBlankString
-      Seats: int
-      Aliases: NonEmptyList<NonBlankString> }
-
-let registrationSchema =
-    schema<Registration> {
-        field _.Owner
-        field _.Seats
-        field _.Aliases
-        construct (fun owner seats aliases ->
-            { Owner = owner; Seats = seats; Aliases = aliases })
-    }
-```
-
-
-The fields stay bare. Every refined type has exactly one schema, so the field resolves it from the type the same way
-`string` resolved `Schema.text`. Rules that need a parameter, a length range, a pattern, are constraints rather
-than types, and go on the field as their own line: `field _.Name { constrain (Constraint.lengthBetween 2 80) }`.
-
-`NonEmptyList<NonBlankString>` composes: the outer refinement resolves, and so does the item.
-
-### It flows through
-
-A refinement carries its constraints, so the interpreters see them:
-
-```fsharp
-JsonSchema.generate registrationSchema
-// "owner":   {"type":"string","pattern":"\\S"}
-// "seats":   {"type":"integer"}
-// "aliases": {"type":"array","items":{"type":"string"},"minItems":1}
-```
-
-
-```fsharp
-Inspect.model registrationSchema
-// owner   -> [ "present" ]
-// seats   -> [ ]
-// aliases -> [ "minLength" ]
-```
-
-
-Failures arrive on the right paths:
-
-```text
-owner: This value must be present.
-aliases: Length must be at least 1; got 0.
-```
-
-
-The generated JSON Schema, inspection metadata, and parse diagnostics all read the refinement definition. Each check runs
-once, at the layer that owns it.
-
-Your own domain types participate the same way. See [Refined Schemas](/schema/refined-values.html) for defining `Email` or
-`WorkspaceName` and contributing a canonical schema.
-
-## 3. Constraints on fields
-
-A refinement holds for every value of its type. A constraint holds at one boundary. Use a constraint when the rule
-belongs to this form rather than to the domain type:
-
-```fsharp
-type Profile =
-    { DisplayName: string
-      Age: int }
-
-let profileSchema =
-    schema<Profile> {
-        field _.DisplayName {
-            constraints [ present; maxLength 40 ]
-        }
-
-        field _.Age {
-            constrain (Constraint.between 13 120)
-        }
-
-        construct (fun displayName age -> { DisplayName = displayName; Age = age })
-    }
-```
-
-
-A field block is the expanded form of `field _.DisplayName`. `constrain` adds one; `constraints` adds a list.
-
-Constraints reach the interpreters just as refinements do:
-
-```fsharp
-JsonSchema.generate profileSchema
-// "displayName": {"type":"string","maxLength":40}
-// "age":         {"type":"integer","minimum":13,"maximum":120}
-```
-
-
-```text
-displayName: This value must be present.
-age: Must be between 13 and 120; got 9.
-```
-
-
-A constraint preserves the value's type, `maxLength 40` on a `string` field leaves a `string` field. That is the
-difference from `refine`, which changes the type and is what makes the guarantee durable.
-
-Which to reach for:
-
-- The rule is true of every value of the type, put it in the refinement, and every construction path enforces it.
-- The rule is true only at this boundary, put it in the field block, where a reader can see it applies here.
-
-Schema will not take metadata without an executable check behind it, so what an inspector reports is always what
-parsing enforces. Constraint names come from
-[Constraints](/constraints/constraints.html); see
-[Refined Schemas](/schema/refined-values.html) for application-defined constraints.
-
-## 4. A private model behind a checked constructor
-
-Stages 2 and 3 cover rules about one field. A rule *between* fields, a booking's start must not follow its end, has
-nowhere field-local to live, and no field type can carry it.
-
-Make the representation private so the only way to build the type runs the rule:
-
-```fsharp
-open System
-
-type BookingDraft =
-    { Guest: NonBlankString
-      Start: DateOnly
-      End: DateOnly }
-
-type Booking =
-    private
-        { Guest: NonBlankString
-          Start: DateOnly
-          End: DateOnly }
-```
-
-
-Now `{ Guest = g; Start = s; End = e }` will not compile outside the defining module, and `constructResult` becomes the
-one entrance:
-
-```fsharp
-module Booking =
-    let create (draft: BookingDraft) =
-        if draft.Start <= draft.End then
-            Ok { Guest = draft.Guest; Start = draft.Start; End = draft.End }
-        else
-            Error "Start must not be after end."
-
-    let guest (booking: Booking) = booking.Guest
-    let start (booking: Booking) = booking.Start
-    let finish (booking: Booking) = booking.End
-
-    let toDraft (booking: Booking) : BookingDraft =
-        { Guest = booking.Guest; Start = booking.Start; End = booking.End }
-
-    let schema =
-        schema<Booking> {
-            fieldAs "guest" guest
-            fieldAs "start" start
-            fieldAs "end" finish
-            constructResult (fun guest start finish ->
-                create { Guest = guest; Start = start; End = finish })
-        }
-```
-
-
-`construct` becomes `constructResult`, which returns `Result` and can reject. Fields use accessor functions because
-`_.Start` needs the representation.
-
-A reversed range now fails at the model, not at a field, so the diagnostic carries no field path:
-
-```text
-: Start must not be after end.
-```
-
-
-### The draft
-
-A private record costs record syntax: callers lose `{ Guest = g; ... }` and `{ booking with End = e }`, and a positional
-`create guest start finish` loses the names that make call sites readable.
-
-A draft is a public record that exists to be assembled and edited freely, with `create` as the one way across:
-`BookingDraft` and `Booking.toDraft` are already declared above, alongside `Booking` itself, since a private
-record's draft counterpart belongs with it.
-
-
-Construction keeps its field names:
-
-```fsharp
-match Refine.nonBlankString "Ada Lovelace" with
-| Ok guest ->
-    let arrival = DateOnly(2026, 6, 1)
-    let departure = DateOnly(2026, 6, 5)
-    Booking.create { Guest = guest; Start = arrival; End = departure }
-| Error _ -> Error "unreachable"
-```
-
-
-Edits drop to the draft, use ordinary `with`, and come back through the same constructor:
-
-```fsharp
-let shift days booking =
-    let draft = Booking.toDraft booking
-    Booking.create { draft with Start = draft.Start.AddDays days; End = draft.End.AddDays days }
-```
-
-
-The draft is not a hole in the guarantee. A `BookingDraft` proves nothing; only `Booking.create` and
-`Schema.parse Booking.schema` produce a `Booking`, and both run the same rule. Skipping it means editing the module
-that owns the representation, a visible act, rather than a quiet record literal elsewhere in the codebase.
-
-Every gated update returns `Result`. That is the real cost of a cross-field invariant: an edit can break the
-relationship, so an infallible `with` on the checked type would be exactly the bypass this stage closes.
-
 ## Where to go next
 
 Choose the least restrictive representation that prevents the problem:
@@ -399,6 +176,8 @@ Choose the least restrictive representation that prevents the problem:
 3. Field constraints, boundary-specific rules, visible where they apply.
 4. Private model and draft, relationships between fields.
 
+- [Refined fields in Schema](/schema/refined-fields.html), refined types as fields and how interpreters read them.
+- [Boundary-specific field rules](/schema/boundary-field-rules.html), field blocks and boundary constraints.
 - [Construction Guarantees](/schema/trusted-construction.html), what each rung does and does not promise.
 - [SchemaDSL](dsl.html), the full declaration vocabulary.
 - [Derived Schemas](derivation/index.html), generate that declaration from an attributed F# wire record.

@@ -54,19 +54,18 @@ An empty field and a misspelled one can need different messages. `OutOfRange` id
 
 ## The parsers
 
+The common parsers:
+
 | Parser | Returns | Accepts |
 | --- | --- | --- |
 | `Parse.int` | `int` | Optionally signed digits, invariant culture. |
-| `Parse.long` | `int64` | As `int`, with the wider range. |
 | `Parse.decimal` | `decimal` | Digits with an optional sign, decimal point, and thousands separators, invariant culture. |
-| `Parse.float` | `float` | Digits with an optional leading sign, decimal point, thousands separators, and exponent notation, invariant culture. |
 | `Parse.bool` | `bool` | `"true"` or `"false"`, any casing. Not `"1"`, `"yes"`, or `"on"`. |
 | `Parse.guid` | `System.Guid` | Any format `Guid.TryParse` accepts, including braced and hyphenless. |
-| `Parse.dateTime` | `System.DateTime` | Invariant-culture date and time text, such as `"2026-03-04T09:30:00"`. |
-| `Parse.dateTimeOffset` | `System.DateTimeOffset` | As `dateTime`, with an offset such as `"+10:00"`. |
-| `Parse.dateOnly` | `System.DateOnly` | Invariant-culture date text. .NET 8+ only. |
-| `Parse.timeOnly` | `System.TimeOnly` | Invariant-culture time text. .NET 8+ only. |
 | `Parse.enum<'enum>` | `'enum` | A case name, case-insensitive, or its numeric text. |
+
+The complete table — `long`, `float`, `dateTime`, `dateTimeOffset`, `dateOnly`, `timeOnly`, and the exact accepted
+form of every parser — is in the [`Parse` API reference](/api/Reified.ParseModule.html).
 
 Every parser takes `string` and returns `Result<'value, ParseError>`. Numeric parsers use invariant culture: the same text parses the same way on every machine, and the decimal point is `.`, not `,`. They also ignore leading and trailing whitespace; whitespace-only input is still `MissingValue`.
 
@@ -160,28 +159,17 @@ The fallback applies to omitted input, not malformed input.
 
 ## Combined optional helpers
 
-Named helpers pair the common primitive parsers with `optional`:
+Named helpers pair the common primitive parsers with `optional` and `optionalOr`; each preserves the error from
+malformed present text:
 
-```fsharp
-Parse.intOption (Some "42")        // Ok (Some 42)
-Parse.boolOption None              // Ok None
-Parse.decimalOption (Some "12.5")  // Ok (Some 12.5M)
-Parse.guidOption (Some "89d45a4b-f634-4db0-9a41-7e8461957be1")
-// Ok (Some 89d45a4b-f634-4db0-9a41-7e8461957be1)
-```
+| Family | Absence | Default |
+| --- | --- | --- |
+| `Parse.int` | `intOption` → `Ok None` | `intOrDefault value` → `Ok value` |
+| `Parse.bool` | `boolOption` → `Ok None` | `boolOrDefault value` → `Ok value` |
+| `Parse.decimal` | `decimalOption` → `Ok None` | `decimalOrDefault value` → `Ok value` |
+| `Parse.guid` | `guidOption` → `Ok None` | `guidOrDefault value` → `Ok value` |
 
-
-The defaulting helpers pair them with `optionalOr`:
-
-```fsharp
-Parse.intOrDefault 80 None                // Ok 80
-Parse.boolOrDefault false (Some "true")   // Ok true
-Parse.decimalOrDefault 5.5M (Some "bad")  // Error (InvalidFormat ("decimal", "bad"))
-```
-
-
-Use `*Option` when absence should stay `None`, and `*OrDefault` when absence should become a concrete value. Both
-preserve the error from malformed present text.
+Use `*Option` when absence should stay `None`, and `*OrDefault` when absence should become a concrete value.
 
 ## Parse, then refine
 

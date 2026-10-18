@@ -124,5 +124,5 @@ stored input
 The generator emits the typed version-chain builder. Adding a version changes that builder, so contract construction
 does not compile until the new migration is supplied.
 
-See [Versioned Contracts](/schema/versioned-contracts.html) for the version-series attribute vocabulary and migration
+See [Generated version series](/schema/generated-version-series.html) for the version-series attribute vocabulary and migration
 setup, and [Build Generation](/schema/derivation/msbuild.html) for running generation in your build.

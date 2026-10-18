@@ -168,5 +168,5 @@ as generation diagnostics:
 A contract with more than one version gets a `contract` builder on its current version. It takes one migration
 parameter per adjacent step, `migrateV1ToV2`, `migrateV2ToV3`, and so on, plus a `VersionSource`. The generator never
 writes the migrations themselves. A contract with a single version gets no builder. See
-[Versioned Contracts](/schema/versioned-contracts.html#generate-a-version-series-from-records) for the generated
+[Generated version series](/schema/generated-version-series.html) for the generated
 signatures and how to add a version.

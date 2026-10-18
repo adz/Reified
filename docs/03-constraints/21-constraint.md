@@ -139,56 +139,9 @@ If you ship in one language, you do not need translation resources.
 
 ## The same declaration is read by everything downstream
 
-A rule named in a module works unchanged in a refinement and in a schema. The DSL spelling is the same in all
-three places:
-
-```fsharp isolated
-open Reified
-open Reified.Refinements
-open Reified.SchemaDSL
-
-module RetryRules =
-    open Reified.ConstraintDSL
-
-    let count : Constraint<int> = Constraint.between 0 10
-
-type RetryCount = RetryCount of int
-
-let retryCountRefinement =
-    Refinement.define RetryRules.count RetryCount (fun (RetryCount value) -> value)
-
-let schema =
-    Schema.int |> Schema.constrain RetryRules.count
-```
-
-
-A constraint built from named parts lowers to JSON Schema, generates test data, and renders localizable
-messages; the equivalent hand-written lambda does none of those things, and says so honestly rather than
-pretending.
-
-The catalogue resolves across text, collections, options, and maps by the type it is used at, so most uses
-need nothing extra:
-
-```fsharp
-Schema.text |> Schema.constrain Constraint.present
-```
-
-
-A standalone binding is the exception: the annotation is the only type information there, so it is what
-selects the shape. Here is a separate module:
-
-```fsharp isolated
-open Reified
-
-module PlanRules =
-    open Reified.ConstraintDSL
-
-    let requiredName : Constraint<string> = present
-    let selectedPlan : Constraint<string option> = present
-```
-
-
-Both are `present`; the annotation is what decides whether it means non-blank text or a supplied option.
+A rule named in a module works unchanged in a refinement and in a schema. [ConstraintDSL](/constraints/dsl.html)
+covers the full vocabulary, the type-directed names, and the result adapters; keep one small rule module here and
+reach for that page for details.
 
 The same value facts appear at three further levels:
 

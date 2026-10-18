@@ -55,20 +55,12 @@ Fable surface and repository coverage to keep it working.
 
 ### Declaring fields under Fable
 
-Both field forms compile with Fable:
-
-```fsharp no-check reason="Illustrates field declaration lines shown outside their enclosing schema<T> block."
-field _.Email                     // derives the wire name "email"
-fieldAs "email_address" _.Email   // declares it
-```
-
-
-`field` reads an F# quotation to derive the wire name, so it needs a target that supports quotations: JavaScript,
-TypeScript, Python, and BEAM from Fable 5.10, and Dart from 5.13. Fable's Rust and PHP targets have no quotation
-support, so declare names there with `fieldAs`. Field typing, schema inference, constraints, constructors, parsing,
-checking, and codecs are available with either form on every target; the exceptions are .NET-only conveniences such as
-the `DateOnly` field type and `Data.ofJsonDocument`, which are compile-time gated out of the Fable surface (see
-[Compiler-Directed: AOT and Fable](/notes/aot-trimming-fable.html)).
+Both field forms compile with Fable. `field` reads an F# quotation to derive the wire name, so it needs a target
+that supports quotations; use `fieldAs` where quotations are unavailable. Field typing, schema inference, constraints,
+constructors, parsing, checking, and codecs are available with either form on every target; the .NET-only conveniences
+such as `DateOnly` and `Data.ofJsonDocument` are compile-time gated out of the Fable surface. The target/version table
+and both field forms live in
+[Compiler-Directed: AOT and Fable](/notes/aot-trimming-fable.html#derived-wire-names-under-fable).
 
 ## Development tools
 

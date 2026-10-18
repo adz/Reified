@@ -59,5 +59,5 @@ from the permissive-DTO strategy in [Schema or Generated DTO](/schema/schema-or-
 wire rules enforced at the boundary, so it reads with the boundary parser rather than the trusted decoder. Generated
 schemas work with `JsonSchema.generate` and `Json.compile`.
 
-See [Versioned Contracts](/schema/versioned-contracts.html) for the version-series attribute vocabulary and
+See [Generated version series](/schema/generated-version-series.html) for the version-series attribute vocabulary and
 [Build Generation](/schema/derivation/msbuild.html) for running generation in your build with `Reified.SchemaGen.MSBuild`.

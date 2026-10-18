@@ -168,22 +168,8 @@ Data.tryMatch [ at "total" positiveNumber ] (data [ "total" => 0 ])
 
 ## Complete matching vocabulary
 
-| Form | What it accepts |
-| --- | --- |
-| `at path pattern` | A present value at the path that satisfies the pattern. |
-| `absent path` | No value at the path. |
-| a literal such as `"Ada"` | That exact value. |
-| `exactly value` | An explicit exact recursive pattern. |
-| `containing fields` | An object with at least the listed matching fields. |
-| `containingItems patterns` | A list containing each pattern in any order; occurrences are consumed once. |
-| `inOrder patterns` | A list containing the patterns as an ordered subsequence. |
-| `allItems pattern` | A list where every item matches. |
-| `someItem pattern` | A list where at least one item matches. |
-| `any` | Any present value. |
-| `anyText` | Any text value. |
-| `anyNumber` | Any number token. |
-| `oneOf patterns` | A value matching at least one alternative. |
-| `satisfying description predicate` | A value accepted by a custom predicate. |
+The full pattern inventory is in the [`DataPattern` API reference](/api/Reified.DataPattern.html); a few representative
+patterns:
 
 ```fsharp
 Data.tryMatch [
@@ -193,10 +179,6 @@ Data.tryMatch [
 ] actual
 // => Ok ()
 ```
-
-
-`matching expectations actual` returns `unit` or raises `DataMatchException`. `Data.tryMatch expectations actual`
-returns `Result<unit, DataMismatch list>` and accumulates mismatches from every expectation.
 
 ## Why patterns are not constraints
 

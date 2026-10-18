@@ -14,17 +14,11 @@ already require a different union shape.
 The chosen format lives in the schema. Reified uses it consistently for parsing, JSON output, JSON Schema, generated
 test data, and inspection.
 
-## Ready-made compatibility formats
+## A ready-made compatibility format
 
-| Format | Use | JSON |
-| --- | --- | --- |
-| Internal tag and named fields | `UnionRepresentations.recommended` | `{ "type": "move", "x": 1, "y": 2 }` |
-| FSharp.SystemTextJson default | `UnionRepresentations.fsharpSystemTextJsonDefault` | `{ "Case": "Move", "Fields": [1, 2] }` |
-| FSharp.SystemTextJson external, named, and unwrapped | `UnionRepresentations.fsharpSystemTextJsonExternalNamed` | `"stop"`, `{ "rename": "Ada" }`, `{ "resize": { "width": 1, "height": 2 } }` |
-| Adjacent tag and named payload | `UnionRepresentations.reifiedAdjacent` | `{ "type": "move", "value": { "x": 1, "y": 2 } }` |
-| External tag and named payload | `UnionRepresentations.compactExternal` | `"stop"`, `{ "move": { "x": 1, "y": 2 } }` |
-
-Pass one of these values with the same case catalogue used by `Schema.union`:
+Ready-made profiles cover the common formats; the full list, with the JSON each one produces, is in the
+[`UnionRepresentations` API reference](/api/Reified.UnionRepresentations.html). Pass one of these values with the same
+case catalogue used by `Schema.union`:
 
 ```fsharp no-check reason="The case catalogue is application-owned."
 let commandSchema =
@@ -154,27 +148,9 @@ name, and leave named fields disabled.
 
 ## Build a representation directly
 
-For a format not covered by a ready-made value, construct one of:
-
-```fsharp
-UnionRepresentation.Internal("kind")
-UnionRepresentation.Adjacent("kind", "fields", UnionPayloadStyle.Named)
-UnionRepresentation.External(UnionPayloadStyle.Named, true)
-```
-
-
-Adjacent and external formats accept these payload styles:
-
-| Style | JSON for a two-field case | JSON for a one-field case |
-| --- | --- | --- |
-| `UnionPayloadStyle.Named` | `{ "x": 10, "y": 20 }` | `{ "amount": 12.5 }` |
-| `UnionPayloadStyle.Positional` | `[10, 20]` | `[12.5]` |
-| `UnionPayloadStyle.UnwrappedSingle` | invalid for two fields | `12.5` |
-| `UnionPayloadStyle.NamedWithUnwrappedSingle` | `{ "x": 10, "y": 20 }` | `12.5` |
-| `UnionPayloadStyle.PositionalWithUnwrappedSingle` | `[10, 20]` | `12.5` |
-
-`UnwrappedSingle` requires every payload case to contain exactly one field. The adaptive styles unwrap only one-field
-cases and retain named objects or positional arrays for larger cases.
+For a format not covered by a ready-made value, construct a [`UnionRepresentation`](/api/Reified.UnionRepresentation.html)
+directly. Adjacent and external formats accept every [`UnionPayloadStyle`](/api/Reified.UnionPayloadStyle.html), which
+controls how the case's fields are shaped inside the payload.
 
 ## Match Reified's default in FSharp.SystemTextJson
 

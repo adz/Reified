@@ -62,18 +62,23 @@ The same declaration lowers to JSON Schema and generates test data. A predicate,
 Reified's own `Constraint.custom` escape hatch, cannot be inspected, and Reified says so rather than
 pretending otherwise.
 
-If you only need to answer "is this valid?", inspectability buys you nothing but costs nothing either. A constraint used that way is still one line, and you never have to see a `Violation`:
+If you only need to answer "is this valid?", inspectability buys you nothing but costs nothing either. A constraint used that way is still one line, and you never have to see a `Violation`. Both mappings live in one place: discard the
+violation with `Result.orError`, or keep its facts with `Result.mapError`:
 
 ```fsharp no-check reason="raw and InvalidEmail are the caller's own binding and error case; not values this page can construct standalone."
 raw
 |> Constraint.guard Constraint.email
-|> Result.orError InvalidEmail
+|> Result.orError InvalidEmail          // InvalidEmail, violation dropped
+
+raw
+|> Constraint.guard Constraint.email
+|> Result.mapError InvalidEmail         // InvalidEmail of Violation, facts kept
 ```
 
 
-That returns `Result<string, SignupError>`, the same shape a hand-written predicate would give you, with the same
-amount of code. Reach for `Result.mapError InvalidEmail` instead when you want to keep the violation's facts. The
-concepts below are the price of the structured path, not of using a constraint at all.
+The `orError` form returns `Result<string, SignupError>`, the same shape a hand-written predicate would give you. The
+`mapError` form keeps the violation's facts when the extra concepts should earn their keep. The concepts below are the
+price of the structured path, not of using a constraint at all.
 
 ## DataAnnotations
 
@@ -92,12 +97,12 @@ or resource keys.
 **Choose FluentValidation when** you want a mature, widely-known library with a large community, ASP.NET
 integration, async and DI-driven validators, and a team already fluent in it. Its ecosystem is far larger than Reified's.
 
-**Where it differs:** a rule belongs to a validator for a type, rather than being a free-standing value.
-FluentValidation can share rules through reusable validators and `Include`, but "what a valid retry count is" still
-lives in a validator — ultimately a set of delegates — not in a value your code can hold, pass around, or inspect.
-Messages are attached per rule and localization is wired up separately, so both remain artefacts to maintain. Because
-a validator is a set of delegates, nothing downstream can read it to produce a JSON Schema or generate matching test
-data.
+**Where it differs for a value rule:** a rule belongs to a validator for a type, rather than being a free-standing
+value. FluentValidation can share rules through reusable validators and `Include`, but "what a valid retry count is"
+still lives in a validator, ultimately a set of delegates, not in a value your code can hold, pass around, or inspect.
+That is the Constraint-level difference. [vs FluentValidation](/comparisons/fluentvalidation-comparison.html) compares
+the Schema-level consequence: one Reified declaration producing JSON Schema, a codec, and UI metadata where a validator
+leaves each as a separate artifact.
 
 ## Validus
 
@@ -110,14 +115,8 @@ derived from it, and nothing can inspect a validator afterwards. Reified's extra
 `Renderer`, interpreted versus opaque rules, exist to buy inspectability and derived messages.
 
 You do not need those concepts for every check. A check that ends in your own error case reads the same length in either
-library, and the Reified version leaves you a rule you can reuse in a schema or a refined type later. Keep the
-violation instead of discarding it, when the extra concepts should earn their keep:
-
-```fsharp no-check reason="raw and InvalidEmail are the caller's own binding and error case; not values this page can construct standalone."
-raw
-|> Constraint.guard Constraint.email
-|> Result.mapError InvalidEmail   // InvalidEmail of Violation
-```
+library, and the Reified version leaves you a rule you can reuse in a schema or a refined type later. The two error
+mappings are shown together in [The second difference](#the-second-difference-a-constraint-is-data) above.
 
 
 ## What Reified costs you

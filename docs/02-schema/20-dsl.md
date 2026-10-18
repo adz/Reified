@@ -181,22 +181,9 @@ lists, arrays, and maps with shape-appropriate interpretation.
 
 ## Constraint equivalents
 
-These are the handwritten operations emitted for derivation attributes. Use them inside a field block with
-`constrain`, except for the metadata operations shown directly:
-
-| Purpose | Schema DSL |
-| --- | --- |
-| Pattern | `constrain (pattern expression)` |
-| Minimum, maximum, exact, or bounded natural length | `constrain (minLength n)`, `maxLength`, `length`, `lengthBetween` |
-| Present value or supplied input key | `constrain present`, `mustSupply` |
-| Inclusive/exclusive numeric bounds | `constrain (atLeast n)`, `greaterThan`, `atMost`, `lessThan` |
-| Numeric multiple | `constrain (multipleOf n)` |
-| Distinct list elements | `constrain distinct` |
-| Email text | `constrain email` |
-| Open format metadata | `format (SchemaFormat.create name)` |
-| Omitted-input default | `defaultValue value` |
-
-See [Derivation Attributes](/schema/derivation/attributes.html) for the complete attribute mapping.
+The handwritten operations emitted for derivation attributes are listed beside the [`Schema` API
+reference](/api/Reified.Schema.html#constraint-equivalents). See [Derivation Attributes](/schema/derivation/attributes.html)
+for the complete attribute mapping.
 
 ## Refinement changes the type
 

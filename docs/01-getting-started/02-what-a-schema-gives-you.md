@@ -42,7 +42,7 @@ let signupSchema =
 | the shape published | `JsonSchema.generate` | a JSON Schema document |
 | the model described to a UI | `Inspect.model` | field metadata, for forms and admin UIs |
 | older payloads accepted | `Contract.parse` | old wire input mapped to the current model |
-| test data that obeys the rules | `SchemaGen` | generated values that satisfy the declaration |
+| test data that obeys the rules | `SchemaGen` | generated values that satisfy the declaration (see [Testing schema guarantees](/data/testing-schema-guarantees.html)) |
 
 ## Turn untrusted input into a model
 

@@ -39,11 +39,17 @@ is no name. `return` wraps a plain value back up as `Ok`. `return!` uses a compl
 
 ```fsharp
 result {
-    let! name = parseName "Ada"
-    let! age = parseAge "36"
+    let! (name: string) = (parseName "Ada": Result<string, SignupError>)
+    let! (age: int) = (parseAge "36": Result<int, SignupError>)
     return { Name = name; Age = age }
 }
+// Result<Signup, SignupError>
 ```
+
+
+On the right of `let!` is a `Result<'value, 'error>`; on the left is the `'value`. The block's own type is
+`Result<'whatever you return, 'error>`, the error type is shared by every step, which is why they all fail with
+`SignupError` here.
 
 `do!` and `return!` in the same block:
 
@@ -64,26 +70,8 @@ signupAdultOnly "Ada" "12"   // Error (AgeOutOfRange 12)
 ```
 
 
-```text
-Ok { Name = "Ada"; Age = 36 }
-```
-
-
-With types on both sides of each binding:
-
-```fsharp
-result {
-    let! (name: string) = (parseName "Ada": Result<string, SignupError>)
-    let! (age: int) = (parseAge "36": Result<int, SignupError>)
-    return { Name = name; Age = age }
-}
-// Result<Signup, SignupError>
-```
-
-
-On the right of `let!` is a `Result<'value, 'error>`; on the left is the `'value`. The block's own type is
-`Result<'whatever you return, 'error>`, the error type is shared by every step, which is why they all fail with
-`SignupError` here.
+`do!` runs a step whose success value is `unit`, so there is no name to bind; `return!` uses a complete `Result` as the
+block's result.
 
 ## Failure stops the block
 
@@ -101,31 +89,8 @@ signup "Ada" "abc"   // Error (AgeNotANumber "abc")
 ```
 
 
-`signup "" "abc"` returns `Error NameMissing`. The age is never parsed, so its failure is never seen, the block stops
-at the first one.
-
-The second binding does not run after a failure:
-
-```fsharp
-let mutable calls = 0
-
-let track raw =
-    calls <- calls + 1
-    parseAge raw
-
-result {
-    let! first = parseAge "abc"
-    let! second = track "36"
-    return first + second
-}
-// Error (AgeNotANumber "abc")
-
-calls
-// 0
-```
-
-
-`track` never ran.
+`signup "" "36"` returns `Error NameMissing`; the age is never parsed because the block stops at the first failure, so
+its own failure is never seen. A later binding does not run after an earlier one fails.
 
 ## Control flow inside a block
 

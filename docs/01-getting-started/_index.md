@@ -143,101 +143,22 @@ Json.serialize codec { Email = "ada@example.org"; Age = 36; Newsletter = true }
 There is no second description of the wire shape to keep in step, and no runtime reflection: the codec is
 compiled from the schema's typed field plan, so it works under NativeAOT, trimming, and Fable.
 
-## The problem it solves
+## One rule, several readers
 
-One rule, "an age is at least 13", usually ends up written four times: in the parser that reads the request,
-in the validator that guards the domain, in the form that shows the message, and in the test that builds a
-fixture. They start identical and drift. When they drift, the parser accepts what the validator rejects, or the
-form shows a message no code enforces.
+One rule, "an age is at least 13", usually ends up written four times: in the parser that reads the request, in the
+validator that guards the domain, in the form that shows the message, and in the test that builds a fixture. They
+start identical and drift. Reified makes the rule a value instead: a checker can *execute* it, a renderer can
+*explain* it, and interpreters can *export* it or *sample* it. The same value scales from one field up to a whole
+model:
 
-Reified makes the rule a value. A checker can *execute* it, a renderer can *explain* it, and interpreters can
-*export* it to JSON Schema or OpenAPI or *sample* it to generate values.
-
-## One rule on one value
-
-For one value, install `Reified.Constraint`; no schema is needed:
-
-```fsharp
-open Reified
-
-let retryCount : Constraint<int> = Constraint.between 0 10
-
-3 |> Constraint.check retryCount
-// Ok ()
-
-42
-|> Constraint.check retryCount
-|> Result.mapError Violation.render
-// Error "expected a value between 0 and 10, but was 42"
-```
-
-
-A `Constraint` carries its description, and a `Violation` carries the failed rule and offending value as data.
-The message comes from the rule and can be localized or reformatted without changing it.
-
-→ [Constraint](/constraints/constraint.html)
-
-## Attach the rule to a type
-
-A constraint holds wherever you remember to run it. A *refinement* holds for every value of a type, because
-the only way to build one is through the check:
-
-```fsharp
-open Reified.Refinements
-
-Refine.nonBlankString "Ada"    // Ok (NonBlankString "Ada")
-Refine.nonBlankString "  "     // Error ...
-```
-
-
-Downstream code takes `NonBlankString` without re-checking it. Domain types such as `CustomerId`, `Email`, and
-`WorkspaceName` can each be defined over a constraint and constructed through it.
-
-→ [Refined values](/refined/index.html)
-
-## Back to the model
-
-Refined types are field types, so the schema from the top of this page absorbs them without extra syntax:
-
-```fsharp
-type Registration =
-    { Owner: NonBlankString
-      Seats: int }
-
-let registrationSchema =
-    schema<Registration> {
-        field _.Owner
-        field _.Seats { constrain (atLeast 1) }
-        construct (fun owner seats -> { Owner = owner; Seats = seats })
-    }
-```
-
-
-The `Owner` field carries no rules of its own: every refined type has exactly one schema, and the field
-resolves it from the type. Use a constraint on the field when the rule belongs to *this boundary*; use a
-refined type when it belongs to the domain.
-
-→ [Schema quickstart](/schema/quickstart.html)
-
-## Everything else is derived from that declaration
-
-The schema is a value, so parsing is only one of the things that can read it:
-
-```fsharp
-JsonSchema.generate signupSchema
-// {"type":"object",
-//  "properties":{"email":{"type":"string", …},
-//                "age":{"type":"integer","minimum":13},
-//                "newsletter":{"type":"boolean"}},
-//  "required":["email","age","newsletter"]}
-```
-
-
-`"minimum": 13` comes from the declaration's `atLeast 13`. The same declaration supports checking an existing
-value, accepting payloads from older versions, describing the model to a form, and generating test data that obeys
-the rules.
-
-→ [What a schema gives you](/getting-started/what-a-schema-gives-you.html)
+- **On one value**, a `Constraint` answers "is this valid?" and derives the failure. →
+  [Constraint](/constraints/constraint.html)
+- **On a type**, a refinement builds the rule into every construction, so downstream code need not re-check it. →
+  [Refined values](/refined/index.html)
+- **On a model**, refined types are field types, and boundary-specific rules attach as field constraints. →
+  [Schema quickstart](/schema/quickstart.html)
+- **From the same declaration**, JSON Schema, a codec, versioned contracts, metadata, and test data are all derived. →
+  [What a schema gives you](/getting-started/what-a-schema-gives-you.html)
 
 ## Failures are ordinary F# values
 

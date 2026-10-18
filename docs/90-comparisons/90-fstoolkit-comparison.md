@@ -30,6 +30,9 @@ None of these depends on `Reified.Result`; every one returns the standard F# `Re
 | `List.traverseResultA`, `List.sequenceResultA` | `Result.traverseAll`, `Result.sequenceAll` |
 | accumulating validation over boundary fields | a record `schema<'model> { }` interpreted by `Schema.parse` or `Schema.check` |
 
+Exact signatures are in the [`Result` API reference](/api/Reified.Result.html) and the
+[`Schema` API reference](/api/Reified.Schema.html).
+
 `Result.requireTrue` and `Result.requireSome` are two-argument functions in FsToolkit: the error comes first, the
 value second. Reified splits that in two, so the error is always attached last with `orError`:
 

@@ -105,39 +105,25 @@ Data.render account
 
 ## Build data with ordinary F# control flow
 
-`data` takes an F# list of fields, so the whole list-expression vocabulary is available inside it. Include another
-object's fields with `yield!`, add a field only under a condition with `if`, and generate fields from a sequence with
-`for`. This needs no intermediate dictionary or null filtering.
-
-With `common = data [ "tenant" => "acme"; "region" => "au" ]`, `customerId = "c-1"`, `includeDebug = true`, and
-`names = [ "ada"; "grace" ]`:
+`data` takes an F# list of fields, so the whole list-expression vocabulary is available inside it. `yield!` splices
+another object's fields, `if` adds a field under a condition, and `for` generates fields from a sequence:
 
 ```fsharp
 let common = data [ "tenant" => "acme"; "region" => "au" ]
-let customerId = "c-1"
-let includeDebug = true
 let names = [ "ada"; "grace" ]
 
 let event =
     data [
         "kind" => "example"
-        "customerId" => customerId
         yield! fields common
-
-        if includeDebug then
-            "debug" => true
-
         for name in names do
             $"user-{name}" => name
     ]
-
-Data.render event
-// => "{ kind: \"example\", customerId: \"c-1\", tenant: \"acme\", region: \"au\", debug: true, user-ada: \"ada\", user-grace: \"grace\" }"
 ```
 
 
-Fields appear in yield order, including conditional and generated fields.
-The same works for lists: `data [ "ids" => [ for id in ids -> id * 10 ] ]`.
+Fields keep yield order, including conditional and generated fields; the same forms build lists. The complete example,
+with conditional fields and rendered output, is in [Declare, render, and edit data](/data/declaring-and-editing.html).
 
 ## Learn and solve tasks
 
