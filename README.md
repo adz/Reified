@@ -21,15 +21,13 @@ Data ───────┼──> Schema ───> contract tooling
 Refinements ┘
 </pre>
 
-Install Schema when structured input must become a model. Constraint, Parse, Data, and Refinements can each be used
-alone without Schema, but they are designed to work together consistently.
+Install Schema when structured input must become a model. Constraint, Parse, Data, and Refinements also work
+without Schema.
 
 ## Why Reified
 
-Reified means “made concrete”: the library turns a model's rules into data that validation, codecs, contracts, and tests can share.
-
-Most boundary code repeats the same facts in validators, decoders, error handling, API contracts, and tests. Reified
-keeps those facts in one typed declaration and lets each job read from it.
+Boundary code often repeats model rules in validators, decoders, error handling, API contracts, and tests. Reified
+keeps those rules in a typed declaration shared by validation, codecs, contracts, and tests.
 
 - **Type-safe data refinement and narrowing functions** — once a value has passed its rules, represent that fact in its type instead of checking it again throughout the application.
 - **Hierarchical error accumulation** — get a structured, keyed diagnostic tree that keeps property names and collection indexes intact, so an API or UI can put each message in the right place.
@@ -57,7 +55,7 @@ let retryCount : Constraint<int> =
 // Error "expected a value between 0 and 10, but was 42"
 ```
 
-Nobody wrote the failure sentence separately. Change the bounds and every interpreter observes the new rule.
+Change the bounds and each interpreter reads the updated rule.
 
 ## Declare a whole model
 

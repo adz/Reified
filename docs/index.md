@@ -82,8 +82,8 @@ JsonSchema.generate signupSchema
 
 </div>
 
-<p style="max-width: 78ch; margin: 0 auto 0.5rem; text-align: center;">Every failure message, the JSON codec, the
-JSON Schema, and the generated test data come from that one declaration. Nothing above is written twice.</p>
+<p style="max-width: 78ch; margin: 0 auto 0.5rem; text-align: center;">Failure messages, the JSON codec, the
+JSON Schema, and generated test data come from the same declaration.</p>
 
 <p style="text-align: center; margin-bottom: 1rem;">
 <a class="btn btn-primary" href="getting-started/index.html">Get started &rarr;</a>
@@ -103,7 +103,7 @@ JSON Schema, and the generated test data come from that one declaration. Nothing
 - **JSON without reflection.** A schema compiles to a JSON codec that runs under NativeAOT and trimming, and
    the same schema compiles to Fable JavaScript. See [JSON Codecs](/schema/json-codecs.html) and
    [AOT, trimming, and Fable](/notes/aot-trimming-fable.html).
-- **A schema you can inspect, not just run.** One declaration produces field-aware parse diagnostics, JSON
+- **Inspect a schema.** One declaration produces field-aware parse diagnostics, JSON
    Schema export, and messages a translator can localize without touching the rule. See
    [Schema](/schema/index.html), [Redisplay and Field Errors](/schema/redisplay-and-field-errors.html), and
    [Localization](/constraints/localization/index.html).
