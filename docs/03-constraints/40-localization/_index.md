@@ -40,8 +40,6 @@ violation |> Violation.fullMessage Renderer.english
 ```
 
 
-Everything below is for applications that want something other than Reified's English.
-
 ## Translate four keys
 
 A renderer is a key-to-template lookup. The smallest useful one is a map:
@@ -58,8 +56,7 @@ let renderer = Renderer.ofLookup french.TryFind
 ```
 
 
-Anything the map does not answer falls back to Reified's neutral English, so a partial translation is a working
-translation. Add keys as you need them; you never have to complete the catalogue before shipping.
+Keys missing from the map fall back to Reified's neutral English. You can translate only the keys your application uses.
 
 Look keys up in [the catalogue](/constraints/localization/catalogue.html).
 
@@ -91,8 +88,6 @@ let name : Constraint<string> =
 
 
 ## Building a renderer
-
-Four constructors cover the ordinary cases.
 
 ```fsharp no-check reason="Illustrates each constructor's call shape; translations/resources/culture are the caller's own ResourceManager and CultureInfo, not values this page can construct standalone."
 // Any key-to-template lookup. The portable constructor, and the one Fable uses.
@@ -126,8 +121,6 @@ services.AddSingleton(Renderer.ofCurrentCulture resources) |> ignore
 
 ## Recipes
 
-Small things applications ask for, in the order they usually ask.
-
 ### Do not show the rejected value
 
 By default a failure that carries an actual value reads "must be at least 13, but was 11". The value clause is its
@@ -143,8 +136,8 @@ violation |> Violation.message (Renderer.ofLookup quiet.TryFind)
 
 ### Translate only the rules you actually use
 
-The four-key map above is the whole technique. Translate the identities your application produces, leave the rest,
-and check what is missing with [Adding a language](/constraints/adding-a-language.html).
+Translate the identities your application produces, leave the rest, and check what is missing with
+[Adding a language](/constraints/adding-a-language.html).
 
 ### Translate one of your own rules
 
@@ -152,10 +145,8 @@ Give the rule a key and it joins the same lookup, see [Custom rules](/constraint
 
 ### Do not translate the English sentence
 
-It is technically possible to render an English message and pass that whole string to a translation service at your
-own edge. It works, and it is worse than it looks: the string has already lost the rule's identity and its operands,
-so nothing can key a cached translation, agree on terminology across two messages, or format `13` the way the target
-language formats numbers. Look up the identity instead; that is what the identity is for.
+Rendering an English message before translation loses the rule's identity and operands. Look up the identity to
+cache translations, use consistent terminology, and format `13` for the target language.
 
 ## Where next
 

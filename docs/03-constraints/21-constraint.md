@@ -9,14 +9,9 @@ targetFramework: net8.0
 
 # Constraint
 
-Most validation stacks make you write every rule twice: once as the check, and once as the message that
-explains it to a person. The two live in different places, an attribute and a resource key, a builder call
-and a message override, a predicate and a string literal, and they drift. Someone widens a length limit
-and the error still quotes the old one.
-
-`Reified.Constraint` has no second place to write it. A `Constraint<'value>` is a reusable description of
-valid values, and the failure it produces is derived from that same description. **check** is the operation
-that runs it.
+When a check and its message are defined separately, changing a length limit can leave the error quoting the old one.
+A `Constraint<'value>` describes valid values and derives failures from the same description. `Constraint.check`
+runs it.
 
 ```fsharp
 open Reified
@@ -35,14 +30,12 @@ let retryCount : Constraint<int> =
 ```
 
 
-Nobody wrote `"expected a value between 0 and 10, but was 42"`. Change the bounds and the message changes
-with them, because it was never a separate artefact to keep in step.
+Change the bounds and the derived message changes with them.
 
 ## When you only want your own error
 
-Plenty of code does not want a `Violation` at all. It wants a function that returns the application's own error case,
-and nothing else. `Constraint.guard` keeps the checked value, and `Result.orError` throws the violation away in favour
-of your error:
+When a function needs only the application's error case, `Constraint.guard` keeps the checked value and
+`Result.orError` discards the violation:
 
 ```fsharp no-check reason="SignupError and InvalidEmail are the application's own error type; not values this page can construct standalone."
 let validateEmail raw : Result<string, SignupError> =
@@ -52,9 +45,7 @@ let validateEmail raw : Result<string, SignupError> =
 ```
 
 
-The function is no longer and no more ceremonious than the equivalent hand-written predicate, and
-unlike the predicate, `Constraint.email` is still the same value you can later put in a refinement, a schema, or a
-JSON Schema document without rewriting the rule.
+You can reuse `Constraint.email` in a refinement, a schema, or a JSON Schema document without rewriting the rule.
 
 `Result.orError` comes from `Reified.Result`. Without that package, `Result.mapError (fun _ -> InvalidEmail)` does the
 same thing.
@@ -93,8 +84,6 @@ raw
 |> Result.mapError InvalidEmail   // InvalidEmail of Violation
 ```
 
-
-The rest of this page is about that second path. Nothing here forces you onto it.
 
 ## The failure carries facts, not prose
 
@@ -146,14 +135,12 @@ Give the renderer a different culture and the identical violation reads `"Le nom
 with contextual fallback, and without any application code walking a violation tree or reproducing Reified's
 key catalogue.
 
-Translation is cheap here because it reuses the same split that removed the duplicated message in the
-first place, rather than adding a feature on top of it. Shipping in one language still gets the benefit;
-you simply never build the resources.
+If you ship in one language, you do not need translation resources.
 
 ## The same declaration is read by everything downstream
 
-There is one vocabulary, not several. A rule named in a module works unchanged in a refinement and in a
-schema, and the DSL spelling reads the same in all three places:
+A rule named in a module works unchanged in a refinement and in a schema. The DSL spelling is the same in all
+three places:
 
 ```fsharp isolated
 open Reified
@@ -188,7 +175,7 @@ Schema.text |> Schema.constrain Constraint.present
 
 
 A standalone binding is the exception: the annotation is the only type information there, so it is what
-selects the shape. A fresh, unrelated module name below, not a continuation of `SignupRules` above:
+selects the shape. Here is a separate module:
 
 ```fsharp isolated
 open Reified
@@ -211,7 +198,7 @@ The same value facts appear at three further levels:
 
 ## Where to go next
 
-Weighing this against DataAnnotations, FluentValidation, or Validus? Read
+For a comparison with DataAnnotations, FluentValidation, and Validus, read
 [How it compares](/comparisons/dataannotations-fluentvalidation-comparison.html).
 
 Otherwise take [ConstraintDSL](/constraints/dsl.html) for the full vocabulary and how to write a rule module,

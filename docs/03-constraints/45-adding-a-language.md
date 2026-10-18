@@ -11,8 +11,7 @@ targetFramework: net8.0
 Adding a language means supplying entries for keys Reified already publishes. The catalogue is available at runtime,
 so the resource file, the coverage test, and this page never have to be kept in sync by hand.
 
-The order below is the one that pays off: get the base catalogue rendering in the new language first, then
-override the handful of fields whose wording actually differs.
+Translate the base catalogue first, then override fields whose wording differs.
 
 ## 1. Generate the skeleton
 
@@ -66,7 +65,7 @@ key. An unknown name renders literally rather than throwing, so a typo shows up 
 
 ## 3. Translate the composition entries
 
-These four decide sentence shape, and they are where most of a language's character lives:
+These entries determine sentence shape:
 
 ```text
 constraint.attribute.default = valeur
@@ -125,8 +124,6 @@ let rec render tree =
     | MessageTree.Any (first, rest) -> yourDisjunction (render first) (List.map render rest)
 ```
 
-
-That is a required path for those languages, not a fallback for a pattern you have not found yet.
 
 ## 5. Name the fields
 
@@ -261,7 +258,7 @@ level; `attributeCandidates` returns the noun keys. Assert that at least one of 
 For a pluralized entry, pass an argument map with a representative operand, the selected suffix depends on the
 value, so `1` and `3` give you the `.one` and `.other` candidates respectively.
 
-## What a translator never has to do
+## What the catalogue handles
 
 - reproduce the key list by hand, it is `Catalogue.keys`;
 - write an optional-value template, `{actual}` is a separate composition entry;

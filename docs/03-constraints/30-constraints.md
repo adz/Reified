@@ -8,8 +8,7 @@ targetFramework: net8.0
 
 # Interpreted and opaque
 
-Constraints come in two tiers. The difference is not a quality judgement; it is whether anything other than the
-runtime can understand the rule.
+Constraints come in two tiers, distinguished by whether tools other than the runtime can understand the rule.
 
 ## Interpreted constraints
 
@@ -43,7 +42,7 @@ with the surrounding schema shape to reach `maxLength`, `maxItems`, or `maxPrope
 
 ## Opaque constraints
 
-Anything else runs perfectly well and is honestly invisible to export and proof.
+Opaque constraints run at runtime but cannot be exported or proved.
 
 ```fsharp
 let isValidIsbn (value: string) = value.Length = 13 && value.StartsWith "978"
@@ -145,15 +144,13 @@ The rule runs perfectly well. `Version` compares, so checking a value is exact. 
 ```
 
 
-Three separate consequences, worth keeping apart:
+This has three consequences:
 
 - **Checking is unaffected.** The constraint accepts and rejects exactly the values it should.
 - **Export cannot name the value.** JSON Schema, generated documentation, and test-data generation see an opaque rule
   and say nothing about it, rather than inventing a rendering.
 - **A derived message cannot print it.** `Violation.render` produces `"must be at least the required value"`, the
   relation, without the operand.
-
-Nothing is silently approximated, and no boxed value escapes through the inspection API.
 
 If that message is not good enough for your users, author the rule with prose instead, and keep the typed check:
 
@@ -162,8 +159,6 @@ let supportedVersionProse : Constraint<Version> =
     Constraint.custom "must be version 2.0 or later" (fun value -> value >= { Major = 2; Minor = 0 })
 ```
 
-
-That is opaque either way, so you lose nothing by saying what you mean.
 
 ## Prose that is not a rule
 
@@ -195,7 +190,7 @@ Interpreters divide by what they *claim*:
   retains the rest as readable prose plus `x-reified-runtime-constraints` entries, so a published document never implies
   a rule is enforced when it is not.
 
-That last rule has teeth, and lowering has three fidelities rather than two:
+Lowering has three fidelities:
 
 | Fidelity | Meaning | Example |
 | --- | --- | --- |
@@ -216,5 +211,5 @@ precisely this reason.
 Keywords that JSON Schema allows only once per node are merged rather than duplicated: several excluding rules
 become one `not: {anyOf: [...]}`, and several pattern-shaped rules become one `allOf`.
 
-Finally, `SchemaFormat.email` is a separate annotation that lowers to `format: "email"`. It makes no validation
+`SchemaFormat.email` is a separate annotation that lowers to `format: "email"`. It makes no validation
 claim of its own, and declaring it alongside `Constraint.email` emits both.

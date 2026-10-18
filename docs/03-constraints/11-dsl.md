@@ -8,8 +8,7 @@ targetFramework: net8.0
 
 # ConstraintDSL
 
-Reified provides a DSL for more concise constraints. It exposes the common constructors without the `Constraint.`
-prefix:
+`ConstraintDSL` exposes common constructors without the `Constraint.` prefix:
 
 ```fsharp
 open Reified
@@ -31,8 +30,7 @@ module SignupRules =
 ```
 
 
-The DSL changes vocabulary, not semantics. Every name here returns the same `Constraint<'value>` the qualified name
-returns; it is optional shorthand, not another abstraction.
+Each DSL name returns the same `Constraint<'value>` as its qualified counterpart.
 
 ## Type-directed names
 
@@ -53,11 +51,8 @@ Schema.text |> Schema.constrain present
 ```
 
 
-In each of those the surrounding type is already known, and the name resolves against it.
-
-The one case that needs help is a binding whose only type information *is* the annotation, which is also the
-central story of naming a reusable rule. Dispatch runs on the return type, so without the annotation the compiler
-has nothing to select on:
+Here the surrounding type selects the shape. A standalone binding needs a type annotation because dispatch runs
+on the return type:
 
 ```fsharp isolated
 open Reified
@@ -103,8 +98,7 @@ Constraint.satisfies emoji "\U0001F600"   // true
 ```
 
 
-That is the definition users mean by "length", and it is the one JavaScript and .NET can be made to agree on, so
-the same constraint reports the same size in a browser and on a server. Collections count elements, and maps count
+Counting code points gives the same size in a browser and on a server. Collections count elements, and maps count
 entries; the atom is shape-neutral and an interpreter combines it with the surrounding shape to reach `maxLength`,
 `maxItems`, or `maxProperties`.
 
