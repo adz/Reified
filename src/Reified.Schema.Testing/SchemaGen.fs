@@ -445,6 +445,18 @@ module SchemaGen =
     let raw (schema: Schema<'model>) : Result<Gen<Data>, SchemaGenerationError> =
         rawWith Map.empty schema
 
+    /// Checks that generated models survive JSON encoding and decoding unchanged; unsupported rules fail closed.
+    /// <example><code>SchemaGen.roundTrip schema |> Result.defaultWith (failwithf "%A")</code></example>
+    let roundTrip (schema: Schema<'model>) : Result<unit, SchemaGenerationError> when 'model: equality =
+        raw schema
+        |> Result.map (fun generator ->
+            let codec = Json.compile schema
+            for input in Gen.sample 100 generator do
+                let value = Schema.parse schema input |> Result.defaultWith (failwithf "Generated invalid input: %A")
+                let decoded = Json.deserialize codec (Json.serialize codec value)
+                if decoded <> value then
+                    failwithf "JSON round trip changed generated value: %A -> %A" value decoded)
+
     /// Derives models by generating structured data and parsing it through the schema.
     let model (schema: Schema<'model>) : Result<Gen<'model>, SchemaGenerationError> =
         raw schema

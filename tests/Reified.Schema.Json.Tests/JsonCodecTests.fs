@@ -94,6 +94,14 @@ module JsonCodecTests =
             @>
 
     [<Fact>]
+    let ``tryParseData returns data or a rendered error`` () =
+        test <@ Json.tryParseData "[1]" = Ok(Data.List [ Data.Number "1" ]) @>
+        match Json.tryParseData "{} []" with
+        | Error message -> Assert.NotEmpty message
+        | Ok _ -> failwith "Expected malformed JSON to fail"
+        Assert.Throws<System.ArgumentNullException>(fun () -> Json.tryParseData null |> ignore) |> ignore
+
+    [<Fact>]
     let ``parseData rejects trailing content`` () =
         let ex = Assert.Throws<JsonCodecException>(fun () -> Json.parseData "{} []" |> ignore)
         test <@ ex.Message.Contains "trailing content" @>

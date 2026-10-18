@@ -53,8 +53,8 @@ let isbn : Constraint<string> =
 ```
 
 
-`custom` takes a predicate and reports the supplied prose on failure. `customWith` takes a callback that returns its
-own violation, for when the failure deserves a structured reason. Its callback is exactly the shape of
+`custom` takes a predicate and reports the supplied prose on failure. `customWith` takes a metadata label first,
+then a callback that returns its own violation, for when the failure deserves a structured reason. Its callback is exactly the shape of
 `Constraint.check` applied to a rule, so the usual way to supply one is to reuse a built-in rather than build a
 violation by hand:
 
@@ -62,7 +62,7 @@ violation by hand:
 let supportedCurrencies = [ "USD"; "EUR"; "GBP" ]
 
 let currency : Constraint<string> =
-    Constraint.customWith "must be a supported currency" (Constraint.check (Constraint.oneOf supportedCurrencies))
+    Constraint.customWith "supported currency rule" (Constraint.check (Constraint.oneOf supportedCurrencies))
 ```
 
 

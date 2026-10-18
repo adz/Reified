@@ -78,17 +78,6 @@ From the same ZIO comparison; these belong *with* the remote-config milestone, n
   conversion, and `Json.compile`. Building the reference app got this wrong more than once. Writing an old version
   should stay opt-in and rare, so a documented recipe may be the whole answer.
 
-- **Logs Digger feedback (2026-10).** From using Reified for settings, query validation, and JSON lines:
-  - `Json.tryParseData : string -> Result<Data, string>`, matching `tryDeserialize`; `Json.parseData` throws on
-    malformed input, so JSON-lines readers wrap every call in `try`.
-  - `Violation.described "message"` shorthand for `Violation.Atomic(AtomicViolation.Described("message", None))`.
-  - Name `customWith`'s first argument as the metadata label in docs and examples; it looks like the user-facing
-    message, which actually comes from the returned violation.
-  - Troubleshooting note: a domain union case named `Error` shadows `Result.Error` in files that open Reified;
-    use `[<RequireQualifiedAccess>]`.
-  - Make mapping a union to and from a string as easy as `field` (Logs Digger stored a time mode as a `oneOf`
-    string because the union path looked harder), and document it.
-  - A one-line generated round-trip test helper: given a schema, generate values and assert decode(encode v) = v.
 
 ## Why 1.0 is held back
 

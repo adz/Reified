@@ -450,7 +450,7 @@ module ApiShapeTests =
         moduleTypeFromAssembly "Reified.Schema" "Reified.Json"
         |> publicStaticMemberNames
         |> assertContainsAll
-            [ "compile"; "serialize"; "serializeBytes"; "parseData"; "deserialize"; "deserializeBytes"; "tryDeserialize" ]
+            [ "compile"; "serialize"; "serializeBytes"; "parseData"; "tryParseData"; "deserialize"; "deserializeBytes"; "tryDeserialize" ]
 
         test <@ not (isNull (schemaAssembly.GetType("Reified.JsonCodec`1", false))) @>
         test <@ not (isNull (schemaAssembly.GetType("Reified.JsonCodecException", false))) @>
@@ -1264,7 +1264,7 @@ module ApiShapeTests =
 
         violationMembers
         |> assertContainsAll
-            [ "tryExpectation"; "tryActual"; "tryDescription"; "children"; "flatten"; "render"; "toMessageTree"; "conjoin"; "alternatives" ]
+            [ "tryExpectation"; "tryActual"; "tryDescription"; "children"; "flatten"; "render"; "toMessageTree"; "conjoin"; "alternatives"; "described" ]
 
         // A string identity never appears on a violation; keys exist only as a rendering projection.
         violationMembers |> assertContainsNone [ "code"; "kind"; "fold"; "describe"; "generic" ]

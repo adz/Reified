@@ -535,6 +535,10 @@ module ConstraintTests =
 
     module Violations =
         [<Fact>]
+        let ``described creates an opaque atomic violation`` () =
+            test <@ Violation.described "bad value" = Atomic(Described("bad value", None)) @>
+
+        [<Fact>]
         let ``failure families that used to collapse together are now distinct`` () =
             let families =
                 [ violation (Constraint.equalTo 1) 2

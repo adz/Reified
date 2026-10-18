@@ -71,7 +71,8 @@ one case.
 
 ### String enums: `Schema.enum`
 
-An all-fieldless union is a JSON string:
+An all-fieldless union is a JSON string. Use `Schema.enum` with an explicit list of string tags and values;
+no reflection or separate `string` field is needed:
 
 ```fsharp
 type Status =
@@ -81,7 +82,7 @@ type Status =
 ```
 
 
-```fsharp no-check reason="The example depends on the application-owned Status union."
+```fsharp
 let statusSchema =
     Schema.enum
         [ EnumCase.create "pending" Pending
@@ -89,6 +90,12 @@ let statusSchema =
           EnumCase.create "complete" Complete ]
 ```
 
+
+```fsharp
+let codec = Json.compile statusSchema
+let encoded = Json.serialize codec InProgress // "\"inProgress\""
+let decoded = Json.deserialize codec encoded // InProgress
+```
 
 ```json
 "inProgress"

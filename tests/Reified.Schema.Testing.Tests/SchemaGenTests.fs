@@ -76,6 +76,10 @@ module SchemaGenTests =
         test <@ models |> Array.forall (fun model -> model.Aliases.Length >= 1 && model.Aliases.Length <= 3) @>
 
     [<Fact>]
+    let ``generated models round trip through JSON`` () =
+        SchemaGen.roundTrip (profileSchema ()) |> Result.defaultWith (failwithf "%A")
+
+    [<Fact>]
     let ``trusted-model generator returns only validated values`` () =
         let generator = SchemaGen.model (profileSchema ()) |> Result.defaultWith (failwithf "%A")
         let models = Gen.sample 100 generator

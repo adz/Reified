@@ -26,6 +26,7 @@
 - `case "tag" { tryExtract tryCase; fieldAs ...; construct ... }` declares named fields for one general-union case with the record-schema vocabulary. The extractor returns `Some payload` for that case and `None` for every other union value.
 - Build derivation accepts namespace-level or file-module-level records, resolves fully qualified cross-file derived types, and supports derived unions nested in payloads and collections.
 - Each fully qualified derived union has one generated schema binding; all fields, nested payloads, collections, and cross-file consumers reference it.
+- `Schema.enum [ EnumCase.create "wireTag" Case; ... ]` maps fieldless union cases to and from JSON strings.
 - Generated enum and transparent-wrapper schemas live beside their owning F# type and are reused across generated files.
 - A contributed refined type can expose a static canonical `Schema` member, making a plain field declaration enough.
 - `Syntax.schema` is only needed when a recursive binding named `schema` shadows the builder. Keep `field` and

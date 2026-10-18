@@ -114,6 +114,14 @@ let parsed = Schema.parse customerSchema (Data.ofJsonDocument document)
 ```
 
 
+For JSON lines without a model codec, `Json.tryParseData` returns `Result<Data, string>` instead of throwing on
+malformed lines. Null input still raises `ArgumentNullException`:
+
+```fsharp
+let line = Json.tryParseData "{\"name\":\"Ada\"}"
+// Ok (Data.Object [ "name", Data.Text "Ada" ])
+```
+
 ## Bytes In, Bytes Out
 
 `Json.serializeBytes` and `Json.deserializeBytes` avoid the string conversion when the payload already lives as UTF-8

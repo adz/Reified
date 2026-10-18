@@ -103,7 +103,7 @@ The same constraint values provide executable checks and `ConstraintDescription`
 
 Use `Constraint.customWith` for an invariant no built-in constraint describes, then hand that opaque constraint to
 `Refinement.define` like any other. The check runs, but nothing downstream can read the rule, the trade-off is
-[interpreted versus opaque](/constraints/constraints.html). `customWith`'s own string argument ("even" below) only
+[interpreted versus opaque](/constraints/constraints.html). `customWith`'s metadata label ("even-number rule" below) only
 feeds that opaque `ConstraintDescription`; a caller sees the callback's own `Described` text on failure, not that
 string:
 
@@ -118,10 +118,10 @@ module EvenInt =
 
     let private even value =
         if value % 2 = 0 then Ok ()
-        else Error(Violation.Atomic(AtomicViolation.Described("must be an even number", None)))
+        else Error(Violation.described "must be an even number")
 
     let refinement =
-        Refinement.define (Constraint.customWith "even" even) EvenInt value
+        Refinement.define (Constraint.customWith "even-number rule" even) EvenInt value
 ```
 
 

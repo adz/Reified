@@ -1508,6 +1508,15 @@ module rec Json =
 
         decodeRootWith dataDecoder (Encoding.UTF8.GetBytes json)
 
+    /// <summary>Parses a JSON string into Data, returning malformed input as a rendered message.</summary>
+    /// <example><code>Json.tryParseData "{\"name\":\"Ada\"}" // Ok (Data.Object [ "name", Data.Text "Ada" ])</code></example>
+    /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="json" /> is null.</exception>
+    let tryParseData (json: string) : Result<Data, string> =
+        try
+            Ok(parseData json)
+        with :? JsonCodecException as ex ->
+            Error ex.Message
+
     /// <summary>Deserializes UTF-8 JSON bytes to a trusted model through a compiled codec.</summary>
     /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="codec" /> or <paramref name="bytes" /> is null.</exception>
     /// <exception cref="T:Reified.JsonCodecException">Thrown when the JSON does not match the schema's wire shape.</exception>

@@ -77,6 +77,10 @@ type MessageTree =
 [<RequireQualifiedAccess>]
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 module Violation =
+    /// <summary>Reports an opaque failure with author-supplied prose and no catalogue key.</summary>
+    /// <example><code>Violation.described "must be even" // Atomic (Described ("must be even", None))</code></example>
+    let described (message: string) : Violation = Atomic(Described(message, None))
+
     /// <summary>
     /// Groups failures as a conjunction, returning <c>None</c> for no failures and the single failure unchanged
     /// for one.

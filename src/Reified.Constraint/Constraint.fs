@@ -325,9 +325,10 @@ module Constraint =
     /// The callback's shape is exactly <c>Constraint.check</c> applied to a constraint, so the usual way to
     /// supply a structured reason is to reuse a built-in rather than build a violation by hand.
     /// </remarks>
-    /// <example><code>let supported = [ "USD"; "EUR" ] in Constraint.customWith "must be a supported currency" (Constraint.check (Constraint.oneOf supported))</code></example>
-    let customWith (description: string) (check: 'value -> Result<unit, Violation>) : Constraint<'value> =
-        ensureProse (nameof description) description
+    /// <remarks><paramref name="metadataLabel" /> labels the opaque description; the callback's violation supplies the user-facing failure message.</remarks>
+    /// <example><code>let supported = [ "USD"; "EUR" ] in Constraint.customWith "supported currency rule" (Constraint.check (Constraint.oneOf supported))</code></example>
+    let customWith (metadataLabel: string) (check: 'value -> Result<unit, Violation>) : Constraint<'value> =
+        ensureProse (nameof metadataLabel) metadataLabel
         ensureFunction (nameof check) check
 
         Constraint<'value>(
@@ -336,7 +337,7 @@ module Constraint =
                 | Ok() -> true
                 | Error _ -> false),
             check,
-            ConstraintDescription.ofExpression (ConstraintExpression.Opaque(OpaqueConstraint.CustomPredicate description))
+            ConstraintDescription.ofExpression (ConstraintExpression.Opaque(OpaqueConstraint.CustomPredicate metadataLabel))
         )
 
     /// <summary>Applies a constraint to a projection of a larger value.</summary>

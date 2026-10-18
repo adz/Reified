@@ -88,6 +88,9 @@ The build writes `Wire.g.fs` beside `Wire.fs` and still manages F# compile order
 
 ## Troubleshooting
 
+- **`Result.Error` fails to resolve:** a domain union case named `Error` can shadow `Result.Error` in files that
+  `open Reified`. Mark the domain union `[<RequireQualifiedAccess>]` and qualify its cases.
+
 - **No output:** confirm generation is enabled, the source is a `<Compile>` item, and the record has
   `[<DeriveSchema>]`.
 - **Container diagnostic:** each derived source file must use one namespace or one file-level module, with marked
