@@ -23,11 +23,10 @@ path natively.
   builds converters through reflection and requires source generators for AOT. Reified uses the explicit path.
 - **Refined values are functions, not conventions.** `Schema.convert construct inspect` carries the conversion in both
   directions as ordinary closures.
-- **Services are explicit.** Dependencies live in `'env` records or nominal `IHas<'service>` contracts; there is no
-  runtime service map or proxy generation.
-
-The one deliberate exception: `Service<'service>.resolve()` can look up registrations from an
-`IServiceProvider` at .NET host edges. That is host integration you opt into at the boundary, not a core mechanism.
+- **Services are explicit.** Reified has no service-resolution API. Dependencies live in your own `'env` records;
+  resolving them from a container is application-owned code at the host edge (see
+  [Keep service-provider lookup at the host](/schema/patterns/project-structure.html#keep-service-provider-lookup-at-the-host)),
+  not a Reified mechanism.
 
 ## Verified In CI
 

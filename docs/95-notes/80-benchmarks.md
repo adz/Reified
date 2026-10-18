@@ -63,8 +63,8 @@ Codec compilation is separate from per-payload work:
 | --- | --- | --- |
 | `Json.compile` for the customer schema | 14.19 us | 20.45 KB |
 
-Compile a codec once and reuse it. Recompiling per payload would dominate the encode path and cost roughly two to
-three times one decode on this model.
+Compile a codec once and reuse it. One compile costs 14.19 us, roughly five to six times a single decode on this
+model (2.42-3.10 us), so recompiling per payload would dominate the per-payload work.
 
 ## Boundary parsing
 
@@ -133,9 +133,11 @@ Measured 2026-09-29 with BenchmarkDotNet's `medium` job (15 iterations, 2 launch
 `ReifiedBenchmarks.Schema.JsonCodecBenchmarks`, the same customer aggregate as the table above, on an otherwise
 idle machine. See [`dev-docs/BenchmarkProcess.md`](https://github.com/adz/Reified/blob/main/dev-docs/BenchmarkProcess.md)
 for steps to reproduce this multi-runtime run, including workarounds for two BenchmarkDotNet bugs that can
-benchmark the wrong runtime.
+benchmark the wrong runtime. The column labels are .NET SDK versions: the benchmark project is retargeted to the
+matching target framework (`net8.0`, `net10.0`, `net11.0`) and each column measures that SDK's matching runtime.
+The Reified packages themselves target `netstandard2.1` and `net8.0`.
 
-| Path | .NET 8.0.424 | .NET 10.0.300 (this package's target) | .NET 11.0.100-rc.1 |
+| Path | SDK 8.0.424 | SDK 10.0.300 | SDK 11.0.100-rc.1 |
 | --- | --- | --- | --- |
 | Deserialize UTF-8 | Reified 2.821 us, STJ 3.262 us (Reified +16%) | Reified 2.285 us, STJ 2.614 us (Reified +14%) | Reified 2.438 us, STJ 2.612 us (Reified +7%) |
 | Deserialize string | Reified 2.996 us, STJ 3.425 us (Reified +14%) | Reified 2.470 us, STJ 2.677 us (Reified +8%) | Reified 2.560 us, STJ 2.681 us (Reified +5%) |

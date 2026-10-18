@@ -35,9 +35,11 @@ each be used without Schema. Every package depends only on what it uses.
 
 ## .NET and Fable
 
-These run on .NET and compile to Fable JavaScript, which is a separate compilation of the same F# sources. Each is
-exercised on Node and in the browser without depending on either host, so they also work in other JavaScript
-environments that provide the primitives they use.
+These run on .NET and compile to Fable JavaScript, which is a separate compilation of the same F# sources. CI
+compiles the Fable surface and runs it on Node; the compiled modules are declaration-only and marked side-effect-free,
+so browsers can tree-shake them, and they work in other JavaScript environments that provide the primitives they use.
+The repository has no browser test suite, so browser support is verified by that side-effect-free compile, not by
+execution in a browser.
 
 | Package | What it gives you | Install |
 | --- | --- | --- |
@@ -63,8 +65,10 @@ fieldAs "email_address" _.Email   // declares it
 
 `field` reads an F# quotation to derive the wire name, so it needs a target that supports quotations: JavaScript,
 TypeScript, Python, and BEAM from Fable 5.10, and Dart from 5.13. Fable's Rust and PHP targets have no quotation
-support, so declare names there with `fieldAs`. Everything else, field typing, schema inference, constraints,
-constructors, parsing, checking, and codecs, is available on every target either way.
+support, so declare names there with `fieldAs`. Field typing, schema inference, constraints, constructors, parsing,
+checking, and codecs are available with either form on every target; the exceptions are .NET-only conveniences such as
+the `DateOnly` field type and `Data.ofJsonDocument`, which are compile-time gated out of the Fable surface (see
+[Compiler-Directed: AOT and Fable](/notes/aot-trimming-fable.html)).
 
 ## Development tools
 
