@@ -4,6 +4,9 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 ## Assumptions
 
+- `docs/95-notes/82-aot-trimming-fable.md:29-36` — verify whether every push runs the NativeAOT probe and whether its trimmer warnings are treated as errors; “if a change introduced reflection ... CI fails” is stronger than merely publishing and running the probe.
+- `docs/95-notes/95-packages-and-platforms.md:38-40` — verify the claim that each listed package is exercised in a browser, not only on Node; the coverage claim affects platform choice.
+
 - `docs/90-comparisons/05-dataannotations-fluentvalidation-comparison.md:31-36` — verify the exact default `Violation.render` sentence; the comment presents it as executable output.
 - `docs/90-comparisons/20-fluentvalidation-comparison.md:78-79` — confirm whether `Schema.check` runs the constructor and preserves the original model or constructs a new one; this comparison describes both as one operation.
 
@@ -34,6 +37,12 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/06-data/50-testing-schema-guarantees.md:26-27,116` — confirm whether `SchemaGen.model` checks generated results with `Schema.check` after parsing, and how unsupported constraints or constructor failures are surfaced; the prose promises accepted models but the example unwraps generation only.
 
 ## Unclear or misleading
+
+- `docs/95-notes/_index.md:23` — promises benchmarks “on .NET and Fable,” but the benchmarks page contains only .NET runtime tables; remove Fable or link Fable measurements.
+- `docs/95-notes/95-packages-and-platforms.md:64-67` — “Everything else ... is available on every target” extends beyond the listed tested JavaScript surface and conflicts with the AOT/Fable page's .NET-only `DateOnly` and `Data.ofJsonDocument` caveat; scope the statement to supported field types and verified targets.
+- `docs/95-notes/82-aot-trimming-fable.md:17-26` — “no runtime reflection in hot paths” is qualified by optional `IServiceProvider` resolution, but new users are not told which package supplies `Service<'service>` or whether it is included in the Fable set; identify the API owner and platform boundary.
+- `docs/95-notes/80-benchmarks.md:54-58` — 14.19 us compile versus 2.42–3.10 us decode is roughly 4.6–5.9 decodes, not “two to three times one decode”; correct the comparison or specify another denominator.
+- `docs/95-notes/80-benchmarks.md:138-143` — table labels .NET 10.0.300 “this package's target,” although that is an SDK version and the notes page front matter says `net8.0`; distinguish SDK, runtime, and target framework.
 
 - `docs/90-comparisons/20-fluentvalidation-comparison.md:10-11,58,85` — the public `Customer` record can be created without parsing, so “cannot exist in an invalid state,” “every Customer in the program passed the boundary,” and “Invalid object exists? No” are false as written. Limit the claim to values returned by `Schema.parse`, and note that the shown `Name` rule permits empty text.
 - `docs/90-comparisons/20-fluentvalidation-comparison.md:68-71` — says the same declaration produces UI metadata and JSON codecs as consequences of inspectable constraints; distinguish schema structure from constraints, and note that trusted codec decoding does not enforce value rules.
@@ -88,6 +97,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 ## Too long
 
+- `docs/95-notes/95-packages-and-platforms.md:54-67` and `docs/95-notes/82-aot-trimming-fable.md:92-116` — repeat the same Fable quotation target/version table and `field`/`fieldAs` example; keep detailed compatibility in one page and link it from the package inventory.
+
 - `docs/90-comparisons/05-dataannotations-fluentvalidation-comparison.md:64-76,108-120` — repeats the same `Constraint.guard Constraint.email` example twice with only error mapping changed. Show both mappings together once.
 - `docs/90-comparisons/05-dataannotations-fluentvalidation-comparison.md:77-120` and `docs/90-comparisons/20-fluentvalidation-comparison.md:8-89` — two FluentValidation comparisons repeat the rules-as-data argument; link the focused Schema comparison from the Constraint comparison and keep their different scopes explicit.
 
@@ -107,6 +118,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/06-data/_index.md:106-140` and `docs/06-data/20-declaring-and-editing.md:73-114` repeat the same control-flow fixture and output. Keep the full example in the focused page and shorten the landing-page example.
 
 ## Reference material in guides
+
+- `docs/95-notes/95-packages-and-platforms.md:42-49,74-78` — package/install and tooling availability tables are useful reference material; keep them in Notes as the central install inventory and link them from guides rather than repeating setup lists.
 
 - `docs/90-comparisons/90-fstoolkit-comparison.md:24-32` — the API-equivalence table is useful as a comparison quick reference; keep it here rather than duplicating it across Result guides, and link the Result reference for precise signatures.
 
@@ -130,6 +143,9 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/06-data/21-how-to-test-produced-json.md:169-199` — the complete pattern inventory and return-type summary belong beside the matching API reference; retain a few representative patterns in the walkthrough.
 
 ## Missing
+
+- `docs/95-notes/95-packages-and-platforms.md:11-18,69-84` — give a minimal Fable project install/compile recipe or point to one; `dotnet add package` alone does not show how a JavaScript client consumes these packages or generated output.
+- `docs/95-notes/82-aot-trimming-fable.md:78-90` — bundle-size estimates omit esbuild/Fable versions, build settings, and a reproducible command or linked recipe; readers cannot compare their own bundles to these numbers.
 
 - `docs/90-comparisons/_index.md:4-10` — the landing description mentions only Schema, despite the Constraint and Result comparisons; add links and a sentence distinguishing the three comparison scopes.
 - `docs/90-comparisons/20-fluentvalidation-comparison.md:38-60` — the example uses `Constraint` and `Data` without showing imports or package setup, and uses `printfn` in a boundary example; show a complete application-host example or explicitly label it a fragment.
@@ -163,6 +179,9 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/06-data/31-how-to-build-test-cases.md:112-114` — explain the error type/exception when `matrix` exceeds 256 combinations or a dimension has no variations, so test authors can diagnose case-generation failure.
 
 ## Suggestions for humans and LLMs
+
+- `docs/95-notes/80-benchmarks.md:31-46,126-152` — put a short “which path to benchmark” reminder beside the multi-runtime comparison: its trusted codec figures do not measure untrusted boundary admission, whose costs are reported separately at lines 60-79.
+- `docs/95-notes/82-aot-trimming-fable.md:40-55` — separate published-package advice from the repo-only `ProjectReference` props path; an assistant copying the latter into an installed application will point at a nonexistent local file.
 
 - `docs/90-comparisons/05-dataannotations-fluentvalidation-comparison.md:67-75,114-118` — both email snippets are marked `no-check` and omit the caller's error union; provide one complete example of `InvalidEmail` with and without a `Violation` so assistants do not invent its shape.
 - `docs/90-comparisons/30-zod-comparison.md:39-45` — link supported Fable targets and a complete `RetainedParseResult` example; the one-line API names do not show how to obtain a retained parse result.
