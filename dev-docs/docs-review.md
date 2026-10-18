@@ -12,7 +12,7 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/90-comparisons/05-dataannotations-fluentvalidation-comparison.md:31-36` — verify the exact default `Violation.render` sentence; the comment presents it as executable output.
 - `docs/90-comparisons/20-fluentvalidation-comparison.md:78-79` — confirm whether `Schema.check` runs the constructor and preserves the original model or constructs a new one; this comparison describes both as one operation.
 
-- `docs/07-result-handling/80-collecting-errors.md:112-127` — confirm how `result.list` distinguishes an already-collected `Result<_, SignupError list>` from a single-error binding, especially when inference has not fixed the error type; the flattening claim is important to copyable composition.
+- [fixed] `docs/07-result-handling/80-collecting-errors.md:112-127` — confirm how `result.list` distinguishes an already-collected `Result<_, SignupError list>` from a single-error binding, especially when inference has not fixed the error type; the flattening claim is important to copyable composition.
 
 - [fixed] `docs/05-parsing/_index.md:61-73` — confirm whether invariant-culture thousands separators and exponent/overflow handling match the stated accepted forms across numeric parsers; the table reads as an exact grammar.
 
@@ -56,9 +56,9 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/90-comparisons/30-zod-comparison.md:31-33` — “on par with System.Text.Json” reads as a broad performance claim without a workload or benchmark; specify the measured operation or remove it.
 - `docs/90-comparisons/05-dataannotations-fluentvalidation-comparison.md:83-86,93-98` — categorical claims that DataAnnotations rules cannot be reused and FluentValidation rules cannot be shared disregard reusable custom attributes, `Include`, and reusable validators; specify that the *declaration attached to a property/type* is not the same free-standing inspectable value.
 
-- `docs/07-result-handling/50-collections.md:123-124` — says an infinite sequence will not terminate through *any* traversal, but fail-fast `traverse`/`sequence` can terminate on an early error. Qualify this for successful or all-errors traversal.
-- `docs/07-result-handling/80-collecting-errors.md:150-160` — the form supplies string `"12"` for an `int` field but the example does not show a text-to-int parser; clarify whether `Data.ofNameValues` plus `Schema.parse` converts it and show the actual diagnostic shape rather than a schematic comment.
-- `docs/07-result-handling/70-result-ce.md:132-146` — a `result` block illustrates filesystem I/O despite the section's description-only context; label it explicitly as host-owned illustrative code so readers do not infer this package opens readers.
+- [fixed] `docs/07-result-handling/50-collections.md:123-124` — says an infinite sequence will not terminate through *any* traversal, but fail-fast `traverse`/`sequence` can terminate on an early error. Qualify this for successful or all-errors traversal.
+- [fixed] `docs/07-result-handling/80-collecting-errors.md:150-160` — the form supplies string `"12"` for an `int` field but the example does not show a text-to-int parser; clarify whether `Data.ofNameValues` plus `Schema.parse` converts it and show the actual diagnostic shape rather than a schematic comment.
+- [fixed] `docs/07-result-handling/70-result-ce.md:132-146` — a `result` block illustrates filesystem I/O despite the section's description-only context; label it explicitly as host-owned illustrative code so readers do not infer this package opens readers.
 
 - [fixed] `docs/05-parsing/_index.md:95-99` — `OutOfRange` also covers numbers too negative for the destination type; the sample message “too large” mislabels that case.
 - [fixed] `docs/05-parsing/_index.md:186-206` — “a refinement admits it into a domain type” but `quantity` returns the guarded `int`, not a refined type. Either construct a refinement or describe this as parsing followed by a value check.

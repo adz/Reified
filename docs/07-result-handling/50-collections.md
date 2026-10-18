@@ -120,5 +120,6 @@ An array or a `seq` goes in; a list comes out. Convert afterwards with `Result.m
 ```
 
 
-`traverse` and `sequence` enumerate the input up to the failure point; `traverseAll` and `sequenceAll` enumerate all
-of it. An infinite sequence will not terminate through any of them.
+All four convert the input to a list up front, so a lazy sequence is fully forced and an infinite one will not
+terminate through any of them. `traverse` and `sequence` then stop *mapping* at the first failure, while
+`traverseAll` and `sequenceAll` run every mapping.

@@ -129,7 +129,9 @@ calls
 
 ## Control flow inside a block
 
-The builder supports the ordinary constructs, so a block is not restricted to a straight run of bindings:
+The builder supports the ordinary constructs, so a block is not restricted to a straight run of bindings. The
+reader and validation calls below are placeholders for the caller's own host I/O; `result { }` only sequences them
+and never opens a file or performs I/O itself:
 
 ```fsharp no-check reason="openReader/path/readHeader/lines/validate/isDone/step are illustrative placeholders for the caller's own I/O; not values this page can construct standalone."
 result {

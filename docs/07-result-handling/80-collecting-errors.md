@@ -109,8 +109,9 @@ hides every later one.
 
 ## Composing blocks
 
-A binding that already carries the collected type passes through without being wrapped again, so the output of one
-accumulating block can feed another:
+A binding whose error type is already the collected container passes through unchanged, and a single-error binding
+is lifted to a one-error list before both join. The output of one accumulating block can therefore feed another
+without nesting:
 
 ```fsharp
 let already: Result<int, SignupError list> = Error [ NameMissing ]
@@ -124,7 +125,9 @@ result.list {
 ```
 
 
-The errors are flattened into one list rather than nested.
+`already` arrives as `Result<int, SignupError list>` and is used unchanged; `parseAge "abc"` arrives as
+`Result<int, SignupError>` and is lifted to `Error [AgeNotANumber "abc"]`. The two are appended into one flat list
+rather than nested.
 
 ## What it does not do
 
@@ -156,8 +159,20 @@ let signupSchema =
 
 let form = [ "name", ""; "age", "12" ]
 
-Data.ofNameValues form |> Schema.parse signupSchema
-// Error carries name -> present, age -> atLeast 18
+match Data.ofNameValues form |> Schema.parse signupSchema with
+| Ok signup -> printfn "%A" signup
+| Error errors ->
+    for issue in SchemaErrors.toList errors do
+        printfn "%s: %s" (SchemaPath.format issue.Path) (SchemaError.render issue.Error)
+```
+
+
+`Data.ofNameValues` keeps each value as text. `Schema.parse` reads each field's serialized form, so `"12"` is parsed
+into `12` and then fails `atLeast 18`, while `""` fails `present`:
+
+```text
+age: Expected a value at least 18, but was 12.
+name: Value must be present.
 ```
 
 
