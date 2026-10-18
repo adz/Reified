@@ -12,6 +12,8 @@ targetFramework: net8.0
 every language. Name a key and the rule becomes translatable:
 
 ```fsharp
+open Reified
+
 let isValidIsbn (value: string) =
     value.Length = 13
 
@@ -27,6 +29,22 @@ let isbnWithLength =
         "must be a valid ISBN"
         (Map.ofList [ "expectedLength", ConstraintValue.Integer 13L ])
         isValidIsbn
+
+// Untranslated, the prose is the fallback.
+Constraint.check isbn "123"
+|> Result.mapError Violation.render
+// Error "must be a valid ISBN"
+
+// With a lookup, the same key renders the translation.
+let translations =
+    Map.ofList [ "books.isbn.invalid", "doit être un ISBN valide" ]
+
+Constraint.check isbn "123"
+|> Result.mapError (Violation.renderWith (fun descriptor ->
+    translations
+    |> Map.tryFind (MessageDescriptor.key descriptor)
+    |> Option.defaultValue "must be a valid ISBN"))
+// Error "doit être un ISBN valide"
 ```
 
 

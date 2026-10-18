@@ -218,20 +218,37 @@ violation |> Violation.fullMessage (signup |> Renderer.attribute "name") |> igno
 
 ## 9. Prove coverage
 
-Base-catalogue coverage is a one-line test:
+Base-catalogue coverage needs one predicate, because the skeleton emits `.one`/`.other` pairs for pluralized
+entries instead of the bare key. A filled skeleton therefore satisfies either the bare key or both plural forms,
+and never both a bare key and its plural pair at once:
 
 ```fsharp no-check reason="Illustrates a real xUnit/Unquote test; those test-framework dependencies are not available to this page's own compile check."
+let coversKey (translations: Map<string, string>) (key: string) =
+    match Catalogue.pluralArgument.TryFind key with
+    | Some (Some _) ->
+        translations.ContainsKey (key + ".one")
+        && translations.ContainsKey (key + ".other")
+    | _ -> translations.ContainsKey key
+
 [<Fact>]
 let ``the French catalogue covers every Reified key`` () =
     let missing =
-        Catalogue.keys @ SchemaMessages.keys
-        |> List.filter (fun key -> not (french.ContainsKey key))
+        Catalogue.keys
+        |> List.filter (fun key -> not (coversKey french key))
+        |> List.append (
+            SchemaMessages.keys
+            |> List.filter (fun key -> not (french.ContainsKey key))
+        )
 
     test <@ missing = [] @>
 ```
 
+`SchemaMessages` has no plural entries, so its keys keep the bare `ContainsKey` check.
 
-Reified cannot enumerate your contexts and fields, it has never seen them. For contextual coverage, enumerate the
+This proves base-catalogue coverage only. Contextual overrides such as
+`signup.name.constraint.presence.present` are application-authored, not enumerable from `Catalogue.keys`, so a
+skeleton never emits them and this test does not check them. Reified cannot enumerate your contexts and fields,
+it has never seen them. For contextual coverage, enumerate the
 ones you care about and ask the renderer exactly what it will look up:
 
 ```fsharp

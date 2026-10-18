@@ -101,10 +101,17 @@ let signupSchema =
 - `Schema.admit create project draftSchema` constructs a domain model from a structured draft while preserving fields.
 
 ```fsharp
-let centsSchema : Schema<decimal> =
+type Cents = Cents of int
+
+let centsSchema : Schema<Cents> =
     Schema.int
-    |> Schema.convert decimal int
+    |> Schema.convert Cents (fun (Cents cents) -> cents)
 ```
+
+`convert` requires a total forward mapping, because it constructs the value with no error channel. A narrowing
+backward mapping such as `decimal → int` truncates fractional values and can throw on out-of-range input, so it
+belongs behind `Schema.tryConvert` with an explicit error, not in a total `convert`. The example above stays
+reversible in both directions.
 
 
 A draft stays public and freely constructible; only the aggregate it admits into enforces the invariant, see

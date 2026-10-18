@@ -69,6 +69,51 @@ UnitInterval.create Double.NaN // Error, NaN is outside every interval
 ```
 
 
+All four field constructors fail with the same `Violation` type, so one `result { }` block admits the whole order
+without an error-union mapping:
+
+```fsharp
+let order
+    rawReference
+    (rawLines: (string * int * decimal) list)
+    rawDiscount
+    rawFrom
+    rawTo
+    =
+    result {
+        let! reference = Refine.nonBlankString rawReference
+
+        let! lines =
+            rawLines
+            |> Result.traverse (fun (sku, quantity, price) -> orderLine sku quantity price)
+            |> Result.bind Refine.nonEmptyList
+
+        let! discount = UnitInterval.create rawDiscount
+        let! delivery = Interval.create rawFrom rawTo
+
+        return
+            { Reference = reference
+              Lines = lines
+              Discount = discount
+              Delivery = delivery }
+    }
+```
+
+`Result.traverse` runs `orderLine` over every raw line and stops at the first failure; `Refine.nonEmptyList` then
+checks that the collected lines form a non-empty list, so an empty order is rejected before the `Order` exists.
+
+```fsharp
+let orderFrom = DateTimeOffset(2026, 6, 1, 0, 0, 0, TimeSpan.Zero)
+let orderTo = DateTimeOffset(2026, 6, 5, 0, 0, 0, TimeSpan.Zero)
+
+order "ORD-1" [ "SKU-1", 2, 9.99m ] 0.15 orderFrom orderTo
+// Ok { Reference = …; Lines = …; Discount = …; Delivery = … }
+
+order "ORD-1" [] 0.15 orderFrom orderTo
+// Error, an order needs at least one line
+```
+
+
 Two of the four fields have a **total** constructor, which is the one to prefer when the
 input has an obvious correct reading:
 
