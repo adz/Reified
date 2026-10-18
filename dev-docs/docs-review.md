@@ -23,18 +23,18 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/index.md:27` — “No runtime reflection: the same declaration compiles under NativeAOT, trimming, and Fable.” Confirm the supported target/compiler combinations and exceptions.
 - `docs/index.md:67` — “decoder ran about 14% faster on .NET 10 ... and allocated less.” Confirm workload, versions, and measurement variance.
 - [fixed] `docs/01-getting-started/_index.md:112` — “Every independent field is checked”; confirm behavior for dependent fields, constructor failures, nested collections, and error ordering.
-- `docs/02-schema/01-quickstart.md:46` — “the wire name is the camelCased property name”; confirm acronym and Unicode naming behavior.
-- `docs/02-schema/01-quickstart.md:111` — “Compile the codec once and reuse it”; confirm concurrent reuse and whether compilation itself is thread-safe.
-- `docs/02-schema/20-dsl.md:72` — “Supplying more than one accepted name for the same field is an error”; confirm which interpreter reports it and whether construction can throw.
-- `docs/02-schema/20-dsl.md:231` — “evaluated at most once”; confirm concurrency and whether failed evaluation is cached.
-- `docs/02-schema/25-input-sources.md:108` — “Later pairs override earlier ones at the same path”; confirm collision rules for scalar/section and sparse numeric indexes.
-- `docs/02-schema/35-trusted-construction.md:217` — “It returns the original value on success”; confirm whether `constructResult` normalization is discarded by `Schema.check`.
-- `docs/02-schema/45-union-schemas.md:58` — “Reified rejects duplicate tags ... inspectors that match either no case or more than one case”; confirm when and how these fail.
-- `docs/02-schema/50-json-codecs.md:83` — “reordered object, alias, omitted field, or unknown field transparently restarts”; confirm unknown-field behavior and performance cost.
-- `docs/02-schema/50-json-codecs.md:183` — “Checked constructors ... still run”; confirm exactly which validation is skipped by trusted decoding, including refinements.
-- `docs/02-schema/60-derivation/_index.md:40` — generator matches bare attribute name rather than resolved type; confirm false-positive diagnostics and mitigation.
-- `docs/02-schema/65-versioned-contracts.md:68` — migrations are followed by checking the current schema; confirm intermediate versions and path preservation on migration failures.
-- `docs/02-schema/70-patterns/20-legal-transitions.md:64` — shifting dates “cannot reverse their order”; confirm overflow behavior at date limits.
+- [fixed] `docs/02-schema/01-quickstart.md:46` — “the wire name is the camelCased property name”; confirm acronym and Unicode naming behavior.
+- [fixed] `docs/02-schema/01-quickstart.md:111` — “Compile the codec once and reuse it”; confirm concurrent reuse and whether compilation itself is thread-safe.
+- [fixed] `docs/02-schema/20-dsl.md:72` — “Supplying more than one accepted name for the same field is an error”; confirm which interpreter reports it and whether construction can throw.
+- [fixed] `docs/02-schema/20-dsl.md:231` — “evaluated at most once”; confirm concurrency and whether failed evaluation is cached.
+- [fixed] `docs/02-schema/25-input-sources.md:108` — “Later pairs override earlier ones at the same path”; confirm collision rules for scalar/section and sparse numeric indexes.
+- [fixed] `docs/02-schema/35-trusted-construction.md:217` — “It returns the original value on success”; confirm whether `constructResult` normalization is discarded by `Schema.check`.
+- [fixed] `docs/02-schema/45-union-schemas.md:58` — “Reified rejects duplicate tags ... inspectors that match either no case or more than one case”; confirm when and how these fail.
+- [fixed] `docs/02-schema/50-json-codecs.md:83` — “reordered object, alias, omitted field, or unknown field transparently restarts”; confirm unknown-field behavior and performance cost.
+- [fixed] `docs/02-schema/50-json-codecs.md:183` — “Checked constructors ... still run”; confirm exactly which validation is skipped by trusted decoding, including refinements.
+- [fixed] `docs/02-schema/60-derivation/_index.md:40` — generator matches bare attribute name rather than resolved type; confirm false-positive diagnostics and mitigation.
+- [fixed] `docs/02-schema/65-versioned-contracts.md:68` — migrations are followed by checking the current schema; confirm intermediate versions and path preservation on migration failures.
+- [fixed] `docs/02-schema/70-patterns/20-legal-transitions.md:64` — shifting dates “cannot reverse their order”; confirm overflow behavior at date limits.
 
 - `docs/06-data/50-testing-schema-guarantees.md:26-27,116` — confirm whether `SchemaGen.model` checks generated results with `Schema.check` after parsing, and how unsupported constraints or constructor failures are surfaced; the prose promises accepted models but the example unwraps generation only.
 
@@ -75,9 +75,9 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/03-constraints/45-adding-a-language.md:261-267` — “What the catalogue handles” lists imperative actions without a lead-in or negation; “reproduce the key list by hand” contradicts the page’s generation advice. Introduce the list as things readers need *not* do.
 
 
-- `docs/02-schema/47-schema-or-generated-dto.md:64-77` — `toDomain` promises `Result<Signup, string>` but builds `Signup` with a `ContactEmail` where `Email` was declared `string`; `bytes` is undeclared, and `Json.deserialize` is used as though it returned `Result`. Show a complete type-correct conversion using `Json.tryDeserialize` and explicit error mapping.
-- `docs/02-schema/25-input-sources.md:48-51` — suggests moving `Contacts`' collection-level `minLength 1` constraint onto `Contact` when removing `withSchema`; an individual `Contact` cannot enforce the length of its containing list. Keep the field block with `constrain` and omit only `withSchema`.
-- `docs/02-schema/90-reference-apps.md:48-55` — says generated wire schemas carry constraints and are written via a compiled codec, but `docs/02-schema/47-schema-or-generated-dto.md:39-55` warns that trusted codecs skip wire constraints. Explain whether this app validates with `Schema.parse` before writing and why this differs from the recommended permissive DTO strategy.
+- [fixed] `docs/02-schema/47-schema-or-generated-dto.md:64-77` — `toDomain` promises `Result<Signup, string>` but builds `Signup` with a `ContactEmail` where `Email` was declared `string`; `bytes` is undeclared, and `Json.deserialize` is used as though it returned `Result`. Show a complete type-correct conversion using `Json.tryDeserialize` and explicit error mapping.
+- [fixed] `docs/02-schema/25-input-sources.md:48-51` — suggests moving `Contacts`' collection-level `minLength 1` constraint onto `Contact` when removing `withSchema`; an individual `Contact` cannot enforce the length of its containing list. Keep the field block with `constrain` and omit only `withSchema`.
+- [fixed] `docs/02-schema/90-reference-apps.md:48-55` — says generated wire schemas carry constraints and are written via a compiled codec, but `docs/02-schema/47-schema-or-generated-dto.md:39-55` warns that trusted codecs skip wire constraints. Explain whether this app validates with `Schema.parse` before writing and why this differs from the recommended permissive DTO strategy.
 
 - [fixed] `docs/01-getting-started/_index.md:94` — “No `Signup` exists unless every field and the constructor succeeded” sounds like a guarantee about the public record type; callers can construct `Signup` directly. Say that `Schema.parse` does not return a `Signup` on failure.
 - [fixed] `docs/01-getting-started/_index.md:79-89` — says the same schema reads JSON and shows `Data.ofNameValues` for text pairs; explain how JSON becomes `Data` before `Schema.parse`, or link the conversion recipe at this point.
@@ -86,14 +86,14 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 - `README.md:112` calls attribute-based derivation “preferred approach for DTOs,” while `docs/02-schema/47-schema-or-generated-dto.md:39-44` says derived wire DTOs should have **no** constraint attributes, but README’s derived example has `[<Present; Email>]` and `[<AtLeast 13>]`. Distinguish derived validated boundary model from permissive wire DTO explicitly.
 - [fixed] `docs/01-getting-started/02-what-a-schema-gives-you.md:78-84` says codec decoding failures return “the same path-aware `SchemaErrors`”; `docs/02-schema/50-json-codecs.md:113-121` says `JsonCodecException` or `Result<_, string>` with first structural failure. These cannot both describe the public decoder result.
-- `docs/02-schema/01-quickstart.md:174-189` shows `Seats` without constraint in the schema, yet JSON Schema has `exclusiveMinimum:0` and diagnostics say “Must be greater than 0”; no visible definition establishes this rule.
-- `docs/02-schema/70-patterns/30-wire-and-domain-models.md:74` uses `(BookingWire.parse raw).Result` although `docs/02-schema/60-derivation/_index.md:29-31` documents `parse : Data -> Result<_, SchemaErrors>`; `.Result` suggests a different API.
-- `docs/02-schema/70-patterns/30-wire-and-domain-models.md:113` points to a “`.contract` grammar alternative,” but no such grammar is introduced in the linked Versioned Contracts page.
-- `docs/02-schema/90-reference-apps.md:38` claims generated typed `Fields` references, while `docs/02-schema/60-derivation/40-generated-code.md:104` explicitly says no `Fields` modules are generated.
-- `docs/02-schema/85-examples.md:156-220` labels an example “refined” but publicly exposes `Email.create`/`Quantity.create` that directly wrap unchecked inputs and then demonstrates invalid values. It undercuts the guarantee taught elsewhere.
-- `docs/02-schema/70-patterns/40-project-structure.md:67` mentions `Service.get`, without introducing its package or relation to Reified; looks like an unrelated API.
-- `docs/02-schema/05-tutorials/25-inspecting-metadata.md:70` says lowering `Any` by dropping a disjunct “strengthens” it; useful caveat, but the preceding `keywords` example does precisely a lossy flattening without showing the safe full-expression alternative.
-- `docs/02-schema/50-json-codecs.md:23` calls storage and queues trusted producers; persistence and queues can contain stale or externally produced bytes. Define trust as a property of the producer and admission history, not transport.
+- [fixed] `docs/02-schema/01-quickstart.md:174-189` shows `Seats` without constraint in the schema, yet JSON Schema has `exclusiveMinimum:0` and diagnostics say “Must be greater than 0”; no visible definition establishes this rule.
+- [fixed] `docs/02-schema/70-patterns/30-wire-and-domain-models.md:74` uses `(BookingWire.parse raw).Result` although `docs/02-schema/60-derivation/_index.md:29-31` documents `parse : Data -> Result<_, SchemaErrors>`; `.Result` suggests a different API.
+- [fixed] `docs/02-schema/70-patterns/30-wire-and-domain-models.md:113` points to a “`.contract` grammar alternative,” but no such grammar is introduced in the linked Versioned Contracts page.
+- [fixed] `docs/02-schema/90-reference-apps.md:38` claims generated typed `Fields` references, while `docs/02-schema/60-derivation/40-generated-code.md:104` explicitly says no `Fields` modules are generated.
+- [fixed] `docs/02-schema/85-examples.md:156-220` labels an example “refined” but publicly exposes `Email.create`/`Quantity.create` that directly wrap unchecked inputs and then demonstrates invalid values. It undercuts the guarantee taught elsewhere.
+- [fixed] `docs/02-schema/70-patterns/40-project-structure.md:67` mentions `Service.get`, without introducing its package or relation to Reified; looks like an unrelated API.
+- [fixed] `docs/02-schema/05-tutorials/25-inspecting-metadata.md:70` says lowering `Any` by dropping a disjunct “strengthens” it; useful caveat, but the preceding `keywords` example does precisely a lossy flattening without showing the safe full-expression alternative.
+- [fixed] `docs/02-schema/50-json-codecs.md:23` calls storage and queues trusted producers; persistence and queues can contain stale or externally produced bytes. Define trust as a property of the producer and admission history, not transport.
 
 - `docs/06-data/10-tutorial.md:126-133` — `variant "present"` is declared, but the displayed case list starts with `"valid"`; update the expected output.
 - `docs/06-data/10-tutorial.md:203-225` — the narrative says “If the actual plan is `"free"`” while the shown `expected` plan is `"free"` and the actual response has `"pro"`; the following example reverses both values. Separate the illustrative comparison from the preceding one.

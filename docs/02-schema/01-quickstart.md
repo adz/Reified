@@ -49,8 +49,11 @@ let signupSchema =
 
 
 `field _.Email` gives the getter and nothing more. The field's value schema comes from its type, `string` resolves
-`Schema.text`, `int` resolves `Schema.int`, `bool` resolves `Schema.bool`, and the wire name is the camelCased
-property name. `construct` receives the fields in declaration order; the compiler checks its argument types and its
+`Schema.text`, `int` resolves `Schema.int`, `bool` resolves `Schema.bool`, and the wire name is derived by lowercasing
+only the property name's first character with `Char.ToLowerInvariant`, leaving the rest unchanged: `Email` becomes
+`email`, but an acronym such as `URLValue` derives `uRLValue`, not `urlValue`. Use `fieldAs` when that default is not
+the wire name you want, including for Unicode identifiers whose first character has no single-character lowercase
+mapping. `construct` receives the fields in declaration order; the compiler checks its argument types and its
 result.
 
 Pass a wire name explicitly when it differs from the property: `fieldAs "email_address" _.Email`. To accept an old
@@ -125,7 +128,10 @@ Json.deserialize codec json
 
 
 Compile the codec once and reuse it. `Json.compile` does the work up front; `serialize` and `deserialize` are the hot
-path. See [JSON Codecs](/schema/json-codecs.html) for buffers, streams, and decode diagnostics.
+path. The compiled codec keeps no per-value state, so one codec is safe to share across threads: each
+`serialize`/`deserialize` call uses its own pooled buffer and its own per-decode field slots. Compilation is a pure
+walk over the built (immutable) schema, so it is also safe to run once at startup or concurrently with other
+compilations. See [JSON Codecs](/schema/json-codecs.html) for buffers, streams, and decode diagnostics.
 
 ### The other interpreters
 
@@ -201,8 +207,8 @@ A refinement carries its constraints, so the interpreters see them:
 
 ```fsharp
 JsonSchema.generate registrationSchema
-// "owner":   {"type":"string"}
-// "seats":   {"type":"integer","exclusiveMinimum":0}
+// "owner":   {"type":"string","pattern":"\\S"}
+// "seats":   {"type":"integer"}
 // "aliases": {"type":"array","items":{"type":"string"},"minItems":1}
 ```
 
@@ -210,7 +216,7 @@ JsonSchema.generate registrationSchema
 ```fsharp
 Inspect.model registrationSchema
 // owner   -> [ "present" ]
-// seats   -> [ "greaterThan" ]
+// seats   -> [ ]
 // aliases -> [ "minLength" ]
 ```
 
@@ -219,7 +225,6 @@ Failures arrive on the right paths:
 
 ```text
 owner: This value must be present.
-seats: Must be greater than 0; got 0.
 aliases: Length must be at least 1; got 0.
 ```
 

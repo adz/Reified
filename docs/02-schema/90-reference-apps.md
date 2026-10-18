@@ -45,11 +45,19 @@ type WorkspaceCard =
 ```
 
 
-`schemagen` writes the sibling `workspace.g.fs`: the schema pipeline you would have written by hand, `parse` and
-`validate`, typed `Fields` references, and, because `WorkspaceCardV1`/`WorkspaceCard` follow the version-chain
-naming convention, a `WorkspaceCard.contract` builder that takes your typed v1 → v2 migration. You write the migration, the strict domain mapping (`TrustedCard` rejects an owner listed as a member, a rule the
-wire deliberately cannot express), and a head-version write through a compiled codec. Generated schemas work with
-`JsonSchema.generate` and `Json.compile`.
+`schemagen` writes the sibling `workspace.g.fs`: the schema pipeline you would have written by hand — `schema`,
+`parse`, and `validate` — and, because `WorkspaceCardV1`/`WorkspaceCard` follow the version-chain
+naming convention, a `WorkspaceCard.contract` builder that takes your typed v1 → v2 migration. No `Fields` module is
+generated; the wire records are yours, and the generated code refers to them. You write the migration, the strict
+domain mapping (`TrustedCard` rejects an owner listed as a member, a rule the wire deliberately cannot express), and a
+head-version write through a compiled codec.
 
-See [Versioned Contracts](/schema/versioned-contracts.html) for the full attribute vocabulary, the
-`.contract` grammar alternative, and running generation in your build with `Reified.SchemaGen.MSBuild`.
+The constraint attributes stay on the wire records, so input is admitted through `Contract.parse` — which runs
+`Schema.parse` on the selected frozen schema and therefore enforces `Min`/`Max`/`Email`/`Distinct`. The compiled codec
+is used only to *write* an already-admitted head-version value, not to decode untrusted input. That is the difference
+from the permissive-DTO strategy in [Schema or Generated DTO](/schema/schema-or-generated-dto.html): this app wants the
+wire rules enforced at the boundary, so it reads with the boundary parser rather than the trusted decoder. Generated
+schemas work with `JsonSchema.generate` and `Json.compile`.
+
+See [Versioned Contracts](/schema/versioned-contracts.html) for the version-series attribute vocabulary and
+[Build Generation](/schema/derivation/msbuild.html) for running generation in your build with `Reified.SchemaGen.MSBuild`.

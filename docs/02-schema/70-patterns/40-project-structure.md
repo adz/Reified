@@ -60,8 +60,8 @@ operational libraries that Domain cannot reference.
 
 ## Keep service-provider lookup at the host
 
-Resolve container-managed objects while constructing the application environment. Application workflows then use typed
-fields or `Service.get`, not arbitrary lookups.
+Resolve container-managed objects while constructing the application environment. Application workflows then read
+typed fields from that environment record (`AppEnv.Bookings`, `AppEnv.Clock`), not arbitrary service-provider lookups.
 
 ```fsharp no-check reason="The example depends on an application-owned service provider and repository/clock interfaces; Microsoft.Extensions.DependencyInjection is not among the assemblies this audit resolves."
 type AppEnv =

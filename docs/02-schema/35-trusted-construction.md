@@ -253,8 +253,10 @@ match Schema.check bookingSchema importedBooking with
 
 
 It recursively checks fields and collections and re-invokes a record schema's constructor. It returns the original
-value on success; it does not create a proof wrapper. The guarantee belongs to that successful result flow. A private
-domain representation carries a stronger, durable guarantee.
+value on success, not the constructor's result, so any normalization a `construct` or `constructResult` performs (such
+as lowercasing an email) is discarded; the constructor runs only to verify cross-field invariants. `Schema.check` does
+not create a proof wrapper, and the guarantee belongs to that successful result flow. A private domain representation
+carries a stronger, durable guarantee.
 
 ## Recommendation
 

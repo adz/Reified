@@ -86,8 +86,10 @@ let profileSchema =
 for missing fields, and other output interpreters continue to use the canonical `displayName` name. Names are exact and
 case-sensitive; list each accepted case explicitly.
 
-Supplying more than one accepted name for the same field is an error. Schema construction also rejects aliases that
-repeat that field's canonical name or collide with another field name or alias. Use
+Supplying more than one accepted name for the same field is an error. The schema builder rejects these eagerly when
+the schema value is built, before any interpreter runs: it collects every field's canonical name and aliases and
+throws `System.ArgumentException` (`invalidArg`) when any name appears more than once. That covers an alias that
+repeats its own field's canonical name and an alias that collides with another field name or alias. Use
 [Versioned Contracts](/schema/versioned-contracts.html) instead when a rename represents a durable versioned wire
 format rather than a short compatibility window.
 
@@ -273,5 +275,8 @@ let rec categorySchema () =
 ```
 
 
-`Schema.defer` takes a thunk, `unit -> Schema<'model>`, evaluated at most once, not a `Lazy` value: `categorySchema`
-is declared as a zero-argument function specifically so `Schema.defer categorySchema` can pass it directly.
+`Schema.defer` takes a thunk, `unit -> Schema<'model>`, not a `Lazy` value: `categorySchema`
+is declared as a zero-argument function specifically so `Schema.defer categorySchema` can pass it directly. The thunk
+is memoized with F#'s thread-safe `lazy`, so a successful evaluation runs at most once and concurrent forces share
+one result. A failed evaluation is not cached: the exception propagates to the caller and the next access retries the
+thunk.

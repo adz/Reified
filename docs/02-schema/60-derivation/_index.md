@@ -43,7 +43,10 @@ JSON Schema, NativeAOT, trimming, and Fable.
 
 `Reified.SchemaGen` matches `[<DeriveSchema>]` by its bare attribute name in the source syntax tree, before the
 project type-checks, not by resolving it to the specific `Reified.DerivedSchema.DeriveSchemaAttribute` type. An
-unrelated type of your own also named `DeriveSchema`, in scope in the same file, would match the same way.
+unrelated attribute of your own also named `DeriveSchema` — or `DeriveSchemaAttribute`, since the generator strips the
+`Attribute` suffix — in scope in the same file would match the same way. There is no resolution-based opt-out for
+`DeriveSchema`: keep the names `DeriveSchema`, `DeriveUnion`, and `SchemaConstructor` out of files that participate in
+generation, or expect the generator to treat your attribute as one of its own.
 
 ## Guides
 

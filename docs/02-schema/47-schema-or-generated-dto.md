@@ -64,25 +64,27 @@ open Reified.DerivedSchema
 type SignupWire = { Email: string; Age: int }
 ```
 
-Decode it with the trusted JSON path, `Json.compile` and `Json.deserialize`, not `Schema.parse`. The two decoders
+Decode it with the trusted JSON path, `Json.compile` plus `Json.deserialize`/`Json.tryDeserialize`, not
+`Schema.parse`. The two decoders
 differ in exactly this: `Schema.parse` runs every constraint on the schema and accumulates diagnostics for a caller
 who has not vetted the payload; the trusted path skips constraint checking entirely and enforces only the wire
 shape, required fields and field types, because there is nothing on this DTO to check. Since the DTO carries no
 attributes, the two would behave identically here; the reason to reach for the trusted path is that it says so in
 the code, and it stays true if a teammate later adds an attribute to the DTO by mistake.
 
-```fsharp no-check reason="Depends on the generated SignupWire module and the ContactEmail refinement from Refined Values."
+```fsharp no-check reason="Depends on the generated SignupWire module; not independently checkable."
 let wireCodec = Json.compile SignupWire.schema
 
 let toDomain (wire: SignupWire) : Result<Signup, string> =
-    ContactEmail.create wire.Email
-    |> Result.mapError (fun _ -> "invalid email")
-    |> Result.bind (fun email ->
-        if wire.Age >= 13 then Ok { Email = email; Age = wire.Age }
-        else Error "age must be at least 13")
+    match Constraint.check (Constraint.all [ Constraint.present; Constraint.email ]) wire.Email with
+    | Error violation -> Error $"invalid email: {Violation.render violation}"
+    | Ok () ->
+        if wire.Age >= 13 then Ok { Email = wire.Email; Age = wire.Age }
+        else Error "age must be at least 13"
 
-Json.deserialize wireCodec bytes
-|> Result.bind toDomain
+let parseWire (json: string) : Result<Signup, string> =
+    Json.tryDeserialize wireCodec json
+    |> Result.bind toDomain
 ```
 
 The real validation runs once, in `toDomain`, through refined values or a hand-written domain schema, exactly as it

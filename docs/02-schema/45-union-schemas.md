@@ -66,8 +66,11 @@ The schema reads and writes:
 Every case uses the same `type` property. An empty case inside a mixed union remains `{ "type": "stop" }`; it does
 not become the string `"stop"`.
 
-Reified rejects duplicate tags, a payload field named `type`, and inspectors that match either no case or more than
-one case.
+Duplicate tags and a payload field named `type` are rejected when the schema is built: `Schema.union` throws
+`System.ArgumentException` for either, because a tag must identify exactly one case and a payload field must not
+collide with the discriminator. Case inspectors are checked when an existing value is validated with `Schema.check`:
+an inspector that matches no case reports `union.case`, and more than one matching inspector reports
+`union.case.ambiguous`. Parsing can only report an unknown tag, since tags are already unique.
 
 ### String enums: `Schema.enum`
 

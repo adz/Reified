@@ -14,10 +14,12 @@ Reified has two paths for JSON, and they exist because they optimize for differe
 
 - **Boundary parsing**, `Data` + `Schema.parse`: for untrusted input. It runs constraint metadata, accumulates
   path-aware diagnostics, and keeps the structured data for redisplay.
-- **Trusted path**, `Json.compile` + `Json.serialize`/`Json.deserialize`: for payloads whose producer you trust, such
-  as internal services, storage, caches, and queues. It enforces the wire shape and required fields, skips constraint
-  checking, and runs about 4x faster than the boundary path with a fraction of the allocations (see the
-  [benchmarks](/notes/benchmarks.html#schema-json-codec)).
+- **Trusted path**, `Json.compile` + `Json.serialize`/`Json.deserialize`: for values that were already admitted by
+  your own boundary or produced by a service under your control. Trust is a property of the producer and the value's
+  admission history, not of the transport: storage, caches, and queues can hold stale or externally written bytes, so
+  treat them as trusted only when every writer is trusted and wrote only admitted values. The codec enforces the wire
+  shape and required fields, skips constraint checking, and runs about 4x faster than the boundary path with a
+  fraction of the allocations (see the [benchmarks](/notes/benchmarks.html#schema-json-codec)).
 
 ## Compile Once, Reuse Everywhere
 
@@ -60,10 +62,13 @@ let customer = Json.deserialize codec json
 
 `Json.compile` walks the typed record plan retained when the object shape closes and emits a direct plan: ordered field
 descriptors, cached UTF-8 wire-name bytes, typed field decoders, and the original curried constructor applied without
-boxing. Decode first follows the canonical field order emitted by Reified without field dispatch or per-field slots. A
-reordered object, alias, omitted field, or unknown field transparently restarts through the general unordered decoder;
-callers do not select a mode. Everything is compiler-directed: there is no runtime reflection at codec-compile time or
-per value, so the codec is AOT- and trimming-safe by construction. Applying a curried constructor of ten or more fields needs
+boxing. Decode first follows the canonical field order emitted by Reified without field dispatch or per-field slots.
+Any layout that does not match that order — a reordered object, an alias, an omitted required field, or an unknown
+field — makes the canonical attempt return no match, and the codec transparently restarts through the general
+unordered decoder; callers do not select a mode. The general decoder matches canonical names and aliases, skips
+unknown fields (they are never an error), and reports a missing required field only after the whole object has been
+read. Everything is compiler-directed: there is no runtime reflection at codec-compile time or per value, so the codec
+is AOT- and trimming-safe by construction. Applying a curried constructor of ten or more fields needs
 NativeAOT generic-cycle limits above the compiler defaults; the `Reified.Schema` package raises them for you, as
 [Compiler-Directed, AOT, and Fable](/notes/aot-trimming-fable.html#records-with-many-fields) explains.
 
@@ -172,8 +177,13 @@ names, union representation, whether an absent field is omitted or written as `n
 
 ## What The Codec Does Not Do
 
-- It does not run constraint metadata such as `maxLength` or `between`, those belong to boundary parsing and
-  validation. A value that only ever passes through trusted systems does not pay for checks it already passed.
+- It does not run schema constraint metadata — rules attached with `constrain`/`constraints`, such as `maxLength` or
+  `between`, or supply declarations. Those belong to boundary parsing and validation; a value that only ever passes
+  through trusted systems does not pay for checks it already passed.
+- Refined and validated values are still *constructed*, and construction is where their own invariants live. Decoding
+  a refined field re-runs the refinement's `Constraint.check`, and decoding a `validate`/`tryConvert` field runs that
+  callback, because the codec cannot build the value otherwise. This is reconstruction, not a separate wire-constraint
+  pass.
 - Checked constructors from `constructResult` still run, so intrinsic cross-field invariants hold on the trusted path;
   their errors surface as `JsonCodecException`.
 

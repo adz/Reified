@@ -59,8 +59,11 @@ match Booking.changeEnd proposedEnd booking with
 ## Keep preserving changes total
 
 Some operations preserve the invariant by their construction. Shifting both dates by the same number of days cannot
-reverse their order. The same `Booking` as above, `create` and `BookingDraft` omitted since this section adds only
-`shift`:
+reverse their order, because adding the same `days` to both ends preserves `Start <= End`. The relation argument holds
+for every `days` for which both `DateOnly.AddDays` calls succeed; `AddDays` throws `ArgumentOutOfRangeException` when
+the shifted date leaves the supported range (years 0001–9999), so `shift` is total over the invariant but not over all
+date inputs. Bound the dates or make the failure explicit if callers can reach the limits. The same `Booking` as
+above, `create` and `BookingDraft` omitted since this section adds only `shift`:
 
 ```fsharp isolated
 open System

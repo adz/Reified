@@ -92,9 +92,35 @@ let keywords (description: SchemaDescription) =
 ```
 
 
-`ConstraintDescription.atoms` deliberately stops at an opacity boundary, and it is only safe where dropping a rule is
-sound. An interpreter that *claims enforcement* must consult the whole expression instead: dropping a conjunct weakens
-an `All`, and dropping a disjunct strengthens an `Any`, which would reject values the library accepts.
+`ConstraintDescription.atoms` deliberately stops at an opacity boundary, and the `keywords` traversal above is only
+safe where dropping a rule is sound; it does not claim to enforce the whole expression. An interpreter that *claims
+enforcement* must consult the whole expression instead: dropping a conjunct weakens an `All`, and dropping a disjunct
+strengthens an `Any`, which would reject values the library accepts. A conservative alternative recurses over
+`ConstraintDescription.Expression` and refuses any form it cannot represent rather than flattening across it:
+
+```fsharp no-check reason="Continues the jsonKeyword illustration above; not a standalone compilation unit."
+let rec expressionKeywords (description: ConstraintDescription) : string list option =
+    match description.Expression with
+    | ConstraintExpression.Atom atom -> jsonKeyword atom |> Option.map List.singleton
+    | ConstraintExpression.All children ->
+        children
+        |> List.map expressionKeywords
+        |> List.fold
+            (fun acc next ->
+                match acc, next with
+                | Some keywords, Some more -> Some(keywords @ more)
+                | _ -> None)
+            (Some [])
+    | ConstraintExpression.Optional inner -> expressionKeywords inner
+    // A disjunction or an opaque node cannot be flattened into one keyword list without
+    // changing what it accepts, so refuse and keep the rule as runtime metadata instead.
+    | ConstraintExpression.Any _
+    | ConstraintExpression.Opaque _ -> None
+```
+
+This shape recurses over the logical form: a conjunction keeps every branch, an optional delegates to its inner
+constraint, and a disjunction or opaque node returns `None` so the caller retains it as runtime metadata rather than
+publishing a keyword that enforces the wrong rule.
 
 Atoms are shape-neutral. `Cardinality.Maximum 5` becomes `maxLength`, `maxItems`, or `maxProperties` depending on the
 `SchemaShape` it is attached to, so combine the two rather than reading the description alone.

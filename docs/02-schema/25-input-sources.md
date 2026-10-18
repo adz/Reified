@@ -57,9 +57,11 @@ let customerSchema =
 
 
 Here `addressSchema` and `contactSchema` are intentionally local value schemas. If `Address` and `Contact` declare
-canonical intrinsic schemas, both lines can use ordinary `field` and the contact list resolves recursively, though
-`Contacts`' own `constrain (minLength 1)` would then need to move onto `Contact` or `Contacts` itself, since dropping
-`withSchema`/`constrain` for a bare `field _.Contacts` drops that length check too.
+canonical intrinsic schemas, the `Address` line can use ordinary `field`, and the `Contacts` line can keep its field
+block while omitting only `withSchema`: the list still resolves through `Contact`'s canonical schema, but the block's
+`constrain (minLength 1)` stays attached to the list field. That constraint constrains the length of the `Contacts`
+list, so it belongs on the list field, not on `Contact` itself, which is a single record. A bare `field _.Contacts`
+would drop the length check along with `withSchema`.
 
 Nested fields expect object-shaped input and prefix their diagnostics with the field name; collection fields expect
 `Data.List`, parse every item, accumulate every item error, and prefix diagnostics with the item index.
@@ -142,10 +144,13 @@ let raw =
 
 
 Later pairs override earlier ones at the same path, matching .NET configuration layering: a repeated key keeps its
-last value, and a later scalar or section replaces the earlier shape at that key. Collections come from numeric
-segments, never from repetition, repeated names as multi-value input is a wire convention that belongs to
-`ofNameValues`. Section keys with null values, as `IConfiguration.AsEnumerable()` emits alongside a section's
-children, never override those children, so real layered `IConfiguration` output round-trips directly.
+last value, and a later scalar or section replaces the earlier shape at that key. A section path written after a
+scalar at the same key replaces the scalar with the section, and a later scalar at a section key replaces the section;
+the one exception is a section key whose value is null, as `IConfiguration.AsEnumerable()` emits alongside a section's
+children — that never overrides the children, so real layered `IConfiguration` output round-trips directly. Collections
+come from numeric segments, never from repetition; repeated names as multi-value input is a wire convention that
+belongs to `ofNameValues`. Numeric segments need not be contiguous: a sparse set such as `contacts:0` and `contacts:2`
+becomes a three-item list with `Data.Null` at the missing index 1.
 
 ## One Parse For All Of Them
 

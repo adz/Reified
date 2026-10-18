@@ -184,6 +184,14 @@ let run () =
 
 This example shows total domain conversions built with Schema.convert, composed into a record schema, and lowered to executable checks.
 
+The `Email.create`, `ContactName.create`, `Quantity.create`, and `Balance.create` helpers in this file are *unchecked
+wrappers* over the example's own private types, not the checked-constructor pattern from
+[Refined Values](/schema/refined-values.html). The executable rules live on the schemas (`Schema.constrainAll` /
+`Schema.constrain` applied before `Schema.convert`), and `SchemaCheck` or `Schema.parse` enforce them. The `run` block
+deliberately builds invalid values such as `Email.create ""` and `Quantity.create 0` to show those checks failing. At a
+real boundary, admit input with `Schema.parse` (or define a `Refinement.define`d constructor when the type itself must
+carry the guarantee); do not call these `create` functions on untrusted input.
+
 Run it:
 
 ```bash

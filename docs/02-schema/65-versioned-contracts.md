@@ -75,8 +75,10 @@ let configContract : Contract<Config> =
 
 
 Migrations are hand-written, typed, contiguous, and may fail. Parsing selects the frozen schema for the input version,
-parses it, migrates each adjacent step, and checks the result against the current schema. There is no automatic
-structural migration.
+parses it, then runs each adjacent migration in order, so every intermediate version is visited and none are skipped.
+When the input version was not already current, the migrated result is re-checked against the current schema and a
+failure becomes `MigrationError.RevalidationFailed`. When the input version was already current, the initial parse is
+the check, so no second pass runs. There is no automatic structural migration.
 
 ## Version sources
 
@@ -100,7 +102,8 @@ match Contract.parse configContract raw with
 
 
 `ContractError.ParseFailed` and `MigrationError.RevalidationFailed` carry the same path-aware `SchemaErrors` used by
-`Schema.parse`.
+`Schema.parse`. A `MigrationError.MigrationFailed` written by your own migration carries only its message string, so
+no paths are preserved through hand-written migration failures.
 
 ## Generate a version series from records
 
