@@ -15,8 +15,7 @@ dotnet add package Reified
 ```
 
 
-`Reified` is an umbrella. It has no code of its own, it just references every runtime package below, so you get the
-whole set and can ignore the rest of this page.
+`Reified` is an umbrella package with no code of its own. It references every runtime package below.
 
 Schema is the integrated path through the packages:
 
@@ -32,8 +31,7 @@ Refinements ┘
 </div>
 
 Install `Reified.Schema` when structured input must become a trusted model. Constraint, Parse, Data, and Refinements can
-each be used alone without Schema, but they are designed to work together consistently. Every package depends only on
-what it uses.
+each be used without Schema. Every package depends only on what it uses.
 
 ## .NET and Fable
 
@@ -79,9 +77,9 @@ produce runs in your application at run time.
 | `Reified.SchemaGen` | The generation library itself, the record frontend, the `.contract` parser, and the emitter | Not published; used through the build package above |
 | `Reified.Schema.Testing` | Derives FsCheck generators from a schema so tests produce accepted values | Not published; copy or adapt the pattern from this repository |
 
-`Reified.SchemaGen.MSBuild` is the one you install. It is deliberately kept out of the `Reified` umbrella: MSBuild
+Install `Reified.SchemaGen.MSBuild` separately from the `Reified` umbrella: MSBuild
 `build/` assets are not transitive, so an umbrella dependency would install the targets without ever running them. Add
 it to the project whose records you want generated.
 
-`Reified.SchemaGen` and `Reified.Schema.Testing` are not packable, and there is nothing to install for either.
+`Reified.SchemaGen` and `Reified.Schema.Testing` are not packable.
 See [Derived Schemas](/schema/derivation/index.html) and [Testing patterns](/data/testing-schema-guarantees.html).

@@ -9,8 +9,8 @@ targetFramework: net8.0
 This page records local runs of the JSON codec and boundary parsing suites on one laptop and toolchain. Use the
 numbers to compare paths and allocations, not as cross-machine performance guarantees. See
 [Across .NET versions](#across-net-versions) for the current headline comparison against `System.Text.Json`; the
-sections below it are a single-machine, single-runtime run from 2026-09-15 kept for the allocation and staging
-detail it shows, not for its specific percentages.
+sections below it report allocation and staging details from a single-machine, single-runtime run on 2026-09-15.
+Do not generalize their percentages.
 
 The suites live in
 [benchmarks/Reified.Schema.Benchmarks/CodecSuites.fs](https://github.com/adz/Reified/blob/main/benchmarks/Reified.Schema.Benchmarks/CodecSuites.fs).
@@ -29,9 +29,9 @@ The measured run used:
 - BenchmarkDotNet 0.15.8
 
 The recorded results use BenchmarkDotNet's `ShortRun` job: one launch, three warmups, and three measured iterations.
-This is enough for a laptop-local directional comparison, but the error bars are wide, often a large fraction of the
-mean, so treat close timings as equivalent until a longer run shows otherwise. Allocations are stable between runs
-and are the more reliable signal here.
+This run supports a laptop-local directional comparison. Error bars are often a large fraction of the mean, so treat
+close timings as equivalent until a longer run shows otherwise. Allocations are stable between runs and are the more
+reliable signal here.
 
 ## JSON codec
 
@@ -125,15 +125,15 @@ wide short-run error bars, so a longer job is required before treating either se
 
 ## Across .NET versions
 
-Reified's codec is compiled once from the schema; it does not do less work than `System.Text.Json` for
-serialization, so treat the two as **competitive**, not "Reified wins," on that path. Decoding is where the
-compiled codec's advantage is real and consistent, though it narrows on newer .NET.
+Reified's codec is compiled once from the schema and does not do less serialization work than `System.Text.Json`.
+Treat serialization as **competitive** with `System.Text.Json`;
+the measured decoding advantage narrows on newer .NET.
 
 Measured 2026-09-29 with BenchmarkDotNet's `medium` job (15 iterations, 2 launches, 10 warmups) against
 `ReifiedBenchmarks.Schema.JsonCodecBenchmarks`, the same customer aggregate as the table above, on an otherwise
 idle machine. See [`dev-docs/BenchmarkProcess.md`](https://github.com/adz/Reified/blob/main/dev-docs/BenchmarkProcess.md)
-for exactly how to reproduce a multi-runtime run like this one, including two BenchmarkDotNet bugs that make a
-naive attempt silently benchmark the wrong runtime.
+for steps to reproduce this multi-runtime run, including workarounds for two BenchmarkDotNet bugs that can
+benchmark the wrong runtime.
 
 | Path | .NET 8.0.424 | .NET 10.0.300 (this package's target) | .NET 11.0.100-rc.1 |
 | --- | --- | --- | --- |
@@ -144,15 +144,14 @@ naive attempt silently benchmark the wrong runtime.
 
 Reified stays ahead on both deserialize paths across all three runtimes, by a margin that shrinks as the .NET
 runtime gets newer, from 16% down to 7% on UTF-8 decode. Serialize is roughly matched on .NET 8 and 10, and on
-.NET 11 RC, `System.Text.Json` measured 5-7% ahead on both serialize paths. `System.Text.Json` keeps improving its
-own allocation and JIT behavior every release, and this codec's advantage was always thinner on the encode side
-(direct integer/string formatting, not a structurally different approach), so this narrowing is expected, not a
-regression to chase.
+.NET 11 RC, `System.Text.Json` measured 5-7% ahead on both serialize paths. `System.Text.Json` improves its allocation
+and JIT behavior with each release. Reified's smaller encode-side advantage comes from direct integer/string
+formatting rather than a structurally different approach; the narrowing is expected, not a regression to chase.
 
-Read "faster than `System.Text.Json`" as a decode-path claim from here on, not a blanket one. Re-run this table
+The "faster than `System.Text.Json`" claim applies to decoding, not serialization. Re-run this table
 against .NET 11 once it reaches GA; a preview or RC toolchain is not representative of shipped performance.
 
-## Conclusion
+## Findings
 
 - For trusted canonical UTF-8 payloads, Reified decoded both the representative aggregate and the 24-field record
   faster than `System.Text.Json` in this run; see [Across .NET versions](#across-net-versions) for the current,
