@@ -62,15 +62,20 @@ Look keys up in [the catalogue](/constraints/localization/catalogue.html).
 
 ## The two messages
 
-`Violation.message` renders a bare predicate. `Violation.fullMessage` composes the attribute noun around it once.
-Using the `violation` and `renderer` from above:
+`Violation.message` renders the failure with no attribute noun; when the violation carries an actual value, it is
+appended through the `constraint.actual` composition entry. `Violation.fullMessage` composes the attribute noun
+around that once. Using the `violation` and `renderer` from above:
 
 ```fsharp
 let field = renderer |> Renderer.context "signup" |> Renderer.attribute "name"
 
-violation |> Violation.message field      // "must be at least 13"
-violation |> Violation.fullMessage field  // "Name must be at least 13"
+violation |> Violation.message field      // "must be at least 13, but was 11"
+violation |> Violation.fullMessage field  // "Nom must be at least 13, but was 11"
 ```
+
+
+The French map has no `constraint.relation.atLeast` entry, so the predicate falls back to Reified's neutral
+English; the `attribute.name` entry does resolve, which is why the noun is `Nom`.
 
 
 Use `message` where a label already names the field, a form row, or a Schema result whose returned path identifies

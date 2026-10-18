@@ -62,11 +62,19 @@ let supportedCurrencies = [ "USD"; "EUR"; "GBP" ]
 
 let currency : Constraint<string> =
     Constraint.customWith "supported currency rule" (Constraint.check (Constraint.oneOf supportedCurrencies))
+
+Constraint.check currency "CAD"
+// Error (Atomic (Expected (MembershipAtom (OneOf [ ConstraintValue.Text "USD"; ConstraintValue.Text "EUR"; ConstraintValue.Text "GBP" ]),
+//                         Some (ConstraintValue.Text "CAD"))))
 ```
 
 
-The enclosing description stays opaque, so reporting an interpreted leaf this way claims no inspectability it does not have.
-Construct a `Violation` directly only when no built-in states what you mean.
+The two halves answer different questions. `Constraint.inspect currency` stays opaque: it reports only the
+`"supported currency rule"` prose, so JSON Schema export, generation, and documentation see nothing of the `oneOf`
+inside. The failure is not opaque — the callback is `Constraint.check` applied to an interpreted `oneOf`, so a
+failed check returns the interpreted leaf that inner rule produces, and `Violation.tryExpectation` recovers the
+`MembershipAtom`. An interpreted failure leaf does not make the enclosing rule inspectable: the description stays
+opaque, and with it export and proof. Construct a `Violation` directly only when no built-in states what you mean.
 
 Descriptions are required and must be non-blank, because they are the only thing a renderer has to work with. They
 are also, by default, untranslatable, see [Custom rules](/constraints/localization/custom-rules.html) for `customLocalized`, which lets you

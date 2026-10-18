@@ -8,8 +8,9 @@ targetFramework: net8.0
 
 ## The key catalogue
 
-Every key Reified can produce. `actual` is not listed as an argument on any predicate: it arrives through the
-separate `constraint.actual` entry.
+Every built-in key Reified can produce. `Constraint.customLocalized` and `customLocalizedWith` name your own
+catalogue entries, which no table here can enumerate. `actual` is not listed as an argument on any predicate: it
+arrives through the separate `constraint.actual` entry.
 
 | Key | Arguments | Plural on | Default English |
 | --- | --- | --- | --- |

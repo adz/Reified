@@ -28,7 +28,9 @@ Constraint.check username "ada"
 // Ok ()
 
 Constraint.check username ""
-// Error [ Blank; InvalidLength (MinimumLength 3, Some 0) ]
+// Error (All (Atomic (Expected (PresenceAtom Present, None)),
+//             [ Atomic (Expected (CardinalityAtom (Cardinality.Minimum 3),
+//                                Some (ConstraintValue.Integer 0L))) ]))
 ```
 
 

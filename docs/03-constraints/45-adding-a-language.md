@@ -258,10 +258,12 @@ level; `attributeCandidates` returns the noun keys. Assert that at least one of 
 For a pluralized entry, pass an argument map with a representative operand, the selected suffix depends on the
 value, so `1` and `3` give you the `.one` and `.other` candidates respectively.
 
-## What the catalogue handles
+## What the catalogue already handles
 
-- reproduce the key list by hand, it is `Catalogue.keys`;
-- write an optional-value template, `{actual}` is a separate composition entry;
-- repeat the field name in every predicate, the noun composes once, around the finished message;
-- handle a missing entry, every key falls back through the contextual chain to neutral English;
-- worry about a field named with a dot or a bracket, segments are encoded before joining.
+You do not need to:
+
+- reproduce the key list by hand — it is `Catalogue.keys`;
+- write an optional-value template — `{actual}` is a separate composition entry;
+- repeat the field name in every predicate — the noun composes once, around the finished message;
+- handle a missing entry — every key falls back through the contextual chain to neutral English;
+- worry about a field named with a dot or a bracket — segments are encoded before joining.
