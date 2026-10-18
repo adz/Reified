@@ -4,6 +4,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 ## Assumptions
 
+- `docs/07-result-handling/80-collecting-errors.md:112-127` — confirm how `result.list` distinguishes an already-collected `Result<_, SignupError list>` from a single-error binding, especially when inference has not fixed the error type; the flattening claim is important to copyable composition.
+
 - `docs/05-parsing/_index.md:61-73` — confirm whether invariant-culture thousands separators and exponent/overflow handling match the stated accepted forms across numeric parsers; the table reads as an exact grammar.
 
 - `docs/04-refined/20-catalog.md:88-90` — confirm the exact return types and out-of-range behavior of `skip`, `item`, `truncate`, and `map2`; the paragraph describes clamping and totality but then says `skip` returns an ordinary list.
@@ -29,6 +31,10 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/06-data/50-testing-schema-guarantees.md:26-27,116` — confirm whether `SchemaGen.model` checks generated results with `Schema.check` after parsing, and how unsupported constraints or constructor failures are surfaced; the prose promises accepted models but the example unwraps generation only.
 
 ## Unclear or misleading
+
+- `docs/07-result-handling/50-collections.md:123-124` — says an infinite sequence will not terminate through *any* traversal, but fail-fast `traverse`/`sequence` can terminate on an early error. Qualify this for successful or all-errors traversal.
+- `docs/07-result-handling/80-collecting-errors.md:150-160` — the form supplies string `"12"` for an `int` field but the example does not show a text-to-int parser; clarify whether `Data.ofNameValues` plus `Schema.parse` converts it and show the actual diagnostic shape rather than a schematic comment.
+- `docs/07-result-handling/70-result-ce.md:132-146` — a `result` block illustrates filesystem I/O despite the section's description-only context; label it explicitly as host-owned illustrative code so readers do not infer this package opens readers.
 
 - `docs/05-parsing/_index.md:95-99` — `OutOfRange` also covers numbers too negative for the destination type; the sample message “too large” mislabels that case.
 - `docs/05-parsing/_index.md:186-206` — “a refinement admits it into a domain type” but `quantity` returns the guarded `int`, not a refined type. Either construct a refinement or describe this as parsing followed by a value check.
@@ -73,6 +79,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 ## Too long
 
+- `docs/07-result-handling/70-result-ce.md:72-128` — repeats the binding example with explicit types and then a second failure demonstration; one typed annotation and one failure example would teach the same behavior with less repetition.
+
 - `docs/05-parsing/_index.md:130-184` — generic optional/defaulting helpers and named wrappers repeat the same absence-versus-malformed rule and examples; condense the wrappers to a short list or table.
 
 - `docs/03-constraints/21-constraint.md:53-85,140-191` — the same DSL/module/type-directed-binding introduction appears twice on the core type page and again in `dsl.md`. Keep one small example here and direct readers to the DSL guide for details.
@@ -87,6 +95,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/06-data/_index.md:106-140` and `docs/06-data/20-declaring-and-editing.md:73-114` repeat the same control-flow fixture and output. Keep the full example in the focused page and shorten the landing-page example.
 
 ## Reference material in guides
+
+- `docs/07-result-handling/50-collections.md:103-112` — the four complete traversal signatures are reference-shaped; keep the list-output warning here and link the signatures from the API reference.
 
 - `docs/05-parsing/_index.md:56-69` — the exhaustive parser/accepted-form table is useful reference material; consider keeping a smaller selection in the walkthrough and linking the complete list from the Parse API reference.
 
@@ -106,6 +116,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/06-data/21-how-to-test-produced-json.md:169-199` — the complete pattern inventory and return-type summary belong beside the matching API reference; retain a few representative patterns in the walkthrough.
 
 ## Missing
+
+- `docs/07-result-handling/80-collecting-errors.md:74-75` — `NonEmptyList.ofList` is named without identifying its package or defining it; show a local conversion or link its owner so the suggestion is copyable.
 
 - `docs/05-parsing/_index.md:130-159` — clarify how `Some ""` and `Some "   "` behave with `optional`/`optionalOr`: these are present inputs that produce `MissingValue`, not absent values receiving a fallback.
 
@@ -133,6 +145,9 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/06-data/31-how-to-build-test-cases.md:112-114` — explain the error type/exception when `matrix` exceeds 256 combinations or a dimension has no variations, so test authors can diagnose case-generation failure.
 
 ## Suggestions for humans and LLMs
+
+- `docs/07-result-handling/60-observing.md:70-79` — the logging example includes raw `AgeNotANumber of string`; advise redacting sensitive raw input before logging, even when the callback itself is total.
+- `docs/07-result-handling/10-quickstart.md:63-69` — the first accumulation example is a no-check fragment with undefined functions; use the complete `signupAll` example from the collecting-errors page or mark the displayed output explicitly as illustrative for copy/paste readers.
 
 - `docs/05-parsing/_index.md:50-51` — warn that `ParseError` retains raw input, which may be sensitive; avoid logging or returning it verbatim without considering redaction.
 
