@@ -50,7 +50,7 @@ type ParseError =
 `target` names the destination type, `"int"`, `"bool"`, `"decimal"`, `"Guid"`, so a caller can tell which conversion
 failed without tracking it separately. `input` is the offending text, retained for redisplay.
 
-An empty field and a misspelled one can need different messages. `OutOfRange` identifies a well-formed number too large for the destination type.
+An empty field and a misspelled one can need different messages. `OutOfRange` identifies a well-formed number outside the destination type's range, either too large or too small: `Parse.int "-2147483649"` reports `OutOfRange ("int", "-2147483649")`.
 
 ## The parsers
 
