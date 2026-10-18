@@ -24,6 +24,10 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 ## Unclear or misleading
 
+- `docs/02-schema/47-schema-or-generated-dto.md:64-77` — `toDomain` promises `Result<Signup, string>` but builds `Signup` with a `ContactEmail` where `Email` was declared `string`; `bytes` is undeclared, and `Json.deserialize` is used as though it returned `Result`. Show a complete type-correct conversion using `Json.tryDeserialize` and explicit error mapping.
+- `docs/02-schema/25-input-sources.md:48-51` — suggests moving `Contacts`' collection-level `minLength 1` constraint onto `Contact` when removing `withSchema`; an individual `Contact` cannot enforce the length of its containing list. Keep the field block with `constrain` and omit only `withSchema`.
+- `docs/02-schema/90-reference-apps.md:48-55` — says generated wire schemas carry constraints and are written via a compiled codec, but `docs/02-schema/47-schema-or-generated-dto.md:39-55` warns that trusted codecs skip wire constraints. Explain whether this app validates with `Schema.parse` before writing and why this differs from the recommended permissive DTO strategy.
+
 - `docs/01-getting-started/_index.md:94` — “No `Signup` exists unless every field and the constructor succeeded” sounds like a guarantee about the public record type; callers can construct `Signup` directly. Say that `Schema.parse` does not return a `Signup` on failure.
 - `docs/01-getting-started/_index.md:79-89` — says the same schema reads JSON and shows `Data.ofNameValues` for text pairs; explain how JSON becomes `Data` before `Schema.parse`, or link the conversion recipe at this point.
 - `docs/01-getting-started/02-what-a-schema-gives-you.md:65-69` — printed sample output includes `age:` and `email:`, but the `printfn` expression renders only `issue.Error`, never `issue.Path`; show path formatting or remove the prefixes.
@@ -61,6 +65,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 ## Missing
 
+- `docs/02-schema/47-schema-or-generated-dto.md:51-77` — strategy 2 lacks a runnable boundary example with a defined byte payload, actual wire-to-domain types, and structural decode error handling; the current fragment cannot serve as a copyable starting point.
+
 - `docs/01-getting-started/02-what-a-schema-gives-you.md:150-152` — the seventh promised job has no runnable generation example, unlike the preceding jobs. Add a minimal `SchemaGen` call or label this section as a pointer to a separate recipe.
 
 - A single decision matrix explicitly contrasting `Schema.parse`, `Schema.check`, `Json.deserialize`, `Json.tryDeserialize`, and `Contract.parse`, including validation run, constructor behavior, input type, error type, and when to trust a payload.
@@ -70,6 +76,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - A single glossary for “trusted,” “admission,” “interpreted,” “opaque,” “canonical,” “wire,” and “domain.”
 
 ## Suggestions for humans and LLMs
+
+- `docs/02-schema/85-examples.md:147-148` — the mirrored example invokes `DateTimeOffset.UtcNow` twice for a publish interval. Use fixed endpoints in teaching examples so copied examples are deterministic and the interval is unambiguous.
 
 - `docs/01-getting-started/03-where-to-go-next.md:10` — the page has both a front-matter title and an explicit H1, unlike its sibling pages; use the same heading convention throughout Getting Started to avoid duplicate titles in rendered navigation.
 
