@@ -4,6 +4,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 ## Assumptions
 
+- `docs/04-refined/20-catalog.md:88-90` — confirm the exact return types and out-of-range behavior of `skip`, `item`, `truncate`, and `map2`; the paragraph describes clamping and totality but then says `skip` returns an ordinary list.
+
 - `docs/01-getting-started/02-what-a-schema-gives-you.md:150` — “`SchemaGen` produces values that satisfy the declaration”; confirm how generation reports unsupported or opaque constraints instead of producing unchecked fixtures.
 
 - `docs/index.md:27` — “No runtime reflection: the same declaration compiles under NativeAOT, trimming, and Fable.” Confirm the supported target/compiler combinations and exceptions.
@@ -23,6 +25,11 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/02-schema/70-patterns/20-legal-transitions.md:64` — shifting dates “cannot reverse their order”; confirm overflow behavior at date limits.
 
 ## Unclear or misleading
+
+- `docs/04-refined/60-tutorials/10-order-totals.md:40-58` — public `OrderLine` and `Order` records can be constructed with unchecked quantities, prices, or even default/null refined fields; “none of those facts ... can be false” and “rejected here and nowhere else” overstate the guarantee. Make the aggregate private or scope the claim to the shown constructor.
+- `docs/04-refined/60-tutorials/10-order-totals.md:112-114` — payable cannot exceed subtotal only if subtotal is nonnegative; the public records permit negative prices, and decimal arithmetic may overflow. Qualify the claim or enforce the preconditions in the type.
+- `docs/04-refined/40-domain-values.md:179-187` — `ContactEmail.normalise` wraps lower-cased text without rechecking `Constraint.email` or `maxLength`; explain why this transformation preserves the precise configured rule, especially if the rule is later changed.
+- `docs/04-refined/_index.md:163-165` — says a custom `CustomerId` resolves from `field _.Id` immediately after defining `Refinement.define`, while the tutorial at `docs/04-refined/60-tutorials/20-customer-id.md:149` says registration is needed. Show registration here or say the field needs an explicit schema until registered.
 
 - `docs/03-constraints/_index.md:30-35` — quick example prints `Error [ Blank; InvalidLength ... ]` as if `check` returned a list, but this page says it returns `Result<unit, Violation>`; the structured `Atomic`/group representation shown in the interpreted-rules guide differs. Show the actual `Violation` or label this as schematic output.
 - `docs/03-constraints/40-localization/_index.md:65-73` — “Using the violation and renderer from above” mixes an `atLeast 13` violation with a French renderer containing only presence/cardinality/email/name translations; the quoted English outputs for `message` and capitalized `Name` are not what that lookup demonstrates. Use `Renderer.english` for those outputs or show the actual fallback/translated noun.
@@ -78,6 +85,9 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 ## Missing
 
+- `docs/04-refined/60-tutorials/10-order-totals.md:44-55` — the tutorial promises building an order from untrusted input but never constructs `Order` from all four admitted fields; add a complete boundary function, including error mapping for heterogeneous failures and checking the line collection.
+- `docs/04-refined/50-schema.md:99-106` — `Schema.convert decimal int` narrows a decimal on encoding; explain what happens with fractional or out-of-range values, or choose a genuinely reversible conversion for the first example.
+
 - `docs/03-constraints/40-localization/20-custom-rules.md:14-30` — the page’s first F# example omits `open Reified`, unlike adjacent pages, and does not show a check and rendered translation. Add a complete minimal invocation so a new reader can verify the custom key and argument path.
 - `docs/03-constraints/45-adding-a-language.md:219-259` — the coverage test checks only bare `Catalogue.keys`, while the skeleton emits `.one`/`.other` instead of the bare key for pluralized entries; a fully filled skeleton fails this proposed test. Supply a coverage predicate that accepts bare OR both required plural forms, and distinguish contextual overrides from base coverage.
 
@@ -93,6 +103,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - A single glossary for “trusted,” “admission,” “interpreted,” “opaque,” “canonical,” “wire,” and “domain.”
 
 ## Suggestions for humans and LLMs
+
+- `docs/04-refined/60-tutorials/20-customer-id.md:108-115` — `index` and `range` work for any comparable key, including zero; identify which operation specifically relies on positivity, or present `CustomerId` as nominal identity rather than proof that positive numeric wrappers earn their keep.
 
 - `docs/03-constraints/60-reference-app.md:39-45` — “must print on one line” is not enforced by the length-only checks shown; remove that claim or add a newline rule, so copied validation does what its comment promises.
 - `docs/03-constraints/40-localization/30-advanced-rendering.md:169-180` — the `MessageRequest` type sketch and host-owned `icu` in a `no-check` block look like an API declaration plus runnable resolver. Label the type as illustrative and show a concrete `Map`-based resolver separately for readers copying code.
