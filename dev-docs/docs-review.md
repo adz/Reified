@@ -16,7 +16,7 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 - `docs/05-parsing/_index.md:61-73` — confirm whether invariant-culture thousands separators and exponent/overflow handling match the stated accepted forms across numeric parsers; the table reads as an exact grammar.
 
-- `docs/04-refined/20-catalog.md:88-90` — confirm the exact return types and out-of-range behavior of `skip`, `item`, `truncate`, and `map2`; the paragraph describes clamping and totality but then says `skip` returns an ordinary list.
+- [fixed] `docs/04-refined/20-catalog.md:88-90` — confirm the exact return types and out-of-range behavior of `skip`, `item`, `truncate`, and `map2`; the paragraph describes clamping and totality but then says `skip` returns an ordinary list.
 
 - [fixed] `docs/01-getting-started/02-what-a-schema-gives-you.md:150` — “`SchemaGen` produces values that satisfy the declaration”; confirm how generation reports unsupported or opaque constraints instead of producing unchecked fixtures.
 
@@ -63,10 +63,10 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/05-parsing/_index.md:95-99` — `OutOfRange` also covers numbers too negative for the destination type; the sample message “too large” mislabels that case.
 - `docs/05-parsing/_index.md:186-206` — “a refinement admits it into a domain type” but `quantity` returns the guarded `int`, not a refined type. Either construct a refinement or describe this as parsing followed by a value check.
 
-- `docs/04-refined/60-tutorials/10-order-totals.md:40-58` — public `OrderLine` and `Order` records can be constructed with unchecked quantities, prices, or even default/null refined fields; “none of those facts ... can be false” and “rejected here and nowhere else” overstate the guarantee. Make the aggregate private or scope the claim to the shown constructor.
-- `docs/04-refined/60-tutorials/10-order-totals.md:112-114` — payable cannot exceed subtotal only if subtotal is nonnegative; the public records permit negative prices, and decimal arithmetic may overflow. Qualify the claim or enforce the preconditions in the type.
-- `docs/04-refined/40-domain-values.md:179-187` — `ContactEmail.normalise` wraps lower-cased text without rechecking `Constraint.email` or `maxLength`; explain why this transformation preserves the precise configured rule, especially if the rule is later changed.
-- `docs/04-refined/_index.md:163-165` — says a custom `CustomerId` resolves from `field _.Id` immediately after defining `Refinement.define`, while the tutorial at `docs/04-refined/60-tutorials/20-customer-id.md:149` says registration is needed. Show registration here or say the field needs an explicit schema until registered.
+- [fixed] `docs/04-refined/60-tutorials/10-order-totals.md:40-58` — public `OrderLine` and `Order` records can be constructed with unchecked quantities, prices, or even default/null refined fields; “none of those facts ... can be false” and “rejected here and nowhere else” overstate the guarantee. Make the aggregate private or scope the claim to the shown constructor.
+- [fixed] `docs/04-refined/60-tutorials/10-order-totals.md:112-114` — payable cannot exceed subtotal only if subtotal is nonnegative; the public records permit negative prices, and decimal arithmetic may overflow. Qualify the claim or enforce the preconditions in the type.
+- [fixed] `docs/04-refined/40-domain-values.md:179-187` — `ContactEmail.normalise` wraps lower-cased text without rechecking `Constraint.email` or `maxLength`; explain why this transformation preserves the precise configured rule, especially if the rule is later changed.
+- [fixed] `docs/04-refined/_index.md:163-165` — says a custom `CustomerId` resolves from `field _.Id` immediately after defining `Refinement.define`, while the tutorial at `docs/04-refined/60-tutorials/20-customer-id.md:149` says registration is needed. Show registration here or say the field needs an explicit schema until registered.
 
 - [fixed] `docs/03-constraints/_index.md:30-35` — quick example prints `Error [ Blank; InvalidLength ... ]` as if `check` returned a list, but this page says it returns `Result<unit, Violation>`; the structured `Atomic`/group representation shown in the interpreted-rules guide differs. Show the actual `Violation` or label this as schematic output.
 - [fixed] `docs/03-constraints/40-localization/_index.md:65-73` — “Using the violation and renderer from above” mixes an `atLeast 13` violation with a French renderer containing only presence/cardinality/email/name translations; the quoted English outputs for `message` and capitalized `Name` are not what that lookup demonstrates. Use `Renderer.english` for those outputs or show the actual fallback/translated noun.

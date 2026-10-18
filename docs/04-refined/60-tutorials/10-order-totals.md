@@ -34,12 +34,14 @@ type Order =
 ```
 
 
-The field types specify the order's invariants. An order has at least one line. The discount is a
+The refined field types specify the order's invariants. An order has at least one line. The discount is a
 proportion, so it cannot be 140% or `NaN`. The delivery window's start is not after its
 end. None of those facts needs restating later, because none of them can be false.
 
-Quantity and price are ordinary numbers, checked on the way in. They are not refined types
-because F# cannot carry "greater than zero" through arithmetic, see
+Quantity and price are ordinary numbers, so their "greater than zero" rule lives in the
+`orderLine` constructor below rather than in the type: a caller who builds an `OrderLine`
+record directly can still put a negative quantity or price in it. They are not refined
+types because F# cannot carry "greater than zero" through arithmetic, see
 [why there are no refined numbers](/refined/catalog.html#why-there-are-no-refined-numbers).
 
 ## Admit the input
@@ -55,7 +57,7 @@ let orderLine rawSku rawQuantity rawPrice =
 ```
 
 
-Invalid values are rejected here and nowhere else:
+The `orderLine` constructor is where quantity and price are admitted, and each refined constructor rejects its own invalid input:
 
 ```fsharp
 orderLine "SKU-1" 0 9.99m      // Error, quantity must be positive
@@ -108,9 +110,12 @@ let payable (order: Order) =
 ```
 
 
-`complement` is total and closed, so `multiplier` is guaranteed to be in `[0, 1]`. That is
-what makes the result safe without a check: the payable amount cannot exceed the subtotal
-and cannot go negative, because there is no discount value that would allow it.
+`complement` is total and closed, so `multiplier` is guaranteed to be in `[0, 1]`. For an
+order admitted through `orderLine`, quantity and price are positive, so the subtotal is
+nonnegative and the payable amount cannot exceed the subtotal or go negative — no discount
+value allows either. That guarantee comes from admission, not from the record types: a
+directly constructed `OrderLine` with a negative price breaks it, and `decimal` arithmetic
+can still overflow on very large values.
 
 The conversion to `decimal` is deliberate rather than hidden. `UnitInterval` is a double,
 money is a `decimal`, and mixing the two is a rounding decision that belongs in your code.

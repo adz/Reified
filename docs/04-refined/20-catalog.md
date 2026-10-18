@@ -81,14 +81,16 @@ Only the second tier is a reason to use the type:
 | Tier | Operations | What the invariant does |
 |---|---|---|
 | Parity | `sum`, `sumBy`, `choose`, `countBy`, `tryPick`, `tryFind`, `tryFindBack`, `tryFindIndex`, `pairwise`, `iter`, `iteri`, `fold`, `exists`, `forall` | nothing, these exist so the type is usable without a round trip |
-| Earned | `average`, `averageBy`, `item`, `truncate`, `skip`, `map2`, `init`, `replicate`, `scan`, `chunkBySize` | removes the partiality: no raise, no option, no empty case |
+| Earned | `average`, `averageBy`, `item`, `truncate`, `skip`, `map2`, `init`, `replicate`, `scan`, `chunkBySize` | removes the partiality: no raise, no option, and — except `skip` — no empty case |
 
 `average` is the clearest of the earned ones: `List.average []` raises, while the divisor
-here is the length, which is at least one. `item`, `truncate`, `init`, and `chunkBySize`
-clamp their count into range instead of raising or emptying the list, so non-emptiness
-survives; `skip` and `map2` are total where `List.skip` and `List.map2` raise. Operations
-that can genuinely destroy the invariant stay honest: `filter`, `choose`, and `skip`
-return an ordinary list, and `tryFilter`/`tryChoose` return an option.
+here is the length, which is at least one. `item` clamps its index into range, and
+`truncate`, `init`, and `chunkBySize` clamp their count or size, so non-emptiness
+survives. `map2` truncates to the shorter input and returns a non-empty list where
+`List.map2` raises on unequal lengths. `skip` is total too — a count past the end yields
+the empty list rather than raising — but it returns an ordinary list, because skipping can
+consume every item. `filter` and `choose` are honest the same way: they return an ordinary
+list, while `tryFilter`/`tryChoose` return an option.
 
 `scan` is non-empty by construction rather than by inheritance, a scan always emits its
 seed.

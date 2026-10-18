@@ -153,16 +153,23 @@ type CustomerId =
 module CustomerId =
     let refinement = Refinement.define (Constraint.greaterThan 0) CustomerId _.Value
     let create value = Refinement.create refinement value
+
+type CustomerId with
+    static member Schema(_: CustomerId) : Schema<CustomerId> =
+        Schema.int |> Schema.refine CustomerId.refinement
 ```
 
 
 `Refinement.constraints` exposes the same rules to Schema and other interpreters, so the
-type describes itself at a boundary without restating the rule.
-[Customer Id](/refined/tutorials/customer-id.html) builds one end to end, including its schema.
+type describes itself at a boundary without restating the rule. The `static member Schema`
+above registers the type's canonical schema.
+[Customer Id](/refined/tutorials/customer-id.html) builds both end to end.
 
-Once the type exists, a schema field of that type needs nothing but the field: `field _.Id`
-resolves the refinement, and a failure at that field is reported with its path alongside every
-other field's. See [Schema integration](/schema/index.html).
+Once the type is registered that way, a schema field of that type needs nothing but the
+field: `field _.Id` resolves the canonical schema, and a failure at that field is reported
+with its path alongside every other field's. Without the registration, the field needs an
+explicit schema via `withSchema`/`refine`. See
+[Refined Schemas](/schema/refined-values.html).
 
 ## Read next
 

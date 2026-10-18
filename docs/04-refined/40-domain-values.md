@@ -183,10 +183,19 @@ module ContactEmail =
 
     // ... as in "Combine constraints" above
 
-    /// Total: lower-casing inhabited, well-formed text leaves it inhabited and well-formed.
+    /// Total for this refinement: lower-casing never introduces an `@`, so the `email`
+    /// shape survives, and it does not lengthen the text, so `maxLength 254` still holds.
+    /// The proof is specific to the constraints in `refinement` — change them and revisit.
     let normalise (input: ContactEmail) = ContactEmail(value input |> fun text -> text.ToLowerInvariant())
 ```
 
+
+Lower-casing is closed under this refinement because the `email` constraint only tests that
+the text is two non-empty runs of non-`@` characters around one `@`, and lower-casing never
+introduces an `@`, while `maxLength 254` survives because `ToLowerInvariant` keeps the
+string length. That argument is tied to the rules listed in `refinement`; if the
+constraints change to something case-sensitive or length-critical, `normalise` has to be
+revisited.
 
 If no operation preserves the invariant, use a constraint instead.
 
