@@ -111,7 +111,11 @@ let matrixCases =
 
 Names follow dimension order, such as `plan: pro / region: AU / roles: admin`.
 
-The matrix limit is 256 combinations. The product is checked before cases are materialized.
+The matrix limit is 256 combinations. The product is checked before cases are materialized. Exceeding it raises
+`System.ArgumentException` with the message `"The matrix would create N cases; the maximum is 256."`, before any
+case is built. A dimension with no variations does not throw: its product is zero, so `matrix` returns an empty case
+list instead. When an empty dimension is itself a test-authoring bug, check `dimension.Variations` before calling
+`matrix`.
 
 This matrix produces eight cases. The first is
 `plan: free / region: AU / roles: none`; its value has `plan = "free"`, `region = "au"`, and `roles = []`.

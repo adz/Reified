@@ -154,43 +154,43 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 ## Missing
 
-- `docs/api/Reified.Schema.md:85-99` — `Schema.check` has no direct link or example explaining what gets rechecked versus `Schema.parse`; include a minimal parse/check contrast and their failure types.
-- `docs/api/Reified.JsonSchema.md:14-29` — `generateValue` appears in the page metadata but not the text; explain when to export a value schema rather than a model schema and what each returns.
-- `docs/api/Reified.Inspect.md:13-27` — `Inspect.schema` is listed under value inspection but never explained; distinguish its return shape and use from `Inspect.model`.
+- [done] `docs/api/Reified.Schema.md:85-99` — `Schema.check` has no direct link or example explaining what gets rechecked versus `Schema.parse`; include a minimal parse/check contrast and their failure types.
+- [done] `docs/api/Reified.JsonSchema.md:14-29` — `generateValue` appears in the page metadata but not the text; explain when to export a value schema rather than a model schema and what each returns.
+- [done] `docs/api/Reified.Inspect.md:13-27` — `Inspect.schema` is listed under value inspection but never explained; distinguish its return shape and use from `Inspect.model`.
 
-- `docs/95-notes/95-packages-and-platforms.md:11-18,69-84` — give a minimal Fable project install/compile recipe or point to one; `dotnet add package` alone does not show how a JavaScript client consumes these packages or generated output.
-- `docs/95-notes/82-aot-trimming-fable.md:78-90` — bundle-size estimates omit esbuild/Fable versions, build settings, and a reproducible command or linked recipe; readers cannot compare their own bundles to these numbers.
+- [done] `docs/95-notes/95-packages-and-platforms.md:11-18,69-84` — give a minimal Fable project install/compile recipe or point to one; `dotnet add package` alone does not show how a JavaScript client consumes these packages or generated output.
+- [done] `docs/95-notes/82-aot-trimming-fable.md:78-90` — bundle-size estimates omit esbuild/Fable versions, build settings, and a reproducible command or linked recipe; readers cannot compare their own bundles to these numbers.
 
-- `docs/90-comparisons/_index.md:4-10` — the landing description mentions only Schema, despite the Constraint and Result comparisons; add links and a sentence distinguishing the three comparison scopes.
-- `docs/90-comparisons/20-fluentvalidation-comparison.md:38-60` — the example uses `Constraint` and `Data` without showing imports or package setup, and uses `printfn` in a boundary example; show a complete application-host example or explicitly label it a fragment.
-- `docs/90-comparisons/30-zod-comparison.md:14-22` — table entries such as `schema<...>`, `construct ctor`, and `Schema.refine` are shorthand rather than copyable F#; link one complete schema example and identify the shorthand.
+- [done] `docs/90-comparisons/_index.md:4-10` — the landing description mentions only Schema, despite the Constraint and Result comparisons; add links and a sentence distinguishing the three comparison scopes.
+- [done] `docs/90-comparisons/20-fluentvalidation-comparison.md:38-60` — the example uses `Constraint` and `Data` without showing imports or package setup, and uses `printfn` in a boundary example; show a complete application-host example or explicitly label it a fragment.
+- [done] `docs/90-comparisons/30-zod-comparison.md:14-22` — table entries such as `schema<...>`, `construct ctor`, and `Schema.refine` are shorthand rather than copyable F#; link one complete schema example and identify the shorthand.
 
-- `docs/07-result-handling/80-collecting-errors.md:74-75` — `NonEmptyList.ofList` is named without identifying its package or defining it; show a local conversion or link its owner so the suggestion is copyable.
+- [done] `docs/07-result-handling/80-collecting-errors.md:74-75` — `NonEmptyList.ofList` is named without identifying its package or defining it; show a local conversion or link its owner so the suggestion is copyable.
 
-- `docs/05-parsing/_index.md:130-159` — clarify how `Some ""` and `Some "   "` behave with `optional`/`optionalOr`: these are present inputs that produce `MissingValue`, not absent values receiving a fallback.
+- [done] `docs/05-parsing/_index.md:130-159` — clarify how `Some ""` and `Some "   "` behave with `optional`/`optionalOr`: these are present inputs that produce `MissingValue`, not absent values receiving a fallback.
 
-- `docs/04-refined/60-tutorials/10-order-totals.md:44-55` — the tutorial promises building an order from untrusted input but never constructs `Order` from all four admitted fields; add a complete boundary function, including error mapping for heterogeneous failures and checking the line collection.
-- `docs/04-refined/50-schema.md:99-106` — `Schema.convert decimal int` narrows a decimal on encoding; explain what happens with fractional or out-of-range values, or choose a genuinely reversible conversion for the first example.
+- [done] `docs/04-refined/60-tutorials/10-order-totals.md:44-55` — the tutorial promises building an order from untrusted input but never constructs `Order` from all four admitted fields; add a complete boundary function, including error mapping for heterogeneous failures and checking the line collection.
+- [done] `docs/04-refined/50-schema.md:99-106` — `Schema.convert decimal int` narrows a decimal on encoding; explain what happens with fractional or out-of-range values, or choose a genuinely reversible conversion for the first example.
 
-- `docs/03-constraints/40-localization/20-custom-rules.md:14-30` — the page’s first F# example omits `open Reified`, unlike adjacent pages, and does not show a check and rendered translation. Add a complete minimal invocation so a new reader can verify the custom key and argument path.
-- `docs/03-constraints/45-adding-a-language.md:219-259` — the coverage test checks only bare `Catalogue.keys`, while the skeleton emits `.one`/`.other` instead of the bare key for pluralized entries; a fully filled skeleton fails this proposed test. Supply a coverage predicate that accepts bare OR both required plural forms, and distinguish contextual overrides from base coverage.
+- [done] `docs/03-constraints/40-localization/20-custom-rules.md:14-30` — the page’s first F# example omits `open Reified`, unlike adjacent pages, and does not show a check and rendered translation. Add a complete minimal invocation so a new reader can verify the custom key and argument path.
+- [done] `docs/03-constraints/45-adding-a-language.md:219-259` — the coverage test checks only bare `Catalogue.keys`, while the skeleton emits `.one`/`.other` instead of the bare key for pluralized entries; a fully filled skeleton fails this proposed test. Supply a coverage predicate that accepts bare OR both required plural forms, and distinguish contextual overrides from base coverage.
 
 
-- `docs/02-schema/47-schema-or-generated-dto.md:51-77` — strategy 2 lacks a runnable boundary example with a defined byte payload, actual wire-to-domain types, and structural decode error handling; the current fragment cannot serve as a copyable starting point.
+- [done] `docs/02-schema/47-schema-or-generated-dto.md:51-77` — strategy 2 lacks a runnable boundary example with a defined byte payload, actual wire-to-domain types, and structural decode error handling; the current fragment cannot serve as a copyable starting point.
 
-- `docs/01-getting-started/02-what-a-schema-gives-you.md:150-152` — the seventh promised job has no runnable generation example, unlike the preceding jobs. Add a minimal `SchemaGen` call or label this section as a pointer to a separate recipe.
+- [done] `docs/01-getting-started/02-what-a-schema-gives-you.md:150-152` — the seventh promised job has no runnable generation example, unlike the preceding jobs. Add a minimal `SchemaGen` call or label this section as a pointer to a separate recipe.
 
-- A single decision matrix explicitly contrasting `Schema.parse`, `Schema.check`, `Json.deserialize`, `Json.tryDeserialize`, and `Contract.parse`, including validation run, constructor behavior, input type, error type, and when to trust a payload.
-- A complete HTTP JSON boundary recipe from request bytes through `Json.parseData`, `Schema.parseRetainingInput`, localized `SchemaErrors`, and an application-owned response; current examples demonstrate pieces separately.
-- A compact error taxonomy and mapping recipe: `Violation`, `ParseError`, `SchemaError`, `SchemaErrors`, `JsonCodecException`, `MigrationError`, and `ContractError` with conversions and paths.
-- Documentation for concurrency/caching of compiled codecs and deferred recursive schemas; the guidance to compile once invites shared use but does not say whether it is safe.
-- A single glossary for “trusted,” “admission,” “interpreted,” “opaque,” “canonical,” “wire,” and “domain.”
+- [done] A single decision matrix explicitly contrasting `Schema.parse`, `Schema.check`, `Json.deserialize`, `Json.tryDeserialize`, and `Contract.parse`, including validation run, constructor behavior, input type, error type, and when to trust a payload.
+- [done] A complete HTTP JSON boundary recipe from request bytes through `Json.parseData`, `Schema.parseRetainingInput`, localized `SchemaErrors`, and an application-owned response; current examples demonstrate pieces separately.
+- [done] A compact error taxonomy and mapping recipe: `Violation`, `ParseError`, `SchemaError`, `SchemaErrors`, `JsonCodecException`, `MigrationError`, and `ContractError` with conversions and paths.
+- [done] Documentation for concurrency/caching of compiled codecs and deferred recursive schemas; the guidance to compile once invites shared use but does not say whether it is safe.
+- [done] A single glossary for “trusted,” “admission,” “interpreted,” “opaque,” “canonical,” “wire,” and “domain.”
 
-- `docs/06-data/10-tutorial.md:136-149` — the tutorial calls `Reified.Json.parseData`, but the Data-only install at `docs/06-data/_index.md:20-26` does not supply it; state that this step also requires `Reified.Schema` and show the install command before the example.
-- `docs/06-data/15-what-it-does.md:67-69` — direct `Data.Number` construction permits invalid JSON number tokens; explain what `Data.Json.render` does with such values, especially when input did not come through `num` or the JSON parser.
-- `docs/06-data/15-what-it-does.md:112-113` — duplicate names use last-field lookup, but partial matching consumes duplicates. Add a small example showing which occurrence an `at` path inspects versus `containing`.
-- `docs/06-data/30-converting-data.md:120-129` — show how `Data.ofCliArgs` treats negative numeric option values and a missing option value; the “starts with `-`” rule turns both into flags or positionals in a surprising way.
-- `docs/06-data/31-how-to-build-test-cases.md:112-114` — explain the error type/exception when `matrix` exceeds 256 combinations or a dimension has no variations, so test authors can diagnose case-generation failure.
+- [done] `docs/06-data/10-tutorial.md:136-149` — the tutorial calls `Reified.Json.parseData`, but the Data-only install at `docs/06-data/_index.md:20-26` does not supply it; state that this step also requires `Reified.Schema` and show the install command before the example.
+- [done] `docs/06-data/15-what-it-does.md:67-69` — direct `Data.Number` construction permits invalid JSON number tokens; explain what `Data.Json.render` does with such values, especially when input did not come through `num` or the JSON parser.
+- [done] `docs/06-data/15-what-it-does.md:112-113` — duplicate names use last-field lookup, but partial matching consumes duplicates. Add a small example showing which occurrence an `at` path inspects versus `containing`.
+- [done] `docs/06-data/30-converting-data.md:120-129` — show how `Data.ofCliArgs` treats negative numeric option values and a missing option value; the “starts with `-`” rule turns both into flags or positionals in a surprising way.
+- [done] `docs/06-data/31-how-to-build-test-cases.md:112-114` — explain the error type/exception when `matrix` exceeds 256 combinations or a dimension has no variations, so test authors can diagnose case-generation failure.
 
 ## Suggestions for humans and LLMs
 

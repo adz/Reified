@@ -68,6 +68,11 @@ Data.render (Data.Number "1.2300e+4")
 visible to exact comparison: `1`, `1.0`, and `1e0` are different. Use the `num` function rather than the
 union case when accepting text, because `num` checks that the token is a valid JSON number.
 
+The `Number` union case does not validate its token, so `Data.Number "not a number"` constructs a value directly.
+`Data.render` and `Data.Json.render` both emit the token verbatim; for an invalid token that produces output that is
+not valid JSON. Always go through `Data.number`/`Data.num`, or the JSON parser, when the token came from input you
+did not already validate.
+
 See [Numbers](/data/numbers.html) for conversion rules and examples.
 
 ## `Data.Bool`
@@ -111,6 +116,22 @@ Data.render value
 
 Path lookup and edits select the last field when a name is repeated. Exact comparison observes every field, including
 duplicates and order. Partial object matching consumes matching duplicate fields one occurrence at a time.
+
+```fsharp
+open Reified.DataDSL
+
+let repeated =
+    Data.Object [
+        "name", Data.Text "Ada"
+        "name", Data.Text "Grace"
+    ]
+
+Data.lookupPath "name" repeated
+// => Data.Text "Grace"   — a path inspects the last occurrence
+
+Data.tryMatch [ at "" (containing [ "name" => "Ada" ]) ] repeated
+// => Ok ()              — containing matches the first occurrence, consuming it
+```
 
 ## Paths
 

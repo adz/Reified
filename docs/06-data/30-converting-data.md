@@ -131,6 +131,21 @@ The rules:
 Every CLI leaf is text. `Data.ofCliArgs` identifies structure but leaves `"42"` and `"true"` as text; the schema
 parsing the tree decides whether they represent a number or Boolean.
 
+Because a value token must not start with `-`, a negative number as a separate token reads as a positional, and a
+trailing option with no following token reads as a flag:
+
+```fsharp
+Data.ofCliArgs [ "--offset"; "-5"; "--verbose" ]
+// => Data.Object [
+//      "_", Data.List [ Data.Text "-5" ]
+//      "offset", Data.Text "true"
+//      "verbose", Data.Text "true"
+//    ]
+```
+
+`--offset -5` did not set `offset` to `-5`; it set `offset` to `"true"` and made `-5` a positional. Use the equals
+form to pass a negative value: `--offset=-5` sets `offset` to the text `"-5"`.
+
 ## Configuration keys
 
 `Data.ofConfiguration` takes flattened `seq<string * string>` and splits each key on `:` to rebuild the nesting. A

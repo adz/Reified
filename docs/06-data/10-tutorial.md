@@ -135,6 +135,13 @@ nameCases |> List.map (fun case -> case.Name, Data.tryFindPath "name" case.Value
 
 ## Parse JSON output
 
+`Json.parseData` lives in `Reified.Schema`, not in the Data-only install shown at the top of this section. Add the
+package for this step:
+
+```sh
+dotnet add package Reified.Schema
+```
+
 ```fsharp
 let response =
     Reified.Json.parseData
