@@ -153,13 +153,23 @@ At `SchemaPath.root`, full rendering uses `constraint.attribute.default`, "value
 
 ## Mapping To Domain Errors
 
-`RetainedParseResult.mapErrors` translates interpreter errors into a domain or application error type at the boundary while
-preserving the structured data and paths:
+`RetainedParseResult.Result` stays typed to `SchemaErrors`, so translate interpreter errors into a domain or application
+error type by mapping that `Result` while keeping the retained `Input` alongside it:
 
 ```fsharp no-check reason="SignupError is an application-owned error type this page cannot declare on its own; illustrates the mapping shape, not a standalone unit."
-let domainParsed = parsed |> RetainedParseResult.mapErrors SignupError.ofSchemaError
+let domainResult =
+    parsed.Result
+    |> Result.mapError (fun errors ->
+        errors
+        |> SchemaErrors.toList
+        |> List.map (fun issue ->
+            SignupError.Field(SchemaPath.format issue.Path, SchemaError.render issue.Error)))
+
+let submitted = parsed.Input
 ```
 
 
-That mapping is the boundary between Reified's interpreter errors and your application errors. Keep your user-owned error
-union in the application, and translate `SchemaError` with one function when the parsed result crosses that boundary.
+Walking `SchemaErrors.toList` keeps each `SchemaPath` available while you build your own case, and `parsed.Input` still
+redisplays the submitted values. That mapping is the boundary between Reified's interpreter errors and your application
+errors. Keep your user-owned error union in the application, and translate `SchemaError` with one function when the parsed
+result crosses that boundary.

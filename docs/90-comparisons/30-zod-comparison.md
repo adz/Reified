@@ -50,8 +50,8 @@ error, not a runtime failure.
 - **Fable**: the schema core, including its `Json` codecs, compiles to JavaScript through Fable, so the browser and the
   server can share one declaration, encode and decode included, the role zod plays across the TypeScript stack.
 - **Errors are values with rendering**: `SchemaError` is a typed union with a default English renderer
-  (`RetainedParseResult.renderErrors`) and a one-function mapping into your own error union (`RetainedParseResult.mapErrors`), rather
-  than a bag of issue objects.
+  (`RetainedParseResult.renderErrors`) and a one-function mapping into your own error union (`Result.mapError` over
+  `parsed.Result`), rather than a bag of issue objects.
 
 ## Where zod Fits Better
 
