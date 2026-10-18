@@ -160,8 +160,12 @@ The contract compiler and schema-derived testing adapter are repository tooling,
 ## Documentation
 
 - [Documentation](https://adz.github.io/Reified/)
+- [Task index](https://adz.github.io/Reified/guides/task-index.html)
+- [Choosing an API](https://adz.github.io/Reified/guides/choosing-an-api.html)
 - [Getting started](https://adz.github.io/Reified/getting-started/)
 - [Schema and JSON](https://adz.github.io/Reified/schema/)
+- [Error taxonomy](https://adz.github.io/Reified/guides/error-taxonomy.html)
+- [Glossary](https://adz.github.io/Reified/guides/glossary.html)
 - [API reference](https://adz.github.io/Reified/api.html)
 
 ## Axial integration

@@ -133,6 +133,10 @@ validation that silently does not run.</p>
 <p style="max-width: 78ch; margin: 0 auto 2rem; text-align: center;"><a href="notes/packages-and-platforms.html">Packages and platforms &rarr;</a></p>
 
 <div class="docs-home-meta" style="margin-bottom: 4rem;">
+<a class="docs-chip" href="guides/task-index.html">Task index</a>
+<a class="docs-chip" href="guides/choosing-an-api.html">Choosing an API</a>
+<a class="docs-chip" href="guides/error-taxonomy.html">Error taxonomy</a>
+<a class="docs-chip" href="guides/glossary.html">Glossary</a>
 <a class="docs-chip" href="getting-started/index.html">Getting started</a>
 <a class="docs-chip" href="https://github.com/adz/Reified">GitHub</a>
 </div>

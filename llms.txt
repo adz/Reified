@@ -1,8 +1,42 @@
 # Reified documentation
 
-Start at `/getting-started/`: one complete transaction, a model declaration, untrusted input parsed into it,
-accumulated path-aware failures, and a JSON codec derived from the same declaration, reflection-free and
-competitive with `System.Text.Json`, ahead of it on decode.
+Read the trust boundary before anything else: `Schema.parse` over `Data` runs constraints, refinements, and
+constructor invariants and accumulates path-aware `SchemaErrors` for untrusted input. The compiled
+`Json.deserialize`/`tryDeserialize` codec is the trusted path and skips constraint metadata, enforcing only the wire
+shape. Decoding an attributed record with the trusted path looks validated but is not. Choose with
+`/guides/choosing-an-api.html`.
+
+## Task router
+
+| I want to… | Canonical page |
+| --- | --- |
+| Parse untrusted structured input into a model with path-aware errors | `/schema/quickstart.html` |
+| Choose between parse, check, codec, and contract | `/guides/choosing-an-api.html` |
+| Put a reusable value rule on a field or value | `/constraints/constraints.html` |
+| Record "this passed its rule" in the type itself | `/refined/index.html` |
+| Parse serialized primitive text | `/parsing/index.html` |
+| Build, change, compare, and test structured data | `/data/index.html` |
+| Compose, recover, or accumulate over `Result` | `/result-handling/llms.txt` |
+| Serialize and deserialize JSON for producers I trust | `/schema/json-codecs.html` |
+| Export JSON Schema from a declaration | `/api/Reified.JsonSchema.html` |
+| Describe a model to a form or admin UI | `/api/Reified.Inspect.html` |
+| Generate a schema from record attributes at build time | `/schema/derivation/index.html` |
+| Keep reading old wire versions | `/schema/versioned-contracts.html` |
+| Run one declaration on .NET and Fable JavaScript | `/notes/aot-trimming-fable.html` |
+| Know which package to install | `/notes/packages-and-platforms.html` |
+| Map a failure type to its meaning and conversion | `/guides/error-taxonomy.html` |
+| Pin down "trusted", "admission", "opaque", or "wire" | `/guides/glossary.html` |
+
+## API disambiguation
+
+| Operation | Input | Runs constraints | Error type | Trust the payload? |
+| --- | --- | --- | --- | --- |
+| `Schema.parse` | `Data` | Yes | `SchemaErrors` | No — untrusted boundary |
+| `Schema.check` | an existing `'model` | Yes | `SchemaErrors` | No — the value's history is uncertain |
+| `Json.deserialize` / `Json.tryDeserialize` | JSON `string` | No — wire shape only | `JsonCodecException` / `Result<_, string>` | Yes — storage, internal service, cache |
+| `Contract.parse` | `Data` | Yes — version parse, migrations, recheck | `ContractError` | No — old wire shapes must stay readable |
+
+## Package routing
 
 Schema uses Constraint, Parse, Data, and Refinements; each package can also be installed without Schema. Result is an
 independent set of composition tools. Load only the context needed for the task:
@@ -14,9 +48,6 @@ independent set of composition tools. Load only the context needed for the task:
   `/result-handling/llms.txt`
 - Structured fixtures, immutable edits, comparisons, and produced-data matching, also the required input shape
   for `Schema.parse`, not only a testing convenience: `/data/llms.txt`
-
-The main documentation order is Schema (JSON codecs first within it), Constraints, Refined, Parsing, Result
-handling, and Data.
 
 `Reified` is an umbrella package that installs every runtime package at once. It adds no API of its own: every
 type still comes from the package documented above.

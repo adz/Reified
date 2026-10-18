@@ -26,6 +26,7 @@ published URL.
 | `docs/05-parsing/` | `/parsing/` | Serialized primitive decoding |
 | `docs/06-data/` | `/data/` | Structured data, fixtures, and comparison |
 | `docs/07-result-handling/` | `/result-handling/` | Standard F# `Result` composition |
+| `docs/08-guides/` | `/guides/` | Task routing, API selection, error taxonomy, and glossary |
 | `docs/90-comparisons/` | `/comparisons/` | Comparisons with adjacent libraries |
 | `docs/95-notes/` | `/notes/` | Packages, platforms, benchmarks, and implementation notes |
 
