@@ -35,10 +35,13 @@ api:
 # `Json`
 
 `Json.compile` interprets a `Schema<'model>` as a reusable `JsonCodec<'model>`. Compile once, then use the codec to
-serialize trusted models or deserialize JSON into the same field plan used by `Schema.parse`.
+serialize trusted models or decode JSON using the schema's field structure. Unlike `Schema.parse`, trusted codec
+decoding does not check value constraints; use `Json.parseData` followed by `Schema.parse` for untrusted input.
 
 The codec is built from the explicit schema rather than runtime type inspection. It supports NativeAOT, trimming, and
-Fable, and it preserves schema paths in decoding failures.
+Fable. `deserialize` and `deserializeBytes` raise `JsonCodecException` on the first structural failure; its `Path`
+identifies the failing schema field. `tryDeserialize` returns `Result<_, string>` instead: its error is the exception's
+rendered message (including the path), not a structured path or accumulated `SchemaErrors`.
 
 See [JSON Codecs](/schema/json-codecs.html) for streams, buffers, diagnostics, and how trusted codec decoding differs
 from untrusted `Data` parsing.

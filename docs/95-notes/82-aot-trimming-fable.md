@@ -31,9 +31,11 @@ The one deliberate exception: `Service<'service>.resolve()` can look up registra
 
 ## Verified In CI
 
-Every push publishes and runs a NativeAOT probe (`dotnet run --project tools/Reified.Build -- --target NativeAot`), which compiles an application
-exercising flows, schemas, parsing, and services with `PublishAot=true` and executes the native binary. If a change
-introduced reflection the trimmer could not prove safe, CI fails.
+Pushes to `main` and pull requests publish and run the Result, Constraint, Refinements, and Schema NativeAOT probes
+(`dotnet run --project tools/Reified.Build -- --target NativeAot`). Each probe is published for `linux-x64` and its
+native binary is executed. Project warnings are errors by default; the IL2104 and IL3053 summary warnings from
+FSharp.Core are explicitly excluded from that policy. The probes catch failures in the exercised paths, not every
+possible reflection or trimming issue in a consumer application.
 
 ### Records with many fields
 

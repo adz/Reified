@@ -4,9 +4,9 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 ## Assumptions
 
-- `docs/api/Reified.Schema.Json.Json.md:40-41` — verify whether “preserves schema paths in decoding failures” applies to every listed deserialize variant, including the string-error `tryDeserialize` form, or only to exception diagnostics.
+- [fixed] `docs/api/Reified.Schema.Json.Json.md:40-41` — verify whether “preserves schema paths in decoding failures” applies to every listed deserialize variant, including the string-error `tryDeserialize` form, or only to exception diagnostics.
 
-- `docs/95-notes/82-aot-trimming-fable.md:29-36` — verify whether every push runs the NativeAOT probe and whether its trimmer warnings are treated as errors; “if a change introduced reflection ... CI fails” is stronger than merely publishing and running the probe.
+- [fixed] `docs/95-notes/82-aot-trimming-fable.md:29-36` — verify whether every push runs the NativeAOT probe and whether its trimmer warnings are treated as errors; “if a change introduced reflection ... CI fails” is stronger than merely publishing and running the probe.
 - `docs/95-notes/95-packages-and-platforms.md:38-40` — verify the claim that each listed package is exercised in a browser, not only on Node; the coverage claim affects platform choice.
 
 - `docs/90-comparisons/05-dataannotations-fluentvalidation-comparison.md:31-36` — verify the exact default `Violation.render` sentence; the comment presents it as executable output.
@@ -42,7 +42,7 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 - `docs/api/Reified.Contract.md:6-7` — the listed outcomes omit migration failures, despite `MigrationError` being listed in the Schema package inventory; explain their result case and whether paths survive migration.
 - `docs/api/Reified.Inspect.md:23-24` — “without ... running application code” sounds absolute, while schemas may contain authored callbacks; clarify whether inspection forces deferred declarations or invokes any getters/constructors.
-- `docs/api/Reified.Schema.Json.Json.md:37-43` — “deserialize JSON into the same field plan used by `Schema.parse`” can imply the same admission guarantees; state here that trusted codec decoding does not enforce value constraints.
+- [fixed] `docs/api/Reified.Schema.Json.Json.md:37-43` — “deserialize JSON into the same field plan used by `Schema.parse`” can imply the same admission guarantees; state here that trusted codec decoding does not enforce value constraints.
 
 - `docs/95-notes/_index.md:23` — promises benchmarks “on .NET and Fable,” but the benchmarks page contains only .NET runtime tables; remove Fable or link Fable measurements.
 - `docs/95-notes/95-packages-and-platforms.md:64-67` — “Everything else ... is available on every target” extends beyond the listed tested JavaScript surface and conflicts with the AOT/Fable page's .NET-only `DateOnly` and `Data.ofJsonDocument` caveat; scope the statement to supported field types and verified targets.
