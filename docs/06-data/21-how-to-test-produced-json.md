@@ -46,7 +46,7 @@ actual
 
 Every expectation is checked against the same root. Failures accumulate instead of stopping after the first mismatch.
 
-The example succeeds and returns `unit`. It does not compare any unmentioned response field.
+The match returns `unit` without comparing unmentioned response fields.
 
 For a result-returning assertion:
 
@@ -73,7 +73,7 @@ result
 
 ## Match a partial object
 
-Use `containing` when related evidence should read as one shape:
+Use `containing` to check related fields as one object:
 
 ```fsharp
 actual
@@ -200,18 +200,12 @@ returns `Result<unit, DataMismatch list>` and accumulates mismatches from every 
 
 ## Why patterns are not constraints
 
-`anyText`, `anyNumber`, and `satisfying` look like a second, smaller copy of `Constraint`. They are not, and they
-deliberately do not reuse it.
+`anyText`, `anyNumber`, and `satisfying` check `Data` nodes: whether a branch is text, a value is present, or a list
+contains an item. `Constraint` checks extracted typed values, such as whether a string is a valid email or an `int`
+is at least 13. Tests of produced JSON need the former.
 
-A pattern asks a question about a `Data` node: is this branch text at all, is it present, does this list contain that
-item. A constraint asks a question about a typed value that has already been extracted: is this string a valid email,
-is this int at least 13. Those are different questions at different stages, and the one that a test of produced JSON
-needs is the first.
+`Reified.Data` has no dependencies, so test projects can use it without a validation library. Accepting a
+`Constraint<'value>` in `at` would add a dependency on `Reified.Constraint` for a test convenience.
 
-The package graph makes the same point. `Reified.Data` depends on nothing, which is what lets a test project take it
-without taking a validation library. Teaching `at` to accept a `Constraint<'value>` would mean `Reified.Data`
-depending on `Reified.Constraint` for a convenience that only test code wants.
-
-When you do want a typed rule over a value inside a `Data` tree, parse the tree with a schema and check the model , 
-which is the thing the schema already does, with paths and accumulated errors. Reach for `satisfying` for the
-in-between case: one local, structural rule that no schema owns.
+For typed rules inside a `Data` tree, parse it with a schema and check the model; the schema reports paths and
+accumulated errors. Use `satisfying` for a local structural rule that no schema owns.

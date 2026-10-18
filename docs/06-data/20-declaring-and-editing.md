@@ -75,8 +75,6 @@ Data.render customerWithAddress
 The argument to `data` is an ordinary F# list of `DataField`, so every list-expression form works inside it. Mix
 literal fields with `yield!`, `if`, `for`, `match`, and `let` bindings in one declaration.
 
-For example:
-
 ```fsharp
 let common = data [ "tenant" => "acme"; "region" => "au" ]
 let customerId = "c-1"
@@ -101,8 +99,6 @@ Data.render event
 ```
 
 
-Points worth knowing:
-
 - Fields keep the order they are yielded. A conditional or generated field appears where it is written, not appended
   at the end.
 - `yield!` splices a `DataField list`. `fields` produces one from an existing object; `Data.fields` is the explicit
@@ -114,8 +110,8 @@ Points worth knowing:
 - The same forms build lists: with `ids = [ 1; 2; 3 ]`, `data [ "ids" => [ for id in ids -> id * 10 ] ]` renders
   `{ ids: [10, 20, 30] }`.
 
-Control flow decides which fields exist. `Data.patch` changes fields that already exist. Prefer control flow when
-building a value from inputs, and patching when deriving a variation from a value you already have.
+Use control flow to choose fields when building a value from inputs. Use `Data.patch` to derive variations from an
+existing value.
 
 ## Render for people
 

@@ -8,8 +8,7 @@ targetFramework: net8.0
 
 # Build, vary, and test structured data
 
-This tutorial builds one customer value, derives requests from it, parses a JSON response, and checks the parts that
-matter to the test.
+Build a customer value, derive requests, parse a JSON response, and check selected fields.
 
 ## Create the baseline
 
@@ -53,8 +52,6 @@ Numbers follow these rules:
 - `float` uses enough digits to read back as the same finite value. `NaN` and infinity are rejected because JSON
   cannot represent them.
 - `num` validates and keeps the token exactly as written. Use it when spelling matters, such as `1.2300e+4`.
-
-For example:
 
 ```fsharp
 let invoice =
@@ -124,8 +121,7 @@ let nameCases =
 Each `DataCase` is a record of `Name` and the materialized `Value`, so a failing test can report which case it was.
 Declaration order is preserved. See [Build variations and matrices](/data/how-to-build-test-cases.html) for the case types.
 
-The result contains four cases named `present`, `missing`, `blank`, and `wrong shape` in that order. Their `name` values
-are respectively `"Ada"`, absent, `""`, and `Data.List [ Data.Text "Ada" ]`.
+Their `name` values are, in order, `"Ada"`, absent, `""`, and `Data.List [ Data.Text "Ada" ]`.
 
 ```fsharp
 nameCases |> List.map (fun case -> case.Name, Data.tryFindPath "name" case.Value)
@@ -190,8 +186,7 @@ Unmentioned object fields are allowed by `containing`. Literal values inside the
 `matching` raises `DataMatchException` when a test fails. Use `Data.tryMatch` when the mismatches should be returned as
 a value.
 
-The example returns `unit`: all three expectations succeed even though the response contains the unmentioned `id`
-field and the additional `author` role.
+The match returns `unit` despite the unmentioned `id` field and additional `author` role.
 
 Changing the expected plan to `"free"` produces a mismatch at `customer.plan`. Adding `absent "customer.id"` produces
 another mismatch because that path contains `Data.Text "c-123"`.

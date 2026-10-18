@@ -93,8 +93,7 @@ fields and converts numbers to JavaScript numbers, so it cannot preserve the ori
 | flattened configuration pairs | `Data.ofConfiguration` | Nested objects and lists from colon-separated keys. |
 | configuration key/value pairs | `Data.ofConfigurationPairs` | The .NET configuration form, including null values. |
 
-The three source adapters below differ in how they treat repetition and nesting, so each one's rules are worth reading
-before you rely on them.
+The adapters below handle repetition and nesting differently.
 
 ## Command-line arguments
 
@@ -129,8 +128,8 @@ The rules:
 - `--` ends option parsing: every remaining token is positional, even if it starts with a dash.
 - Fields come out ordered by name, not in command-line order. Positional order is preserved within `_`.
 
-Every CLI leaf is text, because that is all a command line carries. `Data.ofCliArgs` identifies structure; it never
-decides that `"42"` is a number or `"true"` is a Boolean. That decision belongs to the schema that parses the tree.
+Every CLI leaf is text. `Data.ofCliArgs` identifies structure but leaves `"42"` and `"true"` as text; the schema
+parsing the tree decides whether they represent a number or Boolean.
 
 ## Configuration keys
 
@@ -187,11 +186,10 @@ Data.ofNameValues [ "tag", "fsharp"; "tag", "validation"; "name", "Ada" ]
 ```
 
 
-## Where this leads
+## Parse adapted data with a schema
 
-Every adapter produces the same source-neutral `Data`. That tree is a shape, not a domain model: nothing has been
-typed, checked, or named in your vocabulary yet. `Schema.parse` takes it the rest of the way, converting leaves to
-typed values, applying rules, and reporting failures against field paths.
+Each adapter produces source-neutral `Data`, not a typed domain model. `Schema.parse` converts leaves to typed values,
+applies rules, and reports failures against field paths.
 
 ```fsharp no-check reason="argv and Registration.schema are the caller's own process arguments and application schema; not ones this fragment can construct standalone."
 Data.ofCliArgs argv

@@ -10,15 +10,12 @@ targetFramework: net8.0
 
 # Data
 
-`Reified.Data` makes structured data concise to build and change. Its objects, lists, text, numbers, Booleans, and null
-map directly to JSON, but the same model works well for test fixtures, configuration, command-line input, form values,
+`Reified.Data` builds and changes structured data. Its objects, lists, text, numbers, Booleans, and null
+map directly to JSON, and also work for test fixtures, configuration, command-line input, form values,
 events, and other tree-shaped data.
 
-Build one readable value, derive related cases without copying it, and test either the complete result or only the
-fields that matter.
-
-This is useful when tests otherwise accumulate large JSON strings, nested constructors, or near-identical fixtures.
-The data stays structured, edits identify exactly what changes, and failures point to the path that differs.
+Build one value, derive related cases without copying it, and test the complete result or selected fields. This avoids
+large JSON strings, nested constructors, and near-identical fixtures. Failures identify the path that differs.
 
 ## Install
 
@@ -63,7 +60,7 @@ Data.render request
 ```
 
 
-Now check only the parts of the result that matter:
+Check selected parts of the result:
 
 ```fsharp
 request
@@ -110,7 +107,7 @@ Data.render account
 
 `data` takes an F# list of fields, so the whole list-expression vocabulary is available inside it. Include another
 object's fields with `yield!`, add a field only under a condition with `if`, and generate fields from a sequence with
-`for`. No builder, no intermediate dictionary, no post-hoc filtering of nulls.
+`for`. This needs no intermediate dictionary or null filtering.
 
 With `common = data [ "tenant" => "acme"; "region" => "au" ]`, `customerId = "c-1"`, `includeDebug = true`, and
 `names = [ "ada"; "grace" ]`:
@@ -139,7 +136,7 @@ Data.render event
 ```
 
 
-Fields appear in the order they are yielded, so a conditional or generated field lands exactly where it is written.
+Fields appear in yield order, including conditional and generated fields.
 The same works for lists: `data [ "ids" => [ for id in ids -> id * 10 ] ]`.
 
 ## Learn and solve tasks

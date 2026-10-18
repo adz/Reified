@@ -8,8 +8,7 @@ targetFramework: net8.0
 
 # Using Data with the rest of Reified
 
-`Reified.Data` stands alone, but it is also the input half of Reified's schema story: every schema parse
-takes a `Data` value, and every source that can become `Data` can therefore feed a schema.
+Every schema parse takes a `Data` value, so any source that can become `Data` can feed a schema.
 
 ## Feeding a schema
 
@@ -38,26 +37,23 @@ let parsed = Schema.parse signupSchema input
 ```
 
 
-One schema serves every source: `Data.ofJsonDocument` for a request body, `Data.ofNameValues` for a
-form post, `Data.ofCliArgs` for a command line, `Data.ofConfiguration` for settings. The schema never
-learns which one it was.
+The same schema accepts input from `Data.ofJsonDocument` for a request body, `Data.ofNameValues` for a form post,
+`Data.ofCliArgs` for a command line, and `Data.ofConfiguration` for settings. The schema does not depend on the source.
 
-What each adapter hands over is not identical, though, because the sources are not. JSON carries typed
+Adapters produce different trees. JSON carries typed
 Booleans and numbers, while form, CLI, and configuration leaves are all text that the schema still has
 to parse. Repeated names build a list in `ofNameValues` but overwrite in `ofConfiguration`, where lists
-come from indexed key segments instead. CLI flags arrive as the text `"true"` or `"false"`. So the same
-schema will accept input from any of them, but two sources have to agree on the resulting tree, not just
-on the logical content, see
+come from indexed key segments instead. CLI flags arrive as the text `"true"` or `"false"`. The same schema accepts
+input from any of them, but sources must agree on the resulting tree, not just the logical content. See
 [the adapter rules](/data/converting-data.html) for what each one produces.
 
-This is also why the builder syntax matters in tests: a fixture written with `data [ ... ]` exercises
-the identical parse path as production JSON, with no serializer in the loop.
+A fixture written with `data [ ... ]` exercises the same parse path as production JSON without a serializer.
 
 ## Redisplay and error reporting
 
 `Schema.parseRetainingInput` keeps the original `Data` alongside the parse result, so a failed form
 round-trip can re-show exactly what the user typed next to each field error. The paths in schema
-diagnostics (`address.city`, `lines[2].quantity`) address back into the input tree , 
+diagnostics (`address.city`, `lines[2].quantity`) address the input tree.
 `Data.redisplayPath` (string form) or `Data.redisplayAt` (`DataPath` form) recovers the raw fragment
 at any of them.
 

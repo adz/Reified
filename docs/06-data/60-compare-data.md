@@ -41,7 +41,7 @@ Data.compare expected actual
 ```
 
 
-## Return the difference list directly
+## Return differences without `Result`
 
 `Data.diff expected actual` returns the same list without wrapping it in `Result`.
 

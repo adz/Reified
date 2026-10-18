@@ -8,8 +8,7 @@ targetFramework: net8.0
 
 # DataDSL
 
-Reified provides a DSL for more concise data construction and editing. It includes short names and the `=>` and
-`?=>` operators.
+`Reified.DataDSL` provides short names and the `=>` and `?=>` operators for data construction and editing.
 
 ## Without opening Reified.DataDSL
 

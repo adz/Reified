@@ -23,10 +23,8 @@ Use generated examples to check those claims near the owning module.
 
 ## Generate accepted models
 
-The repository contains a non-packable `Reified.Schema.Testing` project as a test-only FsCheck adapter. It is not
-published on NuGet. The example below documents the adapter used by Reified's own tests and a pattern an application can
-adapt locally. `SchemaGen.model` derives values by generating structured data, parsing it, and immediately checking the
-result.
+Reified's tests use the non-packable `Reified.Schema.Testing` FsCheck adapter. Applications can adapt this pattern
+locally. `SchemaGen.model` generates structured data, parses it, and checks the result.
 
 ```fsharp no-check reason="FsCheck is a test-only dependency of Reified.Schema.Testing; it's not among the assemblies this audit pipeline resolves, so this block can't be checked here even though the pattern is real."
 open System
@@ -68,7 +66,7 @@ let bookings = Gen.sample 100 bookingGenerator
 ```
 
 
-Keep an adapter like this in test code; it is not a runtime dependency. This `Booking` uses a simplified two-field
+Keep the adapter in test code, not as a runtime dependency. This `Booking` uses a simplified two-field
 constructor rather than the draft-plus-typed-error split [Build A Private Aggregate](/schema/patterns/private-aggregates.html)
 and [Model Legal Transitions](/schema/patterns/legal-transitions.html) use for the same shape, since schema
 generation, not construction, is this page's subject.

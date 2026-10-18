@@ -10,8 +10,6 @@ targetFramework: net8.0
 
 Keep one representative baseline and describe each test case as a strict immutable edit.
 
-The four functions on this page are `variant`, `variants`, `dimension`, and `matrix`.
-
 ```fsharp
 open Reified
 open Reified.DataDSL
@@ -27,8 +25,6 @@ let baseline =
 
 
 ## The three types
-
-Case generation moves through three small record types.
 
 ```fsharp
 type DataVariation = { Name: string; Edits: DataEdit list }
@@ -46,7 +42,7 @@ the value that resulted. A `DataCase` is what a test iterates over.
 
 ### Why not just `Data list`
 
-The name. A bare list of values loses which case a value came from, so a failure reports index `5` instead of
+A bare list of values loses case names, so a failure reports index `5` instead of
 `plan: pro / region: US / roles: admin`, and reordering the list silently renumbers every test. Carrying the name with
 the value means:
 
@@ -55,8 +51,7 @@ the value means:
   than by a position in a Cartesian product.
 - `variants` can reject duplicate names, which catches two cases that were meant to differ but describe the same thing.
 
-The value is a plain `Data`, so anything on the rest of these pages (`Data.patch`, `matching`, `Data.compare`,
-`Data.Json.render`) applies to `case.Value` directly.
+`case.Value` is plain `Data`, so `Data.patch`, `matching`, `Data.compare`, and `Data.Json.render` apply directly.
 
 ```fsharp no-check reason="cases, submit, and test are the caller's own values and test-framework function; not ones this fragment can construct standalone."
 for case in cases do

@@ -11,10 +11,9 @@ targetFramework: net8.0
 `Data` represents structured values with six cases. The model maps directly to JSON and also works for fixtures,
 configuration, command-line input, form values, events, and other tree-shaped data.
 
-The examples below use `Data.render`, a human-readable compact form: unquoted ordinary field names, and the same quoting and
-escaping JSON uses for text. For scalars it reads the same as JSON output; for `Data.Object` it does not, since JSON
+`Data.render` uses a compact display with unquoted ordinary field names and JSON quoting and escaping for text. For scalars it reads the same as JSON output; for `Data.Object` it does not, since JSON
 requires quoted field names and `Data.render` does not produce them. Use `Data.Json.render` when the result must be
-valid JSON, see [Render for people](/data/declaring-and-editing.html#render-for-people).
+valid JSON. See [Render for people](/data/declaring-and-editing.html#render-for-people).
 
 ```fsharp
 type Data =
@@ -65,7 +64,7 @@ Data.render (Data.Number "1.2300e+4")
 ```
 
 
-`render` reproduces the token exactly, with no reformatting; that is the point of storing it as text. The token is
+`render` reproduces the token without reformatting. The token is
 visible to exact comparison: `1`, `1.0`, and `1e0` are different. Use the `num` function rather than the
 union case when accepting text, because `num` checks that the token is a valid JSON number.
 
