@@ -64,8 +64,10 @@ let imported = { Email = "ada"; Age = 11; Newsletter = false }
 
 match Schema.check signupSchema imported with
 | Ok signup -> printfn "%A" signup
-| Error errors -> for issue in SchemaErrors.toList errors do printfn "%s" (SchemaError.render issue.Error)
-// age:   Expected a value at least 13, but was 11.
+| Error errors ->
+    for issue in SchemaErrors.toList errors do
+        printfn "%s: %s" (SchemaPath.format issue.Path) (SchemaError.render issue.Error)
+// age: Expected a value at least 13, but was 11.
 // email: Expected an email address, but was ada.
 ```
 
@@ -89,8 +91,11 @@ Json.serialize codec { Email = "ada@example.org"; Age = 36; Newsletter = true }
 There is no second description of the wire shape to keep in step. The codec is built from the schema's typed
 field plan rather than from runtime type inspection, so it works under NativeAOT, trimming, and Fable. Records with many fields rely on build settings the
 `Reified.Schema` package applies for NativeAOT; see [Compiler-Directed, AOT, and Fable](/notes/aot-trimming-fable.html#records-with-many-fields).
-`compile` does the work up front; `serialize` and `deserialize` are the hot path. Decoding failures come back
-as the same path-aware `SchemaErrors`.
+`compile` does the work up front; `serialize` and `deserialize` are the hot path. The codec enforces JSON
+structure and required fields but skips constraint metadata, so decoding failures are not `SchemaErrors`:
+`Json.deserialize` raises `JsonCodecException` with a schema-relative path, and `Json.tryDeserialize` returns the
+first structural failure as `Result<_, string>`. Parse untrusted input with `Schema.parse` when you need
+path-aware accumulated diagnostics.
 
 → [JSON codecs](/schema/json-codecs.html)
 
@@ -132,21 +137,29 @@ the rule before submission.
 A schema describes the model you have now. A contract registers the versions you have shipped, with a
 migration from each one, and reads versioned input into the current model:
 
-```fsharp no-check reason="Illustrative pseudocode: `...` and `use config` are placeholders for the reader's own handling, not valid F#."
+```fsharp no-check reason="Illustrative pseudocode: `configContract`, `raw`, and `...` stand for the reader's own contract, input, and handling, not values this page constructs."
 match Contract.parse configContract raw with
-| Ok config -> use config
+| Ok config -> ...
 | Error (ContractError.VersionUnrecognized version) -> ...
 | Error (ContractError.ParseFailed(version, diagnostics)) -> ...
+| Error (ContractError.Migration failure) -> ...
 ```
 
 
-Old clients keep working without version-specific fields in the current model. Migration failures and malformed
-payloads carry the same `SchemaErrors` with the same paths.
+Old clients keep working without version-specific fields in the current model. Malformed payloads carry
+`ContractError.ParseFailed` with path-aware `SchemaErrors`. Migration failures carry `ContractError.Migration`: a
+hand-written migration returns `MigrationError.MigrationFailed` (a message, no paths), while a migrated value that
+fails the current schema's recheck returns `MigrationError.RevalidationFailed` with the same path-aware
+`SchemaErrors` as `Schema.parse`.
 
 → [Contracts and versioning](/schema/versioned-contracts.html)
 
 ## Build test data that obeys the rules
 
-`SchemaGen` produces values that satisfy the declaration. Raise the minimum age and the generated fixtures follow.
+`SchemaGen` derives values that satisfy the declaration's rules; raise the minimum age and the generated fixtures
+follow. When a rule has no sound generation — a `pattern`, a custom predicate, or any opaque constraint — generation
+fails closed with `UnsupportedConstraint`, naming the field path and the rule, instead of emitting fixtures that
+ignore it. The generator lives in the non-packable `Reified.Schema.Testing` adapter; copy or adapt the pattern shown
+in [Testing schema guarantees](/data/testing-schema-guarantees.html).
 
-→ [Data](/data/index.html) · [Building test cases](/data/how-to-build-test-cases.html)
+→ [Testing schema guarantees](/data/testing-schema-guarantees.html) · [Building test cases](/data/how-to-build-test-cases.html)

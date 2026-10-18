@@ -77,7 +77,9 @@ let signupSchema =
 
 
 `Data` is a source-neutral input tree, so the same schema reads a form post, CLI arguments, JSON, or
-configuration:
+configuration. Each source adapts into `Data` before `Schema.parse` — the name-value pairs below use
+`Data.ofNameValues`; JSON text becomes `Data` with `Json.parseData` (portable, .NET and Fable) or
+`Data.ofJsonDocument` on .NET 8+:
 
 ```fsharp
 let input =
@@ -90,9 +92,12 @@ Schema.parse signupSchema input
 // Ok { Email = "ada@example.org"; Age = 36; Newsletter = true }
 ```
 
+→ [Input sources](/schema/input-sources.html)
 
-`"36"` arrived as text and landed as an `int`. No `Signup` exists unless every field and the constructor
-succeeded, so downstream code can rely on validation having run.
+
+`"36"` arrived as text and landed as an `int`. `Schema.parse` returns a `Signup` only when every field and the
+constructor succeeded; a failed parse returns `SchemaErrors`, never a `Signup`. `Signup` is an ordinary public
+record, so callers can still construct one directly — the parse result is the value that validation has admitted.
 
 For a malformed address, an age below the limit, and a missing field:
 
@@ -117,9 +122,11 @@ newsletter: This value was omitted.
 ```
 
 
-Every independent field is checked, so one parse reports every problem rather than the first. The paths come
-from the declaration's structure; application code need not repeat field names alongside checks.
-Each sentence is rendered from the rule that failed.
+Every independent field is checked even when others fail, so one parse reports every field problem rather than
+the first. `SchemaErrors.toList` returns the failures in deterministic path order, and nested collection items
+carry index paths such as `lines[0].amount`. Each sentence is rendered from the rule that failed. Cross-field
+invariants live in the constructor, which runs only after every field passed; a constructor failure is reported as
+a single diagnostic rather than a per-field problem.
 
 The same `signupSchema` also produces a JSON codec:
 

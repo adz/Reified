@@ -18,11 +18,11 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 - `docs/04-refined/20-catalog.md:88-90` — confirm the exact return types and out-of-range behavior of `skip`, `item`, `truncate`, and `map2`; the paragraph describes clamping and totality but then says `skip` returns an ordinary list.
 
-- `docs/01-getting-started/02-what-a-schema-gives-you.md:150` — “`SchemaGen` produces values that satisfy the declaration”; confirm how generation reports unsupported or opaque constraints instead of producing unchecked fixtures.
+- [fixed] `docs/01-getting-started/02-what-a-schema-gives-you.md:150` — “`SchemaGen` produces values that satisfy the declaration”; confirm how generation reports unsupported or opaque constraints instead of producing unchecked fixtures.
 
 - `docs/index.md:27` — “No runtime reflection: the same declaration compiles under NativeAOT, trimming, and Fable.” Confirm the supported target/compiler combinations and exceptions.
 - `docs/index.md:67` — “decoder ran about 14% faster on .NET 10 ... and allocated less.” Confirm workload, versions, and measurement variance.
-- `docs/01-getting-started/_index.md:112` — “Every independent field is checked”; confirm behavior for dependent fields, constructor failures, nested collections, and error ordering.
+- [fixed] `docs/01-getting-started/_index.md:112` — “Every independent field is checked”; confirm behavior for dependent fields, constructor failures, nested collections, and error ordering.
 - `docs/02-schema/01-quickstart.md:46` — “the wire name is the camelCased property name”; confirm acronym and Unicode naming behavior.
 - `docs/02-schema/01-quickstart.md:111` — “Compile the codec once and reuse it”; confirm concurrent reuse and whether compilation itself is thread-safe.
 - `docs/02-schema/20-dsl.md:72` — “Supplying more than one accepted name for the same field is an error”; confirm which interpreter reports it and whether construction can throw.
@@ -79,13 +79,13 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/02-schema/25-input-sources.md:48-51` — suggests moving `Contacts`' collection-level `minLength 1` constraint onto `Contact` when removing `withSchema`; an individual `Contact` cannot enforce the length of its containing list. Keep the field block with `constrain` and omit only `withSchema`.
 - `docs/02-schema/90-reference-apps.md:48-55` — says generated wire schemas carry constraints and are written via a compiled codec, but `docs/02-schema/47-schema-or-generated-dto.md:39-55` warns that trusted codecs skip wire constraints. Explain whether this app validates with `Schema.parse` before writing and why this differs from the recommended permissive DTO strategy.
 
-- `docs/01-getting-started/_index.md:94` — “No `Signup` exists unless every field and the constructor succeeded” sounds like a guarantee about the public record type; callers can construct `Signup` directly. Say that `Schema.parse` does not return a `Signup` on failure.
-- `docs/01-getting-started/_index.md:79-89` — says the same schema reads JSON and shows `Data.ofNameValues` for text pairs; explain how JSON becomes `Data` before `Schema.parse`, or link the conversion recipe at this point.
-- `docs/01-getting-started/02-what-a-schema-gives-you.md:65-69` — printed sample output includes `age:` and `email:`, but the `printfn` expression renders only `issue.Error`, never `issue.Path`; show path formatting or remove the prefixes.
-- `docs/01-getting-started/02-what-a-schema-gives-you.md:143-144` — says migration failures and malformed payloads carry the same `SchemaErrors` and paths, but the example matches only `VersionUnrecognized` and `ParseFailed`; show the migration failure case or qualify the claim.
+- [fixed] `docs/01-getting-started/_index.md:94` — “No `Signup` exists unless every field and the constructor succeeded” sounds like a guarantee about the public record type; callers can construct `Signup` directly. Say that `Schema.parse` does not return a `Signup` on failure.
+- [fixed] `docs/01-getting-started/_index.md:79-89` — says the same schema reads JSON and shows `Data.ofNameValues` for text pairs; explain how JSON becomes `Data` before `Schema.parse`, or link the conversion recipe at this point.
+- [fixed] `docs/01-getting-started/02-what-a-schema-gives-you.md:65-69` — printed sample output includes `age:` and `email:`, but the `printfn` expression renders only `issue.Error`, never `issue.Path`; show path formatting or remove the prefixes.
+- [fixed] `docs/01-getting-started/02-what-a-schema-gives-you.md:143-144` — says migration failures and malformed payloads carry the same `SchemaErrors` and paths, but the example matches only `VersionUnrecognized` and `ParseFailed`; show the migration failure case or qualify the claim.
 
 - `README.md:112` calls attribute-based derivation “preferred approach for DTOs,” while `docs/02-schema/47-schema-or-generated-dto.md:39-44` says derived wire DTOs should have **no** constraint attributes, but README’s derived example has `[<Present; Email>]` and `[<AtLeast 13>]`. Distinguish derived validated boundary model from permissive wire DTO explicitly.
-- `docs/01-getting-started/02-what-a-schema-gives-you.md:78-84` says codec decoding failures return “the same path-aware `SchemaErrors`”; `docs/02-schema/50-json-codecs.md:113-121` says `JsonCodecException` or `Result<_, string>` with first structural failure. These cannot both describe the public decoder result.
+- [fixed] `docs/01-getting-started/02-what-a-schema-gives-you.md:78-84` says codec decoding failures return “the same path-aware `SchemaErrors`”; `docs/02-schema/50-json-codecs.md:113-121` says `JsonCodecException` or `Result<_, string>` with first structural failure. These cannot both describe the public decoder result.
 - `docs/02-schema/01-quickstart.md:174-189` shows `Seats` without constraint in the schema, yet JSON Schema has `exclusiveMinimum:0` and diagnostics say “Must be greater than 0”; no visible definition establishes this rule.
 - `docs/02-schema/70-patterns/30-wire-and-domain-models.md:74` uses `(BookingWire.parse raw).Result` although `docs/02-schema/60-derivation/_index.md:29-31` documents `parse : Data -> Result<_, SchemaErrors>`; `.Result` suggests a different API.
 - `docs/02-schema/70-patterns/30-wire-and-domain-models.md:113` points to a “`.contract` grammar alternative,” but no such grammar is introduced in the linked Versioned Contracts page.
