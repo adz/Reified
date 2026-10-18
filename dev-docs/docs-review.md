@@ -4,6 +4,9 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 ## Assumptions
 
+- `docs/90-comparisons/05-dataannotations-fluentvalidation-comparison.md:31-36` — verify the exact default `Violation.render` sentence; the comment presents it as executable output.
+- `docs/90-comparisons/20-fluentvalidation-comparison.md:78-79` — confirm whether `Schema.check` runs the constructor and preserves the original model or constructs a new one; this comparison describes both as one operation.
+
 - `docs/07-result-handling/80-collecting-errors.md:112-127` — confirm how `result.list` distinguishes an already-collected `Result<_, SignupError list>` from a single-error binding, especially when inference has not fixed the error type; the flattening claim is important to copyable composition.
 
 - `docs/05-parsing/_index.md:61-73` — confirm whether invariant-culture thousands separators and exponent/overflow handling match the stated accepted forms across numeric parsers; the table reads as an exact grammar.
@@ -31,6 +34,12 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/06-data/50-testing-schema-guarantees.md:26-27,116` — confirm whether `SchemaGen.model` checks generated results with `Schema.check` after parsing, and how unsupported constraints or constructor failures are surfaced; the prose promises accepted models but the example unwraps generation only.
 
 ## Unclear or misleading
+
+- `docs/90-comparisons/20-fluentvalidation-comparison.md:10-11,58,85` — the public `Customer` record can be created without parsing, so “cannot exist in an invalid state,” “every Customer in the program passed the boundary,” and “Invalid object exists? No” are false as written. Limit the claim to values returned by `Schema.parse`, and note that the shown `Name` rule permits empty text.
+- `docs/90-comparisons/20-fluentvalidation-comparison.md:68-71` — says the same declaration produces UI metadata and JSON codecs as consequences of inspectable constraints; distinguish schema structure from constraints, and note that trusted codec decoding does not enforce value rules.
+- `docs/90-comparisons/30-zod-comparison.md:11,26-28` — claims a record schema's constructor/getter alignment is checked field by field, but the comparison does not show a getter or explain the mechanism; readers cannot tell which guarantees are compile-time versus runtime.
+- `docs/90-comparisons/30-zod-comparison.md:31-33` — “on par with System.Text.Json” reads as a broad performance claim without a workload or benchmark; specify the measured operation or remove it.
+- `docs/90-comparisons/05-dataannotations-fluentvalidation-comparison.md:83-86,93-98` — categorical claims that DataAnnotations rules cannot be reused and FluentValidation rules cannot be shared disregard reusable custom attributes, `Include`, and reusable validators; specify that the *declaration attached to a property/type* is not the same free-standing inspectable value.
 
 - `docs/07-result-handling/50-collections.md:123-124` — says an infinite sequence will not terminate through *any* traversal, but fail-fast `traverse`/`sequence` can terminate on an early error. Qualify this for successful or all-errors traversal.
 - `docs/07-result-handling/80-collecting-errors.md:150-160` — the form supplies string `"12"` for an `int` field but the example does not show a text-to-int parser; clarify whether `Data.ofNameValues` plus `Schema.parse` converts it and show the actual diagnostic shape rather than a schematic comment.
@@ -79,6 +88,9 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 ## Too long
 
+- `docs/90-comparisons/05-dataannotations-fluentvalidation-comparison.md:64-76,108-120` — repeats the same `Constraint.guard Constraint.email` example twice with only error mapping changed. Show both mappings together once.
+- `docs/90-comparisons/05-dataannotations-fluentvalidation-comparison.md:77-120` and `docs/90-comparisons/20-fluentvalidation-comparison.md:8-89` — two FluentValidation comparisons repeat the rules-as-data argument; link the focused Schema comparison from the Constraint comparison and keep their different scopes explicit.
+
 - `docs/07-result-handling/70-result-ce.md:72-128` — repeats the binding example with explicit types and then a second failure demonstration; one typed annotation and one failure example would teach the same behavior with less repetition.
 
 - `docs/05-parsing/_index.md:130-184` — generic optional/defaulting helpers and named wrappers repeat the same absence-versus-malformed rule and examples; condense the wrappers to a short list or table.
@@ -95,6 +107,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/06-data/_index.md:106-140` and `docs/06-data/20-declaring-and-editing.md:73-114` repeat the same control-flow fixture and output. Keep the full example in the focused page and shorten the landing-page example.
 
 ## Reference material in guides
+
+- `docs/90-comparisons/90-fstoolkit-comparison.md:24-32` — the API-equivalence table is useful as a comparison quick reference; keep it here rather than duplicating it across Result guides, and link the Result reference for precise signatures.
 
 - `docs/07-result-handling/50-collections.md:103-112` — the four complete traversal signatures are reference-shaped; keep the list-output warning here and link the signatures from the API reference.
 
@@ -116,6 +130,10 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/06-data/21-how-to-test-produced-json.md:169-199` — the complete pattern inventory and return-type summary belong beside the matching API reference; retain a few representative patterns in the walkthrough.
 
 ## Missing
+
+- `docs/90-comparisons/_index.md:4-10` — the landing description mentions only Schema, despite the Constraint and Result comparisons; add links and a sentence distinguishing the three comparison scopes.
+- `docs/90-comparisons/20-fluentvalidation-comparison.md:38-60` — the example uses `Constraint` and `Data` without showing imports or package setup, and uses `printfn` in a boundary example; show a complete application-host example or explicitly label it a fragment.
+- `docs/90-comparisons/30-zod-comparison.md:14-22` — table entries such as `schema<...>`, `construct ctor`, and `Schema.refine` are shorthand rather than copyable F#; link one complete schema example and identify the shorthand.
 
 - `docs/07-result-handling/80-collecting-errors.md:74-75` — `NonEmptyList.ofList` is named without identifying its package or defining it; show a local conversion or link its owner so the suggestion is copyable.
 
@@ -145,6 +163,9 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/06-data/31-how-to-build-test-cases.md:112-114` — explain the error type/exception when `matrix` exceeds 256 combinations or a dimension has no variations, so test authors can diagnose case-generation failure.
 
 ## Suggestions for humans and LLMs
+
+- `docs/90-comparisons/05-dataannotations-fluentvalidation-comparison.md:67-75,114-118` — both email snippets are marked `no-check` and omit the caller's error union; provide one complete example of `InvalidEmail` with and without a `Violation` so assistants do not invent its shape.
+- `docs/90-comparisons/30-zod-comparison.md:39-45` — link supported Fable targets and a complete `RetainedParseResult` example; the one-line API names do not show how to obtain a retained parse result.
 
 - `docs/07-result-handling/60-observing.md:70-79` — the logging example includes raw `AgeNotANumber of string`; advise redacting sensitive raw input before logging, even when the callback itself is total.
 - `docs/07-result-handling/10-quickstart.md:63-69` — the first accumulation example is a no-check fragment with undefined functions; use the complete `signupAll` example from the collecting-errors page or mark the displayed output explicitly as illustrative for copy/paste readers.
