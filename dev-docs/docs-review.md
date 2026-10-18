@@ -26,6 +26,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/02-schema/65-versioned-contracts.md:68` — migrations are followed by checking the current schema; confirm intermediate versions and path preservation on migration failures.
 - `docs/02-schema/70-patterns/20-legal-transitions.md:64` — shifting dates “cannot reverse their order”; confirm overflow behavior at date limits.
 
+- `docs/06-data/50-testing-schema-guarantees.md:26-27,116` — confirm whether `SchemaGen.model` checks generated results with `Schema.check` after parsing, and how unsupported constraints or constructor failures are surfaced; the prose promises accepted models but the example unwraps generation only.
+
 ## Unclear or misleading
 
 - `docs/05-parsing/_index.md:95-99` — `OutOfRange` also covers numbers too negative for the destination type; the sample message “too large” mislabels that case.
@@ -63,6 +65,12 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/02-schema/05-tutorials/25-inspecting-metadata.md:70` says lowering `Any` by dropping a disjunct “strengthens” it; useful caveat, but the preceding `keywords` example does precisely a lossy flattening without showing the safe full-expression alternative.
 - `docs/02-schema/50-json-codecs.md:23` calls storage and queues trusted producers; persistence and queues can contain stale or externally produced bytes. Define trust as a property of the producer and admission history, not transport.
 
+- `docs/06-data/10-tutorial.md:126-133` — `variant "present"` is declared, but the displayed case list starts with `"valid"`; update the expected output.
+- `docs/06-data/10-tutorial.md:203-225` — the narrative says “If the actual plan is `"free"`” while the shown `expected` plan is `"free"` and the actual response has `"pro"`; the following example reverses both values. Separate the illustrative comparison from the preceding one.
+- `docs/06-data/31-how-to-build-test-cases.md:122-133` — `cases |> List.map _.Name` refers to the four independent cases, not the eight `matrixCases` whose names are printed. Use `matrixCases`.
+- `docs/06-data/21-how-to-test-produced-json.md:62-63` — calls `customer.id` a generated identifier, though the fixture fixes it to `"c-123"`; say “present identifier” or introduce generation.
+- `docs/06-data/50-testing-schema-guarantees.md:46-52,74-89` — `Booking.shift` uses `DateTimeOffset.AddDays`, which can throw near date limits; describing it as a total transition is misleading. Bound the input or make failure explicit.
+
 ## Too long
 
 - `docs/05-parsing/_index.md:130-184` — generic optional/defaulting helpers and named wrappers repeat the same absence-versus-malformed rule and examples; condense the wrappers to a short list or table.
@@ -75,6 +83,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/02-schema/01-quickstart.md` spans plain parsing, refined types, constraints, private aggregates, drafts, updates, and JSON Schema. Keep “First schema and parse” and “Read failures” here; move refined fields to “Refined fields in Schema,” field constraints to “Boundary-specific field rules,” and private Booking/draft/update flow to “Construction guarantees.”
 - `docs/02-schema/65-versioned-contracts.md` mixes the manual contract workflow and a long generator evolution tutorial. Split into “Handwritten versioned contracts” and “Generated version series: freezing and migrating.”
 - `docs/02-schema/85-examples.md` embeds entire example program files. Replace with a short explanation, link to runnable source, and focused relevant excerpts; keep the complete program at the linked location.
+
+- `docs/06-data/_index.md:106-140` and `docs/06-data/20-declaring-and-editing.md:73-114` repeat the same control-flow fixture and output. Keep the full example in the focused page and shorten the landing-page example.
 
 ## Reference material in guides
 
@@ -91,6 +101,9 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/02-schema/60-derivation/20-attributes.md`, attribute tables: this is already a reference-shaped page; consider reference enrichment for the derivation attribute entities rather than repeating the tables in tutorial pages.
 - `docs/02-schema/65-versioned-contracts.md`, “Version sources”: move the exhaustive `VersionSource` case list to `docs/api/Reified.Contract.md`; keep one example per use case.
 - `docs/02-schema/30-redisplay-and-field-errors.md`, “The Schema catalogue”: move exhaustive message-key/argument/default table to the appropriate Schema error API reference front matter.
+
+- `docs/06-data/18-dsl.md:81-118` — the complete DSL name and edit mapping tables are reference-shaped; keep a short comparison example here and link the exhaustive vocabulary from the API reference.
+- `docs/06-data/21-how-to-test-produced-json.md:169-199` — the complete pattern inventory and return-type summary belong beside the matching API reference; retain a few representative patterns in the walkthrough.
 
 ## Missing
 
@@ -113,6 +126,12 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - Documentation for concurrency/caching of compiled codecs and deferred recursive schemas; the guidance to compile once invites shared use but does not say whether it is safe.
 - A single glossary for “trusted,” “admission,” “interpreted,” “opaque,” “canonical,” “wire,” and “domain.”
 
+- `docs/06-data/10-tutorial.md:136-149` — the tutorial calls `Reified.Json.parseData`, but the Data-only install at `docs/06-data/_index.md:20-26` does not supply it; state that this step also requires `Reified.Schema` and show the install command before the example.
+- `docs/06-data/15-what-it-does.md:67-69` — direct `Data.Number` construction permits invalid JSON number tokens; explain what `Data.Json.render` does with such values, especially when input did not come through `num` or the JSON parser.
+- `docs/06-data/15-what-it-does.md:112-113` — duplicate names use last-field lookup, but partial matching consumes duplicates. Add a small example showing which occurrence an `at` path inspects versus `containing`.
+- `docs/06-data/30-converting-data.md:120-129` — show how `Data.ofCliArgs` treats negative numeric option values and a missing option value; the “starts with `-`” rule turns both into flags or positionals in a surprising way.
+- `docs/06-data/31-how-to-build-test-cases.md:112-114` — explain the error type/exception when `matrix` exceeds 256 combinations or a dimension has no variations, so test authors can diagnose case-generation failure.
+
 ## Suggestions for humans and LLMs
 
 - `docs/05-parsing/_index.md:50-51` — warn that `ParseError` retains raw input, which may be sensitive; avoid logging or returning it verbatim without considering redaction.
@@ -126,6 +145,10 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/02-schema/85-examples.md:147-148` — the mirrored example invokes `DateTimeOffset.UtcNow` twice for a publish interval. Use fixed endpoints in teaching examples so copied examples are deterministic and the interval is unambiguous.
 
 - `docs/01-getting-started/03-where-to-go-next.md:10` — the page has both a front-matter title and an explicit H1, unlike its sibling pages; use the same heading convention throughout Getting Started to avoid duplicate titles in rendered navigation.
+
+- `docs/06-data/21-how-to-test-produced-json.md:140-158` — `decimal token` in a `satisfying` predicate can throw for a syntactically valid JSON number outside decimal range; use a safe parse so a mismatch is reported instead of an exception.
+- `docs/06-data/50-testing-schema-guarantees.md:10-11,26-34` — the copyable `SchemaGen` sample imports an unpublished repository-only namespace. Provide an actual application-local adapter recipe or label this as an internal-only illustration rather than an available public API.
+- `docs/06-data/30-converting-data.md:204-215` — `lookupPath` maps missing paths to `Data.Null`, collapsing absence and explicit null; prefer `tryFindPath` when a boundary must distinguish them.
 
 - Keep `llms.txt` as a task router, but reconcile its asserted navigation order with the visible section ordering; add a short API-selection decision table and explicit trust-boundary warning.
 - Put actual F# return types and failure types immediately beside every first-use API example; avoid pseudo-output that resembles executable code without showing its setup.
