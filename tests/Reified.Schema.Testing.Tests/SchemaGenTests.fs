@@ -11,6 +11,7 @@ open Swensen.Unquote
 
 module SchemaGenTests =
     type Contact = { Email: string }
+    type Swapped = { First: string; Second: string }
     type Bounded = { Age: int }
     type Kind = Personal | Work
     type Profile = { Age: int; Score: decimal; Active: bool; Contact: Contact; Aliases: string list; Labels: Map<string, string>; Kind: Kind; Note: string option }
@@ -78,6 +79,19 @@ module SchemaGenTests =
     [<Fact>]
     let ``generated models round trip through JSON`` () =
         SchemaGen.roundTrip (profileSchema ()) |> Result.defaultWith (failwithf "%A")
+
+    [<Fact>]
+    let ``round trip detects a mismatched constructor and reports replay seed`` () =
+        let schema =
+            schema<Swapped> {
+                field _.First { withSchema (Schema.text |> Schema.constrain (Constraint.equalTo "first")) }
+                field _.Second { withSchema (Schema.text |> Schema.constrain (Constraint.equalTo "second")) }
+                construct (fun first second -> { First = second; Second = first })
+            }
+        let failure =
+            Assert.ThrowsAny<System.Exception>(fun () -> SchemaGen.roundTripWith 3 42UL schema |> ignore)
+        Assert.Contains("seed 42", failure.Message)
+        Assert.Contains("round trip changed", failure.Message)
 
     [<Fact>]
     let ``trusted-model generator returns only validated values`` () =

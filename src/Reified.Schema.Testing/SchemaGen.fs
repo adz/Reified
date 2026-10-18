@@ -445,17 +445,24 @@ module SchemaGen =
     let raw (schema: Schema<'model>) : Result<Gen<Data>, SchemaGenerationError> =
         rawWith Map.empty schema
 
-    /// Checks that generated models survive JSON encoding and decoding unchanged; unsupported rules fail closed.
-    /// <example><code>SchemaGen.roundTrip schema |> Result.defaultWith (failwithf "%A")</code></example>
-    let roundTrip (schema: Schema<'model>) : Result<unit, SchemaGenerationError> when 'model: equality =
+    /// Checks seeded samples through JSON encoding and decoding; unsupported rules fail closed.
+    /// Failures include the seed for replay with the same sample count.
+    /// <example><code>SchemaGen.roundTripWith 100 42UL schema |> Result.defaultWith (failwithf "%A")</code></example>
+    let roundTripWith (count: int) (seed: uint64) (schema: Schema<'model>) : Result<unit, SchemaGenerationError> when 'model: equality =
+        if count < 0 then invalidArg (nameof count) "Sample count must not be negative."
         raw schema
         |> Result.map (fun generator ->
             let codec = Json.compile schema
-            for input in Gen.sample 100 generator do
-                let value = Schema.parse schema input |> Result.defaultWith (failwithf "Generated invalid input: %A")
+            for input in FsCheck.Fluent.Gen.Sample(generator, count, FsCheck.Rnd(seed), 100) do
+                let value = Schema.parse schema input |> Result.defaultWith (failwithf "Generated invalid input (seed %d): %A" seed)
                 let decoded = Json.deserialize codec (Json.serialize codec value)
                 if decoded <> value then
-                    failwithf "JSON round trip changed generated value: %A -> %A" value decoded)
+                    failwithf "JSON round trip changed generated value (seed %d, count %d): %A -> %A" seed count value decoded)
+
+    /// Checks 100 reproducible samples with seed 0; use roundTripWith to choose a seed and sample count.
+    /// <example><code>SchemaGen.roundTrip schema |> Result.defaultWith (failwithf "%A")</code></example>
+    let roundTrip (schema: Schema<'model>) : Result<unit, SchemaGenerationError> when 'model: equality =
+        roundTripWith 100 0UL schema
 
     /// Derives models by generating structured data and parsing it through the schema.
     let model (schema: Schema<'model>) : Result<Gen<'model>, SchemaGenerationError> =
