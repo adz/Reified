@@ -7,9 +7,7 @@ targetFramework: net8.0
 
 # Customer Id Tutorial
 
-The built-in types cover shapes common to every domain. This tutorial defines one specific
-to yours, and, just as importantly, shows how to decide whether it should be a type at
-all.
+The built-in types cover common shapes. This tutorial defines a domain-specific type and tests whether it warrants a wrapper.
 
 ```fsharp
 open Reified
@@ -86,8 +84,7 @@ Use `Constraint.all [ ... ]` when several constraints describe admission, or
 
 ## Give it the operations that justify it
 
-This is the step that separates a useful type from a wrapper. `CustomerId` is a key, so
-what it owes callers is lookup and identity, not arithmetic:
+`CustomerId` is a key; its operations support lookup and identity, not arithmetic:
 
 ```fsharp isolated
 open Reified
@@ -118,8 +115,7 @@ module CustomerId =
 
 Both work because the invariant is a fact about the value, not about the moment of
 construction, and neither involves arithmetic, which is where F# stops being able to
-carry the invariant for you. If you cannot write an operation like these, that is good
-evidence the concept should be a constraint instead.
+carry the invariant for you. If no such operation applies, use a constraint instead.
 
 ## Use it in domain code
 

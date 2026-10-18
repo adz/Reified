@@ -13,7 +13,7 @@ invariant makes possible. Guarded construction is how a value is admitted, but i
 the reason to reach for a refined type, a wrapper that only checks on the way in leaves
 callers unwrapping it at first use, and the invariant buys nothing after the boundary.
 
-The types here are chosen so that later code can be simpler:
+These types remove checks from later code:
 
 ```fsharp no-check reason="Illustrative signatures; lines/a/b are the caller's own already-refined values, not ones this page can construct standalone."
 let total = NonEmptyList.reduce (+) lines   // no seed, no empty case, no option
@@ -23,10 +23,7 @@ let ratio = UnitInterval.multiply a b       // closed: still in [0, 1]
 
 
 `NonEmptyList.max` returns a value rather than an option because the type makes the empty
-case unrepresentable. That is the test a type has to pass to belong here: it should make a
-partial operation total, guarantee a property later operations rely on, encode a
-relationship between values, preserve an invariant across a useful family of operations,
-or remove a branch from consumers rather than only from construction.
+case unrepresentable. A type belongs here if it makes a partial operation total, guarantees a property later operations rely on, encodes a relationship between values, preserves an invariant across useful operations, or removes a branch from consumers.
 
 Validation that fails that test belongs in a constraint instead. Trimmed text and slugs make
 nothing later total or simpler: no operation on a string needs the ends to be free of
@@ -113,7 +110,7 @@ let averageLineRefined (lines: NonEmptyList<OrderLine>) =
 ```
 
 
-The refined version is shorter because the collection types carry the ordinary list vocabulary,
+The collection types carry the ordinary list vocabulary,
 `sum`, `sumBy`, `average`, `choose`, `countBy`, `item`, alongside operations the invariant makes total. A refined type that only
 offered the clever operations would push you back through `toList` for everyday work, and
 the invariant would be lost halfway down the pipeline. See

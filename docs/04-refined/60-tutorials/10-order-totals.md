@@ -7,9 +7,7 @@ targetFramework: net8.0
 
 # Order Totals Tutorial
 
-This tutorial builds an order from untrusted input and then calculates over it. The point
-is what happens *after* construction: every invariant admitted at the boundary removes a
-branch, an option, or a guard from the code downstream.
+This tutorial builds an order from untrusted input and then calculates over it. Each invariant admitted at the boundary removes a branch, an option, or a guard from downstream code.
 
 ```fsharp
 open System
@@ -36,7 +34,7 @@ type Order =
 ```
 
 
-Read the field types as a specification. An order has at least one line. The discount is a
+The field types specify the order's invariants. An order has at least one line. The discount is a
 proportion, so it cannot be 140% or `NaN`. The delivery window's start is not after its
 end. None of those facts needs restating later, because none of them can be false.
 
@@ -99,8 +97,7 @@ let subtotal (order: Order) =
 ```
 
 
-`reduce` needs no seed and no empty case, that is the invariant paying, and it pays
-without putting a `Result` between every operation.
+`reduce` needs no seed or empty case, and adds no `Result` between operations.
 
 ### Discount
 
@@ -148,8 +145,7 @@ let averageUnitPrice lines =
 ```
 
 
-The refined side is the shorter of the two, which is the point: the collection modules
-carry the everyday operations (`sum`, `sumBy`, `average`, `choose`, `countBy`) as well as
+The collection modules carry the everyday operations (`sum`, `sumBy`, `average`, `choose`, `countBy`) as well as
 the total ones, so nothing here converts back to a list to do ordinary work.
 
 ### Delivery window
@@ -163,9 +159,7 @@ let overlapWith (order: Order) (other: Interval<DateTimeOffset>) =
 ```
 
 
-`intersect` returns an option because two windows may not overlap. That is the honest
-shape: an empty interval is not representable, so emptiness is reported rather than
-smuggled into a value whose `Lower` is somehow above its `Upper`.
+`intersect` returns an option because two windows may not overlap. An empty interval is not representable, so the option reports emptiness without creating a value whose `Lower` is above its `Upper`.
 
 ## Catch a duplicate the type system can see
 
@@ -203,9 +197,6 @@ than losing an entry.
 | `Interval` has `Lower <= Upper` | no "did they send these backwards" check |
 | `DistinctList` has no duplicates | no silent collapse building a set; a reported failure building a map |
 | `NonBlankString` is never empty or whitespace | no blank-string guard at every read site |
-
-None of these is a claim about construction. Each is a claim about every line of code
-downstream.
 
 ## Next
 

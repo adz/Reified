@@ -7,9 +7,7 @@ targetFramework: net8.0
 
 # Built-in Refined Values
 
-A refined type earns its place by what it lets you *stop writing*. Each type below makes
-some partial operation total, guarantees a property later operations rely on, or removes a
-branch from every consumer. A wrapper that only validates at construction is a constraint,
+Each type below makes a partial operation total, guarantees a property later operations rely on, or removes a branch from consumers. A wrapper that only validates at construction is a constraint,
 not a type, see [When not to make a type](#when-not-to-make-a-type).
 
 ```fsharp
@@ -78,8 +76,7 @@ let biggest = NonEmptyList.maxBy id lines             // total: no option
 ```
 
 
-The two tiers are worth telling apart, because only the second is a reason to reach for
-the type:
+Only the second tier is a reason to use the type:
 
 | Tier | Operations | What the invariant does |
 |---|---|---|
@@ -152,9 +149,7 @@ PositiveInt.add a b
 ```
 
 
-Nobody writes that. They unwrap, compute, and re-admit, so the type adds bulk at every
-use site and buys nothing in return, which is more likely to hide an arithmetic mistake
-than to catch one.
+Unwrapping, computing, and re-admitting add bulk at every use site and can hide arithmetic mistakes.
 
 Numeric ranges are therefore constraints:
 
@@ -178,8 +173,7 @@ List.average [ 12.5; 3.0; nan; 8.25 ]   // NaN
 ```
 
 
-No exception, no obviously wrong number, just a dashboard that reads `NaN` some time
-later. Admitting through `FiniteFloat` localises that to the one bad reading at the
+The aggregate returns `NaN` without an exception or an obvious cause. Admitting through `FiniteFloat` localises that to the one bad reading at the
 boundary. Infinity poisons `sum` and `average` identically, which is why the type excludes
 both rather than only `NaN`.
 
@@ -195,7 +189,7 @@ match FiniteFloat.create 12.5 with
 ```
 
 
-**It is not needed for sorting or for `Map`, `Set` and `Dictionary` keys.** F# generic
+It is not needed for sorting or for `Map`, `Set` and `Dictionary` keys. F# generic
 comparison already orders `NaN` consistently, `compare nan nan` is `0`, and `NaN` sorts
 first, so those work on plain `float`. What stays broken is a comparison hand-written
 with `<` and `>`: it reports `NaN` equal to every value, which is intransitive and makes

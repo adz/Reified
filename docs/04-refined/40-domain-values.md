@@ -8,8 +8,6 @@ targetFramework: net8.0
 # Define Refined Types
 
 A refined type is a private wrapper, a checked constructor, and one canonical way to recover the underlying value.
-This page is the reference for that machinery.
-
 Before reaching for it, decide whether the concept deserves a type at all. Checked construction is how a value is
 admitted, not a reason on its own: if nothing downstream becomes total or loses a branch, the rule belongs in a
 [constraint](/constraints/constraint.html) on the primitive instead. Numeric ranges are the clearest
@@ -190,6 +188,6 @@ module ContactEmail =
 ```
 
 
-If you cannot write an operation like that, the concept is probably a constraint rather than a type.
+If no operation preserves the invariant, use a constraint instead.
 
 Continue with [Schema Integration](/schema/index.html).
