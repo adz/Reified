@@ -4,6 +4,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 ## Assumptions
 
+- `docs/05-parsing/_index.md:61-73` — confirm whether invariant-culture thousands separators and exponent/overflow handling match the stated accepted forms across numeric parsers; the table reads as an exact grammar.
+
 - `docs/04-refined/20-catalog.md:88-90` — confirm the exact return types and out-of-range behavior of `skip`, `item`, `truncate`, and `map2`; the paragraph describes clamping and totality but then says `skip` returns an ordinary list.
 
 - `docs/01-getting-started/02-what-a-schema-gives-you.md:150` — “`SchemaGen` produces values that satisfy the declaration”; confirm how generation reports unsupported or opaque constraints instead of producing unchecked fixtures.
@@ -25,6 +27,9 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/02-schema/70-patterns/20-legal-transitions.md:64` — shifting dates “cannot reverse their order”; confirm overflow behavior at date limits.
 
 ## Unclear or misleading
+
+- `docs/05-parsing/_index.md:95-99` — `OutOfRange` also covers numbers too negative for the destination type; the sample message “too large” mislabels that case.
+- `docs/05-parsing/_index.md:186-206` — “a refinement admits it into a domain type” but `quantity` returns the guarded `int`, not a refined type. Either construct a refinement or describe this as parsing followed by a value check.
 
 - `docs/04-refined/60-tutorials/10-order-totals.md:40-58` — public `OrderLine` and `Order` records can be constructed with unchecked quantities, prices, or even default/null refined fields; “none of those facts ... can be false” and “rejected here and nowhere else” overstate the guarantee. Make the aggregate private or scope the claim to the shown constructor.
 - `docs/04-refined/60-tutorials/10-order-totals.md:112-114` — payable cannot exceed subtotal only if subtotal is nonnegative; the public records permit negative prices, and decimal arithmetic may overflow. Qualify the claim or enforce the preconditions in the type.
@@ -60,6 +65,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 ## Too long
 
+- `docs/05-parsing/_index.md:130-184` — generic optional/defaulting helpers and named wrappers repeat the same absence-versus-malformed rule and examples; condense the wrappers to a short list or table.
+
 - `docs/03-constraints/21-constraint.md:53-85,140-191` — the same DSL/module/type-directed-binding introduction appears twice on the core type page and again in `dsl.md`. Keep one small example here and direct readers to the DSL guide for details.
 
 
@@ -70,6 +77,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/02-schema/85-examples.md` embeds entire example program files. Replace with a short explanation, link to runnable source, and focused relevant excerpts; keep the complete program at the linked location.
 
 ## Reference material in guides
+
+- `docs/05-parsing/_index.md:56-69` — the exhaustive parser/accepted-form table is useful reference material; consider keeping a smaller selection in the walkthrough and linking the complete list from the Parse API reference.
 
 - `docs/03-constraints/40-localization/40-catalogue.md:14-95` — the exhaustive key/argument/default-English tables are reference data (also exposed by `Catalogue.keys`/maps); keep the runtime maps discoverable and consider placing the tables beside the catalogue API reference rather than in the localization walkthrough.
 
@@ -84,6 +93,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/02-schema/30-redisplay-and-field-errors.md`, “The Schema catalogue”: move exhaustive message-key/argument/default table to the appropriate Schema error API reference front matter.
 
 ## Missing
+
+- `docs/05-parsing/_index.md:130-159` — clarify how `Some ""` and `Some "   "` behave with `optional`/`optionalOr`: these are present inputs that produce `MissingValue`, not absent values receiving a fallback.
 
 - `docs/04-refined/60-tutorials/10-order-totals.md:44-55` — the tutorial promises building an order from untrusted input but never constructs `Order` from all four admitted fields; add a complete boundary function, including error mapping for heterogeneous failures and checking the line collection.
 - `docs/04-refined/50-schema.md:99-106` — `Schema.convert decimal int` narrows a decimal on encoding; explain what happens with fractional or out-of-range values, or choose a genuinely reversible conversion for the first example.
@@ -103,6 +114,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - A single glossary for “trusted,” “admission,” “interpreted,” “opaque,” “canonical,” “wire,” and “domain.”
 
 ## Suggestions for humans and LLMs
+
+- `docs/05-parsing/_index.md:50-51` — warn that `ParseError` retains raw input, which may be sensitive; avoid logging or returning it verbatim without considering redaction.
 
 - `docs/04-refined/60-tutorials/20-customer-id.md:108-115` — `index` and `range` work for any comparable key, including zero; identify which operation specifically relies on positivity, or present `CustomerId` as nominal identity rather than proof that positive numeric wrappers earn their keep.
 
