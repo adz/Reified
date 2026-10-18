@@ -1,7 +1,7 @@
 ---
 title: Json
 api:
-  family: Reified.Schema.Json.Json
+  family: Reified.Json
   sections:
     - id: compile
       title: Compile codecs
@@ -39,9 +39,21 @@ serialize trusted models or decode JSON using the schema's field structure. Unli
 decoding does not check value constraints; use `Json.parseData` followed by `Schema.parse` for untrusted input.
 
 The codec is built from the explicit schema rather than runtime type inspection. It supports NativeAOT, trimming, and
-Fable. `deserialize` and `deserializeBytes` raise `JsonCodecException` on the first structural failure; its `Path`
-identifies the failing schema field. `tryDeserialize` returns `Result<_, string>` instead: its error is the exception's
-rendered message (including the path), not a structured path or accumulated `SchemaErrors`.
+Fable.
+
+## Choosing a read operation
+
+`Json` exposes three ways to turn JSON text into a model, with different input, output, and failure behavior:
+
+| Operation | Input | Success | Failure |
+| --- | --- | --- | --- |
+| `deserialize` / `deserializeBytes` | JSON string / UTF-8 bytes | `'model` | raises `JsonCodecException` whose `Path` identifies the first failing schema field |
+| `tryDeserialize` | JSON string | `Result<'model, string>` | `Error` with the exception's rendered message, including the path — a string, not structured `SchemaErrors` |
+| `parseData` | JSON string | `Result<Data, string>` | `Error` string; produces a `Data` tree for `Schema.parse`, which then applies constraints and accumulates path-aware `SchemaErrors` |
+
+`deserialize` and `deserializeBytes` stop at the first structural failure. `tryDeserialize` is the result-returning
+form of the same behavior. `parseData` does not run schema rules at all; it is the lossless JSON-to-`Data` step that
+feeds untrusted boundary parsing.
 
 See [JSON Codecs](/schema/json-codecs.html) for streams, buffers, diagnostics, and how trusted codec decoding differs
 from untrusted `Data` parsing.

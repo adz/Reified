@@ -87,6 +87,16 @@ api:
 The `Schema` module contains primitive schemas, collection and recursion combinators, union constructors, and the
 operations that parse or check a completed declaration.
 
+Start from the task:
+
+- Declare a record schema and parse untrusted input: [Schema quickstart](/schema/quickstart.html).
+- Fields, field blocks, and constructors: [SchemaDSL](/schema/dsl.html).
+- Reusable value rules: [Constraints](/constraints/constraints.html).
+- Invariant-carrying field types: [Refined Schemas](/schema/refined-values.html).
+- JSON in and out: [JSON Codecs](/schema/json-codecs.html).
+- Published shape: [`JsonSchema`](/api/Reified.JsonSchema.html).
+- Older wire versions: [Versioned Contracts](/schema/versioned-contracts.html).
+
 Use `Schema.parse` for untrusted `Data`. It decodes fields, applies constraints and refinements, accumulates independent
 failures as `SchemaErrors`, and invokes the model constructor only after the fields succeed.
 
@@ -97,3 +107,22 @@ The same model constructor runs again, so cross-field invariants are checked too
 itself.
 
 The [Schema quickstart](/schema/quickstart.html) introduces the workflow.
+
+## Constraint equivalents
+
+These are the handwritten operations emitted for derivation attributes. Use them inside a field block with
+`constrain`, except for the metadata operations shown directly:
+
+| Purpose | Schema DSL |
+| --- | --- |
+| Pattern | `constrain (pattern expression)` |
+| Minimum, maximum, exact, or bounded natural length | `constrain (minLength n)`, `maxLength`, `length`, `lengthBetween` |
+| Present value or supplied input key | `constrain present`, `mustSupply` |
+| Inclusive/exclusive numeric bounds | `constrain (atLeast n)`, `greaterThan`, `atMost`, `lessThan` |
+| Numeric multiple | `constrain (multipleOf n)` |
+| Distinct list elements | `constrain distinct` |
+| Email text | `constrain email` |
+| Open format metadata | `format (SchemaFormat.create name)` |
+| Omitted-input default | `defaultValue value` |
+
+See [Derivation Attributes](/schema/derivation/attributes.html) for the complete attribute mapping.
