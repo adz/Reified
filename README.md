@@ -112,7 +112,7 @@ The codec is compiled from the schema's typed field plan, so there is no runtime
 
 ## Or derive the schema from the record itself
 
-For wire records — DTOs whose whole job is to cross a boundary — declaring the schema by hand is duplication. Mark the record instead:
+Declaring the schema by hand is duplication when a record already carries its field rules as attributes. Mark the record instead:
 
 ```fsharp
 open Reified.DerivedSchema
@@ -131,7 +131,9 @@ Signup.validate   // Signup -> Result<Signup, SchemaErrors>
 
 This is the same schema as the handwritten one above — not an equivalent one. `Reified.SchemaGen.MSBuild` reads the attributes from F# source at build time and generates ordinary constructor-last Schema DSL, which then compiles normally. The attributes are inert metadata; nothing is reflected over at runtime, and everything downstream — parsing, JSON codecs, JSON Schema, test data — works exactly as it does for a schema you wrote by hand.
 
-Derivation is the preferred approach for DTOs. Keep it to public, permissive boundary records, and map the parsed result through a domain constructor so real invariants live in refined values and domain types rather than on the wire record.
+Derivation with constraint attributes is the preferred way to declare a validated boundary model. The example above is the same schema as the handwritten `signupSchema`: admit untrusted input with `Signup.parse`, which runs every attribute exactly as `Schema.parse` runs the handwritten constraints. Keep the record public and boundary-facing, and map the parsed result through a domain constructor so real invariants live in refined values and domain types rather than on the wire record.
+
+A derived permissive wire DTO is a different choice. Generate it with no constraint attributes and decode it with the trusted JSON path — `Json.compile` plus `Json.deserialize`/`Json.tryDeserialize` — then run the real validation once in your own `toDomain` function. The trusted decoder does not read constraint attributes, so an attributed DTO decoded that way looks validated in the editor but is not. See [Schema or Generated DTO](https://adz.github.io/Reified/schema/schema-or-generated-dto.html) for how to choose between the two.
 
 ## Packages
 
