@@ -17,6 +17,8 @@ own domain types and contributing their canonical schemas.
 [Reified.Refinements](/refined/index.html) ships the common refined types. Use them as field types directly:
 
 ```fsharp
+open Reified
+open Reified.SchemaDSL
 open Reified.Refinements
 
 type Registration =

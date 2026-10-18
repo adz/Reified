@@ -13,6 +13,10 @@ block vocabulary; [Refined Schemas](/schema/refined-values.html) shows how to li
 into a refinement.
 
 ```fsharp
+open Reified
+open Reified.SchemaDSL
+open Reified.ConstraintDSL
+
 type Profile =
     { DisplayName: string
       Age: int }
