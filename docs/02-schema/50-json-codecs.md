@@ -72,6 +72,17 @@ is AOT- and trimming-safe by construction. Applying a curried constructor of ten
 NativeAOT generic-cycle limits above the compiler defaults; the `Reified.Schema` package raises them for you, as
 [Compiler-Directed, AOT, and Fable](/notes/aot-trimming-fable.html#records-with-many-fields) explains.
 
+### Compile once, reuse safely
+
+A compiled codec is an immutable pair of encode and decode closures. `Json.compile` builds a fresh plan on each
+call, so compile once at startup and share the returned `JsonCodec<'model>` across requests and threads; the
+per-decode field slots the general decoder uses are allocated per call, never stored on the codec. A `Schema` value
+is immutable too, so `Schema.parse` and `Schema.check` are safe to run concurrently over the same schema.
+
+Recursive shapes closed with `Schema.defer` use a memoized thunk: the deferred declaration is forced once, on first
+use, and the resolved definition is reused. F#'s `lazy` memoization is thread-safe, so the first concurrent uses of
+a deferred recursive schema all observe the same resolved definition rather than racing to build it.
+
 ## Every Schema Shape Is Supported
 
 Refined values encode as their raw representation and are reconstructed on decode; nested models, collections, and

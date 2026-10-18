@@ -72,20 +72,48 @@ shape, required fields and field types, because there is nothing on this DTO to 
 attributes, the two would behave identically here; the reason to reach for the trusted path is that it says so in
 the code, and it stays true if a teammate later adds an attribute to the DTO by mistake.
 
-```fsharp no-check reason="Depends on the generated SignupWire module; not independently checkable."
-let wireCodec = Json.compile SignupWire.schema
+The generated module exposes `SignupWire.schema`; the hand-written equivalent below is exactly what the generator
+emits for the record above. It is a complete, runnable boundary:
 
-let toDomain (wire: SignupWire) : Result<Signup, string> =
-    match Constraint.check (Constraint.all [ Constraint.present; Constraint.email ]) wire.Email with
+```fsharp
+open Reified
+open Reified.SchemaDSL
+
+// Signup is the type from Strategy 1 above. The permissive wire schema below adds no
+// constraints, so it claims nothing about validity.
+let signupWireSchema : Schema<Signup> =
+    schema<Signup> {
+        field _.Email
+        field _.Age
+        construct (fun email age -> { Email = email; Age = age })
+    }
+
+let wireCodec = Json.compile signupWireSchema
+
+let toDomain (signup: Signup) : Result<Signup, string> =
+    match Constraint.check (Constraint.all [ Constraint.present; Constraint.email ]) signup.Email with
     | Error violation -> Error $"invalid email: {Violation.render violation}"
     | Ok () ->
-        if wire.Age >= 13 then Ok { Email = wire.Email; Age = wire.Age }
+        if signup.Age >= 13 then Ok signup
         else Error "age must be at least 13"
 
 let parseWire (json: string) : Result<Signup, string> =
     Json.tryDeserialize wireCodec json
     |> Result.bind toDomain
+
+parseWire """{"email":"ada@example.org","age":36}"""
+// Ok { Email = "ada@example.org"; Age = 36 }
+
+parseWire """{"email":"ada","age":11}"""
+// Error "invalid email: expected an email address, but was ada"
+
+parseWire """{"age":36}"""
+// Error "JSON decode failed at $.email: missing required field"
 ```
+
+`parseWire` shows both failure kinds: `Json.tryDeserialize` returns the first structural wire-shape failure as a
+string, and `toDomain` returns the first validation failure it finds. Neither accumulates path-aware diagnostics; use
+`Schema.parse` over `Data` when you need every field error at once.
 
 The real validation runs once, in `toDomain`, through refined values or a hand-written domain schema, exactly as it
 would in strategy 1. The DTO is structural, not a second place the same rule could drift.

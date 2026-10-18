@@ -159,7 +159,16 @@ fails the current schema's recheck returns `MigrationError.RevalidationFailed` w
 `SchemaGen` derives values that satisfy the declaration's rules; raise the minimum age and the generated fixtures
 follow. When a rule has no sound generation — a `pattern`, a custom predicate, or any opaque constraint — generation
 fails closed with `UnsupportedConstraint`, naming the field path and the rule, instead of emitting fixtures that
-ignore it. The generator lives in the non-packable `Reified.Schema.Testing` adapter; copy or adapt the pattern shown
+ignore it.
+
+```fsharp no-check reason="SchemaGen.model lives in the non-packable Reified.Schema.Testing adapter and returns an FsCheck generator; this is the call shape, resolved in the linked page's own context, not by this page's compile check."
+open Reified.Schema.Testing
+
+let generated = SchemaGen.model signupSchema
+// Result<FsCheck.FSharp.Gen<Signup>, SchemaGenerationError>
+```
+
+The generator lives in the non-packable `Reified.Schema.Testing` adapter; copy or adapt the pattern shown
 in [Testing schema guarantees](/data/testing-schema-guarantees.html).
 
 → [Testing schema guarantees](/data/testing-schema-guarantees.html) · [Building test cases](/data/how-to-build-test-cases.html)
