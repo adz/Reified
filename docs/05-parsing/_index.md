@@ -10,9 +10,8 @@ targetFramework: net8.0
 
 # Parsing
 
-`Reified.Parse` changes serialized text into primitive typed values. `"42"` becomes `42`, `"true"` becomes `true`. The
-point of the package is not that it converts, `Int32.TryParse` converts, but that when conversion fails it says which
-of three different things went wrong, in a value you can act on.
+`Reified.Parse` converts serialized text into primitive typed values. `"42"` becomes `42`, `"true"` becomes `true`.
+Unlike `Int32.TryParse`, it returns a value identifying which of three failures occurred.
 
 ```sh
 dotnet add package Reified.Parse
@@ -51,8 +50,7 @@ type ParseError =
 `target` names the destination type, `"int"`, `"bool"`, `"decimal"`, `"Guid"`, so a caller can tell which conversion
 failed without tracking it separately. `input` is the offending text, retained for redisplay.
 
-The distinction between the three matters more than it looks. An empty field and a misspelled one usually deserve
-different messages, and only `OutOfRange` tells a user that their number was understood but too big.
+An empty field and a misspelled one can need different messages. `OutOfRange` identifies a well-formed number too large for the destination type.
 
 ## The parsers
 
@@ -70,8 +68,7 @@ different messages, and only `OutOfRange` tells a user that their number was und
 | `Parse.timeOnly` | `System.TimeOnly` | Invariant-culture time text. .NET 8+ only. |
 | `Parse.enum<'enum>` | `'enum` | A case name, case-insensitive, or its numeric text. |
 
-Every parser takes `string` and returns `Result<'value, ParseError>`. Every numeric parser uses invariant culture, so
-the same text parses the same way on every machine, a decimal point is always `.`, never `,`.
+Every parser takes `string` and returns `Result<'value, ParseError>`. Numeric parsers use invariant culture: the same text parses the same way on every machine, and the decimal point is `.`, not `,`.
 
 Only the numeric parsers can produce `OutOfRange`; the others report `MissingValue` or `InvalidFormat`.
 
@@ -105,8 +102,7 @@ let describe error =
 
 ## Hand off to your own error type
 
-Most call sites do not keep `ParseError`. Map it into the application's vocabulary at the point of use, and the
-signature stops mentioning Reified at all:
+Map `ParseError` into an application error at the point of use when callers do not need the parse details:
 
 ```fsharp
 type PortError = PortNotANumber of string
@@ -125,12 +121,9 @@ Parse.int "abc" |> Result.orError PortMissing
 ```
 
 
-Keep the `ParseError` instead, `Result.mapError InvalidInteger` into a case that carries it, when something later
-needs to tell the three failures apart or redisplay the offending text.
+When callers need to distinguish the three failures or redisplay the text, use `Result.mapError InvalidInteger` to keep `ParseError` in an application error case.
 
-When the text is one field of structured input rather than a standalone value, do not do this by hand.
-[`Schema`](/schema/quickstart.html) parses each field, accumulates every failure, and reports the
-field path alongside it.
+For structured input, [`Schema`](/schema/quickstart.html) parses each field, accumulates every failure, and reports the field path alongside it.
 
 ## Optional input
 
@@ -163,7 +156,7 @@ Parse.optionalOr 80 Parse.int (Some "bad")
 ```
 
 
-The fallback never recovers from malformed input. A default is for an omitted setting, not a wrong one.
+The fallback applies to omitted input, not malformed input.
 
 ## Combined optional helpers
 
@@ -192,8 +185,7 @@ preserve the error from malformed present text.
 
 ## Parse, then refine
 
-Parsing changes representation. Checking a typed value is a constraint's job, and admitting it into a domain type is a
-refinement's. They stay separate steps, and each contributes its own error:
+Parsing changes representation; a constraint checks the typed value, and a refinement admits it into a domain type. Each step contributes its own error:
 
 ```fsharp
 open Reified
