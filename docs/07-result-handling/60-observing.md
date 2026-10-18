@@ -7,8 +7,7 @@ targetFramework: net8.0
 
 # Observing a Result
 
-`tap` and `tapError` run a side effect and hand the result back unchanged. They exist so logging does not force you to
-break a pipeline apart.
+`tap` and `tapError` run a side effect and hand the result back unchanged. Use them to log without breaking a pipeline apart.
 
 ```fsharp
 open System
@@ -56,8 +55,7 @@ rejected: AgeNotANumber "abc"
 The value returned is the original `Error (AgeNotANumber "abc")`. `tap` did not run, because the result was not `Ok`;
 `tapError` ran and returned its input untouched.
 
-`tap` and `tapError` say the same thing about each other: the effect returns `unit`, so it has no way to influence
-what comes out:
+Both callbacks return `unit`; neither changes the result:
 
 ```fsharp no-check reason="A bare type signature, not an expression; illustrates the shape rather than compiling as code."
 Result.tap      : ('value -> unit) -> Result<'value, 'error> -> Result<'value, 'error>
@@ -65,7 +63,7 @@ Result.tapError : ('error -> unit) -> Result<'value, 'error> -> Result<'value, '
 ```
 
 
-## Where they earn their place
+## At a boundary
 
 At a boundary, where you want a record of what happened but the caller still gets the untouched result:
 

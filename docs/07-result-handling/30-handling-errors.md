@@ -7,7 +7,7 @@ targetFramework: net8.0
 
 # Handling errors
 
-The error channel gets the same treatment as the success channel: map it, replace it, or use it to produce a fallback.
+Map an error, replace it, or use it to produce a fallback.
 
 ```fsharp
 open Reified.Result
@@ -59,7 +59,7 @@ which fallback to use depends on why the first attempt failed.
 ```
 
 
-Both keep the error type the same. A recovery step that fails with a *different* error type is not covered here , 
+Both keep the error type the same. If a recovery step fails with a *different* error type,
 convert with `mapError` first so both sides agree.
 
 ## Choosing between them

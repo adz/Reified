@@ -7,8 +7,7 @@ targetFramework: net8.0
 
 # Collecting every error
 
-`result { }` stops at the first failure. When the steps do not depend on each other, the fields of a form, the
-columns of a row, the caller usually wants every problem at once, not the first one repeatedly.
+`result { }` stops at the first failure. For independent steps such as fields of a form or columns of a row, callers may need every failure at once.
 
 `result.list { }` collects them. Join the independent bindings with `and!` instead of `let!`.
 
@@ -102,9 +101,8 @@ mixed "Ada" "12"   // Error [AgeOutOfRange 12]
 ```
 
 
-The third case is the one to understand. Name and age both succeeded, so the block reached the `let!`, which failed on
-its own, one error. And in the second case the `let!` never ran at all, so `AgeOutOfRange` could not have appeared
-alongside the other two even if the age had been out of range.
+In the third case, name and age succeeded, then `let!` failed with one error. In the second case, `let!` never ran,
+so `AgeOutOfRange` could not appear alongside the other errors.
 
 The rule: **everything you want reported together must be in the same `and!` group.** A failure in an earlier group
 hides every later one.
@@ -169,8 +167,8 @@ Staying at the Result layer is still reasonable when the failures are not really
 application code, or a small internal function whose caller just wants a list. In that case carry the association
 yourself, by mapping each step's error to a pair of field name and reason before the block collects them.
 
-The line between the two: `result.list { ... and! ... }` accumulates one group of independent bindings.
-`Schema.parse` owns accumulation at a structured boundary, with paths.
+`result.list { ... and! ... }` accumulates one group of independent bindings. `Schema.parse` accumulates
+failures at a structured boundary, with paths.
 
 For the third case, the same operation applied across a collection, use
 [`Result.traverseAll` and `Result.sequenceAll`](/result-handling/collections.html#traverseall-and-sequenceall), which run every mapping

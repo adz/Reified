@@ -7,8 +7,7 @@ targetFramework: net8.0
 
 # Creating a Result
 
-Most failures start as something that is not a `Result`: a predicate over a value, a `bool`, a `TryParse` tuple, an
-option. These helpers do the conversion and let you attach your own error type.
+Convert a predicate over a value, a `bool`, a `TryParse` tuple, or an option to a `Result` with your own error type.
 
 All examples share one error type:
 
@@ -26,8 +25,8 @@ type SignupError =
 
 ## Directly
 
-`ok` and `error` construct a `Result`. They exist so a pipeline can end in one without a type annotation; `Ok` and
-`Error` work just as well.
+`ok` and `error` construct a `Result`. They let a pipeline end in one without a type annotation; `Ok` and
+`Error` work too.
 
 ```fsharp
 Result.ok 42        // Ok 42
@@ -38,7 +37,7 @@ Result.error NameMissing  // Error NameMissing
 ## From a predicate over a value
 
 `okIf` keeps the value when the predicate holds; `failIf` is its inverse. Both fail with `unit`, because at that point
-there is nothing to say about the failure yet, you attach the reason with `orError`.
+attach the reason with `orError`.
 
 ```fsharp
 "Ada" |> Result.okIf (String.IsNullOrWhiteSpace >> not)
@@ -121,11 +120,11 @@ let positive : Constraint<int> = Constraint.greaterThan 0
 ```
 
 
-Note the success type: `Constraint.guard` returns `Ok 36`, not `Ok ()`. If the rule is only a local condition, not
+`Constraint.guard` returns `Ok 36`, not `Ok ()`. If the rule is only a local condition, not
 something worth naming and reusing, use `okIf`/`failIf` with `orError` instead, see
 [Constraint vs. Result](/constraints/overview.html) for the distinction.
 
-## Which one to reach for
+## Choosing a conversion
 
 | Starting point | Function |
 | --- | --- |

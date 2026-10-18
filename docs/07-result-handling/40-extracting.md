@@ -7,8 +7,7 @@ targetFramework: net8.0
 
 # Extracting values
 
-At the edge of a pipeline you usually stop working in `Result` and hand a plain value to something that does not know
-about it.
+At the edge of a pipeline, extract a plain value when the caller does not handle `Result`.
 
 ```fsharp
 open Reified.Result
@@ -38,12 +37,11 @@ Ok 36 |> Result.toOption                                          // Some 36
 ```
 
 
-These discard why the operation failed. That is the point when the caller genuinely does not care, but it is worth
-being deliberate: once the error is gone it cannot be reported, logged, or returned to a user.
+These discard why the operation failed. Use them when the caller does not need the reason: once the error is gone, it cannot be reported, logged, or returned to a user.
 
 ## Pattern matching
 
-Nothing stops you matching the value directly, and for a final branch that handles both sides it is usually clearest:
+Pattern match when the final branch handles both sides:
 
 ```fsharp
 open System

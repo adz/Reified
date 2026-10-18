@@ -20,8 +20,7 @@ open Reified.ResultDSL
 ```
 
 
-The package works with the standard F# `Result<'value, 'error>`, it does not wrap or replace it. What it supplies is
-the vocabulary around it:
+The package works with the standard F# `Result<'value, 'error>` without wrapping or replacing it. It provides:
 
 | Concern | API | Returns |
 | --- | --- | --- |
@@ -55,11 +54,11 @@ let quantity (raw: string) =
 ```
 
 
-Each step's own failure is mapped into one deliberate application error type at the bind site.
+Each failure maps to the application error type at its bind site.
 
 ## Collect independent failures
 
-`let!` fails fast; `and!` accumulates. The boundary is the compiler's, not a setting:
+`let!` fails fast; `and!` accumulates. The choice depends on the binding syntax:
 
 ```fsharp no-check reason="input/parseName/parseAge are the caller's own structured input and parsing functions; not ones this fragment can construct standalone."
 result.list {

@@ -13,10 +13,10 @@ targetFramework: net8.0
 
 # Result handling
 
-`Reified.Result` works with the standard F# `Result<'value, 'error>` - ordinary `Ok` or `Error` values that any other F# code can pattern match.
+`Reified.Result` works with the standard F# `Result<'value, 'error>`. Other F# code can pattern match its `Ok` and `Error` values.
 
-What it provides is a module and DSL for working with them - turning ordinary values into a `Result`, chaining steps, replacing one error with another, getting values back out, and two
-computation expressions for writing sequences of fallible steps as straight-line code.
+Its module and DSL convert values to a `Result`, chain steps, replace errors, extract values, and provide two
+computation expressions for fallible steps.
 
 ```sh
 dotnet add package Reified.Result
@@ -60,8 +60,6 @@ Ok { Name = "Ada"; Age = 36 }
 ```
 
 
-Every page below builds on this same `parseName`/`parseAge` pair, so the examples compose with each other.
-
 ## Pages
 
 - [Creating a Result](/result-handling/creating.html) - turn options, `TryParse` tuples, booleans, and predicates into a
@@ -81,9 +79,9 @@ Every page below builds on this same `parseName`/`parseAge` pair, so the example
 
 ## Related
 
-`Reified.Result` composes failures. Admitting values in the first place is the
-[Constraints](/constraints/index.html) test typed values, [Parsing](/parsing/index.html) decodes serialized primitives,
-and [Refined](/refined/index.html) constructs values whose types record a successful check. All three return the
+`Reified.Result` composes failures. [Constraints](/constraints/index.html) test typed values,
+[Parsing](/parsing/index.html) decodes serialized primitives, and [Refined](/refined/index.html) constructs values
+whose types record a successful check. All three return the
 standard F# `Result`, so these helpers work on their output, but none requires this package, and this package does
 not require them.
 

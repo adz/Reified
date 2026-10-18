@@ -7,7 +7,7 @@ targetFramework: net8.0
 
 # The result computation expression
 
-Reified provides a DSL for more concise `Result` pipelines. `result { }` passes each success to the next step and
+`result { }` passes each success to the next step and
 returns the first `Error`:
 
 ```fsharp
@@ -69,7 +69,7 @@ Ok { Name = "Ada"; Age = 36 }
 ```
 
 
-The same block with the types written out, to show what is on each side of the binding:
+With types on both sides of each binding:
 
 ```fsharp
 result {
@@ -104,7 +104,7 @@ signup "Ada" "abc"   // Error (AgeNotANumber "abc")
 `signup "" "abc"` returns `Error NameMissing`. The age is never parsed, so its failure is never seen, the block stops
 at the first one.
 
-That short-circuit is observable, not just a description of the result:
+The second binding does not run after a failure:
 
 ```fsharp
 let mutable calls = 0

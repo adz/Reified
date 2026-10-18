@@ -7,7 +7,7 @@ targetFramework: net8.0
 
 # Transforming values
 
-Two functions cover almost all of it. `map` changes the success value. `bind` runs a step that can itself fail.
+`map` changes the success value. `bind` runs a step that can itself fail.
 
 ```fsharp
 open System
@@ -65,7 +65,7 @@ let parseAge (raw: string) =
 ```
 
 
-Three outcomes, one for each way through:
+The pipeline can succeed, fail to parse, or reject an out-of-range age:
 
 ```fsharp
 parseAge "36"    // Ok 36
@@ -75,7 +75,7 @@ parseAge "500"   // Error (AgeOutOfRange 500)
 
 
 The chain short-circuits. Once a step produces `Error`, every later `map` and `bind` is skipped and that first error
-is what comes out. Nothing downstream needs to test for it.
+is what comes out. Later steps need no error check.
 
 When a pipeline grows past two or three steps, or when a later step needs a value bound several steps earlier, the
 [result computation expression](/result-handling/result-ce.html) says the same thing without the nesting.

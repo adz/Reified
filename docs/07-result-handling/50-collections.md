@@ -7,8 +7,8 @@ targetFramework: net8.0
 
 # Working with collections
 
-Applying a fallible operation to every item in a list leaves you with a list of results, which is rarely what you
-want. `traverse` and `sequence` turn that inside out: one result holding every value.
+Applying a fallible operation to every item produces a list of results. `traverse` and `sequence` turn that into one
+result holding every value.
 
 ```fsharp
 open System
@@ -56,8 +56,7 @@ let parseAge (raw: string) =
 
 ## It stops at the first error
 
-Traversal is fail-fast, and this is observable: the mapping does not run for items after the failure. This matters
-when the mapping does real work, a lookup, a request, a write.
+Traversal stops mapping after the first failure. This matters when mapping performs a lookup, request, or write.
 
 ```fsharp
 let mutable visited = []
@@ -74,8 +73,7 @@ List.rev visited
 ```
 
 
-`"3"` was never visited. Only the first failure is reported, and later items are not examined at all, so this cannot
-tell a user everything wrong with their input.
+`"3"` was never visited. Only the first failure is reported; later items are not examined.
 
 ## traverseAll and sequenceAll
 
