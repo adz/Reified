@@ -40,8 +40,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 ## Unclear or misleading
 
-- `docs/api/Reified.Contract.md:6-7` — the listed outcomes omit migration failures, despite `MigrationError` being listed in the Schema package inventory; explain their result case and whether paths survive migration.
-- `docs/api/Reified.Inspect.md:23-24` — “without ... running application code” sounds absolute, while schemas may contain authored callbacks; clarify whether inspection forces deferred declarations or invokes any getters/constructors.
+- [fixed] `docs/api/Reified.Contract.md:6-7` — the listed outcomes omit migration failures, despite `MigrationError` being listed in the Schema package inventory; explain their result case and whether paths survive migration.
+- [fixed] `docs/api/Reified.Inspect.md:23-24` — “without ... running application code” sounds absolute, while schemas may contain authored callbacks; clarify whether inspection forces deferred declarations or invokes any getters/constructors.
 - [fixed] `docs/api/Reified.Schema.Json.Json.md:37-43` — “deserialize JSON into the same field plan used by `Schema.parse`” can imply the same admission guarantees; state here that trusted codec decoding does not enforce value constraints.
 
 - [fixed] `docs/95-notes/_index.md:23` — promises benchmarks “on .NET and Fable,” but the benchmarks page contains only .NET runtime tables; remove Fable or link Fable measurements.
