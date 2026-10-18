@@ -4,6 +4,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 ## Assumptions
 
+- `docs/01-getting-started/02-what-a-schema-gives-you.md:150` — “`SchemaGen` produces values that satisfy the declaration”; confirm how generation reports unsupported or opaque constraints instead of producing unchecked fixtures.
+
 - `docs/index.md:27` — “No runtime reflection: the same declaration compiles under NativeAOT, trimming, and Fable.” Confirm the supported target/compiler combinations and exceptions.
 - `docs/index.md:67` — “decoder ran about 14% faster on .NET 10 ... and allocated less.” Confirm workload, versions, and measurement variance.
 - `docs/01-getting-started/_index.md:112` — “Every independent field is checked”; confirm behavior for dependent fields, constructor failures, nested collections, and error ordering.
@@ -22,6 +24,11 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 ## Unclear or misleading
 
+- `docs/01-getting-started/_index.md:94` — “No `Signup` exists unless every field and the constructor succeeded” sounds like a guarantee about the public record type; callers can construct `Signup` directly. Say that `Schema.parse` does not return a `Signup` on failure.
+- `docs/01-getting-started/_index.md:79-89` — says the same schema reads JSON and shows `Data.ofNameValues` for text pairs; explain how JSON becomes `Data` before `Schema.parse`, or link the conversion recipe at this point.
+- `docs/01-getting-started/02-what-a-schema-gives-you.md:65-69` — printed sample output includes `age:` and `email:`, but the `printfn` expression renders only `issue.Error`, never `issue.Path`; show path formatting or remove the prefixes.
+- `docs/01-getting-started/02-what-a-schema-gives-you.md:143-144` — says migration failures and malformed payloads carry the same `SchemaErrors` and paths, but the example matches only `VersionUnrecognized` and `ParseFailed`; show the migration failure case or qualify the claim.
+
 - `README.md:112` calls attribute-based derivation “preferred approach for DTOs,” while `docs/02-schema/47-schema-or-generated-dto.md:39-44` says derived wire DTOs should have **no** constraint attributes, but README’s derived example has `[<Present; Email>]` and `[<AtLeast 13>]`. Distinguish derived validated boundary model from permissive wire DTO explicitly.
 - `docs/01-getting-started/02-what-a-schema-gives-you.md:78-84` says codec decoding failures return “the same path-aware `SchemaErrors`”; `docs/02-schema/50-json-codecs.md:113-121` says `JsonCodecException` or `Result<_, string>` with first structural failure. These cannot both describe the public decoder result.
 - `docs/02-schema/01-quickstart.md:174-189` shows `Seats` without constraint in the schema, yet JSON Schema has `exclusiveMinimum:0` and diagnostics say “Must be greater than 0”; no visible definition establishes this rule.
@@ -35,11 +42,15 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 ## Too long
 
+- `docs/01-getting-started/_index.md:137-232` — after the complete Signup walkthrough, the page restarts with a problem statement, a standalone constraint, a refinement, and another schema. Consider retaining one short conceptual contrast here and linking to focused guides for the second set of examples.
+
 - `docs/02-schema/01-quickstart.md` spans plain parsing, refined types, constraints, private aggregates, drafts, updates, and JSON Schema. Keep “First schema and parse” and “Read failures” here; move refined fields to “Refined fields in Schema,” field constraints to “Boundary-specific field rules,” and private Booking/draft/update flow to “Construction guarantees.”
 - `docs/02-schema/65-versioned-contracts.md` mixes the manual contract workflow and a long generator evolution tutorial. Split into “Handwritten versioned contracts” and “Generated version series: freezing and migrating.”
 - `docs/02-schema/85-examples.md` embeds entire example program files. Replace with a short explanation, link to runnable source, and focused relevant excerpts; keep the complete program at the linked location.
 
 ## Reference material in guides
+
+- `docs/01-getting-started/02-what-a-schema-gives-you.md:37-45` — the seven-API inventory is useful orientation, not an exhaustive reference; keep it here, but link the `SchemaGen` entry directly to its own usage/reference page rather than only the generic Data section at line 152.
 
 - `docs/02-schema/20-dsl.md`, “Constraint equivalents”: move the operation/attribute mapping to `docs/api/Reified.Schema.md` front matter (and retain a short link to Derivation Attributes).
 - `docs/02-schema/46-advanced-union-handling.md`, “Ready-made compatibility formats” and “Build a representation directly”: move exhaustive `UnionRepresentations`/`UnionPayloadStyle` options to their API entity reference enrichment; keep one compatibility recipe in the guide.
@@ -50,6 +61,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 ## Missing
 
+- `docs/01-getting-started/02-what-a-schema-gives-you.md:150-152` — the seventh promised job has no runnable generation example, unlike the preceding jobs. Add a minimal `SchemaGen` call or label this section as a pointer to a separate recipe.
+
 - A single decision matrix explicitly contrasting `Schema.parse`, `Schema.check`, `Json.deserialize`, `Json.tryDeserialize`, and `Contract.parse`, including validation run, constructor behavior, input type, error type, and when to trust a payload.
 - A complete HTTP JSON boundary recipe from request bytes through `Json.parseData`, `Schema.parseRetainingInput`, localized `SchemaErrors`, and an application-owned response; current examples demonstrate pieces separately.
 - A compact error taxonomy and mapping recipe: `Violation`, `ParseError`, `SchemaError`, `SchemaErrors`, `JsonCodecException`, `MigrationError`, and `ContractError` with conversions and paths.
@@ -57,6 +70,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - A single glossary for “trusted,” “admission,” “interpreted,” “opaque,” “canonical,” “wire,” and “domain.”
 
 ## Suggestions for humans and LLMs
+
+- `docs/01-getting-started/03-where-to-go-next.md:10` — the page has both a front-matter title and an explicit H1, unlike its sibling pages; use the same heading convention throughout Getting Started to avoid duplicate titles in rendered navigation.
 
 - Keep `llms.txt` as a task router, but reconcile its asserted navigation order with the visible section ordering; add a short API-selection decision table and explicit trust-boundary warning.
 - Put actual F# return types and failure types immediately beside every first-use API example; avoid pseudo-output that resembles executable code without showing its setup.
