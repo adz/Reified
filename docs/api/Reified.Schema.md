@@ -1,5 +1,6 @@
 ---
 title: Schema
+targetFramework: net8.0
 api:
   family: Reified.Schema
   name: Schema
@@ -105,6 +106,32 @@ declared fields back from the value and checks them.
 
 The same model constructor runs again, so cross-field invariants are checked too. Success returns the checked value
 itself.
+
+Both operations return `Result<_, SchemaErrors>`. The difference is only the input: `Schema.parse` reads untrusted
+`Data` and decodes each field, while `Schema.check` reads fields back from a value that already exists. The field
+rules, constructor, error cases, and paths are the same.
+
+```fsharp
+open Reified.SchemaDSL
+open Reified.ConstraintDSL
+
+type Signup = { Email: string; Age: int }
+
+let signupSchema =
+    schema<Signup> {
+        field _.Email { constraints [ present; email ] }
+        field _.Age { constrain (atLeast 13) }
+        construct (fun email age -> { Email = email; Age = age })
+    }
+
+let input = Data.ofNameValues [ "email", "ada"; "age", "11" ]
+
+Schema.parse signupSchema input
+// Result<Signup, SchemaErrors>: untrusted Data, every field checked and accumulated
+
+Schema.check signupSchema { Email = "ada"; Age = 11 }
+// Result<Signup, SchemaErrors>: an existing value, the same field rules and constructor
+```
 
 The [Schema quickstart](/schema/quickstart.html) introduces the workflow.
 
