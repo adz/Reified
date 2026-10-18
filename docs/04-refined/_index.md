@@ -113,9 +113,8 @@ let averageLineRefined (lines: NonEmptyList<OrderLine>) =
 ```
 
 
-The refined version is shorter, not just safer. That is deliberate: the collection types
-carry the ordinary list vocabulary, `sum`, `sumBy`, `average`, `choose`, `countBy`,
-`item`, as well as the operations the invariant makes total. A refined type that only
+The refined version is shorter because the collection types carry the ordinary list vocabulary,
+`sum`, `sumBy`, `average`, `choose`, `countBy`, `item`, alongside operations the invariant makes total. A refined type that only
 offered the clever operations would push you back through `toList` for everyday work, and
 the invariant would be lost halfway down the pipeline. See
 [the catalogue](/refined/catalog.html#everyday-operations).
@@ -137,9 +136,8 @@ field _.Quantity { constrain (Constraint.greaterThan 0) }
 ```
 
 
-`FiniteFloat` is the exception that proves the rule: it is worth having because `NaN` and
-infinity silently destroy an **aggregate**, `List.average [ 12.5; 3.0; nan; 8.25 ]` is
-`NaN`, not because of arithmetic or ordering. See
+`FiniteFloat` prevents `NaN` and infinity from silently destroying an **aggregate**:
+`List.average [ 12.5; 3.0; nan; 8.25 ]` is `NaN`. Its purpose is not arithmetic or ordering. See
 [the catalogue](/refined/catalog.html#floating-point).
 
 ## Define your own

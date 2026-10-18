@@ -7,10 +7,9 @@ type: docs
 targetFramework: net8.0
 ---
 
-Around one model you end up doing the same seven jobs: read input into it, check values that arrived some
-other way, serialize it, publish its shape, describe it to a UI, accept last year's payloads, and build test
-data for it. Each is usually its own configuration, attributes, a serializer contract, a Swagger annotation,
-a fixture builder, and each has to be told the rules again.
+A model needs input parsing, validation of existing values, serialization, a published shape, UI metadata,
+older-payload support, and test data. Separate configuration, attributes, serializer contracts, Swagger annotations,
+and fixture builders repeat its rules.
 
 The schema is the source for all seven. You write it once:
 
@@ -47,8 +46,8 @@ let signupSchema =
 
 ## Turn untrusted input into a model
 
-The job the getting-started page walks through. `Schema.parse` takes a `Data` tree from any source, a form
-post, a query string, JSON, configuration, converts each field, checks each rule, and calls the constructor.
+`Schema.parse` takes a `Data` tree from a form post, query string, JSON, or configuration. It converts each field,
+checks each rule, and calls the constructor.
 Every independent field is checked, so a failure carries *all* the problems with their paths, not just the
 first. Nothing downstream has to wonder whether validation ran: no `Signup` exists unless it passed.
 
@@ -150,16 +149,11 @@ payloads carry the same `SchemaErrors` with the same paths.
 
 ## Build test data that obeys the rules
 
-The last job runs the rules backwards: instead of rejecting values that violate the declaration, produce
-values that satisfy it. Fixtures stop being hand-maintained lists that quietly drift from the rules, raise
-the minimum age and the generated data follows.
+`SchemaGen` produces values that satisfy the declaration. Raise the minimum age and the generated fixtures follow.
 
 → [Data](/data/index.html) · [Building test cases](/data/how-to-build-test-cases.html)
 
 ## Why one declaration and not seven
 
-Each of these jobs could be configured separately, and usually is. The cost is not the typing, it is that
-seven descriptions of the same model are free to disagree, and they only disagree in production. Making the
-declaration a value means the rule lives in exactly one place, and each job is a different reading of it. It
-also means a new job costs nothing at the declaration site: the schemas you have already written gain it for
-free.
+Separate configurations can disagree about the same model. A schema keeps the rules in one declaration that
+parsing, checking, codecs, contracts, inspection, and test generation can read.
