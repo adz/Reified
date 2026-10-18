@@ -7,11 +7,9 @@ targetFramework: net8.0
 
 # How it compares
 
-The short version: most validation libraries treat a rule and its message as two artefacts. Reified treats
+Most validation libraries treat a rule and its message as two artefacts. Reified treats
 the message as a projection of the rule, which is why one declaration can also produce JSON Schema, test
 data, and translations.
-
-That difference matters in some projects and not others. This page tries to say which is which.
 
 ## The one structural difference
 
@@ -21,8 +19,6 @@ That difference matters in some projects and not others. This page tries to say 
 | FluentValidation | a rule in a validator class | a message override on that rule, or a localizer you wire up |
 | Validus | a validator function | a message function supplied alongside it |
 | **Reified.Constraint** | a `Constraint<'value>` value | **derived from the constraint** |
-
-Everything below follows from that row.
 
 When the message is written separately, nothing makes the two move together. Widening `MaxLength(40)` to
 `80` leaves `"must be 40 characters or fewer"` behind until someone notices. Adding a language means
@@ -66,8 +62,7 @@ The same declaration lowers to JSON Schema and generates test data. A predicate,
 Reified's own `Constraint.custom` escape hatch, cannot be inspected, and Reified says so rather than
 pretending otherwise.
 
-If you only ever need to answer "is this valid?", the inspectability buys you nothing, but it does not cost you
-anything either. A constraint used that way is still one line, and you never have to see a `Violation`:
+If you only need to answer "is this valid?", inspectability buys you nothing but costs nothing either. A constraint used that way is still one line, and you never have to see a `Violation`:
 
 ```fsharp no-check reason="raw and InvalidEmail are the caller's own binding and error case; not values this page can construct standalone."
 raw
@@ -94,8 +89,7 @@ keys.
 ## FluentValidation
 
 **Choose FluentValidation when** you want a mature, widely-known library with a large community, ASP.NET
-integration, async and DI-driven validators, and a team already fluent in it. It is a good library and the
-ecosystem around it is far larger than Reified's.
+integration, async and DI-driven validators, and a team already fluent in it. Its ecosystem is far larger than Reified's.
 
 **Where it differs:** a rule belongs to a validator for a type, rather than being a free-standing value.
 Sharing "what a valid retry count is" between two types means sharing a validator or repeating the rule.
@@ -113,7 +107,7 @@ amount of machinery.
 derived from it, and nothing can inspect a validator afterwards. Reified's extra concepts, `Violation`,
 `Renderer`, interpreted versus opaque rules, exist to buy inspectability and derived messages.
 
-They are not, however, an entry fee. A check that ends in your own error case reads the same length in either
+You do not need those concepts for every check. A check that ends in your own error case reads the same length in either
 library, and the Reified version leaves you a rule you can reuse in a schema or a refined type later. Keep the
 violation instead of discarding it, when the extra concepts should earn their keep:
 
@@ -125,8 +119,6 @@ raw
 
 
 ## What Reified costs you
-
-Stated plainly, because the sections above are about what it gives:
 
 - **More concepts.** `Constraint`, `Violation`, and `Renderer` are three things to learn where a predicate
   and a string are two.
@@ -140,10 +132,10 @@ Stated plainly, because the sections above are about what it gives:
 
 The benefit compounds where the same value rule is needed in more than one place, a domain type's
 invariant, a request schema, a published JSON Schema, a generated fixture, a form message in two languages.
-If that describes your project, one declaration replaces four or five parallel ones.
+One declaration can replace those parallel declarations.
 
 If your validation is a handful of checks in one place and never leaves it, a predicate returning
-`Result<_, string>` is a perfectly good answer and you should use it.
+`Result<_, string>` is enough.
 
 ## Related comparisons
 

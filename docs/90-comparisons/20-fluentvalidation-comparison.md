@@ -7,11 +7,8 @@ targetFramework: net8.0
 
 # Reified vs FluentValidation
 
-This page compares Reified's schema-first parsing with FluentValidation's validator classes for readers deciding between
-the two models.
-
-The short version: FluentValidation validates objects that already exist. Reified parses input into objects that cannot
-exist in an invalid state. That difference decides everything else.
+FluentValidation validates objects that already exist. Reified parses input into objects that cannot
+exist in an invalid state.
 
 ## The Model Difference
 
@@ -33,7 +30,7 @@ The `Customer` had to be constructed first, usually by a model binder filling pu
 Between construction and validation (and anywhere a code path forgets to call the validator) an invalid `Customer`
 exists and can leak.
 
-An Reified schema owns construction. Parsing either produces a trusted model or path-aware issues; there is no
+A Reified schema owns construction. Parsing either produces a trusted model or path-aware issues; there is no
 intermediate invalid object:
 
 ```fsharp
@@ -63,8 +60,7 @@ match Schema.parse customerSchema raw with
 ```
 
 
-Pair that with refined field types (an `Email` with a private constructor) and "did anyone validate this?" stops being
-a question the rest of the codebase can ask.
+With refined field types (such as an `Email` with a private constructor), downstream code need not check whether the fields were validated.
 
 ## Rules Are Data, Not Just Code
 

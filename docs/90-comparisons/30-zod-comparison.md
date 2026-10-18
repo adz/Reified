@@ -7,11 +7,8 @@ targetFramework: net8.0
 
 # Reified vs zod
 
-This page maps zod's model onto Reified for readers who know "parse, don't validate" from TypeScript.
-
 Reified's schema group is the same idea zod made mainstream: declare the shape once, parse unknown input through it, and
-get either a typed value or structured, path-aware issues. If you like zod, Reified should feel familiar, the
-differences come from F# and .NET, not from a different philosophy.
+get either a typed value or structured, path-aware issues. The differences come from F# and .NET.
 
 ## The Same Moves
 
@@ -25,7 +22,7 @@ differences come from F# and .NET, not from a different philosophy.
 | `z.infer<typeof schema>` | not needed, the schema is declared against your record type directly |
 | `zod-to-json-schema` | `JsonSchema.generate` (in `Reified.Schema`, from the same metadata) |
 
-One inversion worth noticing: zod derives the static type from the schema; Reified declares the schema against a type
+zod derives the static type from the schema; Reified declares the schema against a type
 you own. Your domain type stays an ordinary F# record with real members, and the compiler checks constructor/getter
 alignment field by field.
 
@@ -49,6 +46,4 @@ alignment field by field.
 
 ## Where zod Fits Better
 
-zod is the right tool in TypeScript-first codebases, Reified is not trying to run there. The comparison matters when an
-F#/.NET team asks "what is our zod?": the answer is the schema group of Reified, with plain `Result` for code that never
-needed a schema at all.
+zod fits TypeScript-first codebases. For F#/.NET, Reified's schema group covers structured parsing; code that does not need a schema can use plain `Result`.

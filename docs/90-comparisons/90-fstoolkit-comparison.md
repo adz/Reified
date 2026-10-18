@@ -18,10 +18,8 @@ Reified separates four roles, each installable on its own:
 - `Reified.Refinements` constructs values whose types record successful checks.
 - `Reified.Schema` declares structured boundaries and accumulates path-aware failures.
 
-None of these depends on `Reified.Result`; every one of them returns the standard F# `Result`, so they compose
-with `Reified.Result`, with FsToolkit.ErrorHandling, or with your own helpers.
-
-Existing FsToolkit Result helpers can remain in an application. Both libraries use the standard F# `Result` type.
+None of these depends on `Reified.Result`; every one returns the standard F# `Result`. They compose with
+`Reified.Result`, existing FsToolkit helpers, or your own helpers.
 
 | FsToolkit pattern | Reified equivalent |
 | --- | --- |
