@@ -157,6 +157,19 @@ Parse.optionalOr 80 Parse.int (Some "bad")
 
 The fallback applies to omitted input, not malformed input.
 
+A present-but-blank string is a present input, so it parses (and fails) rather than taking the fallback. The
+primitive parsers treat empty or whitespace-only text as a missing value, not a format error:
+
+```fsharp
+Parse.optionalOr 80 Parse.int (Some "")
+// Error (MissingValue "int")
+
+Parse.optionalOr 80 Parse.int (Some "   ")
+// Error (MissingValue "int")
+```
+
+`Some ""` and `Some "   "` produce `MissingValue`, never `Ok 80`. Only `None` receives the fallback.
+
 ## Combined optional helpers
 
 Named helpers pair the common primitive parsers with `optional` and `optionalOr`; each preserves the error from

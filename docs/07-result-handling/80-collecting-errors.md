@@ -71,8 +71,16 @@ result.array {
 ```
 
 
-For any other container, map at the end, `Result.mapError Set.ofList`, `Result.mapError NonEmptyList.ofList`, and so
-on.
+For any other container, map at the end, `Result.mapError Set.ofList`, and so on. `NonEmptyList.ofList` (from
+`Reified.Refinements`) returns an option because the source list may be empty, so wrap it in a local total
+conversion rather than passing it straight to `mapError`:
+
+```fsharp
+open Reified.Refinements
+
+let errorsOr (fallback: NonEmptyList<'error>) (errors: 'error list) : NonEmptyList<'error> =
+    errors |> NonEmptyList.ofList |> Option.defaultValue fallback
+```
 
 ## `and!` accumulates; `let!` still fails fast
 

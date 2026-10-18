@@ -34,6 +34,7 @@ A Reified schema owns construction. Parsing either produces a trusted model or p
 intermediate invalid object:
 
 ```fsharp
+open Reified
 open Reified.SchemaDSL
 
 type Customer = { Name: string; Age: int }

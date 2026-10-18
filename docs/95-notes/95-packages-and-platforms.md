@@ -53,6 +53,26 @@ execution in a browser.
 A `netstandard2.1` target by itself does not imply JavaScript support. This list records the packages with a deliberate
 Fable surface and repository coverage to keep it working.
 
+### Compiling a Fable client
+
+`dotnet add package` installs the library; it does not compile your application to JavaScript. A Fable client
+references the package, then compiles and runs through Fable as usual:
+
+```sh
+# one-time tool install (or `dotnet tool restore` with a tool manifest)
+dotnet tool install fable
+
+# install the library and compile the project to an ESM output directory
+dotnet add package Reified.Schema
+dotnet fable src/Client/Client.fsproj --lang javascript --outDir js
+```
+
+Each `IsFableLibrary` package ships a `fable/package.json` marking its compiled modules `"sideEffects": false`, so a
+bundler (esbuild, Vite, webpack) drops the modules the front end never references. The output is ordinary ESM: import
+the compiled module and call the same functions the .NET side calls. The repository's Fable probe compiles the same
+surface with `dotnet fable … --lang javascript` and runs its assertions on Node; see
+[Compiler-Directed, AOT, and Fable](/notes/aot-trimming-fable.html#fable).
+
 ### Declaring fields under Fable
 
 Both field forms compile with Fable. `field` reads an F# quotation to derive the wire name, so it needs a target

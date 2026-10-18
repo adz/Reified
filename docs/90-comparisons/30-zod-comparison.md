@@ -12,6 +12,11 @@ get either a typed value or structured, path-aware issues. The differences come 
 
 ## The Same Moves
 
+Table entries on the right are shorthand for the complete declarations shown in
+[Schema quickstart](/schema/quickstart.html) and [Union schemas](/schema/union-schemas.html). `maxLength`,
+`constrain`, and `present` come from `Reified.ConstraintDSL`; `schema`, `field`, `construct`, and `Schema.union` come
+from `Reified.SchemaDSL`.
+
 | zod | Reified |
 | --- | --- |
 | `z.object({ name: z.string().max(80) })` | `schema<...> { field _.Name { constrain (maxLength 80) }; construct ctor }` |

@@ -86,6 +86,20 @@ probe surface:
 | Codec plus attached constraints | ~26 KB |
 | Codec plus a refined field type | ~30 KB |
 
+These are order-of-magnitude figures, not a guarantee. They were measured on the repository's Fable probe surface
+(`examples/Reified.FableProbe`), which pins Fable 5.13.0 in `.config/dotnet-tools.json`; the exact esbuild version
+and minify flags were not recorded, so reproduce the surface rather than matching a specific bundle byte count:
+
+```sh
+dotnet tool restore
+dotnet run --project tools/Reified.Build -- --target Fable
+# compiled ESM surface: artifacts/fable-js-surface
+# then bundle that directory with esbuild, minify, and gzip to compare
+```
+
+The decision that made the flag honest is recorded in the 2026-09-01 entry of
+[`dev-docs/decisions/README.md`](https://github.com/adz/Reified/blob/main/dev-docs/decisions/README.md).
+
 fable-library-js is additional and shared across everything on the page. The codec links its `Date`,
 `Guid`, and decimal support unconditionally; avoid `decimal` and `DateOnly`/`DateTimeOffset` fields in
 a browser model where payload size matters.
