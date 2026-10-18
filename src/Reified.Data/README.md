@@ -1,7 +1,7 @@
 # Reified.Data
 
-`Reified.Data` makes structured data concise to build, change, compare, and test. Its data model maps directly to JSON
-and also works well for fixtures, configuration, command-line input, form values, events, and other tree-shaped data.
+`Reified.Data` builds, patches, compares, and tests structured data. Its data model maps to JSON and supports fixtures,
+configuration, command-line input, form values, and events.
 
 ```fsharp
 open Reified.Data
@@ -36,7 +36,7 @@ promoted
 `matching` expression returns `unit` because every selected observation succeeds.
 
 `Data.Number` preserves its lexical token. `Data.Object` preserves field order and duplicate names. Exact comparison,
-patching, paths, and matching state their behavior rather than silently normalizing those distinctions.
+patching, paths, and matching preserve those distinctions.
 
 Install it with `dotnet add package Reified.Data`.
 
