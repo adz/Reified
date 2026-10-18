@@ -59,7 +59,7 @@ An empty field and a misspelled one can need different messages. `OutOfRange` id
 | `Parse.int` | `int` | Optionally signed digits, invariant culture. |
 | `Parse.long` | `int64` | As `int`, with the wider range. |
 | `Parse.decimal` | `decimal` | Digits with an optional sign, decimal point, and thousands separators, invariant culture. |
-| `Parse.float` | `float` | As `decimal`, plus exponent notation. |
+| `Parse.float` | `float` | Digits with an optional leading sign, decimal point, thousands separators, and exponent notation, invariant culture. |
 | `Parse.bool` | `bool` | `"true"` or `"false"`, any casing. Not `"1"`, `"yes"`, or `"on"`. |
 | `Parse.guid` | `System.Guid` | Any format `Guid.TryParse` accepts, including braced and hyphenless. |
 | `Parse.dateTime` | `System.DateTime` | Invariant-culture date and time text, such as `"2026-03-04T09:30:00"`. |
@@ -68,9 +68,9 @@ An empty field and a misspelled one can need different messages. `OutOfRange` id
 | `Parse.timeOnly` | `System.TimeOnly` | Invariant-culture time text. .NET 8+ only. |
 | `Parse.enum<'enum>` | `'enum` | A case name, case-insensitive, or its numeric text. |
 
-Every parser takes `string` and returns `Result<'value, ParseError>`. Numeric parsers use invariant culture: the same text parses the same way on every machine, and the decimal point is `.`, not `,`.
+Every parser takes `string` and returns `Result<'value, ParseError>`. Numeric parsers use invariant culture: the same text parses the same way on every machine, and the decimal point is `.`, not `,`. They also ignore leading and trailing whitespace; whitespace-only input is still `MissingValue`.
 
-Only the numeric parsers can produce `OutOfRange`; the others report `MissingValue` or `InvalidFormat`.
+Only `Parse.int`, `Parse.long`, and `Parse.decimal` can produce `OutOfRange`; every other parser reports `MissingValue` or `InvalidFormat`. `Parse.float` never reports `OutOfRange`: input beyond `float`'s range parses as `infinity` or `-infinity`, and input too close to zero parses as `0.0`.
 
 ## The three failures in practice
 
@@ -83,7 +83,7 @@ Parse.decimal ""
 Parse.decimal "19,95 AUD"
 // Error (InvalidFormat ("decimal", "19,95 AUD"))
 
-// Out of range: well-formed, but too large for the type.
+// Out of range: well-formed, but outside the type's range.
 Parse.int "2147483648"
 // Error (OutOfRange ("int", "2147483648"))
 ```
@@ -96,7 +96,7 @@ let describe error =
     match error with
     | MissingValue target -> $"Please supply a {target}."
     | InvalidFormat (_, input) -> $"'{input}' is not in the expected format."
-    | OutOfRange (_, input) -> $"'{input}' is too large."
+    | OutOfRange (_, input) -> $"'{input}' is out of range."
 ```
 
 
@@ -185,13 +185,18 @@ preserve the error from malformed present text.
 
 ## Parse, then refine
 
-Parsing changes representation; a constraint checks the typed value, and a refinement admits it into a domain type. Each step contributes its own error:
+Parsing changes representation; a refinement then admits the typed value into a domain type by checking a constraint. Here `Parse.int` converts text to `int`, and `Refinement.create positiveInt` admits it as a `PositiveInt`. Each step contributes its own error:
 
 ```fsharp
 open Reified
 open Reified.Refinements
 open Reified.Result
 open Reified.ResultDSL
+
+type PositiveInt = PositiveInt of int
+
+let positiveInt =
+    Refinement.define (Constraint.greaterThan 0) PositiveInt (fun (PositiveInt value) -> value)
 
 type QuantityError =
     | InvalidInteger of ParseError
@@ -200,7 +205,7 @@ type QuantityError =
 let quantity raw =
     result {
         let! parsed = Parse.int raw |> Result.mapError InvalidInteger
-        let! quantity = parsed |> Constraint.guard (Constraint.greaterThan 0) |> Result.mapError InvalidQuantity
+        let! quantity = parsed |> Refinement.create positiveInt |> Result.mapError InvalidQuantity
         return quantity
     }
 ```

@@ -14,7 +14,7 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 - `docs/07-result-handling/80-collecting-errors.md:112-127` — confirm how `result.list` distinguishes an already-collected `Result<_, SignupError list>` from a single-error binding, especially when inference has not fixed the error type; the flattening claim is important to copyable composition.
 
-- `docs/05-parsing/_index.md:61-73` — confirm whether invariant-culture thousands separators and exponent/overflow handling match the stated accepted forms across numeric parsers; the table reads as an exact grammar.
+- [fixed] `docs/05-parsing/_index.md:61-73` — confirm whether invariant-culture thousands separators and exponent/overflow handling match the stated accepted forms across numeric parsers; the table reads as an exact grammar.
 
 - [fixed] `docs/04-refined/20-catalog.md:88-90` — confirm the exact return types and out-of-range behavior of `skip`, `item`, `truncate`, and `map2`; the paragraph describes clamping and totality but then says `skip` returns an ordinary list.
 
@@ -60,8 +60,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - `docs/07-result-handling/80-collecting-errors.md:150-160` — the form supplies string `"12"` for an `int` field but the example does not show a text-to-int parser; clarify whether `Data.ofNameValues` plus `Schema.parse` converts it and show the actual diagnostic shape rather than a schematic comment.
 - `docs/07-result-handling/70-result-ce.md:132-146` — a `result` block illustrates filesystem I/O despite the section's description-only context; label it explicitly as host-owned illustrative code so readers do not infer this package opens readers.
 
-- `docs/05-parsing/_index.md:95-99` — `OutOfRange` also covers numbers too negative for the destination type; the sample message “too large” mislabels that case.
-- `docs/05-parsing/_index.md:186-206` — “a refinement admits it into a domain type” but `quantity` returns the guarded `int`, not a refined type. Either construct a refinement or describe this as parsing followed by a value check.
+- [fixed] `docs/05-parsing/_index.md:95-99` — `OutOfRange` also covers numbers too negative for the destination type; the sample message “too large” mislabels that case.
+- [fixed] `docs/05-parsing/_index.md:186-206` — “a refinement admits it into a domain type” but `quantity` returns the guarded `int`, not a refined type. Either construct a refinement or describe this as parsing followed by a value check.
 
 - [fixed] `docs/04-refined/60-tutorials/10-order-totals.md:40-58` — public `OrderLine` and `Order` records can be constructed with unchecked quantities, prices, or even default/null refined fields; “none of those facts ... can be false” and “rejected here and nowhere else” overstate the guarantee. Make the aggregate private or scope the claim to the shown constructor.
 - [fixed] `docs/04-refined/60-tutorials/10-order-totals.md:112-114` — payable cannot exceed subtotal only if subtotal is nonnegative; the public records permit negative prices, and decimal arithmetic may overflow. Qualify the claim or enforce the preconditions in the type.
