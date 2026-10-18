@@ -22,14 +22,18 @@ get either a typed value or structured, path-aware issues. The differences come 
 | `z.infer<typeof schema>` | not needed, the schema is declared against your record type directly |
 | `zod-to-json-schema` | `JsonSchema.generate` (in `Reified.Schema`, from the same metadata) |
 
-zod derives the static type from the schema; Reified declares the schema against a type
-you own. Your domain type stays an ordinary F# record with real members, and the compiler checks constructor/getter
-alignment field by field.
+zod derives the static type from the schema; Reified declares the schema against a type you own. Your domain type stays
+an ordinary F# record with real members, and each `field _.Property` declaration names one of those members as its
+getter. The computation expression tracks each field's type in declaration order, so the `construct` lambda's parameters
+are checked against the getters' types at compile time: a missing, extra, reordered, or mistyped parameter is a compile
+error, not a runtime failure.
 
 ## What Reified Adds Beyond Parsing
 
-- **Trusted-path serialization**: `Json.compile` turns the same declaration into a compiled JSON codec on par with
-  `System.Text.Json`, zod validates on the way in but does not own the way out.
+- **Trusted-path serialization**: `Json.compile` turns the same declaration into a compiled JSON codec measured against
+  `System.Text.Json` on a representative customer aggregate and a 24-field record: decoding was faster and serialization
+  roughly matched in local runs (see [Benchmarks](/notes/benchmarks.html) for the workload and versions). zod validates
+  on the way in but does not own the way out.
 - **Redisplay**: failed parses keep the structured data, so form fields re-render with the user's values next to their
   errors without extra state.
 - **Workflow policies**: environment-aware requirements over already-trusted models, applied per workflow.

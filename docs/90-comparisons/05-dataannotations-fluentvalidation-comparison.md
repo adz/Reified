@@ -81,10 +81,11 @@ concepts below are the price of the structured path, not of using a constraint a
 content with what attributes can express. Model binding, client-side validation, and the surrounding
 tooling all work out of the box. That integration is real and Reified does not replace it.
 
-**Its limits** are structural rather than incidental: attributes are declarations on properties, so a rule
-cannot be named, passed around, composed, or reused between two types that share a concept. Conditional and
-cross-field rules mean dropping to `IValidatableObject`. Messages are per-attribute strings or resource
-keys.
+**Its limits** are structural rather than incidental: an attribute is a declaration attached to a property, not a
+free-standing value. A reusable attribute class (including a custom one) can be applied to many properties, but each
+application is a separate declaration — there is no value your code can name, pass around, compose, or inspect at
+runtime. Conditional and cross-field rules mean dropping to `IValidatableObject`. Messages are per-attribute strings
+or resource keys.
 
 ## FluentValidation
 
@@ -92,10 +93,11 @@ keys.
 integration, async and DI-driven validators, and a team already fluent in it. Its ecosystem is far larger than Reified's.
 
 **Where it differs:** a rule belongs to a validator for a type, rather than being a free-standing value.
-Sharing "what a valid retry count is" between two types means sharing a validator or repeating the rule.
-Messages are attached per rule and localization is wired up separately, so both remain artefacts to
-maintain. And a validator is ultimately a set of delegates, so nothing downstream can read it to produce a
-JSON Schema or generate matching test data.
+FluentValidation can share rules through reusable validators and `Include`, but "what a valid retry count is" still
+lives in a validator — ultimately a set of delegates — not in a value your code can hold, pass around, or inspect.
+Messages are attached per rule and localization is wired up separately, so both remain artefacts to maintain. Because
+a validator is a set of delegates, nothing downstream can read it to produce a JSON Schema or generate matching test
+data.
 
 ## Validus
 
