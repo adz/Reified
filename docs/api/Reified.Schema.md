@@ -96,5 +96,4 @@ declared fields back from the value and checks them.
 The same model constructor runs again, so cross-field invariants are checked too. Success returns the checked value
 itself.
 
-The [Schema quickstart](/schema/quickstart.html) introduces the workflow. The member catalogue below is the complete
-construction and execution vocabulary.
+The [Schema quickstart](/schema/quickstart.html) introduces the workflow.

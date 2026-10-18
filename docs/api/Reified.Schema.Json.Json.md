@@ -40,5 +40,5 @@ serialize trusted models or deserialize JSON into the same field plan used by `S
 The codec is built from the explicit schema rather than runtime type inspection. It supports NativeAOT, trimming, and
 Fable, and it preserves schema paths in decoding failures.
 
-See [JSON Codecs](/schema/json-codecs.html) for streams, buffers, diagnostics, and the boundary between trusted codec
-decoding and untrusted `Data` parsing.
+See [JSON Codecs](/schema/json-codecs.html) for streams, buffers, diagnostics, and how trusted codec decoding differs
+from untrusted `Data` parsing.

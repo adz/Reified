@@ -6,10 +6,10 @@ value schemas, constraints, refinements, and the constructor that produces `'mod
 Parsing executes that declaration against untrusted `Data`. Every independent field is attempted, failures retain
 their paths, and the constructor runs only after all fields succeed. The result is either `'model` or `SchemaErrors`.
 
-Other interpreters read the same declaration without changing its meaning. `Inspect.model` returns finite metadata;
+Other interpreters read the same declaration. `Inspect.model` returns finite metadata;
 `JsonSchema.generate` publishes the enforceable wire shape; `Json.compile` builds a trusted JSON codec.
 
 A schema guarantees values produced through the schema. It cannot stop callers constructing a public record directly.
 Use refined fields or a private model when the invariant must hold for every value of the type.
 
-The [Schema quickstart](/schema/quickstart.html) introduces schema composition; the members below provide the complete surface.
+The [Schema quickstart](/schema/quickstart.html) introduces schema composition.
