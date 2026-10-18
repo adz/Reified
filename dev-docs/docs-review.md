@@ -103,54 +103,54 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 ## Too long
 
-- `docs/api/Reified.Schema.md:7-54` — the package entity inventory is extensive front matter rather than introductory prose; if surfaced to readers or LLMs, offer a short task-based index and leave the exhaustive entity list to generated navigation.
+- [done] `docs/api/Reified.Schema.md:7-54` — the package entity inventory is extensive front matter rather than introductory prose; if surfaced to readers or LLMs, offer a short task-based index and leave the exhaustive entity list to generated navigation.
 
-- `docs/95-notes/95-packages-and-platforms.md:54-67` and `docs/95-notes/82-aot-trimming-fable.md:92-116` — repeat the same Fable quotation target/version table and `field`/`fieldAs` example; keep detailed compatibility in one page and link it from the package inventory.
+- [done] `docs/95-notes/95-packages-and-platforms.md:54-67` and `docs/95-notes/82-aot-trimming-fable.md:92-116` — repeat the same Fable quotation target/version table and `field`/`fieldAs` example; keep detailed compatibility in one page and link it from the package inventory.
 
-- `docs/90-comparisons/05-dataannotations-fluentvalidation-comparison.md:64-76,108-120` — repeats the same `Constraint.guard Constraint.email` example twice with only error mapping changed. Show both mappings together once.
-- `docs/90-comparisons/05-dataannotations-fluentvalidation-comparison.md:77-120` and `docs/90-comparisons/20-fluentvalidation-comparison.md:8-89` — two FluentValidation comparisons repeat the rules-as-data argument; link the focused Schema comparison from the Constraint comparison and keep their different scopes explicit.
+- [done] `docs/90-comparisons/05-dataannotations-fluentvalidation-comparison.md:64-76,108-120` — repeats the same `Constraint.guard Constraint.email` example twice with only error mapping changed. Show both mappings together once.
+- [done] `docs/90-comparisons/05-dataannotations-fluentvalidation-comparison.md:77-120` and `docs/90-comparisons/20-fluentvalidation-comparison.md:8-89` — two FluentValidation comparisons repeat the rules-as-data argument; link the focused Schema comparison from the Constraint comparison and keep their different scopes explicit.
 
-- `docs/07-result-handling/70-result-ce.md:72-128` — repeats the binding example with explicit types and then a second failure demonstration; one typed annotation and one failure example would teach the same behavior with less repetition.
+- [done] `docs/07-result-handling/70-result-ce.md:72-128` — repeats the binding example with explicit types and then a second failure demonstration; one typed annotation and one failure example would teach the same behavior with less repetition.
 
-- `docs/05-parsing/_index.md:130-184` — generic optional/defaulting helpers and named wrappers repeat the same absence-versus-malformed rule and examples; condense the wrappers to a short list or table.
+- [done] `docs/05-parsing/_index.md:130-184` — generic optional/defaulting helpers and named wrappers repeat the same absence-versus-malformed rule and examples; condense the wrappers to a short list or table.
 
-- `docs/03-constraints/21-constraint.md:53-85,140-191` — the same DSL/module/type-directed-binding introduction appears twice on the core type page and again in `dsl.md`. Keep one small example here and direct readers to the DSL guide for details.
+- [done] `docs/03-constraints/21-constraint.md:53-85,140-191` — the same DSL/module/type-directed-binding introduction appears twice on the core type page and again in `dsl.md`. Keep one small example here and direct readers to the DSL guide for details.
 
 
-- `docs/01-getting-started/_index.md:137-232` — after the complete Signup walkthrough, the page restarts with a problem statement, a standalone constraint, a refinement, and another schema. Consider retaining one short conceptual contrast here and linking to focused guides for the second set of examples.
+- [done] `docs/01-getting-started/_index.md:137-232` — after the complete Signup walkthrough, the page restarts with a problem statement, a standalone constraint, a refinement, and another schema. Consider retaining one short conceptual contrast here and linking to focused guides for the second set of examples.
 
-- `docs/02-schema/01-quickstart.md` spans plain parsing, refined types, constraints, private aggregates, drafts, updates, and JSON Schema. Keep “First schema and parse” and “Read failures” here; move refined fields to “Refined fields in Schema,” field constraints to “Boundary-specific field rules,” and private Booking/draft/update flow to “Construction guarantees.”
-- `docs/02-schema/65-versioned-contracts.md` mixes the manual contract workflow and a long generator evolution tutorial. Split into “Handwritten versioned contracts” and “Generated version series: freezing and migrating.”
-- `docs/02-schema/85-examples.md` embeds entire example program files. Replace with a short explanation, link to runnable source, and focused relevant excerpts; keep the complete program at the linked location.
+- [done] `docs/02-schema/01-quickstart.md` spans plain parsing, refined types, constraints, private aggregates, drafts, updates, and JSON Schema. Keep “First schema and parse” and “Read failures” here; move refined fields to “Refined fields in Schema,” field constraints to “Boundary-specific field rules,” and private Booking/draft/update flow to “Construction guarantees.”
+- [done] `docs/02-schema/65-versioned-contracts.md` mixes the manual contract workflow and a long generator evolution tutorial. Split into “Handwritten versioned contracts” and “Generated version series: freezing and migrating.”
+- [done] `docs/02-schema/85-examples.md` embeds entire example program files. Replace with a short explanation, link to runnable source, and focused relevant excerpts; keep the complete program at the linked location.
 
-- `docs/06-data/_index.md:106-140` and `docs/06-data/20-declaring-and-editing.md:73-114` repeat the same control-flow fixture and output. Keep the full example in the focused page and shorten the landing-page example.
+- [done] `docs/06-data/_index.md:106-140` and `docs/06-data/20-declaring-and-editing.md:73-114` repeat the same control-flow fixture and output. Keep the full example in the focused page and shorten the landing-page example.
 
 ## Reference material in guides
 
-- `docs/api/Reified.Schema.Json.Json.md:11-26` — the front matter already inventories serialize/deserialize variants; add an API-facing comparison of input, output, and failure behavior for `deserialize`, `tryDeserialize`, and `parseData`, rather than leaving this distinction solely to the linked guide.
+- [done] `docs/api/Reified.Schema.Json.Json.md:11-26` — the front matter already inventories serialize/deserialize variants; add an API-facing comparison of input, output, and failure behavior for `deserialize`, `tryDeserialize`, and `parseData`, rather than leaving this distinction solely to the linked guide.
 
-- `docs/95-notes/95-packages-and-platforms.md:42-49,74-78` — package/install and tooling availability tables are useful reference material; keep them in Notes as the central install inventory and link them from guides rather than repeating setup lists.
+- [done] `docs/95-notes/95-packages-and-platforms.md:42-49,74-78` — package/install and tooling availability tables are useful reference material; keep them in Notes as the central install inventory and link them from guides rather than repeating setup lists.
 
-- `docs/90-comparisons/90-fstoolkit-comparison.md:24-32` — the API-equivalence table is useful as a comparison quick reference; keep it here rather than duplicating it across Result guides, and link the Result reference for precise signatures.
+- [done] `docs/90-comparisons/90-fstoolkit-comparison.md:24-32` — the API-equivalence table is useful as a comparison quick reference; keep it here rather than duplicating it across Result guides, and link the Result reference for precise signatures.
 
-- `docs/07-result-handling/50-collections.md:103-112` — the four complete traversal signatures are reference-shaped; keep the list-output warning here and link the signatures from the API reference.
+- [done] `docs/07-result-handling/50-collections.md:103-112` — the four complete traversal signatures are reference-shaped; keep the list-output warning here and link the signatures from the API reference.
 
-- `docs/05-parsing/_index.md:56-69` — the exhaustive parser/accepted-form table is useful reference material; consider keeping a smaller selection in the walkthrough and linking the complete list from the Parse API reference.
+- [done] `docs/05-parsing/_index.md:56-69` — the exhaustive parser/accepted-form table is useful reference material; consider keeping a smaller selection in the walkthrough and linking the complete list from the Parse API reference.
 
-- `docs/03-constraints/40-localization/40-catalogue.md:14-95` — the exhaustive key/argument/default-English tables are reference data (also exposed by `Catalogue.keys`/maps); keep the runtime maps discoverable and consider placing the tables beside the catalogue API reference rather than in the localization walkthrough.
+- [done] `docs/03-constraints/40-localization/40-catalogue.md:14-95` — the exhaustive key/argument/default-English tables are reference data (also exposed by `Catalogue.keys`/maps); keep the runtime maps discoverable and consider placing the tables beside the catalogue API reference rather than in the localization walkthrough.
 
 
-- `docs/01-getting-started/02-what-a-schema-gives-you.md:37-45` — the seven-API inventory is useful orientation, not an exhaustive reference; keep it here, but link the `SchemaGen` entry directly to its own usage/reference page rather than only the generic Data section at line 152.
+- [done] `docs/01-getting-started/02-what-a-schema-gives-you.md:37-45` — the seven-API inventory is useful orientation, not an exhaustive reference; keep it here, but link the `SchemaGen` entry directly to its own usage/reference page rather than only the generic Data section at line 152.
 
-- `docs/02-schema/20-dsl.md`, “Constraint equivalents”: move the operation/attribute mapping to `docs/api/Reified.Schema.md` front matter (and retain a short link to Derivation Attributes).
-- `docs/02-schema/46-advanced-union-handling.md`, “Ready-made compatibility formats” and “Build a representation directly”: move exhaustive `UnionRepresentations`/`UnionPayloadStyle` options to their API entity reference enrichment; keep one compatibility recipe in the guide.
-- `docs/02-schema/60-derivation/10-msbuild.md`, “MSBuild properties”: put the exhaustive build-property defaults in the build tooling reference; keep installation and a link in the guide.
-- `docs/02-schema/60-derivation/20-attributes.md`, attribute tables: this is already a reference-shaped page; consider reference enrichment for the derivation attribute entities rather than repeating the tables in tutorial pages.
-- `docs/02-schema/65-versioned-contracts.md`, “Version sources”: move the exhaustive `VersionSource` case list to `docs/api/Reified.Contract.md`; keep one example per use case.
-- `docs/02-schema/30-redisplay-and-field-errors.md`, “The Schema catalogue”: move exhaustive message-key/argument/default table to the appropriate Schema error API reference front matter.
+- [done] `docs/02-schema/20-dsl.md`, “Constraint equivalents”: move the operation/attribute mapping to `docs/api/Reified.Schema.md` front matter (and retain a short link to Derivation Attributes).
+- [done] `docs/02-schema/46-advanced-union-handling.md`, “Ready-made compatibility formats” and “Build a representation directly”: move exhaustive `UnionRepresentations`/`UnionPayloadStyle` options to their API entity reference enrichment; keep one compatibility recipe in the guide.
+- [done] `docs/02-schema/60-derivation/10-msbuild.md`, “MSBuild properties” — no API entity exists for MSBuild properties; the page remains the build tooling reference.: put the exhaustive build-property defaults in the build tooling reference; keep installation and a link in the guide.
+- [done] `docs/02-schema/60-derivation/20-attributes.md`, attribute tables — already a reference-shaped page; no tutorial page repeats the tables.: this is already a reference-shaped page; consider reference enrichment for the derivation attribute entities rather than repeating the tables in tutorial pages.
+- [done] `docs/02-schema/65-versioned-contracts.md`, “Version sources”: move the exhaustive `VersionSource` case list to `docs/api/Reified.Contract.md`; keep one example per use case.
+- [done] `docs/02-schema/30-redisplay-and-field-errors.md`, “The Schema catalogue”: move exhaustive message-key/argument/default table to the appropriate Schema error API reference front matter.
 
-- `docs/06-data/18-dsl.md:81-118` — the complete DSL name and edit mapping tables are reference-shaped; keep a short comparison example here and link the exhaustive vocabulary from the API reference.
-- `docs/06-data/21-how-to-test-produced-json.md:169-199` — the complete pattern inventory and return-type summary belong beside the matching API reference; retain a few representative patterns in the walkthrough.
+- [done] `docs/06-data/18-dsl.md:81-118` — the complete DSL name and edit mapping tables are reference-shaped; keep a short comparison example here and link the exhaustive vocabulary from the API reference.
+- [done] `docs/06-data/21-how-to-test-produced-json.md:169-199` — the complete pattern inventory and return-type summary belong beside the matching API reference; retain a few representative patterns in the walkthrough.
 
 ## Missing
 
