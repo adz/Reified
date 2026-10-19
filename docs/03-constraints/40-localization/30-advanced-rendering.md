@@ -164,15 +164,32 @@ resolver.
 
 `Renderer.ofLookup` owns the entire candidate order and asks a plain lookup for exact keys. When your localization
 system wants to select plural categories and render entries itself, ICU, for instance, take a resolver instead.
-It receives one request per contextual level:
+It receives one `MessageRequest` per contextual level. `MessageRequest` is the real public type from `Reified`; it
+carries the encoded contextual `BaseKey` (no plural suffix applied), the interpolation `Arguments`, and the
+`PluralArgument` when the owning catalogue declares one. Do not redeclare it.
 
-```fsharp no-check reason="icu is the host application's own ICU-backed resolver, the library many applications use for language-specific plural rules (Arabic has six categories, not two); not a value this page can construct standalone."
-type MessageRequest =
-    { BaseKey: string                              // encoded contextual key, no plural suffix
-      Arguments: Map<string, ConstraintValue>
-      PluralArgument: string option }
+A dictionary-backed resolver is a runnable starting point:
+
+```fsharp
+open Reified
+
+let translations =
+    Map.ofList
+        [ "constraint.relation.atLeast", "must be at least {expected}"
+          "constraint.attribute.default", "value"
+          "constraint.actual", "{message}, but was {actual}" ]
 
 let renderer =
+    Renderer.Advanced.ofResolver (fun request ->
+        translations.TryFind request.BaseKey
+        |> Option.map MessageResolution.Template)
+```
+
+An ICU-backed host resolver has the same shape; `icu` below is the host application's own library, not a Reified
+value:
+
+```fsharp no-check reason="icu is the host application's own ICU-backed resolver, the library many applications use for language-specific plural rules (Arabic has six categories, not two); not a value this page can construct standalone."
+let icuRenderer =
     Renderer.Advanced.ofResolver (fun request ->
         match icu.TryGet request.BaseKey with
         | Some entry -> Some (MessageResolution.Rendered (entry.Format request.Arguments))

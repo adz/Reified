@@ -113,9 +113,11 @@ module CustomerId =
 ```
 
 
-Both work because the invariant is a fact about the value, not about the moment of
-construction, and neither involves arithmetic, which is where F# stops being able to
-carry the invariant for you. If no such operation applies, use a constraint instead.
+Both are total because ids are distinct and ordered, which is true of any comparable key — `index` and `range`
+would work for `0` too. What positivity buys is elsewhere: a `0` account number is a bug the boundary can reject
+once, and `loadCustomer` hands `id.Value` to a lookup without a guard. Neither operation involves arithmetic, which
+is where F# stops being able to carry the invariant for you. If a candidate type buys neither a total operation nor
+a removed branch, use a constraint instead.
 
 ## Use it in domain code
 

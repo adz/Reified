@@ -23,7 +23,7 @@ type BadgeError =
     | NameTooShort
     | NameTooLong
 
-/// A badge name must print on one line: 3 to 40 characters.
+/// A badge name must be 3 to 40 characters.
 let validateBadgeName (name: string) : Result<string, BadgeError> =
     name
     |> Constraint.guard (minLength 3)

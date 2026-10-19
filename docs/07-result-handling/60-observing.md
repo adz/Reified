@@ -74,6 +74,9 @@ let handleSignup raw =
     |> Result.map buildAccount
 ```
 
+`failure` can be `AgeNotANumber raw`, which keeps the caller's text verbatim, so `logger.Warning(..., failure)` writes
+that raw input out as-is. "Total" here means the callback never throws, not that its payload is safe to persist: when
+a field may hold secrets, credentials, or personal data, redact the failure before logging it.
 
 Keep the effect small and total. An effect that throws will propagate out of `tap`, which defeats the purpose of
 working in `Result`, and because the exception escapes mid-pipeline, the result you were carrying is lost.

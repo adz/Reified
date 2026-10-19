@@ -146,5 +146,7 @@ let createProductRequest rawId rawSlug rawDisplayName rawTags rawQuantity rawCon
 
 
 let run () =
-    createProductRequest "1" "product" "Product" [ "featured" ] "2" "ada@example.com" "SKU-1" "5" "12.50" "10" DateTimeOffset.UtcNow DateTimeOffset.UtcNow
+    let publishStart = DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero)
+    let publishEnd = DateTimeOffset(2026, 12, 31, 0, 0, 0, TimeSpan.Zero)
+    createProductRequest "1" "product" "Product" [ "featured" ] "2" "ada@example.com" "SKU-1" "5" "12.50" "10" publishStart publishEnd
     |> printfn "Refined catalog: %A"

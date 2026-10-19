@@ -50,7 +50,9 @@ type ParseError =
 | `OutOfRange (target, input)` | Text spells a well-formed number the destination type cannot hold. | `Parse.int "99999999999"` → `OutOfRange ("int", "99999999999")` |
 
 `target` names the destination type, `"int"`, `"bool"`, `"decimal"`, `"Guid"`, so a caller can tell which conversion
-failed without tracking it separately. `input` is the offending text, retained for redisplay.
+failed without tracking it separately. `input` is the offending text, retained for redisplay. It is raw: a token, an
+identifier, or a password fragment can end up inside a `ParseError`. When a boundary logs, returns, or stores the
+error, redact `input` first unless you have decided the text is safe to keep.
 
 An empty field and a misspelled one can need different messages. `OutOfRange` identifies a well-formed number outside the destination type's range, either too large or too small: `Parse.int "-2147483649"` reports `OutOfRange ("int", "-2147483649")`.
 

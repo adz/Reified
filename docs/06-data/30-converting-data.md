@@ -217,7 +217,8 @@ Start from [the smallest schema](/schema/quickstart.html) if you have not declar
 ## Read values from Data
 
 Use paths to retrieve nested data. `tryFindPath` returns `None` for a missing path; `lookupPath` returns `Data.Null`.
-The parsed-path equivalents are `tryFind` and `lookup`.
+The parsed-path equivalents are `tryFind` and `lookup`. Prefer `tryFindPath` at a boundary that must distinguish a
+missing path from an explicit `Data.Null`; `lookupPath` collapses the two.
 
 ```fsharp
 let nestedValue = data [ "customer" => [ "name" => "Ada" ] ]

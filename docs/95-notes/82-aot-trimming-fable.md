@@ -52,8 +52,11 @@ instantiations are finite; code with unbounded generic recursion is expanded fur
 a larger record, raise `ReifiedIlcGenericCycle` and `ReifiedIlcGenericCycleBreadth`; to manage the limits yourself,
 set `ReifiedRaiseIlcGenericCycleLimits` to `false` and pass your own `IlcArg` items.
 
-A project that references the Reified sources through a `ProjectReference` does not receive package build assets;
-import `src/Reified.Schema/buildTransitive/Reified.Schema.props` directly.
+An installed application gets these limits from the published NuGet package automatically and needs no setup.
+Only a project that references the Reified sources directly through a `ProjectReference` — the repository's own
+tests and examples — does not receive package build assets; that repo-local case imports
+`src/Reified.Schema/buildTransitive/Reified.Schema.props` directly, a relative path that exists only inside this
+repository. Do not copy that import into an application that installed the package.
 
 ## Fable
 

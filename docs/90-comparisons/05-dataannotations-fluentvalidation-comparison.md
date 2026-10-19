@@ -65,14 +65,25 @@ pretending otherwise.
 If you only need to answer "is this valid?", inspectability buys you nothing but costs nothing either. A constraint used that way is still one line, and you never have to see a `Violation`. Both mappings live in one place: discard the
 violation with `Result.orError`, or keep its facts with `Result.mapError`:
 
-```fsharp no-check reason="raw and InvalidEmail are the caller's own binding and error case; not values this page can construct standalone."
-raw
-|> Constraint.guard Constraint.email
-|> Result.orError InvalidEmail          // InvalidEmail, violation dropped
+```fsharp
+open Reified
+open Reified.Result
 
-raw
-|> Constraint.guard Constraint.email
-|> Result.mapError InvalidEmail         // InvalidEmail of Violation, facts kept
+type SignupError =
+    | EmailRejected
+    | InvalidEmail of Violation
+
+// Discard the Violation and keep only the application error case.
+let emailOr (raw: string) : Result<string, SignupError> =
+    raw
+    |> Constraint.guard Constraint.email
+    |> Result.orError EmailRejected          // EmailRejected, violation dropped
+
+// Keep the Violation's facts for rendering or redisplay.
+let emailWithFacts (raw: string) : Result<string, SignupError> =
+    raw
+    |> Constraint.guard Constraint.email
+    |> Result.mapError InvalidEmail          // InvalidEmail of Violation, facts kept
 ```
 
 

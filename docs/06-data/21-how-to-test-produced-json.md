@@ -142,7 +142,10 @@ Data.tryMatch [ at "roles" (containingItems [ "admin"; "admin" ]) ] actual
 ```fsharp
 let positiveNumber =
     satisfying "a positive number token" (function
-        | Data.Number token -> decimal token > 0m
+        | Data.Number token ->
+            match System.Decimal.TryParse(token, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture) with
+            | true, value -> value > 0m
+            | false, _ -> false
         | _ -> false)
 
 actual
@@ -150,6 +153,10 @@ actual
     at "total" positiveNumber
 ]
 ```
+
+
+Use `System.Decimal.TryParse` rather than F#'s `decimal` conversion here: a syntactically valid JSON number token such
+as `1e999999` is outside `decimal`'s range, and the conversion would throw instead of reporting a mismatch.
 
 
 The description appears in mismatch output, so use wording that explains the failed requirement.

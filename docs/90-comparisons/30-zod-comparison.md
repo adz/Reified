@@ -48,10 +48,37 @@ error, not a runtime failure.
 - **No reflection**: Reified schemas are explicit declarations compiled into plans; nothing depends on runtime type
   inspection, so NativeAOT and aggressive trimming work by construction.
 - **Fable**: the schema core, including its `Json` codecs, compiles to JavaScript through Fable, so the browser and the
-  server can share one declaration, encode and decode included, the role zod plays across the TypeScript stack.
+  server can share one declaration, encode and decode included, the role zod plays across the TypeScript stack. See
+  [Compiler-Directed, AOT, and Fable](/notes/aot-trimming-fable.html#derived-wire-names-under-fable) for the
+  supported targets.
 - **Errors are values with rendering**: `SchemaError` is a typed union with a default English renderer
   (`RetainedParseResult.renderErrors`) and a one-function mapping into your own error union (`Result.mapError` over
   `parsed.Result`), rather than a bag of issue objects.
+
+`Schema.parseRetainingInput` produces the retained parse result those one-liners name:
+
+```fsharp
+open Reified
+open Reified.SchemaDSL
+open Reified.ConstraintDSL
+
+type Signup = { Email: string; Age: int }
+
+let signupSchema =
+    schema<Signup> {
+        field _.Email { constrain email }
+        field _.Age { constrain (atLeast 13) }
+        construct (fun email age -> { Email = email; Age = age })
+    }
+
+let parsed =
+    Schema.parseRetainingInput signupSchema
+        (Data.ofNameValues [ "email", "ada@example.com"; "age", "12" ])
+
+parsed.IsValid                     // false
+RetainedParseResult.renderErrors parsed
+// [ "age: Expected a value at least 13, but was 12." ]
+```
 
 ## Where zod Fits Better
 

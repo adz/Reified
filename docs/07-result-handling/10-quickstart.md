@@ -60,15 +60,37 @@ Each failure maps to the application error type at its bind site.
 
 `let!` fails fast; `and!` accumulates. The choice depends on the binding syntax:
 
-```fsharp no-check reason="input/parseName/parseAge are the caller's own structured input and parsing functions; not ones this fragment can construct standalone."
-result.list {
-    let! name = parseName input.Name
-    and! age  = parseAge input.Age
-    return name, age
-}
-// Error [ NameMissing; AgeNotANumber "x" ]
+```fsharp
+open System
+open Reified.Result
+open Reified.ResultDSL
+
+type SignupError =
+    | NameMissing
+    | AgeNotANumber of string
+
+type Signup = { Name: string; Age: int }
+
+let parseName (name: string) : Result<string, SignupError> =
+    if String.IsNullOrEmpty name then Error NameMissing else Ok name
+
+let parseAge (age: string) : Result<int, SignupError> =
+    match Int32.TryParse age with
+    | true, value -> Ok value
+    | false, _ -> Error(AgeNotANumber age)
+
+let signupAll name age =
+    result.list {
+        let! name = parseName name
+        and! age = parseAge age
+        return { Name = name; Age = age }
+    }
 ```
 
+```fsharp
+signupAll "Ada" "36"   // Ok { Name = "Ada"; Age = 36 }
+signupAll "" "abc"     // Error [ NameMissing; AgeNotANumber "abc" ]
+```
 
 Everything inside one `and!` group is accumulated into a list. A later `let!` binds sequentially and fails fast, because
 it can depend on the earlier results. See [Collecting every error](/result-handling/collecting-errors.html) for the exact boundary.

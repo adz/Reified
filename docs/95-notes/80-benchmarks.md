@@ -129,6 +129,10 @@ Reified's codec is compiled once from the schema and does not do less serializat
 Treat serialization as **competitive** with `System.Text.Json`;
 the measured decoding advantage narrows on newer .NET.
 
+These figures are trusted-codec measurements. They do not include the cost of admitting untrusted input, which adds
+`Data` construction and constraint checking and is reported separately in
+[Boundary parsing](#boundary-parsing).
+
 Measured 2026-09-29 with BenchmarkDotNet's `medium` job (15 iterations, 2 launches, 10 warmups) against
 `ReifiedBenchmarks.Schema.JsonCodecBenchmarks`, the same customer aggregate as the table above, on an otherwise
 idle machine. See [`dev-docs/BenchmarkProcess.md`](https://github.com/adz/Reified/blob/main/dev-docs/BenchmarkProcess.md)

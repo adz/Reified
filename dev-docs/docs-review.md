@@ -194,36 +194,36 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 ## Suggestions for humans and LLMs
 
-- `docs/api/Reified.Contract.md:4-9` — show a small `Contract.parse` result match including version, parse, and migration failures, so assistants do not treat the three prose outcomes as an exhaustive union.
-- `docs/api/Reified.Schema`1.md:9-10` — pair the interpreter names with a compact trust/enforcement table: inspection describes, JSON Schema exports portable rules, and trusted codec decoding does not admit untrusted values.
+- [done] `docs/api/Reified.Contract.md:4-9` — show a small `Contract.parse` result match including version, parse, and migration failures, so assistants do not treat the three prose outcomes as an exhaustive union.
+- [done] `docs/api/Reified.Schema`1.md:9-10` — pair the interpreter names with a compact trust/enforcement table: inspection describes, JSON Schema exports portable rules, and trusted codec decoding does not admit untrusted values.
 
-- `docs/95-notes/80-benchmarks.md:31-46,126-152` — put a short “which path to benchmark” reminder beside the multi-runtime comparison: its trusted codec figures do not measure untrusted boundary admission, whose costs are reported separately at lines 60-79.
-- `docs/95-notes/82-aot-trimming-fable.md:40-55` — separate published-package advice from the repo-only `ProjectReference` props path; an assistant copying the latter into an installed application will point at a nonexistent local file.
+- [done] `docs/95-notes/80-benchmarks.md:31-46,126-152` — put a short "which path to benchmark" reminder beside the multi-runtime comparison: its trusted codec figures do not measure untrusted boundary admission, whose costs are reported separately at lines 60-79.
+- [done] `docs/95-notes/82-aot-trimming-fable.md:40-55` — separate published-package advice from the repo-only `ProjectReference` props path; an assistant copying the latter into an installed application will point at a nonexistent local file.
 
-- `docs/90-comparisons/05-dataannotations-fluentvalidation-comparison.md:67-75,114-118` — both email snippets are marked `no-check` and omit the caller's error union; provide one complete example of `InvalidEmail` with and without a `Violation` so assistants do not invent its shape.
-- `docs/90-comparisons/30-zod-comparison.md:39-45` — link supported Fable targets and a complete `RetainedParseResult` example; the one-line API names do not show how to obtain a retained parse result.
+- [done] `docs/90-comparisons/05-dataannotations-fluentvalidation-comparison.md:67-75,114-118` — both email snippets are marked `no-check` and omit the caller's error union; provide one complete example of `InvalidEmail` with and without a `Violation` so assistants do not invent its shape.
+- [done] `docs/90-comparisons/30-zod-comparison.md:39-45` — link supported Fable targets and a complete `RetainedParseResult` example; the one-line API names do not show how to obtain a retained parse result.
 
-- `docs/07-result-handling/60-observing.md:70-79` — the logging example includes raw `AgeNotANumber of string`; advise redacting sensitive raw input before logging, even when the callback itself is total.
-- `docs/07-result-handling/10-quickstart.md:63-69` — the first accumulation example is a no-check fragment with undefined functions; use the complete `signupAll` example from the collecting-errors page or mark the displayed output explicitly as illustrative for copy/paste readers.
+- [done] `docs/07-result-handling/60-observing.md:70-79` — the logging example includes raw `AgeNotANumber of string`; advise redacting sensitive raw input before logging, even when the callback itself is total.
+- [done] `docs/07-result-handling/10-quickstart.md:63-69` — the first accumulation example is a no-check fragment with undefined functions; use the complete `signupAll` example from the collecting-errors page or mark the displayed output explicitly as illustrative for copy/paste readers.
 
-- `docs/05-parsing/_index.md:50-51` — warn that `ParseError` retains raw input, which may be sensitive; avoid logging or returning it verbatim without considering redaction.
+- [done] `docs/05-parsing/_index.md:50-51` — warn that `ParseError` retains raw input, which may be sensitive; avoid logging or returning it verbatim without considering redaction.
 
-- `docs/04-refined/60-tutorials/20-customer-id.md:108-115` — `index` and `range` work for any comparable key, including zero; identify which operation specifically relies on positivity, or present `CustomerId` as nominal identity rather than proof that positive numeric wrappers earn their keep.
+- [done] `docs/04-refined/60-tutorials/20-customer-id.md:108-115` — `index` and `range` work for any comparable key, including zero; identify which operation specifically relies on positivity, or present `CustomerId` as nominal identity rather than proof that positive numeric wrappers earn their keep.
 
-- `docs/03-constraints/60-reference-app.md:39-45` — “must print on one line” is not enforced by the length-only checks shown; remove that claim or add a newline rule, so copied validation does what its comment promises.
-- `docs/03-constraints/40-localization/30-advanced-rendering.md:169-180` — the `MessageRequest` type sketch and host-owned `icu` in a `no-check` block look like an API declaration plus runnable resolver. Label the type as illustrative and show a concrete `Map`-based resolver separately for readers copying code.
+- [done] `docs/03-constraints/60-reference-app.md:39-45` — "must print on one line" is not enforced by the length-only checks shown; remove that claim or add a newline rule, so copied validation does what its comment promises.
+- [done] `docs/03-constraints/40-localization/30-advanced-rendering.md:169-180` — the `MessageRequest` type sketch and host-owned `icu` in a `no-check` block look like an API declaration plus runnable resolver. Label the type as illustrative and show a concrete `Map`-based resolver separately for readers copying code.
 
 
-- `docs/02-schema/85-examples.md:147-148` — the mirrored example invokes `DateTimeOffset.UtcNow` twice for a publish interval. Use fixed endpoints in teaching examples so copied examples are deterministic and the interval is unambiguous.
+- [done] `docs/02-schema/85-examples.md:147-148` — the mirrored example invokes `DateTimeOffset.UtcNow` twice for a publish interval. Use fixed endpoints in teaching examples so copied examples are deterministic and the interval is unambiguous. (Page now links to the source; the `UtcNow` call lived in `examples/Reified.Schema.Examples/RefinedCatalogExample.fs`, now fixed there.)
 
-- `docs/01-getting-started/03-where-to-go-next.md:10` — the page has both a front-matter title and an explicit H1, unlike its sibling pages; use the same heading convention throughout Getting Started to avoid duplicate titles in rendered navigation.
+- [done] `docs/01-getting-started/03-where-to-go-next.md:10` — the page has both a front-matter title and an explicit H1, unlike its sibling pages; use the same heading convention throughout Getting Started to avoid duplicate titles in rendered navigation.
 
-- `docs/06-data/21-how-to-test-produced-json.md:140-158` — `decimal token` in a `satisfying` predicate can throw for a syntactically valid JSON number outside decimal range; use a safe parse so a mismatch is reported instead of an exception.
-- `docs/06-data/50-testing-schema-guarantees.md:10-11,26-34` — the copyable `SchemaGen` sample imports an unpublished repository-only namespace. Provide an actual application-local adapter recipe or label this as an internal-only illustration rather than an available public API.
-- `docs/06-data/30-converting-data.md:204-215` — `lookupPath` maps missing paths to `Data.Null`, collapsing absence and explicit null; prefer `tryFindPath` when a boundary must distinguish them.
+- [done] `docs/06-data/21-how-to-test-produced-json.md:140-158` — `decimal token` in a `satisfying` predicate can throw for a syntactically valid JSON number outside decimal range; use a safe parse so a mismatch is reported instead of an exception.
+- [done] `docs/06-data/50-testing-schema-guarantees.md:10-11,26-34` — the copyable `SchemaGen` sample imports an unpublished repository-only namespace. Provide an actual application-local adapter recipe or label this as an internal-only illustration rather than an available public API. (Resolved: the page now installs and imports the published `Reified.Schema.Testing` package, 0.11.0.)
+- [done] `docs/06-data/30-converting-data.md:204-215` — `lookupPath` maps missing paths to `Data.Null`, collapsing absence and explicit null; prefer `tryFindPath` when a boundary must distinguish them.
 
-- Keep `llms.txt` as a task router, but reconcile its asserted navigation order with the visible section ordering; add a short API-selection decision table and explicit trust-boundary warning.
-- Put actual F# return types and failure types immediately beside every first-use API example; avoid pseudo-output that resembles executable code without showing its setup.
-- Link every performance claim to a specific workload and runtime/version, and mark relative results as benchmark-specific rather than general guarantees.
-- Make examples consistently self-contained or label them explicitly as fragments; use the same Signup/Booking model across adjacent pages only when rules and expected output really agree.
-- Add “verified by docs build” versus “illustrative pseudocode” metadata to examples so coding assistants do not copy placeholders as runnable F#.
+- [proposal] Keep `llms.txt` as a task router, but reconcile its asserted navigation order with the visible section ordering; add a short API-selection decision table and explicit trust-boundary warning. (The trust-boundary warning and API disambiguation table already exist; the navigation-order reconciliation needs owner direction.)
+- [proposal] Put actual F# return types and failure types immediately beside every first-use API example; avoid pseudo-output that resembles executable code without showing its setup.
+- [proposal] Link every performance claim to a specific workload and runtime/version, and mark relative results as benchmark-specific rather than general guarantees.
+- [proposal] Make examples consistently self-contained or label them explicitly as fragments; use the same Signup/Booking model across adjacent pages only when rules and expected output really agree.
+- [proposal] Add "verified by docs build" versus "illustrative pseudocode" metadata to examples so coding assistants do not copy placeholders as runnable F#.
