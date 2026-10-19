@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 10.0.402
       - run: dotnet run --project tools/Reified.Build -- --target Core
 
   fable:
@@ -28,7 +28,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 10.0.402
       - uses: actions/setup-node@v4
         with:
           node-version: 22.x
@@ -40,7 +40,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 10.0.402
       - run: dotnet run --project tools/Reified.Build -- --target NativeAot
 
   packages:
@@ -49,7 +49,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 10.0.402
       - run: dotnet run --project tools/Reified.Build -- --target PackageConsumers
 
   docs:
@@ -58,7 +58,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 10.0.402
       - run: dotnet run --project tools/Reified.Build -- --target DocsCapture
       - run: touch output/.nojekyll
       - uses: actions/upload-artifact@v4

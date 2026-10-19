@@ -10,7 +10,7 @@ open Xunit
 /// Holds the published key catalogue to the atom union and the generated catalogue it is derived from.
 /// </summary>
 /// <remarks>
-/// The localization page is only useful if it is complete: a translator populating a resource file from it has no
+/// The published catalogue page is only useful if it is complete: a translator populating a resource file from it has no
 /// other way to discover a key, and a missing entry surfaces as an untranslated message in production rather than
 /// as a build failure. Deriving the assertion from the union rather than from a second hand-written list is the
 /// same discipline that keeps an atom's description and its violation from drifting.
@@ -22,9 +22,8 @@ module KeyCatalogueDocTests =
             "..",
             "..",
             "docs",
-            "03-constraints",
-            "40-localization",
-            "40-catalogue.md"
+            "api",
+            "Reified.Catalogue.md"
         )
         |> Path.GetFullPath
 
