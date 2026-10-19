@@ -1,34 +1,58 @@
 # Release Notes
 
-## 0.11.0 - 2026-09-27
+## 0.11.0 - 2026-10-19
 
-### `Reified.Schema.Contracts` renamed to `Reified.SchemaGen` (breaking)
+Reified 0.11.0 renames the build-time schema generator and publishes a test helper package. It also fixes JSON Schema
+for options the codec writes as `null`, adds two small APIs, and rates every package's maturity.
+
+### Breaking changes
 
 - `Reified.Schema.Contracts` is now `Reified.SchemaGen`, and `Reified.Schema.Contracts.Build` is now
-  `Reified.SchemaGen.MSBuild`. There is no compatibility alias or deprecated forwarding package; update the
-  `PackageReference` in any project that references the MSBuild integration directly.
-- The name previously described the package's original feature, the `.contract` file grammar, from before
-  `[<DeriveSchema>]`-record generation became the primary path and made `.contract` a secondary form. `Contract`
-  now refers to exactly one thing project-wide: the runtime `Contract<'model>` versioning type in `Reified.Schema`,
-  which is unaffected by this rename and did not move.
-- `[<DeriveSchema>]` and its `Contract`/`Version` arguments are unaffected: they live in the base `Reified.Schema`
-  package, not in the renamed one, and always have.
+  `Reified.SchemaGen.MSBuild`. There is no compatibility alias or forwarding package; update the `PackageReference`
+  in any project that references the MSBuild integration:
 
-### JSON Schema accepts the `null` the codec writes for `None`
+  ```xml
+  <PackageReference Include="Reified.SchemaGen.MSBuild" Version="0.11.0" PrivateAssets="all" />
+  ```
 
-- The JSON codec writes `None` as `null` wherever an option cannot be omitted: collection items, map values, union
-  payloads (including an unwrapped single-field case such as `{"stepWritten":null}`), positional fields, and
-  `Schema.mustSupply` fields. `JsonSchema.generate` previously lowered every option to its payload alone, so a
-  validator rejected those documents. Those positions now lower to `anyOf` of the payload and `{"type":"null"}`.
-- An omittable optional record field still lowers to its payload alone, because the codec leaves `None` out. A
+  `Contract` now refers only to the runtime `Contract<'model>` versioning type in `Reified.Schema`, which did not move.
+  `[<DeriveSchema>]` and its `Contract`/`Version` arguments live in `Reified.Schema` and are unaffected.
+
+### Fixed
+
+- JSON Schema accepts the `null` the codec writes for `None`. The codec writes `None` as `null` wherever an option
+  cannot be omitted: collection items, map values, union payloads (including an unwrapped single-field case such as
+  `{"stepWritten":null}`), positional fields, and `Schema.mustSupply` fields. Those positions now lower to `anyOf`
+  of the payload and `{"type":"null"}`. An omittable optional record field still lowers to its payload alone, and a
   present option (`Constraint.present`) never accepts `null`.
+- Schema generation shares one parse, resolve and emit pipeline, and lowers only files that declare schemas.
+
+### Added
+
+- `Reified.Schema.Testing` package (Experimental): FsCheck generators derived from schemas (`SchemaGen.model`) and
+  seeded JSON codec round-trip checks (`SchemaGen.roundTrip`, `SchemaGen.roundTripWith`) that report the seed of a
+  failing case.
+- `Json.tryParseData` returns malformed JSON as a message without throwing; null input still throws.
+- `Violation.described` creates an opaque atomic violation without a catalogue key.
+
+### Packaging
+
+- Every package carries a maturity rating (Experimental, Incubating or Stable) as a `maturity-<level>` tag and a
+  `[Level]` description prefix. `Reified`, `Reified.Schema` and the runtime packages they reference are Incubating;
+  `Reified.SchemaGen.MSBuild` and `Reified.Schema.Testing` are Experimental. See
+  [Package maturity](https://adz.github.io/Reified/notes/package-maturity.html).
+- The build pins the .NET SDK to 10.0.402 locally and in CI.
 
 ### Documentation
 
-- The API reference now organizes each package into explicit conceptual sections instead of a flat entity list.
-- Companion types and modules share one API family page while retaining exact symbol links.
-- Entity summaries and sidebar navigation expose operation groups down to individual functions.
-- The documentation toolchain moved to FsLiveDocs 0.13.0 and no longer requires Node.js or npm to build search indexes.
+- A full documentation pass: every runnable example is compiled and checked, long pages are split, and reference
+  material moved into API pages. New pages cover testing schema guarantees, and getting started now ends with where
+  to go next.
+- The API reference organizes each package into conceptual sections; companion types and modules share one page with
+  exact symbol links, and the sidebar exposes operation groups down to individual functions.
+- The documentation toolchain moved to FsLiveDocs 0.13.0, which checks each page against the target framework it
+  declares, and no longer needs Node.js or npm.
+- The versioned docs history again records every release since 0.6.1.
 
 ## 0.10.0 - 2026-09-27
 

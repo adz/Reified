@@ -13,7 +13,7 @@ targetFramework: net8.0
 > dotnet add package Reified.Schema.Testing
 > ```
 >
-> Available from the next release.
+> Available from Reified 0.11.0.
 
 The compiler checks type shape and visibility. It cannot prove that a constructor contains the right business rule or
 that a total transition preserves it.

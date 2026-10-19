@@ -169,6 +169,6 @@ let generated = SchemaGen.model signupSchema
 ```
 
 The generator lives in `Reified.Schema.Testing`; install it with `dotnet add package Reified.Schema.Testing`
-(available from the next release) and see [Testing schema guarantees](/data/testing-schema-guarantees.html).
+(0.11.0 or later) and see [Testing schema guarantees](/data/testing-schema-guarantees.html).
 
 → [Testing schema guarantees](/data/testing-schema-guarantees.html) · [Building test cases](/data/how-to-build-test-cases.html)
