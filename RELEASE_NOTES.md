@@ -1,5 +1,17 @@
 # Release Notes
 
+## 0.11.2 - 2026-10-20
+
+A documentation release. The packages are unchanged from 0.11.1.
+
+### Documentation
+
+- The API reference shows its task sections again (for example `Json`: Compile codecs, Serialize JSON). Releases
+  0.11.0 and 0.11.1 were captured by an FsLiveDocs version that did not store sections authored in API page front
+  matter, so their published reference pages listed every operation in one group.
+- Moved to FsLiveDocs 0.14.4: package navigation lists only each package's own entities, cross-package links reach the
+  right page, and index descriptions show the summary's first paragraph.
+
 ## 0.11.1 - 2026-10-19
 
 A documentation release. The packages are unchanged from 0.11.0.
