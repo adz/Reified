@@ -1,12 +1,16 @@
 ---
-weight: 40
+weight: 4
 title: Localization
 type: docs
-description: Rendering constraint failures as sentences, in one language or many.
+description: Rendering Constraint violations and Schema field errors in one language or many.
 targetFramework: net8.0
 ---
 
 # Localization
+
+Localization is a rendering concern shared by [Constraints](/constraints/index.html) and [Schema](/schema/index.html). Constraints produce `Violation` values; Schema carries them alongside parse and structural failures in path-aware `SchemaErrors`. Both use the same `Renderer`, with Schema supplying the field path. Install `Reified.Constraint` for direct rules or `Reified.Schema` for structured input (it includes Constraint as a dependency). Open `Reified`; no separate localization package is required.
+
+Start with the renderer examples below, then read [Constraints and localization in schemas](/schema/constraints-and-localization.html) for a complete field example. Continue with context and fallback, custom rules, the key catalogue, and finally adding a language if you need translations.
 
 A `Violation` carries no language. Built-in failures carry Reified-owned identities and operands; opaque failures
 carry the prose their author wrote. Turning either into a sentence happens at the rendering edge, through a
@@ -58,7 +62,7 @@ let renderer = Renderer.ofLookup french.TryFind
 
 Keys missing from the map fall back to Reified's neutral English. You can translate only the keys your application uses.
 
-Look keys up in [the catalogue](/constraints/localization/catalogue.html).
+Look keys up in [the catalogue](/localization/catalogue.html).
 
 ## The two messages
 
@@ -142,11 +146,11 @@ violation |> Violation.message (Renderer.ofLookup quiet.TryFind)
 ### Translate only the rules you actually use
 
 Translate the identities your application produces, leave the rest, and check what is missing with
-[Adding a language](/constraints/adding-a-language.html).
+[Adding a language](/localization/adding-a-language.html).
 
 ### Translate one of your own rules
 
-Give the rule a key and it joins the same lookup, see [Custom rules](/constraints/localization/custom-rules.html).
+Give the rule a key and it joins the same lookup, see [Custom rules](/localization/custom-rules.html).
 
 ### Do not translate the English sentence
 
@@ -155,12 +159,12 @@ cache translations, use consistent terminology, and format `13` for the target l
 
 ## Where next
 
-- [Context and fallback](/constraints/localization/context-and-fallback.html), scoping a renderer to a document and a field, and how lookup
+- [Context and fallback](/localization/context-and-fallback.html), scoping a renderer to a document and a field, and how lookup
   falls back.
-- [Custom rules](/constraints/localization/custom-rules.html), making your own constraints translatable.
-- [Advanced rendering](/constraints/localization/advanced-rendering.html), composition, interpolation, groups, plurals, and resolvers.
-- [The key catalogue](/constraints/localization/catalogue.html), every key Reified can produce.
-- [Adding a language](/constraints/adding-a-language.html), the working order for a new translation, and proving coverage.
+- [Custom rules](/localization/custom-rules.html), making your own constraints translatable.
+- [Advanced rendering](/localization/advanced-rendering.html), composition, interpolation, groups, plurals, and resolvers.
+- [The key catalogue](/localization/catalogue.html), every key Reified can produce.
+- [Adding a language](/localization/adding-a-language.html), the working order for a new translation, and proving coverage.
 - [Fable support](/constraints/fable.html), what the rendering edge does and does not do in JavaScript.
 
 Schema renders its own parse and structural failures through these same mechanics, with the field path supplied for

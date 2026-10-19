@@ -1,0 +1,3 @@
+# Localization
+
+`Renderer` renders Constraint `Violation` and Schema `SchemaErrors`; Schema supplies field paths, callers supply `Renderer.context`. Start at `/localization/index.html`, then `/schema/constraints-and-localization.html`. Use `/localization/context-and-fallback.html` for scoped keys, `/localization/custom-rules.html` for authored rules, `/localization/catalogue.html` for built-in keys, and `/localization/adding-a-language.html` for generating translations across both catalogues.

@@ -25,3 +25,5 @@ let quantity : Constraint<int> =
 Constraint.guard quantity 12
 // Ok 12
 ```
+
+Schema reuses constraints and violations: `/schema/constraints-and-localization.html`. Rendering for both packages: `/localization/index.html`.

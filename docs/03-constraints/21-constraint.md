@@ -157,6 +157,6 @@ For a comparison with DataAnnotations, FluentValidation, and Validus, read
 Otherwise take [ConstraintDSL](/constraints/dsl.html) for the full vocabulary and how to write a rule module,
 then [Using constraints](/constraints/overview.html) for composition and keeping the input, [Working with
 violations](/constraints/violations.html) for rendering and inspecting failures, [Interpreted and opaque](/constraints/constraints.html)
-for what makes a rule inspectable and what an escape hatch costs, and [Localization](/constraints/localization/index.html) for
-translating failures, with [Adding a language](/constraints/adding-a-language.html) for the working order of a new
+for what makes a rule inspectable and what an escape hatch costs, and [Localization](/localization/index.html) for
+translating failures, with [Adding a language](/localization/adding-a-language.html) for the working order of a new
 translation and [Fable support](/constraints/fable.html) for the JavaScript target.

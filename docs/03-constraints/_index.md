@@ -46,7 +46,8 @@ package, FsToolkit.ErrorHandling, or ordinary pattern matching when you need to 
 - [ConstraintDSL](/constraints/dsl.html), the authoring vocabulary.
 - [Reusable constraints](/constraints/constraints.html), interpreted rules and opaque escape hatches.
 - [Working with violations](/constraints/violations.html), inspect and render failures.
-- [Localization](/constraints/localization/index.html), contextual messages and language catalogues.
+- [Constraints and localization in schemas](/schema/constraints-and-localization.html), using the same rules and violations in structured input.
+- [Localization](/localization/index.html), contextual messages and language catalogues.
 - [Tutorial: constraints and Result](/constraints/tutorials/constraint-result.html), map violations into application errors.
 - [Fable support](/constraints/fable.html), use the same rules on JavaScript.
 

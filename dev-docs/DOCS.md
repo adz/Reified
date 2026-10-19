@@ -22,11 +22,12 @@ published URL.
 | `docs/01-getting-started/` | `/getting-started/` | End-to-end introduction and routing |
 | `docs/02-schema/` | `/schema/` | Structured parsing, JSON codecs, derivation, and versioned contracts |
 | `docs/03-constraints/` | `/constraints/` | Reusable value rules and violations |
-| `docs/04-refined/` | `/refined/` | Invariant-carrying types |
-| `docs/05-parsing/` | `/parsing/` | Serialized primitive decoding |
-| `docs/06-data/` | `/data/` | Structured data, fixtures, and comparison |
-| `docs/07-result-handling/` | `/result-handling/` | Standard F# `Result` composition |
-| `docs/08-guides/` | `/guides/` | Task routing, API selection, error taxonomy, and glossary |
+| `docs/04-localization/` | `/localization/` | Rendering Constraint and Schema diagnostics |
+| `docs/05-refined/` | `/refined/` | Invariant-carrying types |
+| `docs/06-parsing/` | `/parsing/` | Serialized primitive decoding |
+| `docs/07-data/` | `/data/` | Structured data, fixtures, and comparison |
+| `docs/08-result-handling/` | `/result-handling/` | Standard F# `Result` composition |
+| `docs/09-guides/` | `/guides/` | Task routing, API selection, error taxonomy, and glossary |
 | `docs/90-comparisons/` | `/comparisons/` | Comparisons with adjacent libraries |
 | `docs/95-notes/` | `/notes/` | Packages, platforms, benchmarks, and implementation notes |
 
@@ -82,8 +83,9 @@ The root `llms.txt` routes agents to focused context. Section-local files live a
 
 - `docs/02-schema/llms.txt`
 - `docs/03-constraints/llms.txt`
-- `docs/06-data/llms.txt`
-- `docs/07-result-handling/llms.txt`
+- `docs/04-localization/llms.txt`
+- `docs/07-data/llms.txt`
+- `docs/08-result-handling/llms.txt`
 
 Update these files when their public surface or recommended authoring path changes. Do not add agent-specific pages to
 the user-facing documentation tree.

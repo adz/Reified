@@ -60,7 +60,7 @@ constraint.cardinality.between = doit avoir une taille comprise entre {minimum} 
 ```
 
 
-Placeholder names are fixed by the catalogue; the table in [the key catalogue](/constraints/localization/catalogue.html) lists them per
+Placeholder names are fixed by the catalogue; the table in [the key catalogue](/localization/catalogue.html) lists them per
 key. An unknown name renders literally rather than throwing, so a typo shows up in the message.
 
 ## 3. Translate the composition entries

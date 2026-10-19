@@ -136,9 +136,9 @@ for field in formFields do
 
 
 Constraint failures use Reified's `constraint.*` catalogue; Schema's own parse and structural failures have their own,
-below. Both render through the same mechanics, so one renderer covers both. See
-[Localization](/constraints/localization/index.html) for those mechanics and
-[Adding a language](/constraints/adding-a-language.html) for generating a translation.
+below. Both render through the same mechanics, so one renderer covers both. See [Constraints and localization in schemas](/schema/constraints-and-localization.html) for the shared rule and error model,
+[Localization](/localization/index.html) for those mechanics and
+[Adding a language](/localization/adding-a-language.html) for generating a translation.
 
 ## The Schema catalogue
 

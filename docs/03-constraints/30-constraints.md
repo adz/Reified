@@ -77,7 +77,7 @@ failed check returns the interpreted leaf that inner rule produces, and `Violati
 opaque, and with it export and proof. Construct a `Violation` directly only when no built-in states what you mean.
 
 Descriptions are required and must be non-blank, because they are the only thing a renderer has to work with. They
-are also, by default, untranslatable, see [Custom rules](/constraints/localization/custom-rules.html) for `customLocalized`, which lets you
+are also, by default, untranslatable, see [Custom rules](/localization/custom-rules.html) for `customLocalized`, which lets you
 attach your own catalogue key.
 
 `Constraint.contramap` is opaque for the same reason: an arbitrary projection changes the proposition in a way no
@@ -184,7 +184,7 @@ override, because one would let the reported failure diverge from the descriptio
 
 Because it never reaches a violation, `describe` takes no catalogue key and is not localized: it is documentation
 about a rule rather than a message to a user, so translating it is a matter of generating the document per locale.
-Localization applies to failures, and is covered [there](/constraints/localization/index.html).
+Localization applies to failures, and is covered [there](/localization/index.html).
 
 ## What export does with each tier
 

@@ -41,7 +41,7 @@ violation |> Violation.fullMessage (renderer |> Renderer.attribute "name")
 A `Map`, an object fetched as JSON, or a function reaching into an existing i18n library all satisfy
 `MessageLookup`. Reified owns the candidate order, so a lookup only ever answers "do you have this exact key".
 
-Everything the [Localization](/constraints/localization/index.html) page describes about candidate order, contextual fallback,
+Everything the [Localization](/localization/index.html) page describes about candidate order, contextual fallback,
 `.one`/`.other` selection, named interpolation, attribute nouns, humanization, segment encoding, and group and list
 joining behaves identically under Fable. So does `Renderer.english`, `Renderer.Advanced.ofResolver`, and the whole
 inspection surface.
@@ -151,7 +151,7 @@ let renderer = Renderer.ofLookup (fun key -> loaded |> Map.tryFind key)
 
 
 Generate the bundle from `Catalogue.keys` and `SchemaMessages.keys` rather than transcribing it, see
-[Adding a language](/constraints/adding-a-language.html). Since the same catalogue drives both targets, one generated bundle
+[Adding a language](/localization/adding-a-language.html). Since the same catalogue drives both targets, one generated bundle
 serves the browser and the server.
 
 ## AOT and trimming

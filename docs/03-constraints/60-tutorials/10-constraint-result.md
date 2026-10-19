@@ -135,4 +135,4 @@ let describe (renderer: Renderer) error =
 
 
 See [Using constraints](../overview.html), [Working with violations](../violations.html),
-[Localization](../localization/index.html), and [Result CE](/result-handling/result-ce.html).
+[Localization](/localization/index.html), and [Result CE](/result-handling/result-ce.html).

@@ -91,4 +91,4 @@ Arguments are `ConstraintValue`, the closed value model every interpreter unders
 decimal, big integer, float, GUID, timespan, date-time, date-time-offset, null, and lists of those.
 `ConstraintValue.render` gives the invariant rendering of one; a renderer formats through its value culture instead.
 
-See [The key catalogue](/constraints/localization/catalogue.html) for how a language skeleton consumes these entries.
+See [The key catalogue](/localization/catalogue.html) for how a language skeleton consumes these entries.

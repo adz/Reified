@@ -106,7 +106,7 @@ JSON Schema, and generated test data come from the same declaration.</p>
 - **Inspect a schema.** One declaration produces field-aware parse diagnostics, JSON
    Schema export, and messages a translator can localize without touching the rule. See
    [Schema](/schema/index.html), [Redisplay and Field Errors](/schema/redisplay-and-field-errors.html), and
-   [Localization](/constraints/localization/index.html).
+   [Localization](/localization/index.html).
 - **Refined types.** A value's invariant is proven once, at construction, and every later use relies on the
    proof instead of re-checking it. See [Refined values](/refined/index.html).
 - **Parse and Result.** Untrusted text becomes a typed value with a reason attached to failure, and ordinary F#

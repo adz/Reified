@@ -62,6 +62,7 @@ reports every field failure with its path, and compiles the same declaration int
 
 After the quickstart, use these guides as needed:
 
+- [Constraints and localization in schemas](/schema/constraints-and-localization.html), reusable field rules and localized errors.
 - [Schema DSL](/schema/dsl.html), fields, constraints, constructors, and nested schemas.
 - [Refined fields in Schema](/schema/refined-fields.html), refined types as fields.
 - [Boundary-specific field rules](/schema/boundary-field-rules.html), field blocks and boundary constraints.

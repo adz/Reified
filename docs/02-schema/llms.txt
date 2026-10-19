@@ -51,3 +51,5 @@ let signupSchema =
         construct Signup.create
     }
 ```
+
+Read `/schema/constraints-and-localization.html` for a constrained field and localized errors; `/localization/index.html` covers renderer setup and fallback.

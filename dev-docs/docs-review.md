@@ -69,10 +69,10 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - [fixed] `docs/04-refined/_index.md:163-165` — says a custom `CustomerId` resolves from `field _.Id` immediately after defining `Refinement.define`, while the tutorial at `docs/04-refined/60-tutorials/20-customer-id.md:149` says registration is needed. Show registration here or say the field needs an explicit schema until registered.
 
 - [fixed] `docs/03-constraints/_index.md:30-35` — quick example prints `Error [ Blank; InvalidLength ... ]` as if `check` returned a list, but this page says it returns `Result<unit, Violation>`; the structured `Atomic`/group representation shown in the interpreted-rules guide differs. Show the actual `Violation` or label this as schematic output.
-- [fixed] `docs/03-constraints/40-localization/_index.md:65-73` — “Using the violation and renderer from above” mixes an `atLeast 13` violation with a French renderer containing only presence/cardinality/email/name translations; the quoted English outputs for `message` and capitalized `Name` are not what that lookup demonstrates. Use `Renderer.english` for those outputs or show the actual fallback/translated noun.
+- [fixed] `docs/04-localization/_index.md:65-73` — “Using the violation and renderer from above” mixes an `atLeast 13` violation with a French renderer containing only presence/cardinality/email/name translations; the quoted English outputs for `message` and capitalized `Name` are not what that lookup demonstrates. Use `Renderer.english` for those outputs or show the actual fallback/translated noun.
 - [fixed] `docs/03-constraints/30-constraints.md:55-69` — `customWith` is described as returning its own violation, yet the example wraps `Constraint.check (Constraint.oneOf ...)` and says the enclosing rule is opaque. Explain whether a failed custom rule exposes an interpreted atom and how that differs from inspectability of the rule itself.
-- [fixed] `docs/03-constraints/40-localization/40-catalogue.md:11` — “Every key Reified can produce” omits keys supplied through `Constraint.customLocalized`; qualify this as every built-in key.
-- [fixed] `docs/03-constraints/45-adding-a-language.md:261-267` — “What the catalogue handles” lists imperative actions without a lead-in or negation; “reproduce the key list by hand” contradicts the page’s generation advice. Introduce the list as things readers need *not* do.
+- [fixed] `docs/04-localization/40-catalogue.md:11` — “Every key Reified can produce” omits keys supplied through `Constraint.customLocalized`; qualify this as every built-in key.
+- [fixed] `docs/04-localization/45-adding-a-language.md:261-267` — “What the catalogue handles” lists imperative actions without a lead-in or negation; “reproduce the key list by hand” contradicts the page’s generation advice. Introduce the list as things readers need *not* do.
 
 
 - [fixed] `docs/02-schema/47-schema-or-generated-dto.md:64-77` — `toDomain` promises `Result<Signup, string>` but builds `Signup` with a `ContactEmail` where `Email` was declared `string`; `bytes` is undeclared, and `Json.deserialize` is used as though it returned `Result`. Show a complete type-correct conversion using `Json.tryDeserialize` and explicit error mapping.
@@ -137,7 +137,7 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 
 - [done] `docs/05-parsing/_index.md:56-69` — the exhaustive parser/accepted-form table is useful reference material; consider keeping a smaller selection in the walkthrough and linking the complete list from the Parse API reference.
 
-- [done] `docs/03-constraints/40-localization/40-catalogue.md:14-95` — the exhaustive key/argument/default-English tables are reference data (also exposed by `Catalogue.keys`/maps); keep the runtime maps discoverable and consider placing the tables beside the catalogue API reference rather than in the localization walkthrough.
+- [done] `docs/04-localization/40-catalogue.md:14-95` — the exhaustive key/argument/default-English tables are reference data (also exposed by `Catalogue.keys`/maps); keep the runtime maps discoverable and consider placing the tables beside the catalogue API reference rather than in the localization walkthrough.
 
 
 - [done] `docs/01-getting-started/02-what-a-schema-gives-you.md:37-45` — the seven-API inventory is useful orientation, not an exhaustive reference; keep it here, but link the `SchemaGen` entry directly to its own usage/reference page rather than only the generic Data section at line 152.
@@ -172,8 +172,8 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - [done] `docs/04-refined/60-tutorials/10-order-totals.md:44-55` — the tutorial promises building an order from untrusted input but never constructs `Order` from all four admitted fields; add a complete boundary function, including error mapping for heterogeneous failures and checking the line collection.
 - [done] `docs/04-refined/50-schema.md:99-106` — `Schema.convert decimal int` narrows a decimal on encoding; explain what happens with fractional or out-of-range values, or choose a genuinely reversible conversion for the first example.
 
-- [done] `docs/03-constraints/40-localization/20-custom-rules.md:14-30` — the page’s first F# example omits `open Reified`, unlike adjacent pages, and does not show a check and rendered translation. Add a complete minimal invocation so a new reader can verify the custom key and argument path.
-- [done] `docs/03-constraints/45-adding-a-language.md:219-259` — the coverage test checks only bare `Catalogue.keys`, while the skeleton emits `.one`/`.other` instead of the bare key for pluralized entries; a fully filled skeleton fails this proposed test. Supply a coverage predicate that accepts bare OR both required plural forms, and distinguish contextual overrides from base coverage.
+- [done] `docs/04-localization/20-custom-rules.md:14-30` — the page’s first F# example omits `open Reified`, unlike adjacent pages, and does not show a check and rendered translation. Add a complete minimal invocation so a new reader can verify the custom key and argument path.
+- [done] `docs/04-localization/45-adding-a-language.md:219-259` — the coverage test checks only bare `Catalogue.keys`, while the skeleton emits `.one`/`.other` instead of the bare key for pluralized entries; a fully filled skeleton fails this proposed test. Supply a coverage predicate that accepts bare OR both required plural forms, and distinguish contextual overrides from base coverage.
 
 
 - [done] `docs/02-schema/47-schema-or-generated-dto.md:51-77` — strategy 2 lacks a runnable boundary example with a defined byte payload, actual wire-to-domain types, and structural decode error handling; the current fragment cannot serve as a copyable starting point.
@@ -211,7 +211,7 @@ Scope: documentation only; no implementation inspected. Line numbers refer to Ma
 - [done] `docs/04-refined/60-tutorials/20-customer-id.md:108-115` — `index` and `range` work for any comparable key, including zero; identify which operation specifically relies on positivity, or present `CustomerId` as nominal identity rather than proof that positive numeric wrappers earn their keep.
 
 - [done] `docs/03-constraints/60-reference-app.md:39-45` — "must print on one line" is not enforced by the length-only checks shown; remove that claim or add a newline rule, so copied validation does what its comment promises.
-- [done] `docs/03-constraints/40-localization/30-advanced-rendering.md:169-180` — the `MessageRequest` type sketch and host-owned `icu` in a `no-check` block look like an API declaration plus runnable resolver. Label the type as illustrative and show a concrete `Map`-based resolver separately for readers copying code.
+- [done] `docs/04-localization/30-advanced-rendering.md:169-180` — the `MessageRequest` type sketch and host-owned `icu` in a `no-check` block look like an API declaration plus runnable resolver. Label the type as illustrative and show a concrete `Map`-based resolver separately for readers copying code.
 
 
 - [done] `docs/02-schema/85-examples.md:147-148` — the mirrored example invokes `DateTimeOffset.UtcNow` twice for a publish interval. Use fixed endpoints in teaching examples so copied examples are deterministic and the interval is unambiguous. (Page now links to the source; the `UtcNow` call lived in `examples/Reified.Schema.Examples/RefinedCatalogExample.fs`, now fixed there.)

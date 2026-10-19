@@ -64,7 +64,7 @@ nobody tested. `%`, brackets, whitespace, and non-ASCII characters are exact inp
 
 Custom constraints declare no plural operand, and Reified does not infer one from an argument's name or value.
 Guessing would silently change which key a translator has to supply. If you need `.one`/`.other` for a custom rule,
-select it in an [advanced resolver](/constraints/localization/advanced-rendering.html#advanced-resolvers).
+select it in an [advanced resolver](/localization/advanced-rendering.html#advanced-resolvers).
 
 Reified never invents a key for `Constraint.custom` prose. A key it made up would name a catalogue entry that does
 not exist, and the lookup would fail in production, in the language you did not test.

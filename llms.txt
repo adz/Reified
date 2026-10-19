@@ -12,6 +12,8 @@ shape. Decoding an attributed record with the trusted path looks validated but i
 | --- | --- |
 | Parse untrusted structured input into a model with path-aware errors | `/schema/quickstart.html` |
 | Choose between parse, check, codec, and contract | `/guides/choosing-an-api.html` |
+| Render Schema or Constraint failures in another language | `/localization/index.html` |
+| See how Schema uses Constraints | `/schema/constraints-and-localization.html` |
 | Put a reusable value rule on a field or value | `/constraints/constraints.html` |
 | Record "this passed its rule" in the type itself | `/refined/index.html` |
 | Parse serialized primitive text | `/parsing/index.html` |

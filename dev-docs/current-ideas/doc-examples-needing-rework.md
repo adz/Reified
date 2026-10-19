@@ -29,7 +29,7 @@ already improved in-session; a few are left as open follow-ups. Grouped by file.
   comment) instead of the real single-brace output; and the page's "in JSON it renders as"
   framing conflated the human-readable `Data.render` with the actual JSON renderer,
   breaking down exactly at the one case (`Data.Object`) where the two differ.
-- **`docs/03-constraints/40-localization/30-advanced-rendering.md`** — the operand-
+- **`docs/04-localization/30-advanced-rendering.md`** — the operand-
   formatting example's `format` helper had both match arms call the same function
   regardless of the branch, so the "the suffix, when you need it" example never
   demonstrated using the suffix at all — a reader copying it would get nothing useful.
@@ -65,7 +65,7 @@ field names and both get a schema in the same compiled block.
 
 ## Open follow-ups (not yet applied as of this writing)
 
-- **`docs/03-constraints/45-adding-a-language.md`** — the `Violation.toMessageTree` recipe's
+- **`docs/04-localization/45-adding-a-language.md`** — the `Violation.toMessageTree` recipe's
   `render` example buries `yourConjunction`/`yourDisjunction` (the actual point) under
   several lines of leaf-case boilerplate; a reviewer suggested trimming/commenting it so the
   two custom-joining calls are the visual focus. Low priority, still open.
