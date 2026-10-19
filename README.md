@@ -157,7 +157,8 @@ Schema builds on focused packages that remain useful by themselves:
 `Reified.Result` is independent composition over the standard F# `Result` type. It works with Reified APIs but is not
 part of Schema's dependency chain.
 
-The contract compiler and schema-derived testing adapter are repository tooling, not runtime packages.
+The contract compiler (`Reified.SchemaGen`) is repository tooling, not a runtime package. `Reified.Schema.Testing`
+is a published test-time package that stays out of the umbrella so FsCheck remains test-only.
 
 `Reified.SchemaGen.MSBuild` is not in the umbrella. MSBuild targets do not travel through a transitive package reference, so a project that derives schemas at build time references it directly.
 

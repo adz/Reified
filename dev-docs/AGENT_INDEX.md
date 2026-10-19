@@ -49,8 +49,9 @@ exports a type called `X`. See `dev-docs/namespace-flatten.md`.
   (`BoundaryInput`), RFC 9457 problem details from parse diagnostics, and OpenAPI 3.1 documents assembled from
   `EndpointSpec` values. Depends on `Reified.Schema` only, and never on the effect system. The host adapters that
   serve these contracts (ASP.NET Core, GenHTTP) live in the [Axial repository](https://github.com/adz/Axial).
-- `Reified.Schema.Testing` (`src/Reified.Schema.Testing/`): non-packable FsCheck adapter deriving test data from Schema.
-  Depends on `Reified.Schema` and FsCheck; never move the test-library dependency into a public package.
+- `Reified.Schema.Testing` (`src/Reified.Schema.Testing/`): packable (Experimental) FsCheck adapter deriving test data
+  from Schema, and seeded codec round-trip checks. Depends on `Reified.Schema` and FsCheck; stays out of the umbrella so
+  FsCheck remains a test-only dependency for consumers.
 - `Reified.SchemaGen` (`src/Reified.SchemaGen/`): non-packable wire-tier generation library — the
   `[<DeriveSchema>]` record frontend (`Records.fs`, FCS syntax-only), the `.contract` parser, and the shared
   resolver/emitter. The `Reified.DerivedSchema` attribute namespace lives in `Reified.Schema` itself (inert metadata).

@@ -52,11 +52,11 @@ another package — an application must sit above the package graph.
 | `Reified.Result` | Incubating | Used through `Reified` |
 | `Reified.Schema.Http` | Incubating | Used through `Reified` |
 | `Reified.SchemaGen.MSBuild` | Experimental | No application uses it yet |
+| `Reified.Schema.Testing` | Experimental | No application uses it yet |
 
 `Reified` is the umbrella package gitkay references; `Reified.Schema` is the package Logs Digger references. Every
 runtime package those two reference transitively inherits Incubating, because an application using the umbrella or
 the Schema package uses those packages through it. `Reified.SchemaGen.MSBuild` is referenced by no application, so
 it stays Experimental even though both applications could generate schemas with it.
 
-The non-packable repository tooling — `Reified.SchemaGen` and `Reified.Schema.Testing` — has no rating because it
-is never published.
+The non-packable repository tooling — `Reified.SchemaGen` — has no rating because it is never published.

@@ -1,13 +1,26 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <IsPackable>false</IsPackable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageId>Reified.Schema.Testing</PackageId>
+    <PackageMaturity>Experimental</PackageMaturity>
     <AssemblyName>Reified.Schema.Testing</AssemblyName>
     <RootNamespace>Reified.Schema.Testing</RootNamespace>
+    <Authors>Adam Davies</Authors>
+    <Description>FsCheck generators derived from Reified schemas, and seeded codec round-trip checks for tests.</Description>
+    <PackageProjectUrl>https://github.com/adz/Reified</PackageProjectUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/adz/Reified</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PackageTags>fsharp;reified;schema;fscheck;testing;property-based-testing</PackageTags>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="FsCheck" Version="3.3.3" />
+    <PackageReference Include="FsCheck" Version="[3.3.3,4.0.0)" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Reified.Data\Reified.Data.fsproj" />

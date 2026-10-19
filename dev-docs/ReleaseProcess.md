@@ -24,15 +24,16 @@ from it. The set is:
 - `Reified.Data`
 - `Reified.Schema`
 - `Reified.Schema.Http`
+- `Reified.Schema.Testing`
 - `Reified.SchemaGen.MSBuild`
 - `Reified` — the umbrella, which carries no assembly and only depends on the runtime packages above
 
 `Reified.SchemaGen.MSBuild` is not in the umbrella. MSBuild `build/` assets are not transitive, so an
 umbrella dependency would install its targets without ever running them; consumers that derive schemas at build
-time reference it directly.
+time reference it directly. `Reified.Schema.Testing` is also not in the umbrella, so FsCheck stays a test-only
+dependency of the consumer's test project rather than leaking into every application through `Reified`.
 
-The contract compiler (`Reified.SchemaGen`) and the FsCheck adapter (`Reified.Schema.Testing`) are
-repository tooling and are never packed.
+The contract compiler (`Reified.SchemaGen`) is repository tooling and is never packed.
 
 ## Preparing a release
 

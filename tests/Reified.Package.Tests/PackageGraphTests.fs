@@ -33,8 +33,10 @@ let private property (project: XDocument) (name: string) =
     |> Seq.tryHead
     |> Option.map (fun node -> node.Value)
 
-/// Every project under src/ that ships an assembly to NuGet. Tooling libraries set IsPackable=false
-/// and the targets-only build package sets IncludeBuildOutput=false, so both drop out here.
+/// Every project under src/ that ships a runtime assembly to NuGet. Tooling libraries set
+/// IsPackable=false (Reified.SchemaGen), the targets-only build package sets IncludeBuildOutput=false
+/// (Reified.SchemaGen.MSBuild), and the FsCheck adapter is packable but a development-time test tool
+/// rather than a runtime package, so those all drop out here.
 let private packableRuntimeProjects () =
     Directory.EnumerateFiles(srcDir (), "*.fsproj", SearchOption.AllDirectories)
     |> Seq.filter (fun path ->
@@ -47,7 +49,9 @@ let private packableRuntimeProjects () =
             property project "IncludeBuildOutput"
             |> Option.forall (fun value -> value <> "false")
 
-        isPackable && shipsAssembly)
+        isPackable
+        && shipsAssembly
+        && Path.GetFileNameWithoutExtension path <> "Reified.Schema.Testing")
     |> Seq.map Path.GetFileNameWithoutExtension
     |> Set.ofSeq
 
@@ -83,8 +87,8 @@ let ``the umbrella compiles no sources of its own`` () =
 
 [<Fact>]
 let ``the umbrella does not pull repository tooling into a consumer`` () =
-    // The contract compiler and the FsCheck adapter are repository tooling. Reaching a consumer
-    // through the umbrella would put FCS and FsCheck on an application's dependency graph.
+    // The contract compiler and the FsCheck adapter are development-time tooling. Reaching a
+    // consumer through the umbrella would put FCS and FsCheck on an application's dependency graph.
     let references = umbrellaReferences ()
     test <@ not (references.Contains "Reified.SchemaGen") @>
     test <@ not (references.Contains "Reified.Schema.Testing") @>
@@ -104,6 +108,7 @@ let ``every packable runtime package is packed by the build tool`` () =
         packableRuntimeProjects ()
         |> Set.add "Reified"
         |> Set.add "Reified.SchemaGen.MSBuild"
+        |> Set.add "Reified.Schema.Testing"
         |> Set.filter (fun project -> not (buildTool.Contains $"/{project}.fsproj"))
 
     test <@ unpacked = Set.empty @>

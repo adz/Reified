@@ -7,8 +7,13 @@ targetFramework: net8.0
 
 # Test schema guarantees
 
-> `Reified.Schema.Testing` is repository tooling, not a published package. There is nothing to install. Copy or adapt
-> the pattern shown here into your own test project.
+> Install the package:
+>
+> ```sh
+> dotnet add package Reified.Schema.Testing
+> ```
+>
+> Available from the next release.
 
 The compiler checks type shape and visibility. It cannot prove that a constructor contains the right business rule or
 that a total transition preserves it.
@@ -23,13 +28,12 @@ Use generated examples to check those claims near the owning module.
 
 ## Generate accepted models
 
-Reified's tests use the non-packable `Reified.Schema.Testing` FsCheck adapter. Applications can adapt this pattern
-locally. `SchemaGen.model` generates structured data, parses it through the schema, discards samples the schema
-rejects (constructor failures included), and runs `Schema.check` on each surviving model before yielding it. The
-outer `Result` reports generation-support failures such as `UnsupportedConstraint`; a model the generator yields has
-already passed both parse and check.
+Reified's tests use the `Reified.Schema.Testing` FsCheck adapter. `SchemaGen.model` generates structured data, parses it
+through the schema, discards samples the schema rejects (constructor failures included), and runs `Schema.check` on each
+surviving model before yielding it. The outer `Result` reports generation-support failures such as
+`UnsupportedConstraint`; a model the generator yields has already passed both parse and check.
 
-```fsharp no-check reason="FsCheck is a test-only dependency of Reified.Schema.Testing; it's not among the assemblies this audit pipeline resolves, so this block can't be checked here even though the pattern is real."
+```fsharp no-check reason="FsCheck is a dependency of Reified.Schema.Testing; it's not among the assemblies this audit pipeline resolves, so this block can't be checked here even though the pattern is real."
 open System
 open Reified
 open Reified.SchemaDSL

@@ -93,11 +93,12 @@ produce runs in your application at run time.
 | --- | --- | --- |
 | `Reified.SchemaGen.MSBuild` | Runs schema generation over your `[<DeriveSchema>]` records and `.contract` files before each compile | `dotnet add package Reified.SchemaGen.MSBuild` |
 | `Reified.SchemaGen` | The generation library itself, the record frontend, the `.contract` parser, and the emitter | Not published; used through the build package above |
-| `Reified.Schema.Testing` | Derives FsCheck generators from a schema so tests produce accepted values | Not published; copy or adapt the pattern from this repository |
+| `Reified.Schema.Testing` | Derives FsCheck generators from a schema so tests produce accepted values | `dotnet add package Reified.Schema.Testing` |
 
 Install `Reified.SchemaGen.MSBuild` separately from the `Reified` umbrella: MSBuild
 `build/` assets are not transitive, so an umbrella dependency would install the targets without ever running them. Add
-it to the project whose records you want generated.
+it to the project whose records you want generated. `Reified.Schema.Testing` is also a direct install, not part of the
+umbrella, so FsCheck stays a test-only dependency of your test project.
 
-`Reified.SchemaGen` and `Reified.Schema.Testing` are not packable.
+`Reified.SchemaGen` is not packable.
 See [Derived Schemas](/schema/derivation/index.html) and [Testing patterns](/data/testing-schema-guarantees.html).

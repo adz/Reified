@@ -40,6 +40,7 @@ let packProjects =
       "src/Reified.Constraint/Reified.Constraint.fsproj"; "src/Reified.Refinements/Reified.Refinements.fsproj"
       "src/Reified.Parse/Reified.Parse.fsproj"; "src/Reified.Schema/Reified.Schema.fsproj"
       "src/Reified.Schema.Http/Reified.Schema.Http.fsproj"
+      "src/Reified.Schema.Testing/Reified.Schema.Testing.fsproj"
       "src/Reified.SchemaGen.MSBuild/Reified.SchemaGen.MSBuild.fsproj"; "src/Reified/Reified.fsproj" ]
 
 target "CleanPackages" (fun () ->
