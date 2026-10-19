@@ -58,6 +58,21 @@ git tag v0.8.0
 git push origin v0.8.0
 ```
 
+7. After the release workflow has created the GitHub Release (its `.nupkg`/`.snupkg`/capsule assets are live), refresh
+the committed release history and push it:
+
+```bash
+GITHUB_REPOSITORY=adz/Reified dotnet run --project tools/Reified.Build -- --target SyncHistory
+git add .livedocs/history.json
+git commit -m "Docs: record v<version> in release history"
+git push
+```
+
+`SyncHistory` runs `livedocs history-sync` against `.livedocs/history.json`, merging every published
+`Reified-<version>-livedocs.zip` capsule from GitHub Releases (including the one just published) and the asset SHA-256
+digests. It needs GitHub authentication — a logged-in `gh` CLI or `GH_TOKEN`/`GITHUB_TOKEN`. This step is manual because
+the release workflow runs on the tag and must not push to `main`; see [CI release behavior](#ci-release-behavior).
+
 ## CI release behavior
 
 `.github/workflows/release.yml` runs for `v*.*.*` tags.
@@ -79,8 +94,13 @@ merge semantic-versioned `Reified-<version>-livedocs.zip` assets from GitHub Rel
 GitHub's asset digest supplies the SHA-256. A release dispatch requires the new capsule to be current with the exact
 expected URL and checksum. `build-history --retry 3` retries transient capsule downloads, and `verify-output` checks
 entry points, version-switcher order, and generated local links. Later `main` builds therefore retain the complete
-published history. The committed history remains an offline compatibility baseline and should be refreshed
-periodically, but publishing a release does not depend on a follow-up commit.
+published history.
+
+The Pages workflow syncs `.livedocs/history.json` in its working copy, but that copy is never committed back: the
+workflow runs with `contents: read` and only deploys the rendered site. The committed file is therefore an offline
+compatibility baseline for local documentation builds, and it only advances when a maintainer runs the refresh step in
+[Preparing a release](#preparing-a-release). The live site and the published release do not depend on that follow-up
+commit.
 
 For manual `workflow_dispatch`, leave `release_tag` empty for an `0.0.0-rcDev` verification run. Supplying an existing
 tag such as `v0.2.0` checks out that tag and repairs its GitHub Release assets and versioned documentation without
