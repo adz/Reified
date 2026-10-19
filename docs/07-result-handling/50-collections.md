@@ -103,7 +103,7 @@ To accumulate across differently-typed independent steps rather than across one 
 ## Shape in and shape out
 
 Both take any `seq<_>` and produce a **list**. The four complete signatures are in the
-[`Result` API reference](/api/Reified.Result.html).
+[`Result` API reference](/api/Reified.Result.ResultModule.html).
 
 An array or a `seq` goes in; a list comes out. Convert afterwards with `Result.map` when you need a different shape:
 
