@@ -16,14 +16,14 @@ trusted-codec failure is not an accumulated `SchemaErrors`. Know which one you a
 
 | Type | Package | Means | Carries |
 | --- | --- | --- | --- |
-| `Violation` | `Reified.Constraint` | A value failed a constraint | `Atomic` / `All` / `Any` tree; interpreted atoms keep their identity |
-| `ParseError` | `Reified.Parse` | Serialized text could not become a primitive | `MissingValue`, `InvalidFormat (target, input)`, or `OutOfRange (target, input)` |
-| `SchemaError` | `Reified.Schema` | One boundary failure at one path | `Omitted`, `Blank`, `ExpectedScalar`, `ExpectedObject`, `ExpectedMany`, `InvalidFormat`, `ParseOutOfRange`, `UnknownTag`, `Violation`, `ConstructorFailed`, `Custom` |
-| `SchemaIssue` | `Reified.Schema` | A `SchemaError` plus its location | `Path: SchemaPath` and `Error: SchemaError` |
-| `SchemaErrors` | `Reified.Schema` | Accumulated independent failures, in path order | `SchemaIssue list` (via `SchemaErrors.toList`) |
-| `JsonCodecException` | `Reified.Schema` | Trusted codec decode failed on structure or wire shape | Exception with a schema-relative path in `Message` |
-| `MigrationError` | `Reified.Schema` | A contract migration failed | `MigrationFailed message` or `RevalidationFailed SchemaErrors` |
-| `ContractError` | `Reified.Schema` | A versioned contract could not select, parse, or migrate | `VersionMissing`, `VersionUnrecognized`, `VersionTooNew`, `ParseFailed (version, SchemaErrors)`, `Migration MigrationError` |
+| [`Violation`](/api/Reified.Violation.html) | `Reified.Constraint` | A value failed a constraint | A tree of failed rules (`Atomic`, `All`, `Any`) |
+| [`ParseError`](/api/Reified.ParseError.html) | `Reified.Parse` | Serialized text could not become a primitive | Missing, malformed, or out-of-range input, with the target type |
+| [`SchemaError`](/api/Reified.SchemaError.html) | `Reified.Schema` | One boundary failure at one path | Missing or blank input, wrong shape, a parse failure, a `Violation`, or a constructor or custom error |
+| [`SchemaIssue`](/api/Reified.SchemaIssue.html) | `Reified.Schema` | A `SchemaError` plus its location | `Path` and `Error` |
+| [`SchemaErrors`](/api/Reified.SchemaErrors.html) | `Reified.Schema` | Accumulated independent failures, in path order | The issues, via `SchemaErrors.toList` |
+| [`JsonCodecException`](/api/Reified.JsonCodecException.html) | `Reified.Schema` | Trusted codec decode failed on structure or wire shape | A schema-relative path in `Message` |
+| [`MigrationError`](/api/Reified.MigrationError.html) | `Reified.Schema` | A contract migration failed | The migration's message, or the `SchemaErrors` from revalidation |
+| [`ContractError`](/api/Reified.ContractError.html) | `Reified.Schema` | A versioned contract could not select, parse, or migrate | A missing, unknown, or too-new version; a parse failure; or a `MigrationError` |
 
 `Violation` and `ParseError` are leaf errors; `SchemaError` lowers both of them (`SchemaError.Violation`,
 `SchemaError.Blank`/`InvalidFormat`/`ParseOutOfRange`) and adds path structure around them.
