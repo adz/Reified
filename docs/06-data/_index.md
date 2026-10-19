@@ -10,6 +10,8 @@ targetFramework: net8.0
 
 # Data
 
+<span class="maturity-badge">Maturity: Incubating</span>
+
 `Reified.Data` builds and changes structured data. Its objects, lists, text, numbers, Booleans, and null
 map directly to JSON, and also work for test fixtures, configuration, command-line input, form values,
 events, and other tree-shaped data.

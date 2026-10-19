@@ -139,6 +139,10 @@ A derived permissive wire DTO is a different choice. Generate it with no constra
 
 Install `Reified` to get the complete runtime set. For the integrated boundary model, start with `Reified.Schema`:
 
+Every package carries a maturity rating — Experimental, Incubating, or Stable — declared in its project file and
+published in its NuGet metadata. See [Package maturity](https://adz.github.io/Reified/notes/package-maturity.html)
+for the levels, the promotion rule, and the application that justifies each package's rating.
+
 - `Reified` — umbrella package that references all runtime packages
 - `Reified.Schema` — structured model admission, diagnostics, inspection, JSON Schema, and compiled JSON codecs
 - `Reified.SchemaGen.MSBuild` — MSBuild integration for derived record and wire contracts

@@ -152,3 +152,66 @@ let ``no package claims to ship Fable sources without targeting Fable`` () =
         |> Set.ofList
 
     test <@ spurious = Set.empty @>
+
+// Package maturity is declared in each packable project as <PackageMaturity> and mirrored in the
+// published table at docs/95-notes/85-package-maturity.md. Nothing links the two, so this reads both
+// and compares them: a packable project that omits, misspells, or disagrees with the table fails here
+// before a pack does.
+
+let private packableProjects () =
+    Directory.EnumerateFiles(srcDir (), "*.fsproj", SearchOption.AllDirectories)
+    |> Seq.filter (fun path -> property (load path) "PackageId" |> Option.isSome)
+    |> List.ofSeq
+
+let private maturityTable () =
+    let page = Path.Combine(repoRoot (), "docs", "95-notes", "85-package-maturity.md")
+    File.ReadAllLines page
+    |> Array.filter (fun line -> line.TrimStart().StartsWith "|")
+    |> Array.skip 2
+    |> Array.choose (fun line ->
+        let cells =
+            line.Split('|')
+            |> Array.map (fun cell -> cell.Trim())
+            |> Array.filter (fun cell -> cell <> "")
+        match cells with
+        | [| package; maturity; _evidence |] -> Some(package.Replace("`", ""), maturity)
+        | _ -> None)
+    |> Map.ofArray
+
+[<Fact>]
+let ``every packable project declares a package maturity`` () =
+    let missing =
+        packableProjects ()
+        |> List.filter (fun path ->
+            match property (load path) "PackageMaturity" with
+            | None -> true
+            | Some value -> System.String.IsNullOrWhiteSpace value)
+        |> List.map Path.GetFileNameWithoutExtension
+        |> Set.ofList
+
+    test <@ missing = Set.empty @>
+
+[<Fact>]
+let ``package maturity agrees with the docs table`` () =
+    let table = maturityTable ()
+    let projects =
+        packableProjects ()
+        |> List.map (fun path ->
+            let project = load path
+            Path.GetFileNameWithoutExtension path, property project "PackageMaturity")
+        |> Map.ofList
+
+    let declared = projects |> Map.keys |> Set.ofSeq
+    let published = table |> Map.keys |> Set.ofSeq
+    test <@ declared = published @>
+
+    let mismatches =
+        projects
+        |> Map.toList
+        |> List.choose (fun (project, maturity) ->
+            match table.TryFind project with
+            | Some expected when maturity = Some expected -> None
+            | Some expected -> Some(project, maturity, Some expected)
+            | None -> None)
+
+    test <@ mismatches = [] @>

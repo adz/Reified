@@ -8,6 +8,8 @@ targetFramework: net8.0
 
 # Build Generation
 
+<span class="maturity-badge">Maturity: Experimental</span>
+
 Add the runtime Schema package and the private build-time generator package:
 
 ```xml

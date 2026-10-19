@@ -21,6 +21,7 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <NoWarn>$(NoWarn);NU5128</NoWarn>
     <PackageId>Reified</PackageId>
+    <PackageMaturity>Incubating</PackageMaturity>
     <Authors>Adam Davies</Authors>
     <Description>Declare value and model invariants once, then derive validation, parsing, diagnostics, codecs, and contracts from the same declaration. This umbrella package installs every Reified runtime package; install a focused package instead when you need only one capability.</Description>
     <PackageProjectUrl>https://github.com/adz/Reified</PackageProjectUrl>

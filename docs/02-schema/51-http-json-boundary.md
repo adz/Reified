@@ -79,6 +79,8 @@ expects. Reified never opens a socket or writes a response; it produces the valu
 For a stricter contract, `Reified.Schema.Http` assembles RFC 9457 problem-details values from these same parse
 diagnostics; the host adapters that serve them live in the Axial repository.
 
+<span class="maturity-badge">Maturity: Incubating</span>
+
 ## Notes
 
 - `Json.tryParseData` returns `Result<Data, string>`; `Json.parseData` throws `JsonCodecException` instead. Use the

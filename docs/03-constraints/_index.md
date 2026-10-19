@@ -10,6 +10,8 @@ targetFramework: net8.0
 
 # Constraints
 
+<span class="maturity-badge">Maturity: Incubating</span>
+
 `Reified.Constraint` describes which typed values are acceptable. A constraint can be checked directly, reused by a
 refined type, attached to a Schema field, inspected for documentation, and rendered in another language.
 

@@ -13,6 +13,8 @@ targetFramework: net8.0
 
 # Result handling
 
+<span class="maturity-badge">Maturity: Incubating</span>
+
 `Reified.Result` works with the standard F# `Result<'value, 'error>`. Other F# code can pattern match its `Ok` and `Error` values.
 
 Its module and DSL convert values to a `Result`, chain steps, replace errors, extract values, and provide two

@@ -17,6 +17,8 @@ dotnet add package Reified
 
 `Reified` is an umbrella package with no code of its own. It references every runtime package below.
 
+<span class="maturity-badge">Maturity: Incubating</span>
+
 Schema is the integrated path through the packages:
 
 <div class="package-map">

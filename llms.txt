@@ -24,6 +24,7 @@ shape. Decoding an attributed record with the trusted path looks validated but i
 | Keep reading old wire versions | `/schema/versioned-contracts.html` |
 | Run one declaration on .NET and Fable JavaScript | `/notes/aot-trimming-fable.html` |
 | Know which package to install | `/notes/packages-and-platforms.html` |
+| Know how stable a package is | `/notes/package-maturity.html` |
 | Map a failure type to its meaning and conversion | `/guides/error-taxonomy.html` |
 | Pin down "trusted", "admission", "opaque", or "wire" | `/guides/glossary.html` |
 
@@ -51,6 +52,10 @@ independent set of composition tools. Load only the context needed for the task:
 
 `Reified` is an umbrella package that installs every runtime package at once. It adds no API of its own: every
 type still comes from the package documented above.
+
+Each package carries a maturity rating (Experimental, Incubating, or Stable) declared in its project file and
+derived into NuGet metadata. See `/notes/package-maturity.html` for the levels, the promotion rule, and which
+application justifies each package's rating.
 
 Effects, services, concurrency, and hosting are not part of Reified. They live in Axial
 (https://github.com/adz/Axial).

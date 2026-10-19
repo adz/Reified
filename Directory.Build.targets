@@ -71,4 +71,29 @@
           Visible="false" />
   </ItemGroup>
 
+  <!--
+    Package maturity is declared once per packable project as <PackageMaturity> and derived into the
+    package metadata at pack time: the level is appended to PackageTags as maturity-<level> and prefixed
+    to PackageDescription (the NuGet description) as [Level]. The check runs only when the project is
+    packable and declares a PackageId, so tests, tools, and examples never fail it; a packable project
+    without a valid value fails the pack.
+  -->
+  <Target Name="ApplyPackageMaturity"
+          Condition="'$(IsPackable)' != 'false' and '$(PackageId)' != ''"
+          BeforeTargets="GenerateNuspec">
+
+    <Error Condition="'$(PackageMaturity)' == ''"
+           Text="$(PackageId) is packable but declares no &lt;PackageMaturity&gt;. Set it to Experimental, Incubating, or Stable." />
+
+    <Error Condition="'$(PackageMaturity)' != '' and '$(PackageMaturity)' != 'Experimental' and '$(PackageMaturity)' != 'Incubating' and '$(PackageMaturity)' != 'Stable'"
+           Text="$(PackageId) declares an invalid &lt;PackageMaturity&gt; value '$(PackageMaturity)'. Valid values are Experimental, Incubating, and Stable." />
+
+    <PropertyGroup Condition="'$(PackageMaturity)' == 'Experimental' or '$(PackageMaturity)' == 'Incubating' or '$(PackageMaturity)' == 'Stable'">
+      <_ReifiedMaturityTag>maturity-$(PackageMaturity.ToLowerInvariant())</_ReifiedMaturityTag>
+      <PackageTags Condition="'$(PackageTags)' == ''">$(_ReifiedMaturityTag)</PackageTags>
+      <PackageTags Condition="'$(PackageTags)' != ''">$(PackageTags);$(_ReifiedMaturityTag)</PackageTags>
+      <PackageDescription>[$(PackageMaturity)] $(PackageDescription)</PackageDescription>
+    </PropertyGroup>
+  </Target>
+
 </Project>

@@ -8,6 +8,8 @@ targetFramework: net8.0
 
 # Refined
 
+<span class="maturity-badge">Maturity: Incubating</span>
+
 `Reified.Refinements` supplies types that carry an invariant, together with the operations that
 invariant makes possible. Guarded construction is how a value is admitted, but it is not
 the reason to reach for a refined type, a wrapper that only checks on the way in leaves

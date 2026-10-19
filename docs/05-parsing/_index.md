@@ -10,6 +10,8 @@ targetFramework: net8.0
 
 # Parsing
 
+<span class="maturity-badge">Maturity: Incubating</span>
+
 `Reified.Parse` converts serialized text into primitive typed values. `"42"` becomes `42`, `"true"` becomes `true`.
 Unlike `Int32.TryParse`, it returns a value identifying which of three failures occurred.
 

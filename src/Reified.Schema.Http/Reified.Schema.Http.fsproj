@@ -5,6 +5,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsAotCompatible>true</IsAotCompatible>
     <PackageId>Reified.Schema.Http</PackageId>
+    <PackageMaturity>Incubating</PackageMaturity>
     <AssemblyName>Reified.Schema.Http</AssemblyName>
     <RootNamespace>Reified.Schema.Http</RootNamespace>
     <Authors>Adam Davies</Authors>

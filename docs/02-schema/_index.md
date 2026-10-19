@@ -9,6 +9,8 @@ targetFramework: net8.0
 
 # Schema
 
+<span class="maturity-badge">Maturity: Incubating</span>
+
 Schema describes how untrusted boundary values become a model. If a field or constructor invariant fails, parsing
 returns `SchemaErrors` and does not return the model.
 

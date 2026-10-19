@@ -111,6 +111,19 @@ main :not(pre) > code {
     color: var(--reified-text);
 }
 
+.maturity-badge {
+    display: inline-block;
+    margin: 0.25rem 0 1.25rem;
+    padding: 0.25rem 0.7rem;
+    border: 1px solid var(--reified-border);
+    border-radius: 999px;
+    background: var(--reified-surface-soft);
+    color: var(--reified-muted);
+    font: 600 0.72rem/1.4 var(--reified-mono-font);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
 .package-map {
     display: flex;
     justify-content: center;

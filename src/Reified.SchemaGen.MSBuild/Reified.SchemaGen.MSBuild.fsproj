@@ -9,6 +9,7 @@
     <DevelopmentDependency>true</DevelopmentDependency>
     <NoWarn>$(NoWarn);NU5128</NoWarn>
     <PackageId>Reified.SchemaGen.MSBuild</PackageId>
+    <PackageMaturity>Experimental</PackageMaturity>
     <Authors>Adam Davies</Authors>
     <Description>MSBuild integration for Reified schema generation: discovers [&lt;DeriveSchema&gt;]-marked F# records, derives wire schemas before compile, and supports intermediate or checked-in generated files.</Description>
     <PackageProjectUrl>https://github.com/adz/Reified</PackageProjectUrl>
