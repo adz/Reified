@@ -33,7 +33,7 @@ through the schema, discards samples the schema rejects (constructor failures in
 surviving model before yielding it. The outer `Result` reports generation-support failures such as
 `UnsupportedConstraint`; a model the generator yields has already passed both parse and check.
 
-```fsharp no-check reason="FsCheck is a dependency of Reified.Schema.Testing; it's not among the assemblies this audit pipeline resolves, so this block can't be checked here even though the pattern is real."
+```fsharp no-check reason="FsCheck is a dependency of Reified.Schema.Testing, which this page does not reference."
 open System
 open Reified
 open Reified.SchemaDSL
@@ -86,7 +86,7 @@ because it adds the same number of days to both endpoints, but it is only total 
 page stay far from those limits, so the example below does not throw. A production transition should bound its inputs
 or return a result rather than rely on generated values landing in a safe range.
 
-```fsharp no-check reason="Continues the Booking/bookings illustration above; not a standalone compilation unit."
+```fsharp no-check reason="Continues the Booking/bookings example above."
 let shiftedBookings =
     bookings
     |> Array.map (Booking.shift 10.0)
@@ -114,7 +114,7 @@ or hand-picked inputs for malformed data, constraint edges, and constructor fail
 Patterns, custom constraints, and application-specific distributions cannot always be reversed automatically.
 `SchemaGen.rawWith` accepts generators keyed by field path.
 
-```fsharp no-check reason="bookingDeriveSchema is the caller's own DeriveSchema-generated wire schema; not one this fragment can construct standalone."
+```fsharp no-check reason="bookingDeriveSchema is the caller's generated wire schema."
 let overrides =
     Map.ofList [ "reference", Gen.constant (Data.Text "BK-42") ]
 

@@ -7,7 +7,7 @@ combinators apply a fallible operation across a sequence, stopping at the first 
 
 All four take any `seq<_>` and produce a **list**:
 
-```fsharp no-check reason="Shows the functions' type signatures, not a compilation unit."
+```fsharp no-check reason="Type signatures only, not runnable code."
 Result.traverse    : ('a -> Result<'b, 'e>) -> seq<'a> -> Result<'b list, 'e>
 Result.sequence    : seq<Result<'a, 'e>> -> Result<'a list, 'e>
 Result.traverseAll : ('a -> Result<'b, 'e>) -> seq<'a> -> Result<'b list, 'e list>

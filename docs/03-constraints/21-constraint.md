@@ -37,7 +37,7 @@ Change the bounds and the derived message changes with them.
 When a function needs only the application's error case, `Constraint.guard` keeps the checked value and
 `Result.orError` discards the violation:
 
-```fsharp no-check reason="SignupError and InvalidEmail are the application's own error type; not values this page can construct standalone."
+```fsharp no-check reason="SignupError and InvalidEmail belong to the application."
 let validateEmail raw : Result<string, SignupError> =
     raw
     |> Constraint.guard Constraint.email
@@ -78,7 +78,7 @@ Reach for the structured path when the extra facts earn their keep, when you wan
 messages in more than one language, or report several field failures at once. Then keep the violation and
 `Result.mapError` it into a case that carries it:
 
-```fsharp no-check reason="raw and InvalidEmail are the caller's own binding and error case; not values this page can construct standalone."
+```fsharp no-check reason="raw and InvalidEmail belong to the caller."
 raw
 |> Constraint.guard Constraint.email
 |> Result.mapError InvalidEmail   // InvalidEmail of Violation

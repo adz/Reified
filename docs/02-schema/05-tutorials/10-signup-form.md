@@ -83,7 +83,7 @@ Use `SchemaError.render` for field-level messages or `RetainedParseResult.render
 
 ## Use The Trusted Model
 
-```fsharp no-check reason="register and renderForm are the host application's own functions; not values this page can construct standalone."
+```fsharp no-check reason="register and renderForm belong to the host application."
 match parsed.Result with
 | Ok signup -> register signup      // constraints already hold; no re-checking downstream
 | Error _ -> renderForm parsed

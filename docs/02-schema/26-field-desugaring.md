@@ -35,7 +35,7 @@ let validateCompanyEmail (email: ContactEmail) : Result<unit, SchemaError> =
     else Error (SchemaError.Custom("company-email", Some "Company email must end with @example.com."))
 ```
 
-```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; shown here for comparison with the verified plain-function pipeline below, not as a standalone unit."
+```fsharp no-check reason="Shown without its enclosing `schema<T> { }` declaration, for comparison with the verified pipeline below."
 field _.Email {
     withSchema Schema.text
     refine ContactEmail.refinement
@@ -59,7 +59,7 @@ The outer declaration then attaches that `Schema<ContactEmail>` to the `"email"`
 
 `withSchema` replaces canonical type resolution for this field:
 
-```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
+```fsharp no-check reason="Shown without its enclosing `schema<T> { }` declaration."
 field _.Children {
     withSchema (Schema.listWith childSchema)
 }
@@ -75,7 +75,7 @@ its built-in types, and `reified schemagen` emits it for every record it owns (t
 file). A field whose type is such a contract, directly, or wrapped in `list`, `option`, or `Map`, therefore needs
 no `withSchema`:
 
-```fsharp no-check reason="Illustrates field declaration lines shown outside their enclosing schema<T> block."
+```fsharp no-check reason="Field declarations shown outside their enclosing `schema<T>` block."
 field _.Origin        // Origin: Geo            - Geo is a generated contract type
 field _.Waypoints     // Waypoints: Geo list
 field _.Destination   // Destination: Geo option
@@ -90,7 +90,7 @@ it does not declare, so a field of such a type still selects its schema with `wi
 Portable constraints can be inspected by JSON Schema, documentation, and UI interpreters. `constraints` takes a
 list for several at once; `constrain` takes one:
 
-```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
+```fsharp no-check reason="Shown without its enclosing `schema<T> { }` declaration."
 field _.Name {
     constraints [ present; maxLength 80 ]
 }
@@ -118,7 +118,7 @@ let contactEmailSchema =
 
 Inside the field block, either supply the same value or use the destination type's canonical contribution:
 
-```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
+```fsharp no-check reason="Shown without its enclosing `schema<T> { }` declaration."
 field _.Email {
     withSchema Schema.text
     refine ContactEmail.refinement
@@ -131,7 +131,7 @@ type ContactEmail with
     static member Refinement(_: string, _: ContactEmail) = ContactEmail.refinement
 ```
 
-```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
+```fsharp no-check reason="Shown without its enclosing `schema<T> { }` declaration."
 field _.Email {
     withSchema Schema.text
     refine
@@ -154,7 +154,7 @@ let companyEmailSchema =
 
 Inside the block:
 
-```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
+```fsharp no-check reason="Shown without its enclosing `schema<T> { }` declaration."
 field _.Email {
     validate validateCompanyEmail
 }

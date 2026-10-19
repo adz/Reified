@@ -50,7 +50,7 @@ inspection surface.
 
 These three constructors do not exist in a Fable build:
 
-```fsharp no-check reason="Illustrates constructors absent under Fable by design; referencing them bare with no arguments is not something this fragment can compile."
+```fsharp no-check reason="Constructors absent under Fable by design; call shape only."
 Renderer.ofResourceManager
 Renderer.ofResourceManagerWithCultures
 Renderer.ofCurrentCulture
@@ -63,7 +63,7 @@ silent no-op would produce untranslated English in production with nothing to ca
 If a codebase is shared between a .NET host and a Fable client, put the constructor behind the one conditional you
 already have:
 
-```fsharp no-check reason="Illustrates a #if FABLE_COMPILER split; translations and resources are the host application's own values, not ones this page can construct standalone."
+```fsharp no-check reason="A #if FABLE_COMPILER split; translations and resources belong to the host application."
 let renderer =
 #if FABLE_COMPILER
     Renderer.ofLookup translations.TryFind
@@ -140,7 +140,7 @@ assert on a whole violation value rather than on its rendered text.
 
 The lookup is a plain function, so how the bundle arrives is entirely yours. Two shapes work well:
 
-```fsharp no-check reason="Illustrates two bundle-delivery shapes; catalogue/culture/loaded are the host application's own values (a generated per-language Map, and a fetch result), not ones this page can construct standalone."
+```fsharp no-check reason="Two bundle-delivery shapes; catalogue, culture and loaded belong to the host application."
 // Bundled at build time. One Map per language, selected once.
 let renderer = Renderer.ofLookup (catalogue culture).TryFind
 

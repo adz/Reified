@@ -51,7 +51,7 @@ Every version gets its own module with `schema`, `parse`, and `validate`, exactl
 
 The generated `contract` is just the hand-written chain from the handwritten page, with the versions filled in:
 
-```fsharp no-check reason="Shape of emitted code."
+```fsharp no-check reason="Shape of the emitted code."
     let contract
         (migrateV1ToV2: ProfileV1 -> Result<Profile, MigrationError>)
         (source: VersionSource)
@@ -64,7 +64,7 @@ The generated `contract` is just the hand-written chain from the handwritten pag
 **The generator does not write migrations.** It cannot know how a v1 value becomes a v2 value, so each migration is a
 parameter that you supply. `contract` only chains the frozen schemas and your migrations in the right order:
 
-```fsharp no-check reason="Depends on the generated Profile module."
+```fsharp no-check reason="Uses the generated Profile module from above."
 let migrateV1ToV2 (v1: ProfileV1) : Result<Profile, MigrationError> =
     Ok { Name = v1.Name; Email = "" }
 
@@ -103,7 +103,7 @@ type Profile = { Name: string; Email: string; Verified: bool }     // v3
 
 After a build, the generated `contract` has one more parameter:
 
-```fsharp no-check reason="Shape of emitted code."
+```fsharp no-check reason="Shape of the emitted code."
     let contract
         (migrateV1ToV2: ProfileV1 -> Result<ProfileV2, MigrationError>)
         (migrateV2ToV3: ProfileV2 -> Result<Profile, MigrationError>)
@@ -154,7 +154,7 @@ current version's `contract` builder refers to every older schema, so older vers
 A bare `Contract` name is relative to the record's own namespace or module. A dotted name is fully qualified, which
 lets frozen versions live in a separate container:
 
-```fsharp no-check reason="Declares its own namespace or module, which cannot follow the site's F# prelude opens."
+```fsharp no-check reason="A complete file with its own namespace or module, not a fragment."
 // Profile.History.fs: compiled first, never edited again
 module MyApp.Wire.History
 
@@ -164,7 +164,7 @@ open Reified.DerivedSchema
 type ProfileV1 = { Name: string }
 ```
 
-```fsharp no-check reason="Declares its own namespace or module, which cannot follow the site's F# prelude opens."
+```fsharp no-check reason="A complete file with its own namespace or module, not a fragment."
 // Profile.fs
 namespace MyApp.Wire
 

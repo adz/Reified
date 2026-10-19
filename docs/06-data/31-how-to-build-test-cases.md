@@ -53,7 +53,7 @@ the value means:
 
 `case.Value` is plain `Data`, so `Data.patch`, `matching`, `Data.compare`, and `Data.Json.render` apply directly.
 
-```fsharp no-check reason="cases, submit, and test are the caller's own values and test-framework function; not ones this fragment can construct standalone."
+```fsharp no-check reason="cases, submit and test belong to the host application's test suite."
 for case in cases do
     test case.Name (fun () -> case.Value |> submit |> matching [ at "status" "rejected" ])
 ```
@@ -139,7 +139,7 @@ matrixCases |> List.map _.Name
 
 ## Inspect patch failures from an edit list
 
-```fsharp no-check reason="edits and runCase are the caller's own edit list and test runner; not ones this fragment can construct standalone."
+```fsharp no-check reason="edits and runCase belong to the host application's test suite."
 match Data.tryPatch edits baseline with
 | Ok value -> runCase value
 | Error failures ->

@@ -84,7 +84,7 @@ how, and in which language, to say it. Rendering it here would settle that quest
 
 When the application only wants its own error case, discard the violation instead with `Result.orError`:
 
-```fsharp no-check reason="EmailNotValid is an application-specific error case this page doesn't declare; illustrates the alternative to InvalidEmail of Violation, not a standalone compilation unit."
+```fsharp no-check reason="EmailNotValid is an application-owned error case; this shows the mapping shape."
 let validateEmail (request: SignupRequest) =
     request.Email
     |> Constraint.guard email

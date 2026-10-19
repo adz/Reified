@@ -43,7 +43,7 @@ Nothing executes: no getters run, no constructors are called, no checks fire. Th
 
 Each field carries a `SchemaDescription`, shape, declared format, and constraint metadata:
 
-```fsharp no-check reason="Continues the description/signupSchema illustration above; not a standalone compilation unit."
+```fsharp no-check reason="Continues the description/signupSchema example above."
 let email = description.Fields |> List.find (fun field -> field.Name = "email")
 
 email.Schema.Format          // Some SchemaFormat.email (when declared with Schema.withFormat)
@@ -98,7 +98,7 @@ enforcement* must consult the whole expression instead: dropping a conjunct weak
 strengthens an `Any`, which would reject values the library accepts. A conservative alternative recurses over
 `ConstraintDescription.Expression` and refuses any form it cannot represent rather than flattening across it:
 
-```fsharp no-check reason="Continues the jsonKeyword illustration above; not a standalone compilation unit."
+```fsharp no-check reason="Continues the jsonKeyword example above."
 let rec expressionKeywords (description: ConstraintDescription) : string list option =
     match description.Expression with
     | ConstraintExpression.Atom atom -> jsonKeyword atom |> Option.map List.singleton

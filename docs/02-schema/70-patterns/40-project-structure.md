@@ -63,7 +63,7 @@ operational libraries that Domain cannot reference.
 Resolve container-managed objects while constructing the application environment. Application workflows then read
 typed fields from that environment record (`AppEnv.Bookings`, `AppEnv.Clock`), not arbitrary service-provider lookups.
 
-```fsharp no-check reason="The example depends on an application-owned service provider and repository/clock interfaces; Microsoft.Extensions.DependencyInjection is not among the assemblies this audit resolves."
+```fsharp no-check reason="Needs an application-owned service provider plus repository and clock interfaces, and Microsoft.Extensions.DependencyInjection is not referenced here."
 type AppEnv =
     { Bookings: IBookingRepository
       Clock: IClock }

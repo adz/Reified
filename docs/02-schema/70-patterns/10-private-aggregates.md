@@ -135,7 +135,7 @@ module Booking =
 
 Both direct construction and boundary parsing now use `Booking.create`.
 
-```fsharp no-check reason="raw/save/display are the caller's own structured input and functions; not values this page can construct standalone."
+```fsharp no-check reason="raw, save and display belong to the caller."
 match (Schema.parse Booking.schema raw) with
 | Ok booking -> save booking
 | Error diagnostics -> display diagnostics
@@ -147,7 +147,7 @@ match (Schema.parse Booking.schema raw) with
 For an important domain module, an `.fsi` file makes the representation opaque even if the implementation uses a
 normal record. It also gives reviewers a short list of allowed operations.
 
-```fsharp no-check reason="A signature file's val-only module members are only meaningful paired with a matching Booking.fs implementation; not a standalone implementation-file compilation unit."
+```fsharp no-check reason="Signature-file sketch; val-only members need a matching implementation file."
 // Booking.fsi
 namespace MyApp.Domain
 

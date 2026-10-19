@@ -88,7 +88,7 @@ a deferred recursive schema all observe the same resolved definition rather than
 Refined values encode as their raw representation and are reconstructed on decode; nested models, collections, and
 tagged unions follow the same wire shapes the input parser reads:
 
-```fsharp no-check reason="orderSchema is a stand-in for the reader's own schema with a union field; not one this page declares."
+```fsharp no-check reason="orderSchema stands in for the reader's own schema with a union field."
 // A union field {"type":"card","value":{...}} round-trips through the same discriminator convention.
 let orderCodec = Json.compile orderSchema
 ```
@@ -124,7 +124,7 @@ match Json.tryDeserialize codec """{"name":"Ada","age":"not-a-number"}""" with
 The codec reports the first structural failure and stops. When you need every problem reported with redisplayable
 input, a form, a public API, that is boundary parsing's job:
 
-```fsharp no-check reason="document is the caller's own parsed JsonDocument; Data.ofJsonDocument also requires .NET 8+ (#if NET8_0_OR_GREATER && !FABLE_COMPILER), unavailable in the netstandard2.1 build this audit pipeline checks isolated blocks against."
+```fsharp no-check reason="document is the caller's own JsonDocument; Data.ofJsonDocument requires .NET 8 or later."
 // Boundary parsing: complete diagnostics for untrusted input.
 let parsed = Schema.parse customerSchema (Data.ofJsonDocument document)
 ```

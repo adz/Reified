@@ -20,7 +20,7 @@ in [Derived Schemas](/schema/derivation/index.html).
 A wire model describes what the format can carry. Keep it public and permissive. A domain model describes what business
 code may rely on and should protect its invariants with refined values or private construction.
 
-```fsharp no-check reason="Order/OrderError are the application's own domain type and error case; not ones this page can construct standalone."
+```fsharp no-check reason="Order and OrderError belong to the application."
 // Wire DTO: shaped like persisted input.
 type OrderWire = { Sku: string; Quantity: int }
 
@@ -89,7 +89,7 @@ the check, so no second pass runs. There is no automatic structural migration.
 `Contract.parseVersion`, or `VersionSource.UnversionedMeans 1` to treat input without a marker as one registered
 version.
 
-```fsharp no-check reason="Continues the configContract illustration above; raw is the caller's own structured input, not one this fragment constructs standalone."
+```fsharp no-check reason="Continues the configContract example above; raw is the caller's own input."
 match Contract.parse configContract raw with
 | Ok config -> printfn $"%s{config.Host}:%d{config.Port}"
 | Error ContractError.VersionMissing -> eprintfn "no readable schema version"

@@ -37,7 +37,7 @@ schema<Signup> {
 `field` takes the getter and nothing else. The getter fixes the field type, Schema resolves that type's canonical
 schema, and the wire name is the property name, camelCased:
 
-```fsharp no-check reason="Illustrates field declaration lines shown outside their enclosing schema<T> block."
+```fsharp no-check reason="Field declarations shown outside their enclosing `schema<T>` block."
 field _.Name        // wire name "name"
 field _.Age         // wire name "age"
 field _.Tags        // wire name "tags"
@@ -51,7 +51,7 @@ static `Schema` member.
 
 `fieldAs` sets the wire name when it is not the camelCased property name. Explicit names are never transformed:
 
-```fsharp no-check reason="Illustrates field declaration lines shown outside their enclosing schema<T> block."
+```fsharp no-check reason="Field declarations shown outside their enclosing `schema<T>` block."
 fieldAs "email_address" _.Email
 fieldAs "type" _.Number
 ```
@@ -97,7 +97,7 @@ format rather than a short compatibility window.
 
 A block groups transformations for one field:
 
-```fsharp no-check reason="Shows the field block's typed pipeline shape against an application-owned ContactEmail refinement and validator; see Refined Schemas for a working refine+validate example."
+```fsharp no-check reason="Field-block pipeline shape against an application-owned ContactEmail; see Refined Schemas for a working example."
 field _.Email {
     withSchema Schema.text
     constrain present
@@ -187,7 +187,7 @@ for the complete attribute mapping.
 
 ## Refinement changes the type
 
-```fsharp no-check reason="Shows the field block's typed pipeline shape against an application-owned ContactEmail refinement and validator; see Refined Schemas for a working refine+validate example."
+```fsharp no-check reason="Field-block pipeline shape against an application-owned ContactEmail; see Refined Schemas for a working example."
 field _.Email {
     withSchema Schema.text
     constrain present                   // operates on string

@@ -17,7 +17,7 @@ callers unwrapping it at first use, and the invariant buys nothing after the bou
 
 These types remove checks from later code:
 
-```fsharp no-check reason="Illustrative signatures; lines/a/b are the caller's own already-refined values, not ones this page can construct standalone."
+```fsharp no-check reason="Signatures only; lines, a and b are the caller's refined values."
 let total = NonEmptyList.reduce (+) lines   // no seed, no empty case, no option
 let largest = NonEmptyList.max lines        // total
 let ratio = UnitInterval.multiply a b       // closed: still in [0, 1]
@@ -63,7 +63,7 @@ Refine.nonEmptyList ([]: string list)    // Error (Atomic (Expected (Cardinality
 Some types also offer a **total** constructor, which is the one to prefer when the input
 has an obvious correct reading:
 
-```fsharp no-check reason="Illustrative signatures; first/rest/finish/start are the caller's own values, not ones this page can construct standalone."
+```fsharp no-check reason="Signatures only; first, rest, finish and start belong to the caller."
 let lines = NonEmpty(first, rest)              // cannot fail
 let window = Interval.between finish start     // cannot fail: orders the pair
 let ratio = UnitInterval.clamp 1.5             // cannot fail: clamps to 1.0
@@ -76,7 +76,7 @@ Read the underlying value through the `Value` member or the module's `value` fun
 
 The smallest contrast is one partial operation becoming total:
 
-```fsharp no-check reason="Illustrative signatures; lines is the caller's own list, plain on the left and refined on the right, not one value this page can construct standalone."
+```fsharp no-check reason="Signatures only; lines is the caller's list, plain on the left and refined on the right."
 List.max lines            // throws on an empty list
 NonEmptyList.max lines    // total: returns the value
 ```
@@ -130,7 +130,7 @@ rather than catching them.
 
 Numeric ranges are constraints instead:
 
-```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
+```fsharp no-check reason="Shown without its enclosing `schema<T> { }` declaration."
 field _.Quantity { constrain (Constraint.greaterThan 0) }
 ```
 

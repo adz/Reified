@@ -143,7 +143,7 @@ re-establish the fact by hand. Since integer arithmetic is unchecked ,
 `Int32.MaxValue + 1` is negative, an addition returning `PositiveInt` would be unsound,
 which leaves returning `Result`:
 
-```fsharp no-check reason="Illustrative: PositiveInt does not exist in this package. Shows what call sites would cost if it did."
+```fsharp no-check reason="PositiveInt does not exist in this package; shows what call sites would cost if it did."
 // what a refined numeric type costs for ((2 + 3) * 4) + 1
 PositiveInt.add a b
 |> Result.bind (fun s -> PositiveInt.multiply s c)
@@ -155,7 +155,7 @@ Unwrapping, computing, and re-admitting add bulk at every use site and can hide 
 
 Numeric ranges are therefore constraints:
 
-```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
+```fsharp no-check reason="Shown without its enclosing `schema<T> { }` declaration."
 field _.Quantity { constrain (Constraint.greaterThan 0) }
 ```
 
@@ -251,7 +251,7 @@ Slug does not even get that far, joining two slugs can break the pattern.
 Express them as constraints on a primitive instead, the metadata reaching interpreters is
 identical:
 
-```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
+```fsharp no-check reason="Shown without its enclosing `schema<T> { }` declaration."
 field _.DisplayName { constrain Constraint.trimmed }
 
 field _.Slug {

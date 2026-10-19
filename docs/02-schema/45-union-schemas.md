@@ -30,7 +30,7 @@ type Command =
 
 Select the payload case with a function that returns its fields and rejects every other case:
 
-```fsharp no-check reason="The example depends on the application-owned Command union."
+```fsharp no-check reason="Uses the application-owned Command union."
 let trySetVolumeCase = function
     | SetVolume amount -> Some amount
     | _ -> None
@@ -38,7 +38,7 @@ let trySetVolumeCase = function
 
 Then connect each F# case to `Schema.union`:
 
-```fsharp no-check reason="The example depends on the application-owned Command union."
+```fsharp no-check reason="Uses the application-owned Command union."
 let commandSchema =
     Schema.union [
         UnionCase.empty "stop" Stop (function Stop -> true | _ -> false)
@@ -114,7 +114,7 @@ type CustomerId = CustomerId of string
 ```
 
 
-```fsharp no-check reason="The example depends on the application-owned CustomerId union."
+```fsharp no-check reason="Uses the application-owned CustomerId union."
 let customerIdSchema =
     Schema.text
     |> Schema.convert CustomerId (fun (CustomerId value) -> value)
@@ -139,7 +139,7 @@ Schemagen applies the same three rules from the complete F# declaration:
 
 Mark a general union with `[<DeriveUnion>]`:
 
-```fsharp no-check reason="Generated support requires the schemagen build package."
+```fsharp no-check reason="Needs the Reified.SchemaGen.MSBuild generator."
 [<DeriveUnion>]
 type Command =
     | Stop

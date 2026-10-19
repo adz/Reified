@@ -105,7 +105,7 @@ arguments collect under the `_` field.
 On .NET 8+ targets, adapt a parsed `JsonDocument` or `JsonElement` directly, the natural fit for ASP.NET Core
 request bodies:
 
-```fsharp no-check reason="Illustrates ASP.NET Core request-body integration (use! inside a task/async CE, request.Body); those are the host application's own, not values this page can construct standalone."
+```fsharp no-check reason="ASP.NET Core request-body handling; the request and its use! context belong to the host application."
 use! document = JsonDocument.ParseAsync request.Body
 let raw = Data.ofJsonDocument document
 ```

@@ -55,7 +55,7 @@ Use this when either is true:
 attributes at all. The DTO's only job is to name the fields and their wire types correctly; it makes no claim
 about validity.
 
-```fsharp no-check reason="Declares its own namespace as the first thing in the file; not independently checkable."
+```fsharp no-check reason="A complete file with its own namespace, not a fragment."
 namespace MyApp.Wire
 
 open Reified.DerivedSchema

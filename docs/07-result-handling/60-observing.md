@@ -28,7 +28,7 @@ let parseAge (age: string) : Result<int, SignupError> =
 
 Logging mid-pipeline means naming the intermediate value and returning it again:
 
-```fsharp no-check reason="raw is the caller's own input; not a value this fragment can construct standalone."
+```fsharp no-check reason="raw is the caller's own input."
 let logged =
     let outcome = parseAge raw
     match outcome with
@@ -57,7 +57,7 @@ The value returned is the original `Error (AgeNotANumber "abc")`. `tap` did not 
 
 Both callbacks return `unit`; neither changes the result:
 
-```fsharp no-check reason="A bare type signature, not an expression; illustrates the shape rather than compiling as code."
+```fsharp no-check reason="A bare type signature, not runnable code."
 Result.tap      : ('value -> unit) -> Result<'value, 'error> -> Result<'value, 'error>
 Result.tapError : ('error -> unit) -> Result<'value, 'error> -> Result<'value, 'error>
 ```
@@ -67,7 +67,7 @@ Result.tapError : ('error -> unit) -> Result<'value, 'error> -> Result<'value, '
 
 At a boundary, where you want a record of what happened but the caller still gets the untouched result:
 
-```fsharp no-check reason="logger and buildAccount are the host application's own values; not ones this fragment can construct standalone."
+```fsharp no-check reason="logger and buildAccount belong to the host application."
 let handleSignup raw =
     parseAge raw
     |> Result.tapError (fun failure -> logger.Warning("signup rejected: {Failure}", failure))

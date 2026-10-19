@@ -49,7 +49,7 @@ module Booking =
 
 The type tells the caller that the change can be refused:
 
-```fsharp no-check reason="proposedEnd/booking/save/showDateError are the caller's own values and functions; not ones this page can construct standalone."
+```fsharp no-check reason="proposedEnd, booking, save and showDateError belong to the caller."
 match Booking.changeEnd proposedEnd booking with
 | Ok changed -> save changed
 | Error BookingError.EndBeforeStart -> showDateError ()
@@ -94,7 +94,7 @@ An edit screen often changes several fields before submission. Convert to a draf
 once. `Booking.toDraft` is the same accessor [Build A Private Aggregate](/schema/patterns/private-aggregates.html)
 defines alongside `create`.
 
-```fsharp no-check reason="booking/proposedStart/proposedEnd/save/redisplay are the caller's own values and functions, and Booking.toDraft needs a toDraft function this fragment doesn't declare; not a standalone compilation unit."
+```fsharp no-check reason="The booking, save and redisplay values belong to the caller; Booking.toDraft is not declared here."
 let edited =
     booking
     |> Booking.toDraft
@@ -115,7 +115,7 @@ Do not pass the draft into business functions that expect the invariant to hold.
 
 When operations differ sharply by state, use separate types so unavailable transitions are absent from the interface.
 
-```fsharp no-check reason="val-only member declarations are a signature-file (.fsi) shape; this sketch of Order's public surface is not a standalone implementation-file compilation unit."
+```fsharp no-check reason="Signature-file sketch; val-only members need a matching implementation file."
 type DraftOrder
 type SubmittedOrder
 type CancelledOrder

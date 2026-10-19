@@ -94,7 +94,7 @@ let name : Constraint<string> =
 
 ## Building a renderer
 
-```fsharp no-check reason="Illustrates each constructor's call shape; translations/resources/culture are the caller's own ResourceManager and CultureInfo, not values this page can construct standalone."
+```fsharp no-check reason="Call shapes for each constructor; translations, resources and culture belong to the caller."
 // Any key-to-template lookup. The portable constructor, and the one Fable uses.
 Renderer.ofLookup translations.TryFind
 
@@ -119,7 +119,7 @@ effects.
 Register a renderer as an ordinary immutable value. Reified introduces no renderer interface, no ambient registry,
 and no global configuration:
 
-```fsharp no-check reason="Illustrates ASP.NET Core DI registration; services and resources are the host application's own, not values this page can construct standalone."
+```fsharp no-check reason="ASP.NET Core DI registration; services and resources belong to the host application."
 services.AddSingleton(Renderer.ofCurrentCulture resources) |> ignore
 ```
 

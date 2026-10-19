@@ -188,7 +188,7 @@ let renderer =
 An ICU-backed host resolver has the same shape; `icu` below is the host application's own library, not a Reified
 value:
 
-```fsharp no-check reason="icu is the host application's own ICU-backed resolver, the library many applications use for language-specific plural rules (Arabic has six categories, not two); not a value this page can construct standalone."
+```fsharp no-check reason="icu is the host application's ICU-backed resolver for language-specific plural rules."
 let icuRenderer =
     Renderer.Advanced.ofResolver (fun request ->
         match icu.TryGet request.BaseKey with

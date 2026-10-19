@@ -13,7 +13,7 @@ targetFramework: net8.0
 build reads ordinary F# source, infers a schema from each marked record, and generates normal constructor-last Schema
 DSL code before F# compilation.
 
-```fsharp no-check reason="Declares its own namespace as the first thing in the file, which cannot follow the site's F# prelude opens; not independently checkable."
+```fsharp no-check reason="A complete file with its own namespace, not a fragment."
 namespace MyApp.Wire
 
 open Reified.DerivedSchema
@@ -30,7 +30,7 @@ type Signup =
 
 The generated companion module provides:
 
-```fsharp no-check reason="Generated companion members produced by the schemagen build package; the generator does not run in this audit."
+```fsharp no-check reason="Generated companion members; the schemagen generator runs during a project build."
 Signup.schema    // Schema<Signup>
 Signup.parse     // Data -> Result<Signup, SchemaErrors>
 Signup.validate  // Signup -> Result<Signup, SchemaErrors>

@@ -53,7 +53,7 @@ By default output is written below `obj/`, so it should not be committed.
 
 `Wire.fs` may use a namespace or a file-level module. Place marked records directly in that container, not in a nested module:
 
-```fsharp no-check reason="Declares its own namespace as the first thing in the file, which cannot follow the site's F# prelude opens; not independently checkable."
+```fsharp no-check reason="A complete file with its own namespace, not a fragment."
 namespace MyApp.Wire
 
 open Reified.DerivedSchema

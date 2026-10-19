@@ -20,7 +20,7 @@ Ready-made profiles cover the common formats; the full list, with the JSON each 
 [`UnionRepresentations` API reference](/api/Reified.UnionRepresentations.html). Pass one of these values with the same
 case catalogue used by `Schema.union`:
 
-```fsharp no-check reason="The case catalogue is application-owned."
+```fsharp no-check reason="The case catalogue belongs to the application."
 let commandSchema =
     Schema.unionWith
         UnionRepresentations.fsharpSystemTextJsonDefault
@@ -41,7 +41,7 @@ That profile reads and writes FSharp.SystemTextJson's default `Case`/`Fields` fo
 
 Set the representation and payload style on `[<DeriveUnion>]`:
 
-```fsharp no-check reason="Generated support requires the schemagen build package."
+```fsharp no-check reason="Needs the Reified.SchemaGen.MSBuild generator."
 [<DeriveUnion(
     "Case",
     Representation = UnionRepresentationKind.Adjacent,
@@ -60,7 +60,7 @@ to construct the cases, but their names do not appear in the positional arrays.
 The external named/unwrapped profile writes empty cases as strings, one-field cases as scalars, and multi-field cases
 as named objects:
 
-```fsharp no-check reason="Generated support requires the schemagen build package."
+```fsharp no-check reason="Needs the Reified.SchemaGen.MSBuild generator."
 [<DeriveUnion(
     Representation = UnionRepresentationKind.External,
     PayloadStyle = UnionPayloadStyleKind.NamedWithUnwrappedSingle,
@@ -84,7 +84,7 @@ type ExistingExternalCommand =
 If an established named-field contract uses `item`, `item1`, or `item2`, retain meaningful F# names and override the
 wire names explicitly:
 
-```fsharp no-check reason="Generated support requires the schemagen build package."
+```fsharp no-check reason="Needs the Reified.SchemaGen.MSBuild generator."
 [<DeriveUnion>]
 type Command =
     | SetVolume of [<SchemaName "item">] amount: decimal
@@ -103,7 +103,7 @@ Application code still uses `amount`, `x`, and `y`. Only the JSON keys retain th
 In a handwritten case, call `fieldAs` once per field. Its first argument is the JSON key; its second argument reads the
 meaningful payload field:
 
-```fsharp no-check reason="The example depends on the application-owned Command union."
+```fsharp no-check reason="Uses the application-owned Command union."
 type MovePayload = { x: int; y: int }
 
 let tryMoveCase = function
@@ -125,7 +125,7 @@ let moveCase =
 Renaming individual fields cannot produce `{ "type": "move", "items": [10, 20] }`. That JSON uses adjacent tagging
 with a positional payload:
 
-```fsharp no-check reason="The case catalogue is application-owned."
+```fsharp no-check reason="The case catalogue belongs to the application."
 let commandSchema =
     Schema.unionWith
         (UnionRepresentation.Adjacent(
@@ -156,7 +156,7 @@ controls how the case's fields are shaped inside the payload.
 
 Use this configuration when FSharp.SystemTextJson and Reified must write the same default JSON:
 
-```fsharp no-check reason="This example requires FSharp.SystemTextJson."
+```fsharp no-check reason="Needs FSharp.SystemTextJson."
 let fsharpOptions =
     JsonFSharpOptions
         .Default()

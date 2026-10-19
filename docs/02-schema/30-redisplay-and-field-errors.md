@@ -156,7 +156,7 @@ At `SchemaPath.root`, full rendering uses `constraint.attribute.default`, "value
 `RetainedParseResult.Result` stays typed to `SchemaErrors`, so translate interpreter errors into a domain or application
 error type by mapping that `Result` while keeping the retained `Input` alongside it:
 
-```fsharp no-check reason="SignupError is an application-owned error type this page cannot declare on its own; illustrates the mapping shape, not a standalone unit."
+```fsharp no-check reason="SignupError is an application-owned error type; this shows the mapping shape."
 let domainResult =
     parsed.Result
     |> Result.mapError (fun errors ->

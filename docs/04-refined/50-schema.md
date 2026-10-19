@@ -36,7 +36,7 @@ and checking project through `NonBlankString.Value`.
 
 A numeric range is a constraint rather than a refined type, so it goes on the primitive:
 
-```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
+```fsharp no-check reason="Shown without its enclosing `schema<T> { }` declaration."
 field _.Quantity { constrain (Constraint.greaterThan 0) }
 ```
 

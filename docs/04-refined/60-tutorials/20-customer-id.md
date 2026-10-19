@@ -31,7 +31,7 @@ Only the first changes what later code can assume. The second is real validation
 downstream consequence; the third is validation that arithmetic immediately undoes. Both
 stay constraints on the underlying value:
 
-```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
+```fsharp no-check reason="Shown without its enclosing `schema<T> { }` declaration."
 field _.Email {
     constrain Constraint.present
     constrain Constraint.email
@@ -121,7 +121,7 @@ a removed branch, use a constraint instead.
 
 ## Use it in domain code
 
-```fsharp no-check reason="repository is the caller's own data-access value; not one this fragment can construct standalone."
+```fsharp no-check reason="repository is the caller's data-access value."
 let loadCustomer (id: CustomerId) =
     // No guard: id is known to be above zero.
     repository.load id.Value

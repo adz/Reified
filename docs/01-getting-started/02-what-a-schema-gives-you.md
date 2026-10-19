@@ -161,7 +161,7 @@ follow. When a rule has no sound generation — a `pattern`, a custom predicate,
 fails closed with `UnsupportedConstraint`, naming the field path and the rule, instead of emitting fixtures that
 ignore it.
 
-```fsharp no-check reason="SchemaGen.model lives in Reified.Schema.Testing and returns an FsCheck generator; this is the call shape, resolved in the linked page's own context, not by this page's compile check."
+```fsharp no-check reason="SchemaGen.model lives in Reified.Schema.Testing and returns an FsCheck generator; the testing page shows it in context."
 open Reified.Schema.Testing
 
 let generated = SchemaGen.model signupSchema

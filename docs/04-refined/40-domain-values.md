@@ -60,7 +60,7 @@ module ContactEmail =
 
 `ContactEmail.create` is now the only way in. Construction returns check failures directly:
 
-```fsharp no-check reason="Continues the isolated block above; shown separately for readability, not as an independently-compiling unit (rawEmail is illustrative caller input)."
+```fsharp no-check reason="Continues the isolated block above; rawEmail is illustrative caller input."
 let email : Result<ContactEmail, Violation> =
     ContactEmail.create rawEmail
 ```

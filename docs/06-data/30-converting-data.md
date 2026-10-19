@@ -53,7 +53,7 @@ Data.Json.render value
 On .NET 8+, use `Data.ofJsonElement` or `Data.ofJsonDocument` when JSON has already been parsed with
 `System.Text.Json`. These conversion functions are intentionally .NET-only.
 
-```fsharp no-check reason="Data.ofJsonDocument requires .NET 8+ (#if NET8_0_OR_GREATER && !FABLE_COMPILER, where System.Text.Json ships in-box); unavailable in the netstandard2.1 build this audit pipeline checks isolated blocks against, regardless of this page's own net8.0 targetFramework."
+```fsharp no-check reason="Data.ofJsonDocument requires .NET 8 or later."
 use document = System.Text.Json.JsonDocument.Parse("""{"name":"Ada"}""")
 let value = Data.ofJsonDocument document
 
@@ -68,7 +68,7 @@ The returned `Data` is a copy and remains usable after the document is disposed.
 
 Under Fable, pass the result of the host's `JSON.parse` to `Data.ofJsonValue`:
 
-```fsharp no-check reason="Fable-only snippet: Fable.Core and JS.JSON are not available when this page is checked against the .NET project."
+```fsharp no-check reason="Fable-only snippet; Fable.Core and JS.JSON are unavailable in a .NET build."
 open Fable.Core
 
 let value = JS.JSON.parse """{"name":"Ada","active":true}""" |> Data.ofJsonValue
@@ -206,7 +206,7 @@ Data.ofNameValues [ "tag", "fsharp"; "tag", "validation"; "name", "Ada" ]
 Each adapter produces source-neutral `Data`, not a typed domain model. `Schema.parse` converts leaves to typed values,
 applies rules, and reports failures against field paths.
 
-```fsharp no-check reason="argv and Registration.schema are the caller's own process arguments and application schema; not ones this fragment can construct standalone."
+```fsharp no-check reason="argv and Registration.schema belong to the host application."
 Data.ofCliArgs argv
 |> Schema.parse Registration.schema
 ```

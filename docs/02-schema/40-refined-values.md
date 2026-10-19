@@ -47,7 +47,7 @@ This is the form to prefer at use sites. Every built-in refined type from
 Rules that need a parameter, such as a length range or a pattern, are constraints rather than types. They belong on
 the field, because the bounds are a property of *this* field rather than of the value:
 
-```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
+```fsharp no-check reason="Shown without its enclosing `schema<T> { }` declaration."
 field _.Name {
     constrain Constraint.present
     constrain (Constraint.lengthBetween 2 80)
@@ -91,7 +91,7 @@ The `email` format is intrinsic to `Email`, so its refinement owns that constrai
 
 Expand the field to expose its wire schema:
 
-```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
+```fsharp no-check reason="Shown without its enclosing `schema<T> { }` declaration."
 field _.Email {
     withSchema Schema.text
     constraints [ present; maxLength 80 ]
@@ -153,7 +153,7 @@ A raw-text constraint must appear before refinement because it cannot be applied
 
 Suppose only the billing form imposes an 80-character transport limit:
 
-```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
+```fsharp no-check reason="Shown without its enclosing `schema<T> { }` declaration."
 field _.BillingEmail {
     withSchema Schema.text
     constraints [ present; maxLength 80 ]
@@ -179,7 +179,7 @@ let even : Constraint<int> =
     Constraint.custom "must be an even quantity" (fun value -> value % 2 = 0)
 ```
 
-```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
+```fsharp no-check reason="Shown without its enclosing `schema<T> { }` declaration."
 field _.Quantity {
     constrain even
 }
@@ -285,7 +285,7 @@ type ContactEmail with
 
 Then an explicitly selected raw schema can use bare `refine`:
 
-```fsharp no-check reason="A field block is only valid inside an enclosing schema<T> { } declaration; not a standalone compilation unit."
+```fsharp no-check reason="Shown without its enclosing `schema<T> { }` declaration."
 field _.Email {
     withSchema Schema.text
     refine

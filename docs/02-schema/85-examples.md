@@ -29,7 +29,7 @@ Source:
 The admission pipeline is `Parse` → `Refinement.create` (or a checked `create`) → the domain record. Each step maps its
 own error so a caller can tell a parse failure from a rule failure:
 
-```fsharp no-check reason="Excerpt from a whole source file's module form; not independently checkable."
+```fsharp no-check reason="Excerpt from a whole source file, not a fragment."
 result {
     let! parsedId = Parse.int rawId |> Result.mapError (sprintf "%A")
     let! id = ProductId.create parsedId |> Result.mapError Violation.render
@@ -58,7 +58,7 @@ Source:
 
 A refined field type contributes one canonical schema through a static member; a bare `field` then resolves it:
 
-```fsharp no-check reason="Excerpt from a whole source file's module form; not independently checkable."
+```fsharp no-check reason="Excerpt from a whole source file, not a fragment."
 type Quantity =
     private
     | Quantity of int

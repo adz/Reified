@@ -169,7 +169,7 @@ constraint.cardinality.minimum.other = doit contenir au moins {minimum} élémen
 Two forms are all ordinary lookup does. A language with more categories, or one where the category depends on more
 than the value, takes an advanced resolver:
 
-```fsharp no-check reason="Illustrates integrating an external ICU-backed catalogue, the library many applications use for language-specific plural rules (Arabic has six categories, not two); icu/cldrCategory are the host application's own, not values this page can construct standalone."
+```fsharp no-check reason="An external ICU-backed catalogue for language-specific plural rules; icu and cldrCategory belong to the host application."
 let renderer =
     Renderer.Advanced.ofResolver (fun request ->
         match request.PluralArgument, icu.TryGet request.BaseKey with
@@ -187,7 +187,7 @@ rendering.
 
 For .NET resources, one renderer at the composition root:
 
-```fsharp no-check reason="Illustrates ASP.NET Core DI registration and a .NET ResourceManager; services and resources are the host application's own, not values this page can construct standalone."
+```fsharp no-check reason="ASP.NET Core DI registration and a .NET ResourceManager; services and resources belong to the host application."
 let renderer = Renderer.ofCurrentCulture resources
 services.AddSingleton renderer |> ignore
 ```
@@ -222,7 +222,7 @@ Base-catalogue coverage needs one predicate, because the skeleton emits `.one`/`
 entries instead of the bare key. A filled skeleton therefore satisfies either the bare key or both plural forms,
 and never both a bare key and its plural pair at once:
 
-```fsharp no-check reason="Illustrates a real xUnit/Unquote test; those test-framework dependencies are not available to this page's own compile check."
+```fsharp no-check reason="Uses xUnit and Unquote, which this page does not reference."
 let coversKey (translations: Map<string, string>) (key: string) =
     match Catalogue.pluralArgument.TryFind key with
     | Some (Some _) ->
