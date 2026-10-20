@@ -35,7 +35,8 @@ type Interval<'value when 'value: comparison> =
         this.UpperValue
 
     override this.ToString() =
-        let render value = System.Convert.ToString(box value, System.Globalization.CultureInfo.CurrentCulture)
+        // Object.ToString keeps current-culture number formatting, as the previous interpolation did, and compiles under Fable.
+        let render value = match box value with null -> "" | boxed -> boxed.ToString()
         "[" + render this.LowerValue + ", " + render this.UpperValue + "]"
 
 /// Operations over inclusive ranges of ordered values.

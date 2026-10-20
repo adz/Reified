@@ -25,7 +25,8 @@ type Bounded<'value when 'value: comparison> =
         this.BoundsValue
 
     override this.ToString() =
-        let value = System.Convert.ToString(box this.BoundedValue, System.Globalization.CultureInfo.CurrentCulture)
+        // Object.ToString keeps current-culture number formatting, as the previous interpolation did, and compiles under Fable.
+        let value = match box this.BoundedValue with null -> "" | boxed -> boxed.ToString()
         value + " in " + this.BoundsValue.ToString()
 
 /// Operations over values that carry their permitted range.
