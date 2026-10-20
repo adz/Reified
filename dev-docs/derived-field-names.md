@@ -25,8 +25,9 @@ an explicit quotation compiles but throws, because the quotation then carries no
 ## Why the two paths differ
 
 On .NET the constructor uses `ReflectedDefinition(includeValue = true)`, so the quotation carries the
-already-compiled getter and `WithValue` hands it straight back. Nothing is evaluated at run time and no reflection
-is performed, which is what keeps the AOT and trimming guarantees in `docs/95-notes/82-aot-trimming-fable.md` true.
+already-compiled getter and `WithValue` hands it straight back. Nothing is evaluated on parse or encode paths, but
+the quotation machinery roots FSharp.Core reflection warnings during NativeAOT analysis. Applications requiring a
+warning-free NativeAOT publish use `fieldAs`.
 
 Fable does not implement `Expr.WithValue`. Using `includeValue = true` there fails to compile:
 
@@ -78,7 +79,8 @@ the `Fable` FAKE target compiles the Fable surface and runs it on Node.
 `Program.fs` asserts `planSummary = [ "0:name"; "1:age" ]` — so a regression in either the name derivation or the
 rebuilt getter fails the check rather than silently producing wrong wire names.
 
-the `NativeAot` FAKE target executes the .NET path natively under NativeAOT for the same reason.
+The `NativeAot` FAKE target deliberately uses `fieldAs`, proving the explicit-name path stays free of quotation
+reflection warnings. Ordinary .NET tests cover the quotation path.
 
 ## Deliberate limits
 

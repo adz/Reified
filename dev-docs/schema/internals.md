@@ -110,8 +110,9 @@ a boxed `FieldDefinition<'model,'last>` — the cursor.
   instead. Explicit names are never transformed; the camelCase policy applies only to derived names. Field blocks
   add exact input-only names with `alias`/`aliases`; parsing and codecs accept them, while encoding and export retain
   the canonical name. Model closure rejects collisions across all canonical names and aliases.
-  Verified under NativeAOT by the AOT probe and on Node by the Fable probe. The .NET and Fable
-  quotation paths differ — see `dev-docs/derived-field-names.md`.
+  Verified on Node by the Fable probe. The NativeAOT probe uses `fieldAs` because quotation name extraction
+  roots FSharp.Core reflection warnings. The .NET and Fable quotation paths differ — see
+  `dev-docs/derived-field-names.md`.
 - `field` (no explicit schema) resolves the value schema from the getter's result type via
   `SchemaDefaults.Resolve()` — an overload set, extendable by giving a type a
   `static member Schema: T -> Schema<T>`. Its generic option/list/map overloads resolve member schemas recursively. Optional

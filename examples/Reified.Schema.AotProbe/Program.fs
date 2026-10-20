@@ -51,22 +51,21 @@ type SummaryFactory<'model>() =
 let probeSchemaPlan () =
     let schema =
         schema<SchemaContact> {
-            field _.Name
-            field _.Age
+            fieldAs "name" _.Name
+            fieldAs "age" _.Age
             construct (fun name age -> { Name = name; Age = age })
         }
 
     Schema.compilePlan (SummaryFactory<SchemaContact>()) schema
 
-let probeBareGetterFields () =
-    // The bare field form derives wire names from getter quotations; this proves the quotation
-    // pattern-match and the compiled-getter extraction both survive native AOT.
+let probeExplicitGetterFields () =
+    // Explicit names and ordinary getter functions keep schema construction free of quotation reflection.
     let schema =
         schema<SchemaContact> {
-            field _.Name {
+            fieldAs "name" _.Name {
                 constrain (Constraint.minLength 1)
             }
-            field _.Age
+            fieldAs "age" _.Age
             construct (fun name age -> { Name = name; Age = age })
         }
 
@@ -645,7 +644,7 @@ let probe () =
             { Order = 1; ExternalName = "age" }
         ]
 
-    probeBareGetterFields ()
+    probeExplicitGetterFields ()
     probeTypeDirectedConstraints ()
     probeWideRecordJson ()
     probeWideRecordParse ()

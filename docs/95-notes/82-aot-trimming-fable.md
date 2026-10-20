@@ -9,9 +9,10 @@ targetFramework: net8.0
 
 Reified performs no runtime reflection in hot paths. Schemas, constructors, getters, checks, codecs, and service
 access use explicit declarations the compiler can see, allowing trimming and ahead-of-time compilation without
-runtime discovery. The bare `field _.Name` form reads a property name from the
-getter expression once during schema construction, never per parsed or encoded value. The AOT probe executes this
-path natively.
+runtime discovery. Use `fieldAs "name" _.Name` in a NativeAOT application: its explicit name and ordinary getter
+function require no quotation reflection. The bare `field _.Name` convenience reads a property name from a
+quotation once during schema construction; keep it for applications that do not require a warning-free NativeAOT
+publish.
 
 ## Why It Holds By Construction
 
@@ -46,11 +47,12 @@ A consumer does not inherit compiler flags from a NuGet dependency. To apply the
 
 With that option, give application records and unions an explicit `ToString` only when their text is part of the
 application contract, and replace `%A` formatting with a domain formatter. Reified's NativeAOT probes contain no
-printf-family calls and treat IL2104 and IL3053 like every other warning: a summary warning from `FSharp.Core` fails
-the publish. The Schema probe currently exposes such summaries. Expanded diagnostics identify FSharp quotation
-reflection used by field-name extraction and FSharp printf retained by `JsonSchema`'s string assembly; those paths
-must be removed or annotated before that probe is clean. The probes catch failures in the exercised paths, not every
-possible reflection or trimming issue in a consumer application.
+printf-family calls. The Result, Constraint, and Refinements probes treat
+IL2104 and IL3053 like every other warning. The Schema probe uses `fieldAs` rather than the quotation-based `field`
+form and exercises JSON Schema generation without FSharp printf formatting, but temporarily leaves those two
+summary warnings non-fatal: `fieldAs` returns the shared public field-builder type, whose quotation constructor still
+roots FSharp.Core quotation and printf reflection even when the application does not call it. The probes catch
+failures in the exercised paths, not every possible reflection or trimming issue in a consumer application.
 
 ### Records with many fields
 
@@ -152,7 +154,8 @@ and asserts the derived wire names from the compiled JavaScript.
 ## Runtime implications
 
 - `PublishAot=true` and `PublishTrimmed=true` work without `DynamicDependency` annotations, trimmer XML, or source
-  generators.
+  generators. `fieldAs` avoids quotation execution, though its shared builder type currently leaves FSharp.Core
+  summary warnings in a warning-as-error publish.
 - Startup does not pay for converter caches or expression-tree compilation; codecs and parsers are compiled once from
   explicit declarations.
 - The same domain model and boundary declaration can serve .NET services, native binaries, and Fable clients.

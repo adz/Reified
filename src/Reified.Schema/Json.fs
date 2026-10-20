@@ -162,7 +162,7 @@ module rec Json =
                     | :? JsonCodecException as ex ->
                         raise (
                             JsonCodecException(
-                                "[" + string count + "]" + (if ex.Path = "$" then "" else ex.Path.Substring 1),
+                                "[" + count.ToString(Globalization.CultureInfo.InvariantCulture) + "]" + (if ex.Path = "$" then "" else ex.Path.Substring 1),
                                 ex.Detail,
                                 ex
                             )

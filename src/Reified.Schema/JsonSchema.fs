@@ -41,7 +41,8 @@ module JsonSchema =
             | '\n' -> builder.Append "\\n" |> ignore
             | '\r' -> builder.Append "\\r" |> ignore
             | '\t' -> builder.Append "\\t" |> ignore
-            | c when int c < 32 -> builder.AppendFormat("\\u{0:x4}", int c) |> ignore
+            | c when int c < 32 ->
+                builder.Append("\\u").Append((int c).ToString("x4", CultureInfo.InvariantCulture)) |> ignore
             | c -> builder.Append c |> ignore)
 
         builder.ToString()
@@ -49,13 +50,13 @@ module JsonSchema =
     let private literal (value: obj) =
         match value with
         | null -> "null"
-        | :? string as text -> sprintf "\"%s\"" (escape text)
-        | :? char as character -> sprintf "\"%s\"" (escape (string character))
+        | :? string as text -> "\"" + escape text + "\""
+        | :? char as character -> "\"" + escape (character.ToString()) + "\""
         | :? bool as flag -> if flag then "true" else "false"
         | :? float as number when Double.IsNaN number || Double.IsInfinity number ->
-            sprintf "\"%s\"" (Convert.ToString(number, CultureInfo.InvariantCulture))
+            "\"" + Convert.ToString(number, CultureInfo.InvariantCulture) + "\""
         | :? float32 as number when Single.IsNaN number || Single.IsInfinity number ->
-            sprintf "\"%s\"" (Convert.ToString(number, CultureInfo.InvariantCulture))
+            "\"" + Convert.ToString(number, CultureInfo.InvariantCulture) + "\""
         | other ->
             // Numbers are emitted bare and everything else is quoted. Type tests rather than
             // Type.GetTypeCode, which Fable does not support. Fable erases the numeric types to one
@@ -79,7 +80,7 @@ module JsonSchema =
 
             let text = Convert.ToString(other, CultureInfo.InvariantCulture)
 
-            if isNumber then text else text |> escape |> sprintf "\"%s\""
+            if isNumber then text else "\"" + escape text + "\""
 
     /// Collects the constraint descriptions visible at a boundary: the layer's own constraints plus every
     /// refinement layer down to the primitive foundation. A refinement's constraint is written against the raw
@@ -133,10 +134,10 @@ module JsonSchema =
     /// equality for them and no `const`, `enum`, `contains`, or `uniqueItems` may be emitted from one.
     let private comparableLiteral (value: ConstraintValue) =
         match value with
-        | ConstraintValue.Text text -> Some(sprintf "\"%s\"" (escape text))
-        | ConstraintValue.Char character -> Some(sprintf "\"%s\"" (escape (string character)))
+        | ConstraintValue.Text text -> Some("\"" + escape text + "\"")
+        | ConstraintValue.Char character -> Some("\"" + escape (character.ToString()) + "\"")
         | ConstraintValue.Boolean flag -> Some(if flag then "true" else "false")
-        | ConstraintValue.Integer number -> Some(string number)
+        | ConstraintValue.Integer number -> Some(number.ToString(CultureInfo.InvariantCulture))
         | ConstraintValue.Decimal number -> Some(number.ToString CultureInfo.InvariantCulture)
         | ConstraintValue.BigInteger _
         | ConstraintValue.Guid _
@@ -153,9 +154,9 @@ module JsonSchema =
     /// rounding: `0.3 % 0.1` is not zero, so the two disagree in both directions.
     let private numericLiteral (value: ConstraintValue) =
         match value with
-        | ConstraintValue.Integer number -> Some(string number)
+        | ConstraintValue.Integer number -> Some(number.ToString(CultureInfo.InvariantCulture))
         | ConstraintValue.Decimal number -> Some(number.ToString CultureInfo.InvariantCulture)
-        | ConstraintValue.BigInteger number -> Some(string number)
+        | ConstraintValue.BigInteger number -> Some(number.ToString(CultureInfo.InvariantCulture))
         | _ -> None
 
     let private atomKeywords shape (atom: ConstraintAtom) : Fidelity =
@@ -164,11 +165,13 @@ module JsonSchema =
             | SchemaShape.Primitive PrimitiveValueKind.Text -> true
             | _ -> false
 
-        let sizeKeyword prefix bound =
+        let sizeKeyword prefix (bound: int) =
+            let keyword suffix = "\"" + prefix + suffix + "\":" + bound.ToString(CultureInfo.InvariantCulture)
+
             match shape with
-            | SchemaShape.Primitive PrimitiveValueKind.Text -> Some(sprintf "\"%sLength\":%d" prefix bound)
-            | SchemaShape.Many _ -> Some(sprintf "\"%sItems\":%d" prefix bound)
-            | SchemaShape.MapOf _ -> Some(sprintf "\"%sProperties\":%d" prefix bound)
+            | SchemaShape.Primitive PrimitiveValueKind.Text -> Some(keyword "Length")
+            | SchemaShape.Many _ -> Some(keyword "Items")
+            | SchemaShape.MapOf _ -> Some(keyword "Properties")
             | _ -> None
 
         let sizeKeywords bounds =
@@ -178,7 +181,7 @@ module JsonSchema =
 
         let comparison keyword operand =
             match numericLiteral operand with
-            | Some literal -> Enforced [ sprintf "\"%s\":%s" keyword literal ]
+            | Some literal -> Enforced [ "\"" + keyword + "\":" + literal ]
             | None -> NotEnforceable
 
         match atom with
@@ -204,11 +207,11 @@ module JsonSchema =
         | CardinalityAtom(Cardinality.Between(minimum, maximum)) -> sizeKeywords [ "min", minimum; "max", maximum ]
         | RelationAtom(Compared(Equal, expected)) ->
             match comparableLiteral expected with
-            | Some literal -> Enforced [ sprintf "\"const\":%s" literal ]
+            | Some literal -> Enforced [ "\"const\":" + literal ]
             | None -> NotEnforceable
         | RelationAtom(Compared(NotEqual, unexpected)) ->
             match comparableLiteral unexpected with
-            | Some literal -> Excluded(sprintf "\"const\":%s" literal)
+            | Some literal -> Excluded("\"const\":" + literal)
             | None -> NotEnforceable
         | RelationAtom(Compared(GreaterThan, minimum)) -> comparison "exclusiveMinimum" minimum
         | RelationAtom(Compared(LessThan, maximum)) -> comparison "exclusiveMaximum" maximum
@@ -217,25 +220,25 @@ module JsonSchema =
         | RelationAtom(Within(minimum, maximum)) ->
             match numericLiteral minimum, numericLiteral maximum with
             | Some minimum, Some maximum ->
-                Enforced [ sprintf "\"minimum\":%s" minimum; sprintf "\"maximum\":%s" maximum ]
+                Enforced [ "\"minimum\":" + minimum; "\"maximum\":" + maximum ]
             | _ -> NotEnforceable
         | MembershipAtom(Membership.OneOf choices) ->
             match choices |> List.map comparableLiteral with
             | literals when not literals.IsEmpty && literals |> List.forall Option.isSome ->
-                Enforced [ literals |> List.map Option.get |> String.concat "," |> sprintf "\"enum\":[%s]" ]
+                Enforced [ "\"enum\":[" + (literals |> List.map Option.get |> String.concat ",") + "]" ]
             | _ -> NotEnforceable
         | MembershipAtom(NoneOf choices) ->
             match choices |> List.map comparableLiteral with
             | literals when not literals.IsEmpty && literals |> List.forall Option.isSome ->
-                Excluded(literals |> List.map Option.get |> String.concat "," |> sprintf "\"enum\":[%s]")
+                Excluded("\"enum\":[" + (literals |> List.map Option.get |> String.concat ",") + "]")
             | _ -> NotEnforceable
         | MembershipAtom(Membership.Contains item) ->
             match comparableLiteral item with
-            | Some literal -> Enforced [ sprintf "\"contains\":{\"const\":%s}" literal ]
+            | Some literal -> Enforced [ "\"contains\":{\"const\":" + literal + "}" ]
             | None -> NotEnforceable
         | MembershipAtom(Membership.NotContains item) ->
             match comparableLiteral item with
-            | Some literal -> Excluded(sprintf "\"contains\":{\"const\":%s}" literal)
+            | Some literal -> Excluded("\"contains\":{\"const\":" + literal + "}")
             | None -> NotEnforceable
         // `uniqueItems` compares decoded wire values. That substitutes for typed equality only where decoding is
         // injective, which the item shape decides — two spellings of one GUID or instant are distinct on the wire
@@ -269,15 +272,16 @@ module JsonSchema =
         | FormatAtom Numeric -> NotEnforceable
         | NumberAtom(MultipleOf divisor) ->
             match numericLiteral divisor with
-            | Some literal -> Enforced [ sprintf "\"multipleOf\":%s" literal ]
+            | Some literal -> Enforced [ "\"multipleOf\":" + literal ]
             | None -> NotEnforceable
         // The JSON number grammar already excludes NaN and the infinities.
         | NumberAtom Finite -> Enforced []
 
     let private runtimeEntry key description =
         match description with
-        | Some description -> sprintf "{\"rule\":\"%s\",\"description\":%s}" key (literal (box (description: string)))
-        | None -> sprintf "{\"rule\":\"%s\"}" key
+        | Some description ->
+            "{\"rule\":\"" + key + "\",\"description\":" + literal (box (description: string)) + "}"
+        | None -> "{\"rule\":\"" + key + "\"}"
 
     let private opaqueEntry (opaque: OpaqueConstraint) =
         match opaque with
@@ -330,24 +334,22 @@ module JsonSchema =
         let matched =
             match lowering.Patterns |> List.distinct with
             | [] -> []
-            | [ single ] -> [ sprintf "\"pattern\":\"%s\"" (escape single) ]
+            | [ single ] -> [ "\"pattern\":\"" + escape single + "\"" ]
             | several ->
-                several
-                |> List.map (escape >> sprintf "{\"pattern\":\"%s\"}")
-                |> String.concat ","
-                |> sprintf "\"allOf\":[%s]"
-                |> List.singleton
+                let patterns =
+                    several
+                    |> List.map (fun pattern -> "{\"pattern\":\"" + escape pattern + "\"}")
+                    |> String.concat ","
+
+                [ "\"allOf\":[" + patterns + "]" ]
 
         let excluded =
             match lowering.Exclusions |> List.distinct with
             | [] -> []
-            | [ single ] -> [ sprintf "\"not\":{%s}" single ]
+            | [ single ] -> [ "\"not\":{" + single + "}" ]
             | several ->
-                several
-                |> List.map (sprintf "{%s}")
-                |> String.concat ","
-                |> sprintf "\"not\":{\"anyOf\":[%s]}"
-                |> List.singleton
+                let cases = several |> List.map (fun body -> "{" + body + "}") |> String.concat ","
+                [ "\"not\":{\"anyOf\":[" + cases + "]}" ]
 
         lowering.Keywords @ matched @ excluded
 
@@ -383,10 +385,10 @@ module JsonSchema =
             if lowerings |> List.forall (fun lowering -> List.isEmpty lowering.Runtime) then
                 let cases =
                     lowerings
-                    |> List.map (fun lowering -> lowering |> enforcementKeywords |> String.concat "," |> sprintf "{%s}")
+                    |> List.map (fun lowering -> "{" + (lowering |> enforcementKeywords |> String.concat ",") + "}")
                     |> String.concat ","
 
-                { nothing with Keywords = [ sprintf "\"anyOf\":[%s]" cases ] }
+                { nothing with Keywords = [ "\"anyOf\":[" + cases + "]" ] }
             else
                 { nothing with Runtime = branches |> List.collect runtimeEntries }
         | ConstraintExpression.Optional inner ->
@@ -401,7 +403,7 @@ module JsonSchema =
         let runtimeKeyword =
             match lowering.Runtime |> List.distinct with
             | [] -> []
-            | entries -> [ entries |> String.concat "," |> sprintf "\"x-reified-runtime-constraints\":[%s]" ]
+            | entries -> [ "\"x-reified-runtime-constraints\":[" + String.concat "," entries + "]" ]
 
         enforcementKeywords lowering @ runtimeKeyword
 
@@ -446,12 +448,12 @@ module JsonSchema =
         // `pattern`. Declaring both emits both — no collision, no precedence rule.
         let formatKeyword =
             match boundaryFormat description with
-            | Some format -> [ sprintf "\"format\":\"%s\"" (escape format.Name) ]
+            | Some format -> [ "\"format\":\"" + escape format.Name + "\"" ]
             | None -> []
 
         let descriptionKeyword =
             match boundaryDescription description with
-            | Some text -> [ sprintf "\"description\":%s" (literal text) ]
+            | Some text -> [ "\"description\":" + literal text ]
             | None -> []
 
         let defaultKeyword =
@@ -469,7 +471,7 @@ module JsonSchema =
                         |> Option.defaultValue (literal (box name))
                     | _ -> literal value
 
-                [ sprintf "\"default\":%s" rendered ]
+                [ "\"default\":" + rendered ]
             | None -> []
 
         let shapeKeywords =
@@ -479,7 +481,7 @@ module JsonSchema =
             | SchemaShape.Nested model -> modelKeywords model
             | SchemaShape.Many item ->
                 [ "\"type\":\"array\""
-                  sprintf "\"items\":{%s}" (valueKeywords [] item |> String.concat ",") ]
+                  "\"items\":{" + (valueKeywords [] item |> String.concat ",") + "}" ]
                 @ constraintKeywords (SchemaShape.Many item) constraints
             | SchemaShape.Union union ->
                 let cases =
@@ -492,42 +494,41 @@ module JsonSchema =
                             | UnionCaseShape.Fields fields -> inlineCaseKeywords tagField case.Tag (Some fields)
                             | UnionCaseShape.Value _ -> invalidOp "Internal unions cannot contain value payload cases."
                         | UnionRepresentation.Adjacent(tagField, payloadField, style) ->
-                            let tagProperty = sprintf "\"%s\":{\"const\":%s}" (escape tagField) (literal case.Tag)
+                            let escapedTagField = escape tagField
+                            let tagProperty = "\"" + escapedTagField + "\":{\"const\":" + literal case.Tag + "}"
                             match case.Shape with
                             | UnionCaseShape.Empty ->
-                                sprintf "{\"type\":\"object\",\"properties\":{%s},\"required\":[\"%s\"]}" tagProperty (escape tagField)
+                                "{\"type\":\"object\",\"properties\":{" + tagProperty + "},\"required\":[\"" + escapedTagField + "\"]}"
                             | shape ->
                                 let payload = unionPayloadKeywords style shape |> String.concat ","
-                                sprintf "{\"type\":\"object\",\"properties\":{%s,\"%s\":{%s}},\"required\":[\"%s\",\"%s\"]}" tagProperty (escape payloadField) payload (escape tagField) (escape payloadField)
+                                let escapedPayloadField = escape payloadField
+                                "{\"type\":\"object\",\"properties\":{" + tagProperty + ",\"" + escapedPayloadField + "\":{" + payload + "}},\"required\":[\"" + escapedTagField + "\",\"" + escapedPayloadField + "\"]}"
                         | UnionRepresentation.External(style, unwrapFieldless) ->
                             match case.Shape with
-                            | UnionCaseShape.Empty when unwrapFieldless -> sprintf "{\"const\":%s}" (literal case.Tag)
+                            | UnionCaseShape.Empty when unwrapFieldless -> "{\"const\":" + literal case.Tag + "}"
                             | shape ->
                                 let payload = unionPayloadKeywords style shape |> String.concat ","
-                                sprintf
-                                    "{\"type\":\"object\",\"properties\":{\"%s\":{%s}},\"required\":[\"%s\"],\"additionalProperties\":false}"
-                                    (escape case.Tag)
-                                    payload
-                                    (escape case.Tag))
+                                let escapedTag = escape case.Tag
+                                "{\"type\":\"object\",\"properties\":{\"" + escapedTag + "\":{" + payload + "}},\"required\":[\"" + escapedTag + "\"],\"additionalProperties\":false}")
                     |> String.concat ","
-                [ sprintf "\"oneOf\":[%s]" cases ]
+                [ "\"oneOf\":[" + cases + "]" ]
             | SchemaShape.Enum enum ->
                 let tags = enum.Cases |> List.map (fun case -> literal case.Tag) |> String.concat ","
-                [ "\"type\":\"string\""; sprintf "\"enum\":[%s]" tags ] @ constraintKeywords (SchemaShape.Enum enum) constraints
+                [ "\"type\":\"string\""; "\"enum\":[" + tags + "]" ] @ constraintKeywords (SchemaShape.Enum enum) constraints
             | SchemaShape.Optional payload ->
                 let payloadKeywords = valueKeywords constraints payload
 
                 // A present option is always `Some`, so `null` is never valid for it.
                 if noneAsNull && not (declaresPresence constraints) then
-                    [ sprintf "\"anyOf\":[{%s},{\"type\":\"null\"}]" (String.concat "," payloadKeywords) ]
+                    [ "\"anyOf\":[{" + String.concat "," payloadKeywords + "},{\"type\":\"null\"}]" ]
                 else
                     payloadKeywords
             | SchemaShape.MapOf item ->
                 [ "\"type\":\"object\""
-                  sprintf "\"additionalProperties\":{%s}" (valueKeywords [] item |> String.concat ",") ]
+                  "\"additionalProperties\":{" + (valueKeywords [] item |> String.concat ",") + "}" ]
                 @ constraintKeywords (SchemaShape.MapOf item) constraints
-            | SchemaShape.Deferred(reference, _) -> [ sprintf "\"$ref\":\"#/$defs/recursive%d\"" reference ]
-            | SchemaShape.Recursive reference -> [ sprintf "\"$ref\":\"#/$defs/recursive%d\"" reference ]
+            | SchemaShape.Deferred(reference, _) -> [ "\"$ref\":\"#/$defs/recursive" + reference.ToString(CultureInfo.InvariantCulture) + "\"" ]
+            | SchemaShape.Recursive reference -> [ "\"$ref\":\"#/$defs/recursive" + reference.ToString(CultureInfo.InvariantCulture) + "\"" ]
             | SchemaShape.Refined _ -> failwith "underlyingShape never returns a refined shape."
 
         descriptionKeyword @ defaultKeyword @ shapeKeywords
@@ -565,12 +566,12 @@ module JsonSchema =
         | None -> not (isOptionalDescription field.Schema) || explicitlySupplied
 
     and private inlineCaseKeywords (discriminatorField: string) (tag: string) (model: ModelDescription option) =
-        let discriminatorProperty = sprintf "\"%s\":{\"const\":%s}" (escape discriminatorField) (literal tag)
+        let discriminatorProperty = "\"" + escape discriminatorField + "\":{\"const\":" + literal tag + "}"
 
         let payloadProperties =
             model |> Option.map _.Fields |> Option.defaultValue []
             |> List.map (fun field ->
-                sprintf "\"%s\":{%s}" (escape field.Name) (fieldValueKeywords field |> String.concat ","))
+                "\"" + escape field.Name + "\":{" + (fieldValueKeywords field |> String.concat ",") + "}")
 
         let properties = discriminatorProperty :: payloadProperties |> String.concat ","
 
@@ -579,10 +580,10 @@ module JsonSchema =
             :: ((model |> Option.map _.Fields |> Option.defaultValue [])
                 |> List.filter fieldIsRequired
                 |> List.map (fun field -> escape field.Name))
-            |> List.map (sprintf "\"%s\"")
+            |> List.map (fun name -> "\"" + name + "\"")
             |> String.concat ","
 
-        sprintf "{\"type\":\"object\",\"properties\":{%s},\"required\":[%s]}" properties required
+        "{\"type\":\"object\",\"properties\":{" + properties + "},\"required\":[" + required + "]}"
 
     and private unionPayloadKeywords style shape =
         let style =
@@ -604,11 +605,11 @@ module JsonSchema =
             match style with
             | UnionPayloadStyle.Named -> modelKeywords model
             | UnionPayloadStyle.Positional ->
-                let items = model.Fields |> List.map (fun field -> sprintf "{%s}" (valueKeywords field.Constraints field.Schema |> String.concat ","))
+                let items = model.Fields |> List.map (fun field -> "{" + (valueKeywords field.Constraints field.Schema |> String.concat ",") + "}")
                 [ "\"type\":\"array\""
-                  sprintf "\"prefixItems\":[%s]" (String.concat "," items)
-                  sprintf "\"minItems\":%d" model.Fields.Length
-                  sprintf "\"maxItems\":%d" model.Fields.Length ]
+                  "\"prefixItems\":[" + String.concat "," items + "]"
+                  "\"minItems\":" + model.Fields.Length.ToString(CultureInfo.InvariantCulture)
+                  "\"maxItems\":" + model.Fields.Length.ToString(CultureInfo.InvariantCulture) ]
             | UnionPayloadStyle.UnwrappedSingle ->
                 let field = model.Fields |> List.exactlyOne
                 valueKeywords field.Constraints field.Schema
@@ -618,22 +619,22 @@ module JsonSchema =
         let properties =
             model.Fields
             |> List.map (fun field ->
-                sprintf "\"%s\":{%s}" (escape field.Name) (fieldValueKeywords field |> String.concat ","))
+                "\"" + escape field.Name + "\":{" + (fieldValueKeywords field |> String.concat ",") + "}")
             |> String.concat ","
 
         let required =
             model.Fields
             |> List.filter fieldIsRequired
-            |> List.map (fun field -> sprintf "\"%s\"" (escape field.Name))
+            |> List.map (fun field -> "\"" + escape field.Name + "\"")
 
         (match model.Description with
-         | Some text -> [ sprintf "\"title\":%s" (literal text) ]
+         | Some text -> [ "\"title\":" + literal text ]
          | None -> [])
-        @ [ "\"type\":\"object\""; sprintf "\"properties\":{%s}" properties ]
+        @ [ "\"type\":\"object\""; "\"properties\":{" + properties + "}" ]
         @ (if List.isEmpty required then
                []
            else
-               [ sprintf "\"required\":[%s]" (String.concat "," required) ])
+               [ "\"required\":[" + String.concat "," required + "]" ])
 
     /// <summary>The JSON Schema draft 2020-12 meta-schema URI pinned as every generated document's <c>$schema</c>.</summary>
     [<Literal>]
@@ -671,13 +672,13 @@ module JsonSchema =
         found
         |> Seq.sortBy _.Key
         |> Seq.map (fun pair ->
-            sprintf "\"recursive%d\":{%s}" pair.Key (valueKeywords [] pair.Value |> String.concat ","))
+            "\"recursive" + pair.Key.ToString(CultureInfo.InvariantCulture) + "\":{" + (valueKeywords [] pair.Value |> String.concat ",") + "}")
         |> Seq.toList
 
     let private definitionsKeyword roots =
         match deferredDefinitions roots with
         | [] -> []
-        | definitions -> [ sprintf "\"$defs\":{%s}" (String.concat "," definitions) ]
+        | definitions -> [ "\"$defs\":{" + String.concat "," definitions + "}" ]
 
     /// <summary>Generates a compact JSON Schema document from any completed schema declaration.</summary>
     /// <param name="schema">The record, primitive, collection, union, or other completed schema to lower.</param>
@@ -701,10 +702,11 @@ module JsonSchema =
     /// </example>
     let generate (schema: Schema<'model>) : string =
         let value = Inspect.schema schema
-        sprintf
-            "{%s}"
-            (sprintf "\"$schema\":%s" (literal draft2020_12) :: (valueKeywords [] value @ definitionsKeyword [ value ])
-             |> String.concat ",")
+        let keywords =
+            ("\"$schema\":" + literal draft2020_12) :: (valueKeywords [] value @ definitionsKeyword [ value ])
+            |> String.concat ","
+
+        "{" + keywords + "}"
 
     /// <summary>Generates a compact JSON Schema document for a standalone value schema.</summary>
     /// <param name="schema">The value schema to lower.</param>

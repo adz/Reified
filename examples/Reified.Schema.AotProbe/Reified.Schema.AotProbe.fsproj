@@ -6,6 +6,9 @@
     <PublishAot>true</PublishAot>
     <InvariantGlobalization>true</InvariantGlobalization>
     <RuntimeIdentifiers>linux-x64</RuntimeIdentifiers>
+    <!-- fieldAs avoids quotation execution, but its public field builder type still exposes the
+         quotation-based field constructor and roots FSharp.Core quotation/printf reflection. -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);IL2104;IL3053</WarningsNotAsErrors>
   </PropertyGroup>
 
   <UsingTask TaskName="ComputeManagedAssemblies"

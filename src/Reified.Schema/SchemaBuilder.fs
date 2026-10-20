@@ -959,8 +959,8 @@ module SchemaDSL =
     /// </summary>
     /// <remarks>
     /// <c>field _.Email</c> derives the wire name from the property; reach for <c>fieldAs</c> when the wire name
-    /// is not the camelCased property name, or when the code must also compile under Fable, which cannot run the
-    /// quotation the derived form reads. Explicit names are never transformed.
+    /// is not the camelCased property name, when a NativeAOT publish must be free of quotation-reflection warnings,
+    /// or on a Fable target without quotation support. Explicit names are never transformed.
     /// </remarks>
     /// <example><code>type Signup = { Email: string }
     /// fieldAs "email_address" (fun (s: Signup) -> s.Email)</code></example>

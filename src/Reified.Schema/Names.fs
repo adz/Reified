@@ -64,7 +64,7 @@ type FieldOrder internal (value: int) =
     /// <summary>Gets the zero-based field position.</summary>
     member _.Value = value
 
-    override _.ToString() = string value
+    override _.ToString() = value.ToString(System.Globalization.CultureInfo.InvariantCulture)
 
 /// <summary>Functions for creating and inspecting schema field order metadata.</summary>
 [<RequireQualifiedAccess>]

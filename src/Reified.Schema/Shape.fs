@@ -17,7 +17,7 @@ module internal ShapeInternals =
         if System.String.IsNullOrEmpty name then
             name
         else
-            string (System.Char.ToLowerInvariant name[0]) + name.Substring 1
+            System.Char.ToLowerInvariant(name[0]).ToString() + name.Substring 1
 
 /// <summary>
 /// Canonical value-schema resolution for a schema field. A type participates by exposing
