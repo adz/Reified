@@ -95,6 +95,15 @@ let private isPrintfMember (metadata: MetadataReader) handle =
                 || memberName.Contains("printf", StringComparison.OrdinalIgnoreCase)))
         || (typeName.StartsWith("PrintfFormat`", StringComparison.Ordinal) && memberName = ".ctor"))
 
+let rec private resolvesToPrintfMember (metadata: MetadataReader) (handle: EntityHandle) =
+    match handle.Kind with
+    | HandleKind.MemberReference ->
+        isPrintfMember metadata (MemberReferenceHandle.op_Explicit handle)
+    | HandleKind.MethodSpecification ->
+        let specification = metadata.GetMethodSpecification(MethodSpecificationHandle.op_Explicit handle)
+        resolvesToPrintfMember metadata specification.Method
+    | _ -> false
+
 let private declaringTypeName (metadata: MetadataReader) (definition: TypeDefinition) =
     let typeName = metadata.GetString definition.Name
     let typeNamespace = metadata.GetString definition.Namespace
@@ -115,10 +124,30 @@ let private printfCallers assemblyPath =
                       |> referencedTokens
                       |> Seq.exists (fun token ->
                           let handle: EntityHandle = MetadataTokens.EntityHandle token
-                          handle.Kind = HandleKind.MemberReference
-                          && isPrintfMember metadata (MetadataTokens.MemberReferenceHandle(token &&& 0x00ffffff)))
+                          resolvesToPrintfMember metadata handle)
                   if callsPrintf then
                       yield declaringTypeName metadata typeDefinition + "." + metadata.GetString methodDefinition.Name ]
+
+type private Marker = class end
+
+let private deliberatelyBadGenericPrintf value = sprintf "%A" value
+
+[<Fact>]
+let ``scanner resolves generic printf calls through method specifications`` () =
+    deliberatelyBadGenericPrintf 42 |> ignore
+    let assemblyPath = typeof<Marker>.Assembly.Location
+    use stream = File.OpenRead assemblyPath
+    use peReader = new PEReader(stream)
+    let metadata = peReader.GetMetadataReader()
+    let genericPrintfReferences =
+        seq { 1 .. metadata.GetTableRowCount(TableIndex.MethodSpec) }
+        |> Seq.map (fun row -> MetadataTokens.EntityHandle(0x2b000000 ||| row))
+        |> Seq.filter (resolvesToPrintfMember metadata)
+        |> Seq.length
+    Assert.True(genericPrintfReferences > 0, "The deliberately bad fixture must contain a printf MethodSpecification.")
+
+    let callers = printfCallers assemblyPath
+    Assert.Contains(callers, fun name -> name.EndsWith("deliberatelyBadGenericPrintf", StringComparison.Ordinal))
 
 [<Fact>]
 let ``shipped runtime assemblies do not call FSharp Core printf`` () =

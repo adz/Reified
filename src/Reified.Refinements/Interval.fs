@@ -35,7 +35,7 @@ type Interval<'value when 'value: comparison> =
         this.UpperValue
 
     override this.ToString() =
-        let render value = System.Convert.ToString(box value, System.Globalization.CultureInfo.InvariantCulture)
+        let render value = System.Convert.ToString(box value, System.Globalization.CultureInfo.CurrentCulture)
         "[" + render this.LowerValue + ", " + render this.UpperValue + "]"
 
 /// Operations over inclusive ranges of ordered values.

@@ -25,7 +25,7 @@ type Bounded<'value when 'value: comparison> =
         this.BoundsValue
 
     override this.ToString() =
-        let value = System.Convert.ToString(box this.BoundedValue, System.Globalization.CultureInfo.InvariantCulture)
+        let value = System.Convert.ToString(box this.BoundedValue, System.Globalization.CultureInfo.CurrentCulture)
         value + " in " + this.BoundsValue.ToString()
 
 /// Operations over values that carry their permitted range.

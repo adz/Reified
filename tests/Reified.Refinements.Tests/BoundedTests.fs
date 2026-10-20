@@ -49,6 +49,16 @@ module BoundedTests =
         test <@ narrowed.Value = 50 @>
 
     [<Fact>]
+    let ``ToString formats the value and bounds with the current culture`` () =
+        let previous = System.Globalization.CultureInfo.CurrentCulture
+        try
+            System.Globalization.CultureInfo.CurrentCulture <- System.Globalization.CultureInfo.GetCultureInfo("fr-FR")
+            let bounded = Bounded.clamp (Interval.between 1.5m 2.5m) 2.0m
+            test <@ bounded.ToString() = "2,0 in [1,5, 2,5]" @>
+        finally
+            System.Globalization.CultureInfo.CurrentCulture <- previous
+
+    [<Fact>]
     let ``normalize reports position within the bounds as a fraction`` () =
         let bounds = Interval.between 0.0 200.0
         test <@ BoundedFloat.normalize (Bounded.clamp bounds 50.0) = 0.25 @>

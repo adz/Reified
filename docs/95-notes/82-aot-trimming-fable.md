@@ -9,11 +9,11 @@ targetFramework: net8.0
 
 Reified performs no runtime reflection in hot paths. Schemas, constructors, getters, checks, codecs, and service
 access use explicit declarations the compiler can see, allowing trimming and ahead-of-time compilation without
-runtime discovery. Use `fieldAs "name" _.Name` when a NativeAOT application should avoid quotation metadata:
-its explicit name and ordinary getter function require none. The bare `field _.Name` convenience reads a property
-name from a quotation once during schema construction; it does not put reflection on parse or codec paths. The
-Schema probe's former IL2104 and IL3053 warnings came from its generated record `ToString` and reachable
-printf-lowered interpolations, not from this quotation.
+runtime discovery. The bare `field _.Name` convenience reads a property name from a quotation once during schema
+construction; it does not put reflection on parse or codec paths. Use `fieldAs "name" _.Name` for an explicit wire
+name or on a Fable target without quotation support, not as a NativeAOT warning workaround. The Schema probe's former
+IL2104 and IL3053 warnings came from its generated record `ToString` and reachable printf-lowered interpolations, not
+from this quotation.
 
 ## Why It Holds By Construction
 
@@ -154,8 +154,8 @@ and asserts the derived wire names from the compiled JavaScript.
 ## Runtime implications
 
 - `PublishAot=true` and `PublishTrimmed=true` work without `DynamicDependency` annotations, trimmer XML, or source
-  generators. `fieldAs` avoids quotation execution, though its shared builder type currently leaves FSharp.Core
-  summary warnings in a warning-as-error publish.
+  generators. All four NativeAOT probes treat every warning as an error and publish cleanly; both `field` and
+  `fieldAs` are covered.
 - Startup does not pay for converter caches or expression-tree compilation; codecs and parsers are compiled once from
   explicit declarations.
 - The same domain model and boundary declaration can serve .NET services, native binaries, and Fable clients.

@@ -152,6 +152,15 @@ module IntervalTests =
         test <@ Interval.contains (FiniteFloat.create 3.0 |> Result.defaultWith (failwithf "%A")) sound @>
 
     [<Fact>]
+    let ``ToString formats bounds with the current culture`` () =
+        let previous = System.Globalization.CultureInfo.CurrentCulture
+        try
+            System.Globalization.CultureInfo.CurrentCulture <- System.Globalization.CultureInfo.GetCultureInfo("fr-FR")
+            test <@ (Interval.between 1.5m 2.5m).ToString() = "[1,5, 2,5]" @>
+        finally
+            System.Globalization.CultureInfo.CurrentCulture <- previous
+
+    [<Fact>]
     let ``width and duration answer the obvious question about a range`` () =
         test <@ Interval.widthInt (Interval.between 3 10) = 7L @>
         test <@ Interval.widthDecimal (Interval.between 1.5m 4.0m) = 2.5m @>
