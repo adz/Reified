@@ -35,13 +35,16 @@ let releaseVersion () = Environment.GetEnvironmentVariable "REIFIED_VERSION" |> 
 let historyPath () = Environment.GetEnvironmentVariable "LIVEDOCS_HISTORY" |> Option.ofObj |> Option.defaultValue ".livedocs/history.json"
 let target name action = Target.create name (fun _ -> action ())
 
-let packProjects =
+let runtimeProjects =
     [ "src/Reified.Data/Reified.Data.fsproj"; "src/Reified.Result/Reified.Result.fsproj"
       "src/Reified.Constraint/Reified.Constraint.fsproj"; "src/Reified.Refinements/Reified.Refinements.fsproj"
       "src/Reified.Parse/Reified.Parse.fsproj"; "src/Reified.Schema/Reified.Schema.fsproj"
       "src/Reified.Schema.Http/Reified.Schema.Http.fsproj"
-      "src/Reified.Schema.Testing/Reified.Schema.Testing.fsproj"
-      "src/Reified.SchemaGen.MSBuild/Reified.SchemaGen.MSBuild.fsproj"; "src/Reified/Reified.fsproj" ]
+      "src/Reified.Schema.Testing/Reified.Schema.Testing.fsproj" ]
+
+let packProjects =
+    runtimeProjects
+    @ [ "src/Reified.SchemaGen.MSBuild/Reified.SchemaGen.MSBuild.fsproj"; "src/Reified/Reified.fsproj" ]
 
 target "CleanPackages" (fun () ->
     Directory.CreateDirectory "artifacts/package" |> ignore
@@ -52,6 +55,11 @@ target "CleanPackages" (fun () ->
 target "Restore" (fun () -> dotnet [ "tool"; "restore" ]; dotnet [ "restore"; "--force" ])
 target "Build" (fun () -> dotnet [ "build"; "Reified.slnx"; "--configuration"; "Release"; "--no-restore"; "--nologo"; "-v"; "minimal" ])
 target "Test" (fun () -> dotnet [ "test"; "Reified.slnx"; "--configuration"; "Release"; "--no-build"; "--nologo"; "-v"; "minimal" ])
+target "ReflectionFree" (fun () ->
+    for project in runtimeProjects do
+        let code, output = runCapture "dotnet" [ "msbuild"; project; "-getProperty:OtherFlags"; "-nologo" ] []
+        if code <> 0 || not (output.Contains "--reflectionfree") then
+            failwith $"{project} does not evaluate OtherFlags with --reflectionfree.\n{output}")
 
 target "SourceInventory" (fun () ->
     let relative path = Path.GetRelativePath(root, Path.GetFullPath path).Replace('\\', '/')
@@ -279,6 +287,7 @@ target "Pages" ignore
 target "Default" ignore
 
 "Restore" ==> "Build" ==> "Test" ==> "Verify" |> ignore
+"ReflectionFree" ==> "Verify" |> ignore
 "SourceInventory" ==> "Verify" |> ignore
 "Build" ==> "SchemaCompilerErrors" ==> "Verify" |> ignore
 "Build" ==> "Fable" ==> "Verify" |> ignore

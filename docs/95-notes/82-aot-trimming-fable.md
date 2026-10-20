@@ -32,8 +32,24 @@ path natively.
 
 Pushes to `main` and pull requests publish and run the Result, Constraint, Refinements, and Schema NativeAOT probes
 (`dotnet run --project tools/Reified.Build -- --target NativeAot`). Each probe is published for `linux-x64` and its
-native binary is executed. Project warnings are errors by default; the IL2104 and IL3053 summary warnings from
-FSharp.Core are explicitly excluded from that policy. The probes catch failures in the exercised paths, not every
+native binary is executed. Reified's library assemblies are compiled with the F# compiler's `--reflectionfree`
+option, which omits reflection-backed generated structural formatting and rejects `%A` printf formats in those
+assemblies.
+
+A consumer does not inherit compiler flags from a NuGet dependency. To apply the same check to an application, add:
+
+```xml
+<PropertyGroup>
+  <OtherFlags>$(OtherFlags) --reflectionfree</OtherFlags>
+</PropertyGroup>
+```
+
+With that option, give application records and unions an explicit `ToString` only when their text is part of the
+application contract, and replace `%A` formatting with a domain formatter. Reified's NativeAOT probes contain no
+printf-family calls and treat IL2104 and IL3053 like every other warning: a summary warning from `FSharp.Core` fails
+the publish. The Schema probe currently exposes such summaries. Expanded diagnostics identify FSharp quotation
+reflection used by field-name extraction and FSharp printf retained by `JsonSchema`'s string assembly; those paths
+must be removed or annotated before that probe is clean. The probes catch failures in the exercised paths, not every
 possible reflection or trimming issue in a consumer application.
 
 ### Records with many fields

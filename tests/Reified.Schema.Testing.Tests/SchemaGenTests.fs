@@ -132,7 +132,9 @@ module SchemaGenTests =
             }
 
         match SchemaGen.raw textOrdering with
-        | Error error -> test <@ error = SchemaGenerationError.UnsupportedConstraint([ "email" ], "constraint.relation.atLeast") @>
+        | Error error ->
+            test <@ error = SchemaGenerationError.UnsupportedConstraint([ "email" ], "constraint.relation.atLeast") @>
+            test <@ string error = "Unsupported constraint 'constraint.relation.atLeast' at 'email'." @>
         | Ok _ -> failwith "Expected text ordering to be reported as unsupported."
 
         // The numeric generators do honour bounds, so the same family stays supported where it is real.

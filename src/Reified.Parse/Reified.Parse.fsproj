@@ -4,6 +4,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsAotCompatible Condition="'$(TargetFramework)' == 'net8.0'">true</IsAotCompatible>
     <PackageId>Reified.Parse</PackageId>
+    <ShipsRuntimeAssembly>true</ShipsRuntimeAssembly>
     <PackageMaturity>Incubating</PackageMaturity>
     <!-- Ships F# sources under fable/ so Fable can compile this; see Directory.Build.targets. -->
     <IsFableLibrary>true</IsFableLibrary>

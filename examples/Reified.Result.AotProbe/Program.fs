@@ -15,4 +15,4 @@ let main _ =
     |> Result.orError "invalid workflow"
     |> function
         | Ok 11 -> 0
-        | other -> failwithf "Unexpected Result probe result: %A" other
+        | _ -> failwith "Unexpected Result probe result."

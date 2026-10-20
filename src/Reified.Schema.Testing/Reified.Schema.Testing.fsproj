@@ -3,6 +3,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>Reified.Schema.Testing</PackageId>
+    <ShipsRuntimeAssembly>true</ShipsRuntimeAssembly>
     <PackageMaturity>Experimental</PackageMaturity>
     <AssemblyName>Reified.Schema.Testing</AssemblyName>
     <RootNamespace>Reified.Schema.Testing</RootNamespace>

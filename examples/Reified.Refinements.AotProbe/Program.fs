@@ -6,4 +6,4 @@ let main _ =
     |> Result.map NonEmptyList.head
     |> function
         | Ok 42 -> 0
-        | other -> failwithf "Unexpected Refined probe result: %A" other
+        | _ -> failwith "Unexpected Refined probe result."

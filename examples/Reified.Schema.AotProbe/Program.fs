@@ -8,7 +8,7 @@ type ProbeFailure(message: string) =
 module Assert =
     let equal<'value when 'value : equality> (expected: 'value) (actual: 'value) =
         if actual <> expected then
-            raise (ProbeFailure(sprintf "Expected %+A but got %+A." expected actual))
+            raise (ProbeFailure("Expected and actual values differ."))
 
 type SchemaContact =
     {

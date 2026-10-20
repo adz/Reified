@@ -27,4 +27,4 @@ let main _ =
     |> orError "invalid name"
     |> function
         | Ok _ -> 0
-        | other -> failwithf "Unexpected constraint probe result: %A" other
+        | _ -> failwith "Unexpected constraint probe result."

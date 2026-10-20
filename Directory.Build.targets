@@ -1,5 +1,13 @@
 <Project>
 
+  <!-- Packable runtime libraries must not rely on FSharp.Core's reflection-backed generated
+       structural formatting. Each assembly-bearing package opts in with ShipsRuntimeAssembly;
+       tooling, tests, examples, the targets-only package, and the dependency-only umbrella do not.
+       This is evaluated after project properties so it is independent of host path separators. -->
+  <PropertyGroup Condition="'$(IsPackable)' != 'false' and '$(ShipsRuntimeAssembly)' == 'true'">
+    <OtherFlags>$(OtherFlags) --reflectionfree</OtherFlags>
+  </PropertyGroup>
+
   <!--
     Fable compiles a library from its F# sources, not its assembly, because an `inline` member has
     no body once compiled. A package that ships only lib/ builds fine under `dotnet build` and fails

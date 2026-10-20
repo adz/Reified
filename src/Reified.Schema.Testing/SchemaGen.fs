@@ -17,6 +17,12 @@ type SchemaGenerationError =
     /// <summary>The rule at this path has no sound generation, named by its stable message key.</summary>
     | UnsupportedConstraint of path: string list * rule: string
 
+    override this.ToString() =
+        match this with
+        | UnsupportedConstraint(path, rule) ->
+            let formattedPath = String.concat "." path
+            $"Unsupported constraint '{rule}' at '{formattedPath}'."
+
 /// FsCheck generators derived from Schema metadata.
 [<RequireQualifiedAccess>]
 module SchemaGen =
@@ -447,20 +453,25 @@ module SchemaGen =
 
     /// Checks seeded samples through JSON encoding and decoding; unsupported rules fail closed.
     /// Failures include the seed for replay with the same sample count.
-    /// <example><code>SchemaGen.roundTripWith 100 42UL schema |> Result.defaultWith (failwithf "%A")</code></example>
+    /// <example><code>SchemaGen.roundTripWith 100 42UL schema |> Result.defaultWith (string >> failwith)</code></example>
     let roundTripWith (count: int) (seed: uint64) (schema: Schema<'model>) : Result<unit, SchemaGenerationError> when 'model: equality =
         if count < 0 then invalidArg (nameof count) "Sample count must not be negative."
         raw schema
         |> Result.map (fun generator ->
             let codec = Json.compile schema
             for input in FsCheck.Fluent.Gen.Sample(generator, count, FsCheck.Rnd(seed), 100) do
-                let value = Schema.parse schema input |> Result.defaultWith (failwithf "Generated invalid input (seed %d): %A" seed)
-                let decoded = Json.deserialize codec (Json.serialize codec value)
+                let value =
+                    Schema.parse schema input
+                    |> Result.defaultWith (fun errors ->
+                        failwith $"Generated invalid input (seed {seed}): {SchemaErrors.toString errors}")
+                let encoded = Json.serialize codec value
+                let decoded = Json.deserialize codec encoded
                 if decoded <> value then
-                    failwithf "JSON round trip changed generated value (seed %d, count %d): %A -> %A" seed count value decoded)
+                    let decodedJson = Json.serialize codec decoded
+                    failwith $"JSON round trip changed generated value (seed {seed}, count {count}): {encoded} -> {decodedJson}")
 
     /// Checks 100 reproducible samples with seed 0; use roundTripWith to choose a seed and sample count.
-    /// <example><code>SchemaGen.roundTrip schema |> Result.defaultWith (failwithf "%A")</code></example>
+    /// <example><code>SchemaGen.roundTrip schema |> Result.defaultWith (string >> failwith)</code></example>
     let roundTrip (schema: Schema<'model>) : Result<unit, SchemaGenerationError> when 'model: equality =
         roundTripWith 100 0UL schema
 
