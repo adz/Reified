@@ -30,7 +30,7 @@ module Data =
     let fields value =
         match value with
         | Data.Object values -> values |> List.map (fun (name, item) -> DataField.Create(name, DataPattern.CreateExact item, false))
-        | actual -> invalidArg (nameof value) $"Expected an object but found {shapeName actual}."
+        | actual -> invalidArg (nameof value) ("Expected an object but found " + shapeName actual + ".")
 
     /// <summary>Constructs a number from one JSON number token, validated identically on .NET and Fable.</summary>
     /// <example><code>Data.number "1.2300e+4" // Data.Number "1.2300e+4"</code></example>
@@ -319,7 +319,7 @@ module DataDSL =
         if isNull (box variations) then nullArg (nameof variations)
         let duplicate = variations |> List.countBy _.Name |> List.tryFind (fun (_, count) -> count > 1)
         match duplicate with
-        | Some(name, _) -> invalidArg (nameof variations) $"Variation name '{name}' is duplicated."
+        | Some(name, _) -> invalidArg (nameof variations) ("Variation name '" + name + "' is duplicated.")
         | None ->
             variations
             |> List.map (fun (variation: DataVariation) ->
@@ -342,14 +342,14 @@ module DataDSL =
         if isNull (box dimensions) then nullArg (nameof dimensions)
         let maximum = 256
         let count = dimensions |> List.fold (fun product dimension -> product * int64 dimension.Variations.Length) 1L
-        if count > int64 maximum then invalidArg (nameof dimensions) $"The matrix would create {count} cases; the maximum is {maximum}."
+        if count > int64 maximum then invalidArg (nameof dimensions) ("The matrix would create " + count.ToString(System.Globalization.CultureInfo.InvariantCulture) + " cases; the maximum is " + maximum.ToString(System.Globalization.CultureInfo.InvariantCulture) + ".")
 
         let folder cases dimension =
             [ for case in cases do
                   for variation in dimension.Variations do
                       let value = Data.patch variation.Edits case.Value
-                      let part = $"{dimension.Name}: {variation.Name}"
-                      let name = if case.Name = "" then part else $"{case.Name} / {part}"
+                      let part = dimension.Name + ": " + variation.Name
+                      let name = if case.Name = "" then part else case.Name + " / " + part
                       yield { Name = name; Value = value } ]
 
         dimensions |> List.fold folder [ { Name = ""; Value = baseline } ]

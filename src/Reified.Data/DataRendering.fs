@@ -23,7 +23,7 @@ module internal DataRendering =
                 builder.Append("\\u").Append((int character).ToString("x4", CultureInfo.InvariantCulture)) |> ignore
             | character -> builder.Append(character) |> ignore)
 
-        $"\"{builder}\""
+        $"\"{builder.ToString()}\""
 
     let renderName (name: string) =
         let isPlainStart character = Char.IsLetter character || character = '_'
@@ -69,17 +69,17 @@ module internal DataRendering =
                 | Data.List [] -> "[]"
                 | Data.List items ->
                     items
-                    |> List.map (fun item -> $"{indent (level + 1)}{render (level + 1) item}")
+                    |> List.map (fun item -> indent (level + 1) + render (level + 1) item)
                     |> String.concat ",\n"
-                    |> fun body -> $"[\n{body}\n{indent level}]"
+                    |> fun body -> "[\n" + body + "\n" + indent level + "]"
                 | Data.Object [] -> "{}"
                 | Data.Object fields ->
                     fields
                     |> List.map (fun (name, field) ->
                         let encodedName = renderText name
-                        $"{indent (level + 1)}{encodedName}: {render (level + 1) field}")
+                        indent (level + 1) + encodedName + ": " + render (level + 1) field)
                     |> String.concat ",\n"
-                    |> fun body -> $"{{\n{body}\n{indent level}}}"
+                    |> fun body -> "{\n" + body + "\n" + indent level + "}"
                 | _ -> failwith "Unreachable scalar rendering branch."
 
         render 0 input
@@ -121,16 +121,16 @@ module internal DataRendering =
                 | Data.List [] -> "[]"
                 | Data.List items ->
                     items
-                    |> List.map (fun item -> $"{indent (level + 1)}{render (level + 1) item}")
+                    |> List.map (fun item -> indent (level + 1) + render (level + 1) item)
                     |> String.concat ",\n"
-                    |> fun body -> $"[\n{body}\n{indent level}]"
+                    |> fun body -> "[\n" + body + "\n" + indent level + "]"
                 | Data.Object [] -> "{}"
                 | Data.Object fields ->
                     fields
                     |> List.map (fun (name, field) ->
-                        $"{indent (level + 1)}{renderName name}: {render (level + 1) field}")
+                        indent (level + 1) + renderName name + ": " + render (level + 1) field)
                     |> String.concat ",\n"
-                    |> fun body -> $"{{\n{body}\n{indent level}}}"
+                    |> fun body -> "{\n" + body + "\n" + indent level + "}"
                 | _ -> failwith "Unreachable scalar rendering branch."
 
         render 0 input

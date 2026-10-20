@@ -45,6 +45,6 @@ let checkUnderlyingProjection<'primitive> (getExpected: unit -> Type) (parameter
     if typeof<'primitive> <> expected then
         invalidArg
             parameterName
-            $"Expected the underlying primitive type {expected.Name}, but the requested projection type is {typeof<'primitive>.Name}."
+            ("Expected the underlying primitive type " + expected.Name + ", but the requested projection type is " + typeof<'primitive>.Name + ".")
 
 #endif

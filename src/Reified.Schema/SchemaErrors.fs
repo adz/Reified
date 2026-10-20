@@ -56,7 +56,7 @@ module SchemaPath =
             match part with
             | KeyComponent key when String.IsNullOrEmpty text -> key
             | KeyComponent key -> $"{text}.{key}"
-            | IndexComponent index -> $"{text}[{index}]") ""
+            | IndexComponent index -> $"{text}[{string index}]") ""
 
     /// <summary>Folds over string keys and integer indexes without exposing a path-segment type.</summary>
     let fold keyFolder indexFolder state (path: SchemaPath) =

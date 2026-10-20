@@ -132,7 +132,7 @@ type DataPatchFailure =
 type DataPatchException(failures: DataPatchFailure list) =
     inherit Exception(
         failures
-        |> List.map (fun failure -> $"Edit {failure.EditIndex} at '{failure.Path}': {failure.Message}")
+        |> List.map (fun failure -> "Edit " + string failure.EditIndex + " at '" + failure.Path + "': " + failure.Message)
         |> String.concat Environment.NewLine
     )
 
@@ -218,7 +218,7 @@ type DataMatchException(mismatches: DataMismatch list) =
         |> List.map (fun mismatch ->
             let path = DataPath.toString mismatch.Path
             let rendered = if path = "" then "<root>" else path
-            $"Expectation {mismatch.ExpectationIndex} failed at '{rendered}': expected {mismatch.Expected}.")
+            "Expectation " + string mismatch.ExpectationIndex + " failed at '" + rendered + "': expected " + mismatch.Expected + ".")
         |> String.concat Environment.NewLine
     )
 

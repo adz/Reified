@@ -62,7 +62,7 @@ module internal ModelSchemaDefinition =
             |> List.choose (fun (name, count) -> if count > 1 then Some name else None)
 
         match duplicates with
-        | name :: _ -> invalidArg (nameof fields) $"The field name or alias '{name}' is declared more than once."
+        | name :: _ -> invalidArg (nameof fields) ("The field name or alias '" + name + "' is declared more than once.")
         | [] -> ()
 
     let create (constructor: ConstructorApplication<'model>) (fields: FieldDescriptor<'model> list) =
@@ -80,7 +80,7 @@ module internal ModelSchemaDefinition =
         if fields.Length <> constructor.ArgumentCount then
             invalidArg
                 (nameof fields)
-                $"Expected {constructor.ArgumentCount} ordered field(s), but received {fields.Length}."
+                ("Expected " + string constructor.ArgumentCount + " ordered field(s), but received " + string fields.Length + ".")
 
         ensureContiguousOrders fields
         ensureDistinctAcceptedNames fields

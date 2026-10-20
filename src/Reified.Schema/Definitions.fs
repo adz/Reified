@@ -61,7 +61,7 @@ module internal ConstructorApplication =
             nullArg (nameof arguments)
 
         if arguments.Length <> expected then
-            invalidArg (nameof arguments) $"Expected {expected} constructor argument(s), but received {arguments.Length}."
+            invalidArg (nameof arguments) ("Expected " + string expected + " constructor argument(s), but received " + string arguments.Length + ".")
 
     let tryApply (application: ConstructorApplication<'model>) (arguments: obj array) =
         if isNull (box application) then

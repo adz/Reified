@@ -145,13 +145,13 @@ module DataErgonomicsHelpers =
                 | Data.Object fields ->
                     match fields |> List.tryFindIndexBack (fun (fieldName, _) -> fieldName = name) with
                     | Some index -> loop (appendPath (DataPathSegment.Name name) traversed) rest (snd fields[index])
-                    | None -> Error(traversed, $"Object field '{name}' does not exist.")
-                | actual -> Error(traversed, $"Expected an object but found {shapeName actual}.")
+                    | None -> Error(traversed, "Object field '" + name + "' does not exist.")
+                | actual -> Error(traversed, "Expected an object but found " + shapeName actual + ".")
             | DataPathSegment.Index index :: rest ->
                 match current with
                 | Data.List items when index < items.Length ->
                     loop (appendPath (DataPathSegment.Index index) traversed) rest items[index]
-                | Data.List items -> Error(traversed, $"List index {index} is outside the list of {items.Length} items.")
-                | actual -> Error(traversed, $"Expected a list but found {shapeName actual}.")
+                | Data.List items -> Error(traversed, "List index " + string index + " is outside the list of " + string items.Length + " items.")
+                | actual -> Error(traversed, "Expected a list but found " + shapeName actual + ".")
 
         loop [] path input

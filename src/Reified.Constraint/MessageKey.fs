@@ -52,7 +52,7 @@ module internal MessageSegment =
     let describe (error: MessageKeyError) =
         match error with
         | MessageKeyError.EmptyKey -> "A message key must contain at least one segment."
-        | MessageKeyError.EmptySegment index -> $"The message key segment at index {index} is empty."
+        | MessageKeyError.EmptySegment index -> $"The message key segment at index {string index} is empty."
 
 /// <summary>A message identity and the operands its template may interpolate.</summary>
 /// <remarks>
@@ -226,4 +226,4 @@ module MessageFormatSpec =
             | Error(MessageFormatSpecError.UnknownPluralArgument name) ->
                 invalidArg
                     (nameof pluralArgument)
-                    $"The plural argument '{name}' is not an argument of '{MessageDescriptor.key descriptor}'."
+                    ("The plural argument '" + name + "' is not an argument of '" + (MessageDescriptor.key descriptor) + "'.")

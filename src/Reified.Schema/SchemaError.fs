@@ -65,12 +65,12 @@ module SchemaError =
         | SchemaError.ExpectedScalar -> "Expected a scalar value."
         | SchemaError.ExpectedObject -> "Expected an object."
         | SchemaError.ExpectedMany -> "Expected a collection."
-        | SchemaError.InvalidFormat expected -> $"Expected {expected} format."
-        | SchemaError.ParseOutOfRange target -> $"{target} value is out of range."
-        | SchemaError.UnknownTag choices -> $"Must be one of: {choices}."
+        | SchemaError.InvalidFormat expected -> "Expected " + expected + " format."
+        | SchemaError.ParseOutOfRange target -> target + " value is out of range."
+        | SchemaError.UnknownTag choices -> "Must be one of: " + choices + "."
         | SchemaError.Violation violation ->
             let rendered = Violation.render violation
-            $"{System.Char.ToUpperInvariant rendered.[0]}{rendered.Substring 1}."
+            string (System.Char.ToUpperInvariant rendered.[0]) + rendered.Substring 1 + "."
         | SchemaError.ConstructorFailed message -> message
         | SchemaError.Custom(_, Some message) -> message
         | SchemaError.Custom(code, None) -> code

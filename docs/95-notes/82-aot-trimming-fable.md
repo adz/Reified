@@ -9,10 +9,11 @@ targetFramework: net8.0
 
 Reified performs no runtime reflection in hot paths. Schemas, constructors, getters, checks, codecs, and service
 access use explicit declarations the compiler can see, allowing trimming and ahead-of-time compilation without
-runtime discovery. Use `fieldAs "name" _.Name` in a NativeAOT application: its explicit name and ordinary getter
-function require no quotation reflection. The bare `field _.Name` convenience reads a property name from a
-quotation once during schema construction; keep it for applications that do not require a warning-free NativeAOT
-publish.
+runtime discovery. Use `fieldAs "name" _.Name` when a NativeAOT application should avoid quotation metadata:
+its explicit name and ordinary getter function require none. The bare `field _.Name` convenience reads a property
+name from a quotation once during schema construction; it does not put reflection on parse or codec paths. The
+Schema probe's former IL2104 and IL3053 warnings came from its generated record `ToString` and reachable
+printf-lowered interpolations, not from this quotation.
 
 ## Why It Holds By Construction
 
@@ -45,14 +46,13 @@ A consumer does not inherit compiler flags from a NuGet dependency. To apply the
 </PropertyGroup>
 ```
 
-With that option, give application records and unions an explicit `ToString` only when their text is part of the
-application contract, and replace `%A` formatting with a domain formatter. Reified's NativeAOT probes contain no
-printf-family calls. The Result, Constraint, and Refinements probes treat
-IL2104 and IL3053 like every other warning. The Schema probe uses `fieldAs` rather than the quotation-based `field`
-form and exercises JSON Schema generation without FSharp printf formatting, but temporarily leaves those two
-summary warnings non-fatal: `fieldAs` returns the shared public field-builder type, whose quotation constructor still
-roots FSharp.Core quotation and printf reflection even when the application does not call it. The probes catch
-failures in the exercised paths, not every possible reflection or trimming issue in a consumer application.
+Without it, every application record and union gets a compiler-generated `ToString` that calls `sprintf "%+A"`,
+which keeps FSharp.Core's printf and structured-formatting code in the binary and produces the IL2104 and IL3053
+summary warnings even when the application never prints a value. With the option, give application records and
+unions an explicit `ToString` only when their text is part of the application contract, and replace `%A` formatting
+with a domain formatter. Reified's NativeAOT probes are compiled with `--reflectionfree`, contain no printf-family
+calls, and treat IL2104 and IL3053 like every other warning. The probes catch failures in the exercised paths, not
+every possible reflection or trimming issue in a consumer application.
 
 ### Records with many fields
 

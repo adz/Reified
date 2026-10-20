@@ -351,7 +351,7 @@ module internal SchemaParsing =
                     |> ConstructorApplication.tryApply model.Constructor
                     |> Result.mapError (fun message -> diagnosticsAt payloadPath (SchemaError.ConstructorFailed message))
                 else Error(mergeErrors errors)
-            | Data.List _ -> errorAt payloadPath (SchemaError.Custom("union.positional.count", Some $"Expected {model.Fields.Length} union field(s)."))
+            | Data.List _ -> errorAt payloadPath (SchemaError.Custom("union.positional.count", Some $"Expected {string model.Fields.Length} union field(s)."))
             | _ -> errorAt payloadPath SchemaError.ExpectedMany
 
         let parseCasePayload style payloadPath case rawPayload =

@@ -21,7 +21,7 @@ type SchemaGenerationError =
         match this with
         | UnsupportedConstraint(path, rule) ->
             let formattedPath = String.concat "." path
-            $"Unsupported constraint '{rule}' at '{formattedPath}'."
+            "Unsupported constraint '" + rule + "' at '" + formattedPath + "'."
 
 /// FsCheck generators derived from Schema metadata.
 [<RequireQualifiedAccess>]
@@ -463,12 +463,12 @@ module SchemaGen =
                 let value =
                     Schema.parse schema input
                     |> Result.defaultWith (fun errors ->
-                        failwith $"Generated invalid input (seed {seed}): {SchemaErrors.toString errors}")
+                        failwith ("Generated invalid input (seed " + seed.ToString(Globalization.CultureInfo.InvariantCulture) + "): " + SchemaErrors.toString errors))
                 let encoded = Json.serialize codec value
                 let decoded = Json.deserialize codec encoded
                 if decoded <> value then
                     let decodedJson = Json.serialize codec decoded
-                    failwith $"JSON round trip changed generated value (seed {seed}, count {count}): {encoded} -> {decodedJson}")
+                    failwith ("JSON round trip changed generated value (seed " + seed.ToString(Globalization.CultureInfo.InvariantCulture) + ", count " + count.ToString(Globalization.CultureInfo.InvariantCulture) + "): " + encoded + " -> " + decodedJson))
 
     /// Checks 100 reproducible samples with seed 0; use roundTripWith to choose a seed and sample count.
     /// <example><code>SchemaGen.roundTrip schema |> Result.defaultWith (string >> failwith)</code></example>

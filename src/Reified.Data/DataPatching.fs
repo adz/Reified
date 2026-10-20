@@ -26,7 +26,7 @@ module internal DataPatching =
                 match current with
                 | Data.List items when index < items.Length ->
                     loop rest items[index] |> Result.map (fun updated -> Data.List(replaceAt index updated items))
-                | Data.List items -> Error $"List index {index} is outside the list of {items.Length} items."
+                | Data.List items -> Error ("List index " + string index + " is outside the list of " + string items.Length + " items.")
                 | actual -> Error $"Expected a list but found {shapeName actual}."
 
         loop path input
@@ -54,7 +54,7 @@ module internal DataPatching =
                 updateAtPath (List.rev reversedParent) (fun parent ->
                     match parent with
                     | Data.List items when index < items.Length -> Ok(Data.List(replaceAt index value items))
-                    | Data.List items -> Error $"List index {index} is outside the list of {items.Length} items."
+                    | Data.List items -> Error ("List index " + string index + " is outside the list of " + string items.Length + " items.")
                     | actual -> Error $"Expected a list parent but found {shapeName actual}.") input
         | Remove path ->
             updateParent path (fun final parent ->
@@ -64,7 +64,7 @@ module internal DataPatching =
                     | Some index -> Ok(Data.Object(removeAt index fields))
                     | None -> Error $"Object field '{name}' does not exist."
                 | DataPathSegment.Index index, Data.List items when index < items.Length -> Ok(Data.List(removeAt index items))
-                | DataPathSegment.Index index, Data.List items -> Error $"List index {index} is outside the list of {items.Length} items."
+                | DataPathSegment.Index index, Data.List items -> Error ("List index " + string index + " is outside the list of " + string items.Length + " items.")
                 | DataPathSegment.Name _, actual -> Error $"Expected an object parent but found {shapeName actual}."
                 | DataPathSegment.Index _, actual -> Error $"Expected a list parent but found {shapeName actual}.") input
         | Append(path, value) ->
@@ -80,7 +80,7 @@ module internal DataPatching =
                 | Data.List items when index <= items.Length ->
                     let before, after = List.splitAt index items
                     Ok(Data.List(before @ [ value ] @ after))
-                | Data.List items -> Error $"List index {index} is outside the insertion range of {items.Length} items."
+                | Data.List items -> Error ("List index " + string index + " is outside the insertion range of " + string items.Length + " items.")
                 | actual -> Error $"Expected a list but found {shapeName actual}.") input
         | Rename(path, newName) ->
             updateParent path (fun final parent ->

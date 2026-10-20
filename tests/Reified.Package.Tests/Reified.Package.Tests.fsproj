@@ -12,6 +12,18 @@
 
   <ItemGroup>
     <Compile Include="PackageGraphTests.fs" />
+    <Compile Include="RuntimeAssemblyTests.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Reified.Constraint\Reified.Constraint.fsproj" />
+    <ProjectReference Include="..\..\src\Reified.Data\Reified.Data.fsproj" />
+    <ProjectReference Include="..\..\src\Reified.Parse\Reified.Parse.fsproj" />
+    <ProjectReference Include="..\..\src\Reified.Refinements\Reified.Refinements.fsproj" />
+    <ProjectReference Include="..\..\src\Reified.Result\Reified.Result.fsproj" />
+    <ProjectReference Include="..\..\src\Reified.Schema\Reified.Schema.fsproj" />
+    <ProjectReference Include="..\..\src\Reified.Schema.Http\Reified.Schema.Http.fsproj" />
+    <ProjectReference Include="..\..\src\Reified.Schema.Testing\Reified.Schema.Testing.fsproj" />
   </ItemGroup>
 
   <ItemGroup>

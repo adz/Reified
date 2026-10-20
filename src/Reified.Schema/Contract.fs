@@ -94,7 +94,7 @@ module Contract =
 
         let oldest = builder.Versions.Head.Version
         if version <> oldest - 1 then
-            invalidArg (nameof version) $"Expected the immediately preceding version {oldest - 1}, but received {version}."
+            invalidArg (nameof version) ("Expected the immediately preceding version " + string (oldest - 1) + ", but received " + string version + ".")
 
         let entry =
             {
@@ -113,7 +113,7 @@ module Contract =
             if String.IsNullOrWhiteSpace wireName then invalidArg (nameof wireName) "Version field names cannot be empty."
         | VersionSource.UnversionedMeans version ->
             if not (builder.Versions |> List.exists (fun item -> item.Version = version)) then
-                invalidArg (nameof source) $"The unversioned fallback {version} is not registered in this contract."
+                invalidArg (nameof source) $"The unversioned fallback {string version} is not registered in this contract."
         | VersionSource.External -> ()
 
         { Name = builder.Name; CurrentVersion = builder.CurrentVersion; CurrentSchema = builder.CurrentSchema; Source = source; Versions = builder.Versions }

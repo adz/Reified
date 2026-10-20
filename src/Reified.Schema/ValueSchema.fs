@@ -377,7 +377,7 @@ module internal ValueSchema =
             match case.Definition.Payload with
             | FieldsUnionCase { Shape = NestedValueDefinition(model, _) } -> Some model
             | FieldsUnionCase _ ->
-                invalidArg (nameof cases) $"Union case \"{case.Definition.Tag}\" fields must use a record schema."
+                invalidArg (nameof cases) ("Union case \"" + case.Definition.Tag + "\" fields must use a record schema.")
             | _ -> None
 
         match representation with
@@ -386,11 +386,11 @@ module internal ValueSchema =
             for case in cases do
                 match case.Definition.Payload with
                 | EmptyUnionCase -> ()
-                | ValueUnionCase _ -> invalidArg (nameof cases) $"Internal union case \"{case.Definition.Tag}\" must use UnionCase.fields."
+                | ValueUnionCase _ -> invalidArg (nameof cases) ("Internal union case \"" + case.Definition.Tag + "\" must use UnionCase.fields.")
                 | FieldsUnionCase _ ->
                     let model = fieldModel case |> Option.get
                     if model.Fields |> List.exists (fun field -> ExternalFieldName.value field.ExternalName = tag) then
-                        invalidArg (nameof cases) $"Union case \"{case.Definition.Tag}\" has a field that collides with discriminator \"{tag}\"."
+                        invalidArg (nameof cases) ("Union case \"" + case.Definition.Tag + "\" has a field that collides with discriminator \"" + tag + "\".")
         | UnionRepresentation.Adjacent(tagField, payloadField, style) ->
             let tag = ExternalFieldName.create tagField |> ExternalFieldName.value
             let payload = ExternalFieldName.create payloadField |> ExternalFieldName.value
@@ -398,12 +398,12 @@ module internal ValueSchema =
             if style = UnionPayloadStyle.UnwrappedSingle then
                 for case in cases do
                     match fieldModel case with
-                    | Some model when model.Fields.Length <> 1 -> invalidArg (nameof cases) $"Union case \"{case.Definition.Tag}\" must have exactly one field for UnwrappedSingle."
+                    | Some model when model.Fields.Length <> 1 -> invalidArg (nameof cases) ("Union case \"" + case.Definition.Tag + "\" must have exactly one field for UnwrappedSingle.")
                     | _ -> ()
         | UnionRepresentation.External(style, _) when style = UnionPayloadStyle.UnwrappedSingle ->
             for case in cases do
                 match fieldModel case with
-                | Some model when model.Fields.Length <> 1 -> invalidArg (nameof cases) $"Union case \"{case.Definition.Tag}\" must have exactly one field for UnwrappedSingle."
+                | Some model when model.Fields.Length <> 1 -> invalidArg (nameof cases) ("Union case \"" + case.Definition.Tag + "\" must have exactly one field for UnwrappedSingle.")
                 | _ -> ()
         | UnionRepresentation.External _ -> ()
 
