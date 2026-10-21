@@ -27,6 +27,16 @@ type AtomicViolation =
     /// <summary>A built-in rule failed whose operand has no portable representation.</summary>
     | UnsupportedOperand of operation: UnsupportedOperation
 
+    override this.ToString() =
+        match this with
+        | Expected(expectation, actual) ->
+            let expected = ConstraintAtom.render expectation
+            match actual with
+            | Some value -> expected + ", but was " + ConstraintValue.render value
+            | None -> expected
+        | Described(description, _) -> description
+        | UnsupportedOperand operation -> UnsupportedOperation.render operation
+
 /// <summary>Why a value failed its constraint.</summary>
 /// <remarks>
 /// <para>
@@ -50,6 +60,12 @@ type Violation =
     | All of first: Violation * rest: Violation list
     /// <summary>No alternative succeeded; each listed failure is one rejected branch.</summary>
     | Any of first: Violation * rest: Violation list
+
+    override this.ToString() =
+        match this with
+        | Atomic atomic -> atomic.ToString()
+        | All(first, rest) -> first :: rest |> List.map string |> String.concat "; "
+        | Any(first, rest) -> first :: rest |> List.map string |> String.concat ", or "
 
 /// <summary>One leaf of a projected message tree.</summary>
 /// <remarks>
@@ -150,28 +166,13 @@ module Violation =
         | Atomic(Described(_, key)) -> key
         | _ -> None
 
-    let private renderAtomic (atomic: AtomicViolation) =
-        match atomic with
-        | Expected(expectation, actual) ->
-            let expected = ConstraintAtom.render expectation
-
-            match actual with
-            | Some actual -> $"{expected}, but was {ConstraintValue.render actual}"
-            | None -> expected
-        | Described(description, _) -> description
-        | UnsupportedOperand operation -> UnsupportedOperation.render operation
-
     /// <summary>
     /// Renders a violation as an English sentence fragment with no trailing punctuation, keeping conjunction and
     /// alternative groups distinct.
     /// </summary>
     /// <example><code>Violation.render (Atomic (Expected (PresenceAtom Present, None)))
     /// // "value must be present"</code></example>
-    let rec render (violation: Violation) : string =
-        match violation with
-        | Atomic atomic -> renderAtomic atomic
-        | All(first, rest) -> first :: rest |> List.map render |> String.concat "; "
-        | Any(first, rest) -> first :: rest |> List.map render |> String.concat ", or "
+    let render (violation: Violation) : string = violation.ToString()
 
     /// <summary>
     /// Projects a violation for an external localization system, preserving its grouping so a translator renders

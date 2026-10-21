@@ -180,3 +180,13 @@ module ContractTests =
             |> Contract.supersedes 1 (v1Schema ()) skipV2
             |> ignore
         @>
+
+    [<Fact>]
+    let ``MigrationError has stable readable text`` () =
+        let error = MigrationError.MigrationFailed "port has no replacement"
+        test <@ error.ToString() = "MigrationFailed (message 'port has no replacement')" @>
+
+    [<Fact>]
+    let ``ContractError has stable readable text`` () =
+        let error = ContractError.VersionTooNew(4, 3)
+        test <@ error.ToString() = "VersionTooNew (detected 4, highestSupported 3)" @>

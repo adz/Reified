@@ -128,6 +128,9 @@ type DataPatchFailure =
         Message: string
     }
 
+    override this.ToString() =
+        "DataPatchFailure (editIndex " + string this.EditIndex + ", path '" + this.Path + "', message '" + this.Message + "')"
+
 /// <summary>Raised by <c>Data.patch</c> when an edit cannot be applied.</summary>
 type DataPatchException(failures: DataPatchFailure list) =
     inherit Exception(
@@ -175,6 +178,14 @@ type DataDifferenceCause =
     | DifferentShape
     | DifferentFieldName
 
+    override this.ToString() =
+        match this with
+        | Missing -> "Missing"
+        | Unexpected -> "Unexpected"
+        | DifferentValue -> "DifferentValue"
+        | DifferentShape -> "DifferentShape"
+        | DifferentFieldName -> "DifferentFieldName"
+
 /// <summary>One focused difference between expected and actual structured data.</summary>
 type DataDifference =
     {
@@ -187,6 +198,11 @@ type DataDifference =
         /// <summary>The difference category.</summary>
         Cause: DataDifferenceCause
     }
+
+    override this.ToString() =
+        let renderValue value = value |> Option.map DataRendering.renderCompact |> Option.defaultValue "none"
+        "DataDifference (path '" + DataPath.toString this.Path + "', expected " + renderValue this.Expected
+        + ", actual " + renderValue this.Actual + ", cause " + this.Cause.ToString() + ")"
 
 /// <summary>An opaque path-based expectation.</summary>
 [<Sealed>]
@@ -210,6 +226,11 @@ type DataMismatch =
         /// <summary>The actual value, or <c>None</c> when it was absent.</summary>
         Actual: Data option
     }
+
+    override this.ToString() =
+        let actual = this.Actual |> Option.map DataRendering.renderCompact |> Option.defaultValue "none"
+        "DataMismatch (expectationIndex " + string this.ExpectationIndex + ", path '"
+        + DataPath.toString this.Path + "', expected '" + this.Expected + "', actual " + actual + ")"
 
 /// <summary>Raised by <c>matching</c> when one or more expectations fail.</summary>
 type DataMatchException(mismatches: DataMismatch list) =

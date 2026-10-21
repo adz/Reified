@@ -786,3 +786,22 @@ module ConstraintTests =
             assertThat <@ 16 |> Constraint.guard age |> orError "too young" = Ok 16 @>
             assertThat <@ 11 |> Constraint.guard age |> orError "too young" = Error "too young" @>
             assertThat <@ 11 |> Constraint.guard age |> mapError Violation.render = Error "expected a value at least 13, but was 11" @>
+
+    module ToString =
+        [<Fact>]
+        let ``AtomicViolation has stable readable text`` () =
+            let value = Expected(PresenceAtom Present, Some ConstraintValue.Null)
+            test <@ value.ToString() = "value must be present, but was null" @>
+
+        [<Fact>]
+        let ``Violation has stable readable text`` () =
+            let value = Violation.described "must be approved"
+            test <@ value.ToString() = "must be approved" @>
+
+        [<Fact>]
+        let ``MessageKeyError has stable readable text`` () =
+            test <@ (MessageKeyError.EmptySegment 2).ToString() = "The message key segment at index 2 is empty." @>
+
+        [<Fact>]
+        let ``MessageFormatSpecError has stable readable text`` () =
+            test <@ (MessageFormatSpecError.UnknownPluralArgument "count").ToString() = "UnknownPluralArgument ('count')" @>

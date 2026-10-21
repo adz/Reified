@@ -98,6 +98,25 @@ let ``successful parses produce no problem details`` () =
     test <@ ProblemDetails.ofParsed parsed = None @>
 
 [<Fact>]
+let ``ProblemError has stable readable text`` () =
+    let error: ProblemError = { Pointer = "/name"; Message = "Expected text." }
+    test <@ error.ToString() = "ProblemError (pointer '/name', message 'Expected text.')" @>
+
+[<Fact>]
+let ``ProblemDetails has stable readable text`` () =
+    let problem: Reified.Schema.Http.ProblemDetails =
+        { Type = "about:blank"
+          Title = "Invalid request"
+          Status = 400
+          Detail = None
+          Errors = [ { Pointer = "/name"; Message = "Expected text." } ] }
+    test
+        <@
+            problem.ToString() =
+                "ProblemDetails (type 'about:blank', title 'Invalid request', status 400, detail 'none', errors [ProblemError (pointer '/name', message 'Expected text.')])"
+        @>
+
+[<Fact>]
 let ``openapi documents embed generated schemas per endpoint`` () =
     let spec =
         Endpoint.post "/signups"

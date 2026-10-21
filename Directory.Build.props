@@ -4,7 +4,7 @@
     <TreatWarningsAsErrors Condition="'$(TreatWarningsAsErrors)' == ''">true</TreatWarningsAsErrors>
     <!-- Every package in this repository ships on one release train. The Flow train moved out with
          Flow itself: a tag here says nothing about a version in the Axial repository. -->
-    <ReifiedVersion>0.11.2</ReifiedVersion>
+    <ReifiedVersion>0.12.0</ReifiedVersion>
 
     <Version Condition="'$(Version)' == ''">$(ReifiedVersion)</Version>
     <NuGetAudit>false</NuGetAudit>

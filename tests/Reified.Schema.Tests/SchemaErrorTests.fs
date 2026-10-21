@@ -78,3 +78,16 @@ module SchemaErrorTests =
             | Error errors -> errors |> SchemaErrors.toList |> List.map (fun issue -> issue.Error)
 
         test <@ applicationErrors = [ SchemaError.Blank ] @>
+
+    [<Fact>]
+    let ``ParseError has stable readable text`` () =
+        test <@ (ParseError.InvalidFormat("int", "nope")).ToString() = "InvalidFormat (target 'int', input 'nope')" @>
+
+    [<Fact>]
+    let ``SchemaError has stable readable text`` () =
+        test <@ (SchemaError.InvalidFormat "email").ToString() = "Expected email format." @>
+
+    [<Fact>]
+    let ``SchemaIssue has stable readable text`` () =
+        let issue = { Path = SchemaPath.key "email"; Error = SchemaError.InvalidFormat "email" }
+        test <@ issue.ToString() = "email: Expected email format." @>

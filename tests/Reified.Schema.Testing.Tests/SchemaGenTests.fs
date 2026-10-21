@@ -183,3 +183,8 @@ module SchemaGenTests =
         let generator = SchemaGen.raw schema |> Result.defaultWith (failwithf "%A")
         let inputs = Gen.sample 100 generator
         test <@ inputs |> Array.forall (fun input -> (Schema.parse schema input |> Result.isOk)) @>
+
+    [<Fact>]
+    let ``SchemaGenerationError has stable readable text`` () =
+        let error = SchemaGenerationError.UnsupportedConstraint([ "email" ], "constraint.format.pattern")
+        test <@ error.ToString() = "Unsupported constraint 'constraint.format.pattern' at 'email'." @>

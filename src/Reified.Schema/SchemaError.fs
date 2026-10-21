@@ -43,6 +43,23 @@ type SchemaError =
     /// <summary>A Schema-owned intrinsic check failed.</summary>
     | Custom of code: string * message: string option
 
+    override this.ToString() =
+        match this with
+        | Omitted -> "This value was omitted."
+        | Blank -> "This value must be present."
+        | ExpectedScalar -> "Expected a scalar value."
+        | ExpectedObject -> "Expected an object."
+        | ExpectedMany -> "Expected a collection."
+        | InvalidFormat expected -> "Expected " + expected + " format."
+        | ParseOutOfRange target -> target + " value is out of range."
+        | UnknownTag choices -> "Must be one of: " + choices + "."
+        | Violation violation ->
+            let rendered = violation.ToString()
+            string (System.Char.ToUpperInvariant rendered.[0]) + rendered.Substring 1 + "."
+        | ConstructorFailed message -> message
+        | Custom(_, Some message) -> message
+        | Custom(code, None) -> code
+
 #if !REIFIED_SCHEMA_CORE_ONLY
 /// <summary>Functions for lowering and rendering boundary schema failures.</summary>
 [<RequireQualifiedAccess>]
@@ -58,21 +75,6 @@ module SchemaError =
     /// <summary>Renders a schema error as an English sentence.</summary>
     /// <remarks>Constraint violations delegate to <c>Violation.render</c>, so there is one rendering catalogue.</remarks>
     /// <example><code>SchemaError.render (SchemaError.InvalidFormat "int") // "Expected int format."</code></example>
-    let render error =
-        match error with
-        | SchemaError.Omitted -> "This value was omitted."
-        | SchemaError.Blank -> "This value must be present."
-        | SchemaError.ExpectedScalar -> "Expected a scalar value."
-        | SchemaError.ExpectedObject -> "Expected an object."
-        | SchemaError.ExpectedMany -> "Expected a collection."
-        | SchemaError.InvalidFormat expected -> "Expected " + expected + " format."
-        | SchemaError.ParseOutOfRange target -> target + " value is out of range."
-        | SchemaError.UnknownTag choices -> "Must be one of: " + choices + "."
-        | SchemaError.Violation violation ->
-            let rendered = Violation.render violation
-            string (System.Char.ToUpperInvariant rendered.[0]) + rendered.Substring 1 + "."
-        | SchemaError.ConstructorFailed message -> message
-        | SchemaError.Custom(_, Some message) -> message
-        | SchemaError.Custom(code, None) -> code
+    let render (error: SchemaError) = error.ToString()
 
 #endif

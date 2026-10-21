@@ -18,6 +18,11 @@ type MessageKeyError =
     /// <summary>The zero-based segment at this position was empty, as in <c>books..isbn</c>.</summary>
     | EmptySegment of index: int
 
+    override this.ToString() =
+        match this with
+        | EmptyKey -> "A message key must contain at least one segment."
+        | EmptySegment index -> "The message key segment at index " + string index + " is empty."
+
 /// <summary>The reserved-character encoding that keeps independently supplied segments from colliding.</summary>
 /// <remarks>
 /// <c>%</c> is encoded first, so a literal <c>%2E</c> in an attribute name stays distinct from a literal dot.
@@ -49,10 +54,7 @@ module internal MessageSegment =
             | Some index -> Error(MessageKeyError.EmptySegment index)
             | None -> Ok segments
 
-    let describe (error: MessageKeyError) =
-        match error with
-        | MessageKeyError.EmptyKey -> "A message key must contain at least one segment."
-        | MessageKeyError.EmptySegment index -> $"The message key segment at index {string index} is empty."
+    let describe (error: MessageKeyError) = error.ToString()
 
 /// <summary>A message identity and the operands its template may interpolate.</summary>
 /// <remarks>
@@ -85,6 +87,10 @@ type MessageDescriptor =
 type MessageFormatSpecError =
     /// <summary>The declared plural operand names no argument the descriptor carries.</summary>
     | UnknownPluralArgument of string
+
+    override this.ToString() =
+        match this with
+        | UnknownPluralArgument name -> "UnknownPluralArgument ('" + name + "')"
 
 /// <summary>
 /// A descriptor plus the rendering metadata its owning catalogue holds: the neutral fallback template and the

@@ -12,6 +12,12 @@ type MigrationError =
     | MigrationFailed of message: string
     | RevalidationFailed of SchemaErrors
 
+    override this.ToString() =
+        match this with
+        | MigrationFailed message -> "MigrationFailed (message '" + message + "')"
+        | RevalidationFailed errors ->
+            "RevalidationFailed (" + (SchemaErrors.toString errors).Replace(Environment.NewLine, " | ") + ")"
+
 /// The explicit source of a contract version.
 [<RequireQualifiedAccess>]
 type VersionSource =
@@ -27,6 +33,17 @@ type ContractError =
     | VersionTooNew of detected: int * highestSupported: int
     | ParseFailed of version: int * SchemaErrors
     | Migration of MigrationError
+
+    override this.ToString() =
+        match this with
+        | VersionMissing -> "VersionMissing"
+        | VersionUnrecognized version -> "VersionUnrecognized (version " + string version + ")"
+        | VersionTooNew(detected, highestSupported) ->
+            "VersionTooNew (detected " + string detected + ", highestSupported " + string highestSupported + ")"
+        | ParseFailed(version, errors) ->
+            "ParseFailed (version " + string version + ", "
+            + (SchemaErrors.toString errors).Replace(Environment.NewLine, " | ") + ")"
+        | Migration error -> "Migration (" + error.ToString() + ")"
 
 type private ContractVersion =
     {

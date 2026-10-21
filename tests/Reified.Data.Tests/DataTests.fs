@@ -445,3 +445,30 @@ module DataTests =
         test <@ Data.render value = "{ n: 1.20e+3, n: 2, text: \"Ada\", items: [true, null] }" @>
         test <@ Data.Json.render value = "{\"n\":1.20e+3,\"n\":2,\"text\":\"Ada\",\"items\":[true,null]}" @>
         test <@ Data.renderIndented value |> fun rendered -> rendered.Contains(Environment.NewLine) || rendered.Contains("\n") @>
+
+    [<Fact>]
+    let ``DataPatchFailure has stable readable text`` () =
+        let patch = { EditIndex = 2; Path = "items[1]"; Message = "Expected a list." }
+        test <@ patch.ToString() = "DataPatchFailure (editIndex 2, path 'items[1]', message 'Expected a list.')" @>
+
+    [<Fact>]
+    let ``DataDifferenceCause has stable readable text`` () =
+        test <@ DataDifferenceCause.DifferentShape.ToString() = "DifferentShape" @>
+
+    [<Fact>]
+    let ``DataDifference has stable readable text`` () =
+        let difference =
+            { Path = DataPath.parse "name"
+              Expected = Some(Data.Text "Ada")
+              Actual = None
+              Cause = DataDifferenceCause.Missing }
+        test <@ difference.ToString() = "DataDifference (path 'name', expected \"Ada\", actual none, cause Missing)" @>
+
+    [<Fact>]
+    let ``DataMismatch has stable readable text`` () =
+        let mismatch =
+            { ExpectationIndex = 1
+              Path = DataPath.parse "name"
+              Expected = "text equal to Ada"
+              Actual = Some(Data.Text "Grace") }
+        test <@ mismatch.ToString() = "DataMismatch (expectationIndex 1, path 'name', expected 'text equal to Ada', actual \"Grace\")" @>

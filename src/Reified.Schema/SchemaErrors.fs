@@ -79,6 +79,11 @@ type SchemaIssue =
         Error: SchemaError
     }
 
+    override this.ToString() =
+        let path = SchemaPath.format this.Path
+        let message = SchemaError.render this.Error
+        if String.IsNullOrEmpty path then message else path + ": " + message
+
 /// <summary>One or more accumulated schema failures.</summary>
 [<Sealed; AllowNullLiteral>]
 type SchemaErrors internal (issues: SchemaIssue list) =

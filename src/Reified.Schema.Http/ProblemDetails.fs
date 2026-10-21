@@ -27,6 +27,10 @@ type ProblemError =
         Message: string
     }
 
+    override this.ToString() =
+        "ProblemError (pointer '" + this.Pointer + "', message '"
+        + this.Message.Replace(System.Environment.NewLine, " | ") + "')"
+
 /// <summary>An RFC 9457 problem-details value carrying path-aware parse errors.</summary>
 /// <remarks>
 /// This is the shared error contract for schema-driven endpoints: every host adapter renders the same JSON body with
@@ -38,6 +42,12 @@ type ProblemDetails =
       Status: int
       Detail: string option
       Errors: ProblemError list }
+
+    override this.ToString() =
+        let detail = this.Detail |> Option.defaultValue "none"
+        let errors = this.Errors |> List.map string |> String.concat "; "
+        "ProblemDetails (type '" + this.Type + "', title '" + this.Title + "', status "
+        + string this.Status + ", detail '" + detail + "', errors [" + errors + "])"
 
 [<RequireQualifiedAccess>]
 module ProblemDetails =
