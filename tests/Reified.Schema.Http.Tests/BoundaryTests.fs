@@ -98,22 +98,40 @@ let ``successful parses produce no problem details`` () =
     test <@ ProblemDetails.ofParsed parsed = None @>
 
 [<Fact>]
-let ``ProblemError has stable readable text`` () =
-    let error: ProblemError = { Pointer = "/name"; Message = "Expected text." }
-    test <@ error.ToString() = "ProblemError (pointer '/name', message 'Expected text.')" @>
+let ``ProblemError has stable null-safe one-line text`` () =
+    let error: ProblemError = { Pointer = null; Message = "First\r\nSecond\rThird\nFourth" }
+    test
+        <@
+            error.ToString() =
+                "ProblemError (pointer '<null>', message 'First | Second | Third | Fourth')"
+        @>
 
 [<Fact>]
-let ``ProblemDetails has stable readable text`` () =
+let ``ProblemDetails omits absent detail and normalizes public strings`` () =
     let problem: Reified.Schema.Http.ProblemDetails =
-        { Type = "about:blank"
-          Title = "Invalid request"
+        { Type = "about:\rblank"
+          Title = "Invalid\nrequest"
           Status = 400
           Detail = None
           Errors = [ { Pointer = "/name"; Message = "Expected text." } ] }
     test
         <@
             problem.ToString() =
-                "ProblemDetails (type 'about:blank', title 'Invalid request', status 400, detail 'none', errors [ProblemError (pointer '/name', message 'Expected text.')])"
+                "ProblemDetails (type 'about: | blank', title 'Invalid | request', status 400, errors [ProblemError (pointer '/name', message 'Expected text.')])"
+        @>
+
+[<Fact>]
+let ``ProblemDetails distinguishes literal detail and null collections`` () =
+    let problem: Reified.Schema.Http.ProblemDetails =
+        { Type = null
+          Title = null
+          Status = 500
+          Detail = Some "none\r\ncontinued"
+          Errors = Unchecked.defaultof<ProblemError list> }
+    test
+        <@
+            problem.ToString() =
+                "ProblemDetails (type '<null>', title '<null>', status 500, detail 'none | continued', errors [<null>])"
         @>
 
 [<Fact>]

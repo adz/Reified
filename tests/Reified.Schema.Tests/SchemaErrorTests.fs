@@ -88,6 +88,32 @@ module SchemaErrorTests =
         test <@ (SchemaError.InvalidFormat "email").ToString() = "Expected email format." @>
 
     [<Fact>]
+    let ``SchemaError handles empty and null violation prose`` () =
+        let empty = SchemaError.Violation(Violation.described "")
+        let nullProse = SchemaError.Violation(Violation.described null)
+        test <@ empty.ToString() = "Constraint violation." @>
+        test <@ nullProse.ToString() = "Constraint violation." @>
+
+    [<Fact>]
     let ``SchemaIssue has stable readable text`` () =
         let issue = { Path = SchemaPath.key "email"; Error = SchemaError.InvalidFormat "email" }
         test <@ issue.ToString() = "email: Expected email format." @>
+
+    [<Fact>]
+    let ``SchemaErrors uses its path-aware rendering for ToString`` () =
+        let schema =
+            schema<Signup> {
+                field _.Email
+                field _.Age
+                construct (fun email age -> { Email = email; Age = age })
+            }
+
+        let errors =
+            match
+                Data.objectOfMap (Map.ofList [ "email", Data.Text "ada@example.com"; "age", Data.Text "nope" ])
+                |> Schema.parse schema
+            with
+            | Error errors -> errors
+            | Ok _ -> failwith "Expected schema errors."
+
+        test <@ errors.ToString() = "age: Expected int format." @>

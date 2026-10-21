@@ -177,3 +177,8 @@ contract Broken.v1 {
     let ``numeric overflow is reported instead of escaping the Result API`` source =
         let diagnostics = parseErrors source
         test <@ diagnostics |> List.exists (fun diagnostic -> diagnostic.Message.Contains "out of range") @>
+
+    [<Fact>]
+    let ``ContractDiagnostic has stable printf-free text`` () =
+        let diagnostic = { File = "account.contract"; Line = 12; Message = "Unknown shape." }
+        test <@ diagnostic.ToString() = "account.contract(12): error: Unknown shape." @>

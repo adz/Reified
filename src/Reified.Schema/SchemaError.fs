@@ -54,8 +54,11 @@ type SchemaError =
         | ParseOutOfRange target -> target + " value is out of range."
         | UnknownTag choices -> "Must be one of: " + choices + "."
         | Violation violation ->
-            let rendered = violation.ToString()
-            string (System.Char.ToUpperInvariant rendered.[0]) + rendered.Substring 1 + "."
+            let rendered = Violation.render violation
+            if System.String.IsNullOrEmpty rendered then
+                "Constraint violation."
+            else
+                string (System.Char.ToUpperInvariant rendered.[0]) + rendered.Substring 1 + "."
         | ConstructorFailed message -> message
         | Custom(_, Some message) -> message
         | Custom(code, None) -> code

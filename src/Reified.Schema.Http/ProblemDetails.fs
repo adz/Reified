@@ -18,6 +18,13 @@ module JsonPointer =
             (fun pointer index -> pointer + "/" + string index)
             ""
 
+module private ProblemText =
+    let oneLine (value: string) =
+        if isNull value then
+            "<null>"
+        else
+            value.Replace("\r\n", " | ").Replace("\r", " | ").Replace("\n", " | ")
+
 /// <summary>One boundary error: a JSON pointer into the request body plus a rendered message.</summary>
 type ProblemError =
     {
@@ -28,8 +35,8 @@ type ProblemError =
     }
 
     override this.ToString() =
-        "ProblemError (pointer '" + this.Pointer + "', message '"
-        + this.Message.Replace(System.Environment.NewLine, " | ") + "')"
+        "ProblemError (pointer '" + ProblemText.oneLine this.Pointer + "', message '"
+        + ProblemText.oneLine this.Message + "')"
 
 /// <summary>An RFC 9457 problem-details value carrying path-aware parse errors.</summary>
 /// <remarks>
@@ -44,10 +51,19 @@ type ProblemDetails =
       Errors: ProblemError list }
 
     override this.ToString() =
-        let detail = this.Detail |> Option.defaultValue "none"
-        let errors = this.Errors |> List.map string |> String.concat "; "
-        "ProblemDetails (type '" + this.Type + "', title '" + this.Title + "', status "
-        + string this.Status + ", detail '" + detail + "', errors [" + errors + "])"
+        let errors =
+            if isNull (box this.Errors) then
+                "<null>"
+            else
+                this.Errors
+                |> List.map (fun error -> if isNull (box error) then "<null>" else error.ToString())
+                |> String.concat "; "
+        let detail =
+            match this.Detail with
+            | None -> ""
+            | Some value -> ", detail '" + ProblemText.oneLine value + "'"
+        "ProblemDetails (type '" + ProblemText.oneLine this.Type + "', title '"
+        + ProblemText.oneLine this.Title + "', status " + string this.Status + detail + ", errors [" + errors + "])"
 
 [<RequireQualifiedAccess>]
 module ProblemDetails =

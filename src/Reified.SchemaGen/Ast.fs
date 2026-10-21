@@ -157,7 +157,7 @@ type ContractDiagnostic =
       Line: int
       Message: string }
 
-    override this.ToString() = $"{this.File}({this.Line}): error: {this.Message}"
+    override this.ToString() = this.File + "(" + string this.Line + "): error: " + this.Message
 
 module FieldDecl =
     /// The external (wire) name: the explicit `as "..."` rename when present, the field name otherwise.

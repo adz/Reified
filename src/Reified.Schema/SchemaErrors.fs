@@ -89,6 +89,11 @@ type SchemaIssue =
 type SchemaErrors internal (issues: SchemaIssue list) =
     member internal _.Issues = issues
 
+    override _.ToString() =
+        issues
+        |> List.map string
+        |> String.concat Environment.NewLine
+
 /// <summary>Functions for inspecting and rendering accumulated schema failures.</summary>
 [<RequireQualifiedAccess>]
 module SchemaErrors =
@@ -117,13 +122,9 @@ module SchemaErrors =
     let isEmpty errors = toList errors |> List.isEmpty
 
     /// <summary>Renders one line per failure.</summary>
-    let toString errors =
-        toList errors
-        |> List.map (fun issue ->
-            let message = SchemaError.render issue.Error
-            let path = SchemaPath.format issue.Path
-            if String.IsNullOrEmpty path then message else $"{path}: {message}")
-        |> String.concat Environment.NewLine
+    let toString (errors: SchemaErrors) =
+        if isNull errors then nullArg (nameof errors)
+        errors.ToString()
 
     /// Schema owns the diagnostic path and supplies it as the renderer's attribute path. Index components are
     /// omitted from resource candidates — `addresses[0].postcode` and `addresses[7].postcode` are the same field

@@ -794,6 +794,19 @@ module ConstraintTests =
             test <@ value.ToString() = "value must be present, but was null" @>
 
         [<Fact>]
+        let ``localized AtomicViolation text includes its key and arguments`` () =
+            let descriptor =
+                MessageDescriptor.Advanced.create
+                    "account.minimumAge"
+                    (Map.ofList [ "minimum", ConstraintValue.Integer 18L ])
+            let value = Described("must meet the minimum age", Some descriptor)
+            test
+                <@
+                    value.ToString() =
+                        "must meet the minimum age (key 'account.minimumAge', arguments [minimum=18])"
+                @>
+
+        [<Fact>]
         let ``Violation has stable readable text`` () =
             let value = Violation.described "must be approved"
             test <@ value.ToString() = "must be approved" @>

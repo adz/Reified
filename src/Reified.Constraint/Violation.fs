@@ -34,7 +34,18 @@ type AtomicViolation =
             match actual with
             | Some value -> expected + ", but was " + ConstraintValue.render value
             | None -> expected
-        | Described(description, _) -> description
+        | Described(description, key) ->
+            let prose = if isNull description then "" else description
+            match key with
+            | None -> prose
+            | Some descriptor ->
+                let arguments =
+                    descriptor
+                    |> MessageDescriptor.arguments
+                    |> Map.toList
+                    |> List.map (fun (name, value) -> name + "=" + ConstraintValue.render value)
+                    |> String.concat ", "
+                prose + " (key '" + MessageDescriptor.key descriptor + "', arguments [" + arguments + "])"
         | UnsupportedOperand operation -> UnsupportedOperation.render operation
 
 /// <summary>Why a value failed its constraint.</summary>
@@ -166,13 +177,27 @@ module Violation =
         | Atomic(Described(_, key)) -> key
         | _ -> None
 
+    let private renderAtomic (atomic: AtomicViolation) =
+        match atomic with
+        | Expected(expectation, actual) ->
+            let expected = ConstraintAtom.render expectation
+            match actual with
+            | Some actual -> expected + ", but was " + ConstraintValue.render actual
+            | None -> expected
+        | Described(description, _) -> if isNull description then "" else description
+        | UnsupportedOperand operation -> UnsupportedOperation.render operation
+
     /// <summary>
     /// Renders a violation as an English sentence fragment with no trailing punctuation, keeping conjunction and
     /// alternative groups distinct.
     /// </summary>
     /// <example><code>Violation.render (Atomic (Expected (PresenceAtom Present, None)))
     /// // "value must be present"</code></example>
-    let render (violation: Violation) : string = violation.ToString()
+    let rec render (violation: Violation) : string =
+        match violation with
+        | Atomic atomic -> renderAtomic atomic
+        | All(first, rest) -> first :: rest |> List.map render |> String.concat "; "
+        | Any(first, rest) -> first :: rest |> List.map render |> String.concat ", or "
 
     /// <summary>
     /// Projects a violation for an external localization system, preserving its grouping so a translator renders
