@@ -11,7 +11,10 @@
   original number-token spelling do not matter.
 - `Reified.Json.parseData` provides portable, lossless JSON-to-`Data` parsing from the `Reified.Schema` package.
 - Adapt sources with `Data.ofCliArgs`, `Data.ofConfiguration` (`:` keys), and `Data.ofEnvironment` /
-  `Data.ofEnvironmentWith` (`__` names, optional prefix; the caller passes the variable pairs, no I/O). Leaves are text
+  `Data.ofEnvironmentWith` (`__` names, optional prefix; caller-supplied pairs, no I/O). Sections use canonical
+  ASCII decimal indexes only; `00` never aliases `0`. Text/null leaves and null gaps count toward bounded output.
+  Defaults: 10000 items/list, 100000 output nodes including root/containers/gaps, 64 path segments. Override positive
+  limits with `Data.ofConfigurationWith` or `DataEnvironmentOptions.Limits`. Supplied non-null leaves are text
   for the schema to parse.
 - Layer configuration with `Data.mergeAll [ file; environment; cli ]`: right-biased deep merge of objects; lists,
   scalars, and `Data.Null` on the right replace; a later null overrides and never removes a key.

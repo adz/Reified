@@ -91,6 +91,22 @@ module DataEnvironmentTests =
 
         test <@ exactPrefix = Data.Object [] @>
 
+    [<Theory>]
+    [<InlineData("0x10")>]
+    [<InlineData("1_0")>]
+    [<InlineData("+1")>]
+    [<InlineData("-0")>]
+    [<InlineData(" 1")>]
+    [<InlineData("1 ")>]
+    [<InlineData("01")>]
+    [<InlineData("00")>]
+    [<InlineData("١")>]
+    [<InlineData("１")>]
+    let ``only canonical ASCII decimal sections become indexes`` segment =
+        let expected = Data.Object ["X", Data.Object [segment, Data.Text "v"]]
+        Assert.Equal(expected, Data.ofEnvironment ["X__" + segment, "v"])
+        Assert.Equal(expected, Data.ofConfiguration ["X:" + segment, "v"])
+
     [<Fact>]
     let ``numeric aliases remain separate object sections without dropping children`` () =
         let expected =

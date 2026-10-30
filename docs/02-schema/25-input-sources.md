@@ -131,7 +131,8 @@ when either distinction matters.
 
 ## Configuration
 
-Configuration keys use `:`-separated sections and numeric segments for collection indexes:
+Configuration keys use `:`-separated sections. A section with only canonical ASCII decimal child names
+(`0` or `[1-9][0-9]*`) becomes a collection:
 
 ```fsharp
 let raw =
@@ -168,8 +169,13 @@ let raw =
 
 
 Names keep their case, so a field matches `SHOP__name` but not `SHOP__NAME` unless it declares `alias "NAME"`.
-Numeric segments are list indexes, as with configuration keys. See
-[environment variables](/data/converting-data.html#environment-variables) for the ordering and conflict rules.
+Sections use the same canonical decimal index grammar as configuration keys. Names such as `00`, `+1`,
+`0x10` and `1_0` remain distinct object fields; they never alias an index. Both adapters default to 10,000 items
+per list, 100,000 output nodes (including root, containers and null gaps) and 64 path segments. Exceeding a limit
+throws `ArgumentException` before oversized expansion. Use `Data.ofConfigurationWith` or the environment options'
+`Limits` record to configure positive bounds explicitly. See
+[environment variables](/data/converting-data.html#environment-variables) for ordering/conflicts and
+[conversion limits](/data/converting-data.html#conversion-limits) for trusted-input overrides.
 
 ## Layered Sources
 

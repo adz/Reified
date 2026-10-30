@@ -75,18 +75,22 @@ module DataConfigurationLimitsTests =
     let ``default bounds accept the largest collection and the deepest path`` environment =
         let separator = if environment then "__" else ":"
         let convert = if environment then Data.ofEnvironment else Data.ofConfiguration
-        match convert ["X" + separator + "9999", "v"] with
-        | Data.Object ["X", Data.List items] -> Assert.Equal(10000, items.Length)
-        | actual -> failwith (Data.Json.render actual)
-        convert [(List.replicate 64 "X" |> String.concat separator), "v"] |> ignore
+        for index in [9998; 9999] do
+            match convert ["X" + separator + string index, "v"] with
+            | Data.Object ["X", Data.List items] -> Assert.Equal(index + 1, items.Length)
+            | actual -> failwith (Data.Json.render actual)
+        for depth in [63; 64] do
+            convert [(List.replicate depth "X" |> String.concat separator), "v"] |> ignore
+        Assert.Equal(Data.Object [], withLimits environment (fun limits -> { limits with MaxExpandedNodes = 1 }) [])
 
     [<Theory>]
     [<InlineData(false)>]
     [<InlineData(true)>]
     let ``index length arithmetic cannot overflow at Int32 maximum`` environment =
-        let key = if environment then "X__2147483647" else "X:2147483647"
+        let separator = if environment then "__" else ":"
         let convert = if environment then Data.ofEnvironment else Data.ofConfiguration
-        Assert.Throws<ArgumentException>(fun () -> convert [key, "v"] |> ignore) |> ignore
+        for index in ["2147483647"; "2147483648"; "999999999999999999999999999999"] do
+            Assert.Throws<ArgumentException>(fun () -> convert ["X" + separator + index, "v"] |> ignore) |> ignore
 
     [<Theory>]
     [<InlineData(false)>]

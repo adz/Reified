@@ -50,7 +50,9 @@ independent set of composition tools. Load only the context needed for the task:
 - Primitive text decoding and Result composition, `result { }`, and accumulating builders: `/parsing/`,
   `/result-handling/llms.txt`
 - Structured fixtures, immutable edits, comparisons, produced-data matching, and layered configuration
-  (`Data.ofEnvironment`, `Data.mergeAll`), also the required input shape for `Schema.parse`, not only a testing
+  (`Data.ofEnvironment`, `Data.mergeAll`), with canonical decimal indexes and bounded expansion (10000 items/list,
+  100000 output nodes, 64 path segments; configure via `ofConfigurationWith` / environment `Limits`), also the
+  required input shape for `Schema.parse`, not only a testing
   convenience: `/data/llms.txt`
 
 `Reified` is an umbrella package that installs every runtime package at once. It adds no API of its own: every

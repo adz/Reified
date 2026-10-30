@@ -158,5 +158,14 @@ module DataMergeTests =
             @>
 
     [<Fact>]
+    let ``singleton layers normalize object duplicates but keep lists opaque`` () =
+        let duplicate = Data.Object ["x", Data.Text "first"; "x", Data.Text "last"]
+        let normalized = Data.Object ["x", Data.Text "last"]
+        test <@ Data.mergeAll [duplicate] = normalized @>
+        test <@ Data.merge duplicate (Data.Object []) = normalized @>
+        let list = Data.List [duplicate]
+        test <@ Data.mergeAll [list] = list @>
+
+    [<Fact>]
     let ``merge rejects a null list`` () =
         raises<ArgumentNullException> <@ Data.mergeAll (Unchecked.defaultof<Data list>) @>

@@ -361,6 +361,7 @@ module ApiShapeTests =
               "ofJsonElement"
               "ofJsonDocument"
               "ofConfiguration"
+              "ofConfigurationWith"
               "ofEnvironment"
               "ofEnvironmentWith"
               "merge"

@@ -82,15 +82,25 @@ module Data =
     let ofJsonValue = DataConversions.ofJsonValue
 #endif
 
-    /// <summary>Builds structured data from flattened configuration keys.</summary>
+    /// <summary>Builds structured data from flattened configuration keys with bounded expansion.</summary>
+    /// <remarks>Only sections with all-canonical ASCII decimal child names become lists. Defaults are 10000 items
+    /// per list, 100000 output nodes (including containers and null gaps), and 64 input path segments.
+    /// Use ofConfigurationWith for explicit limits; exceeding one throws ArgumentException with the path.</remarks>
     let ofConfiguration = DataConversions.ofConfiguration
+
+    /// <summary>Converts flattened configuration using explicit resource limits.</summary>
+    /// <remarks>The configure function receives defaults: 10000 items per list, 100000 output nodes and 64 path segments.
+    /// Limits must be positive. Exceeding a limit throws ArgumentException identifying the path and bound.</remarks>
+    /// <example><code>[ "Servers:10000", "host" ]
+    /// |&gt; Data.ofConfigurationWith (fun limits -&gt; { limits with MaxCollectionLength = 20000 })</code></example>
+    let ofConfigurationWith configure values = DataConversions.ofConfigurationWith configure values
 
     /// <summary>Builds structured data from .NET configuration key and value pairs.</summary>
     let ofConfigurationPairs = DataConversions.ofConfigurationPairs
 
     /// <summary>Builds nested structured data from environment variable name and value pairs.</summary>
     /// <remarks>
-    /// Splits names on <c>__</c>, keeps their case, and turns numeric segments into list indexes. The caller reads
+    /// Splits names on <c>__</c>, keeps their case, and turns canonical decimal sections into bounded lists. The caller reads
     /// the environment; see <c>ofEnvironmentWith</c> for a prefix, another separator, and the conflict rules.
     /// </remarks>
     /// <example><code>Data.ofEnvironment [ "Database__Port", "5432" ]
@@ -101,15 +111,19 @@ module Data =
     /// <remarks>
     /// <para>
     /// The configuring function receives the defaults (no prefix, separator <c>__</c>). A prefix is matched
-    /// ordinally and stripped, so include its separator. Leaves are <c>Data.Text</c>; names keep their case, and
+    /// ordinally and stripped, so include its separator. Leaves are <c>Data.Text</c> (or <c>Data.Null</c> for a null string); names keep their case, and
     /// matching <c>PORT</c> to a field <c>port</c> is the schema's job (<c>alias "PORT"</c>).
     /// </para>
     /// <para>
-    /// Numeric segments are list indexes, as in <c>ofConfiguration</c>. Names are applied in ordinal order, because
+    /// A section becomes a list only when every child name is <c>0</c> or matches <c>[1-9][0-9]*</c> using ASCII
+    /// digits. Other names remain object fields: <c>00</c> never aliases <c>0</c>. This is identical on .NET and
+    /// Fable. Names are applied in ordinal order, because
     /// the environment has no meaningful order: a name that is also a section loses to the section
     /// (<c>A=1</c> with <c>A__B=2</c> gives <c>A.B = "2"</c> in either input order), and a repeated name keeps its
     /// last value. Names that are empty after the prefix or contain an empty segment are skipped. The root is always
-    /// an object.
+    /// an object. Default <c>Limits</c> are 10000 items per list, 100000 output nodes including root/containers/gaps,
+    /// and 64 path segments. Configure positive limits explicitly for larger trusted inputs; exceeding a limit
+    /// throws <c>ArgumentException</c> identifying the path and bound.
     /// </para>
     /// <para>
     /// On .NET, pass <c>Environment.GetEnvironmentVariables()</c> as pairs; under Fable, pass the entries of
@@ -120,7 +134,8 @@ module Data =
     /// |&gt; Seq.cast&lt;System.Collections.DictionaryEntry&gt;
     /// |&gt; Seq.map (fun entry -&gt; string entry.Key, string entry.Value)
     /// |&gt; Data.ofEnvironmentWith (fun options -&gt; { options with Prefix = Some "MYAPP__" })</code></example>
-    /// <exception cref="T:System.ArgumentException">Thrown when the separator or a supplied prefix is empty.</exception>
+    /// <exception cref="T:System.ArgumentException">Thrown when the separator or a supplied prefix is empty,
+    /// limits are nonpositive, or conversion exceeds a configured limit.</exception>
     let ofEnvironmentWith
         (configure: DataEnvironmentOptions -> DataEnvironmentOptions)
         (variables: seq<string * string>)
@@ -138,13 +153,13 @@ module Data =
     /// A right-side <c>Data.Null</c> overrides: the key stays and its value becomes <c>Null</c>, which is how a
     /// later configuration source that sets a key to null behaves. Nothing removes a key. (JSON Merge Patch,
     /// RFC 7396, deletes on null instead; use <c>Data.patch</c> with <c>remove</c> for that.) A name repeated within
-    /// one object merges into its first occurrence, so every object in the result has unique names; lists are taken
-    /// as they are and not inspected.
+    /// one object merges into its first occurrence. Object-valued descendants are normalized too; lists are taken
+    /// as they are and objects inside them are not inspected.
     /// </para>
     /// <para>
     /// The right argument wins, so <c>Data.merge defaults overrides</c> reads in layering order; piping
     /// <c>defaults |&gt; Data.merge overrides</c> would let the defaults win. <c>Data.Object []</c> is an identity on both
-    /// sides for objects. Merge is associative except where one layer has a non-object between two layers that have
+    /// sides for already-normalized objects (unique names recursively outside lists). Merge is associative except where one layer has a non-object between two layers that have
     /// objects at the same path; prefer <c>mergeAll</c>, which always applies layers in order.
     /// </para>
     /// </remarks>
@@ -157,7 +172,8 @@ module Data =
     /// <summary>Merges structured values in order with <c>merge</c>, so each later layer wins.</summary>
     /// <remarks>
     /// Folds from the left starting at <c>Data.Object []</c>, so an empty list gives an empty object and a
-    /// one-item list gives that item. Order the list from lowest to highest precedence, typically file, then
+    /// one-item list normalizes duplicate names in object layers; scalars and lists pass through unchanged.
+    /// Order layers from lowest to highest precedence, typically file, then
     /// environment, then command line.
     /// </remarks>
     /// <example><code>Data.mergeAll

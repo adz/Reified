@@ -42,9 +42,11 @@ The same schema accepts input from `Data.ofJsonDocument` for a request body, `Da
 `Data.mergeAll` for several of those layered together. The schema does not depend on the source.
 
 Adapters produce different trees. JSON carries typed
-Booleans and numbers, while form, CLI, and configuration leaves are all text that the schema still has
-to parse. Repeated names build a list in `ofNameValues` but overwrite in `ofConfiguration`, where lists
-come from indexed key segments instead. CLI flags arrive as the text `"true"` or `"false"`. The same schema accepts
+Booleans and numbers, while form, CLI, and configuration adapters leave supplied non-null strings as text for the
+schema to parse. Accepted null strings and sparse gaps remain `Data.Null`. Repeated names build a list in `ofNameValues` but overwrite in `ofConfiguration`, where lists
+come from canonical ASCII decimal key segments instead (`0` or `[1-9][0-9]*`). Environment/configuration adapters
+share bounded list length, output-node count and path depth; configure positive overrides for larger trusted inputs
+with `Data.ofConfigurationWith` or the environment options' `Limits` record. CLI flags arrive as the text `"true"` or `"false"`. The same schema accepts
 input from any of them, but sources must agree on the resulting tree, not just the logical content. See
 [the adapter rules](/data/converting-data.html) for what each one produces.
 

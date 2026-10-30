@@ -90,7 +90,7 @@ fields and converts numbers to JavaScript numbers, so it cannot preserve the ori
 | `seq<string * string>` | `Data.ofNameValues` | Repeated names become lists. |
 | `NameValueCollection` | `Data.ofNameValueCollection` | Repeated names become lists. |
 | command-line arguments | `Data.ofCliArgs` | Parsed option names and their supplied values. |
-| flattened configuration pairs | `Data.ofConfiguration` | Nested objects and lists from colon-separated keys. |
+| flattened configuration pairs | `Data.ofConfiguration`, `Data.ofConfigurationWith` | Bounded nested objects/lists from colon-separated keys. |
 | configuration key/value pairs | `Data.ofConfigurationPairs` | The .NET configuration form, including null values. |
 | environment variable pairs | `Data.ofEnvironment`, `Data.ofEnvironmentWith` | Nested objects and lists from `__`-separated names. |
 
@@ -150,7 +150,9 @@ form to pass a negative value: `--offset=-5` sets `offset` to the text `"-5"`.
 ## Configuration keys
 
 `Data.ofConfiguration` takes flattened `seq<string * string>` and splits each key on `:` to rebuild the nesting. A
-segment that is a non-negative integer is an index, so those siblings become a `Data.List`.
+section becomes a `Data.List` only when every child name is a canonical ASCII decimal index: `0` or
+`[1-9][0-9]*`. Signs, whitespace, hexadecimal prefixes, underscores, Unicode digits and leading zeroes are not
+indexes. Those names remain object fields, identically on .NET and Fable.
 
 ```fsharp
 Data.ofConfiguration
@@ -248,16 +250,46 @@ let environment =
 
 The rules:
 
-- Every leaf is text, as with the CLI adapter; the schema decides whether `"5432"` is a number.
+- Supplied values become text, or `Data.Null` for a null string; the schema decides whether `"5432"` is a number.
 - Names keep their case. `PORT` and `Port` are different fields, and a schema field `port` matches neither unless it
   declares `alias "PORT"`. Matching is the schema's concern, not the adapter's.
-- Numeric segments are list indexes, as in `ofConfiguration`, and the root is always an object.
+- Sections with only canonical decimal child names become lists, as in `ofConfiguration`; the root is always an
+  object. `0` and `00` remain separate fields in an object section, never aliases that discard one child's subtree.
 - The environment has no meaningful order, so names apply in ordinal order rather than input order. A name that is
   also a section loses to the section in either order: `A=1` with `A__B=2` gives `A.B = "2"`. A repeated name keeps
   its last value.
 - A name that is empty after the prefix, or that contains an empty segment, cannot address a path and is skipped.
   Shells and operating systems set such variables (macOS sets `__CF_USER_TEXT_ENCODING`), so rejecting them would make
   an unprefixed read fail on ordinary machines.
+
+## Conversion limits
+
+Environment and flattened configuration conversion default to **10,000 items per list**, **100,000 output nodes**
+across the complete result, and **64 input path segments**. The node budget includes the root, every object/list,
+supplied leaves and every null gap in a sparse list. For example, `X__9999` requires 10,000 list slots; `X__10000`
+exceeds the default length. Canonical numeric indexes too large for Int32 are rejected, not reinterpreted as object
+names. The same bounds apply to `ofConfigurationPairs`.
+
+A limit violation throws `ArgumentException` naming the path and bound before oversized list expansion. Limits
+must be positive. Raise them explicitly for larger trusted inputs with `Data.ofConfigurationWith` or
+`DataEnvironmentOptions.Limits`:
+
+```fsharp isolated
+open Reified
+
+let limits (defaults: DataConversionLimits) =
+    { defaults with MaxCollectionLength = 2; MaxExpandedNodes = 7; MaxDepth = 2 }
+
+let configuration = Data.ofConfigurationWith limits [ "A:1", "a"; "B:1", "b" ]
+let environment =
+    [ "A__1", "a"; "B__1", "b" ]
+    |> Data.ofEnvironmentWith (fun options -> { options with Limits = limits options.Limits })
+// Both have one root object, two lists and four list slots: seven nodes including the two null gaps.
+```
+
+Limits bound conversion's expansion, not source text bytes or the number of supplied pairs. A host handling
+untrusted uploads should bound those inputs too. `merge` does not apply these adapter-specific limits to arbitrary
+already-built Data values.
 
 ## Merge layered sources
 
@@ -295,9 +327,21 @@ Choices that matter for configuration:
   `Data.patch` with `remove` when a key must go.
 - Lists replace whole. An indexed environment variable such as `Servers__0__Host` builds a complete list that replaces
   the file's list, so a layer that changes one element must supply every element.
-- A name repeated within one object merges into its first occurrence, so every object in the result has unique names.
+- A name repeated within an object merges into its first occurrence, recursively through object-valued fields.
+  Lists are opaque: objects inside them are not normalized. Even `mergeAll [oneObject]` normalizes duplicates;
+  the empty-object identity law applies to already-normalized object trees, not arbitrary duplicate-key inputs.
 - Merging is associative while layers agree on which paths hold objects. When a middle layer puts a non-object between
   two objects at one path, grouping changes the result; `mergeAll` always applies layers in order, so prefer it.
+
+A singleton object layer need not be identical to its input:
+
+```fsharp isolated
+open Reified
+
+let duplicate = Data.Object [ "x", Data.Text "first"; "x", Data.Text "last" ]
+let normalized = Data.mergeAll [ duplicate ]
+assert (normalized = Data.Object [ "x", Data.Text "last" ])
+```
 
 ## Parse adapted data with a schema
 

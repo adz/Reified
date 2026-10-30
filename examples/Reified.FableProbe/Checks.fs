@@ -213,13 +213,38 @@ module Checks =
                   Data.ofCliArgs [ "--name"; "Ada" ] ]
 
         let portableSegments =
-            ["0x10"; "1_0"]
+            ["0x10"; "1_0"; "+1"; "-0"; " 1"; "1 "; "01"; "00"; "١"; "１"]
             |> List.forall (fun segment ->
                 let expected = Data.Object ["X", Data.Object [segment, Data.Text "v"]]
                 Data.ofEnvironment ["X__" + segment, "v"] = expected &&
                 Data.ofConfiguration ["X:" + segment, "v"] = expected)
 
+        let aliases = ["X__0__A", "a"; "X__00__B", "b"]
+        let expectedAliases = Data.Object ["X", Data.Object ["0", Data.Object ["A", Data.Text "a"]; "00", Data.Object ["B", Data.Text "b"]]]
+        let aliasesPreserved =
+            Data.ofEnvironment aliases = expectedAliases && Data.ofEnvironment (List.rev aliases) = expectedAliases &&
+            Data.ofConfiguration ["X:0:A", "a"; "X:00:B", "b"] = expectedAliases &&
+            Data.ofConfiguration ["X:00:B", "b"; "X:0:A", "a"] = expectedAliases
+        let rejects operation =
+            try operation () |> ignore; false
+            with :? ArgumentException -> true
+        let bounded =
+            [ (fun () -> Data.ofEnvironment ["X__10000", "v"])
+              (fun () -> Data.ofConfiguration ["X:2147483647", "v"])
+              (fun () -> Data.ofEnvironment ["X__999999999999999999999999999999", "v"])
+              (fun () -> Data.ofConfiguration [(List.replicate 65 "X" |> String.concat ":"), "v"])
+              (fun () -> Data.ofEnvironmentWith (fun options -> { options with Limits = { options.Limits with MaxExpandedNodes = 6 } }) ["A__1", "a"; "B__1", "b"]) ]
+            |> List.forall rejects
+        let explicitLimits =
+            let configure limits = { limits with MaxCollectionLength = 2; MaxExpandedNodes = 7; MaxDepth = 2 }
+            let expected = Data.Object ["A", Data.List [Data.Null; Data.Text "a"]; "B", Data.List [Data.Null; Data.Text "b"]]
+            Data.ofConfigurationWith configure ["A:1", "a"; "B:1", "b"] = expected &&
+            Data.ofEnvironmentWith (fun options -> { options with Limits = configure options.Limits }) ["A__1", "a"; "B__1", "b"] = expected
+
         [ portableSegments
+          aliasesPreserved
+          bounded
+          explicitLimits
           environment =
             Data.Object
                 [ "age", Data.Text "41"

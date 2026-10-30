@@ -8,10 +8,21 @@ open System.Collections.Specialized
 open Fable.Core.JsInterop
 #endif
 
+/// <summary>Resource bounds for flattened configuration and environment conversion.</summary>
+/// <remarks>The node budget includes the root, containers, supplied leaves and null gaps. All limits must be positive.</remarks>
+type DataConversionLimits =
+    { /// <summary>Maximum length of each expanded list, including gaps. Default: 10000.</summary>
+      MaxCollectionLength: int
+      /// <summary>Maximum number of nodes in the complete converted tree. Default: 100000.</summary>
+      MaxExpandedNodes: int
+      /// <summary>Maximum number of segments in an input path. Default: 64.</summary>
+      MaxDepth: int }
+
 /// <summary>How <c>Data.ofEnvironmentWith</c> selects environment variables and splits their names into sections.</summary>
 /// <remarks>
 /// Pass a configuring function to <c>Data.ofEnvironmentWith</c>; the value it receives is the default used by
-/// <c>Data.ofEnvironment</c>: no prefix and the separator <c>__</c>.
+/// <c>Data.ofEnvironment</c>: no prefix, separator <c>__</c>, and limits of 10000 items per list,
+/// 100000 output nodes and 64 input path segments.
 /// </remarks>
 type DataEnvironmentOptions =
     { /// <summary>
@@ -24,12 +35,25 @@ type DataEnvironmentOptions =
       /// The text that separates section names inside a variable name. The default <c>__</c> is the
       /// Microsoft.Extensions.Configuration convention, chosen because <c>:</c> is not valid in POSIX shell names.
       /// </summary>
-      Separator: string }
+      Separator: string
+      /// <summary>Bounds list expansion, total output nodes and input path depth.</summary>
+      Limits: DataConversionLimits }
 
 /// <summary>Internal conversions from supported source representations into owned structured data.</summary>
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module internal DataConversions =
+    let private rejectLimit (argumentName: string) (message: string) = raise (ArgumentException(message, argumentName))
+
+    let private defaultLimits = { MaxCollectionLength = 10000; MaxExpandedNodes = 100000; MaxDepth = 64 }
+
+    let private validateLimits argumentName (limits: DataConversionLimits) =
+        if isNull (box limits) then nullArg argumentName
+        if limits.MaxCollectionLength <= 0 then rejectLimit argumentName "MaxCollectionLength must be positive."
+        if limits.MaxExpandedNodes <= 0 then rejectLimit argumentName "MaxExpandedNodes must be positive."
+        if limits.MaxDepth <= 0 then rejectLimit argumentName "MaxDepth must be positive."
+        limits
+
     /// <summary>Builds an object from an F# map, ordered by key.</summary>
     let objectOfMap (fields: Map<string, Data>) : Data =
         if isNull (box fields) then nullArg (nameof fields)
@@ -80,10 +104,12 @@ module internal DataConversions =
 
         fields |> Map.change name append
 
-    let private tryNonNegativeInt (text: string) =
-        match Int32.TryParse text with
-        | true, value when value >= 0 -> Some value
-        | _ -> None
+    // Int32.TryParse accepts different syntaxes on .NET and Fable. Canonical decimal keys are injective:
+    // "0" and "00" must never collapse into one slot and silently drop a section.
+    let private isIndexSegment (text: string) =
+        text = "0" ||
+        (text.Length > 0 && text.[0] >= '1' && text.[0] <= '9' &&
+         (text |> Seq.forall (fun character -> character >= '0' && character <= '9')))
 
     let private insertConfigurationValue (segments: string list) value node =
         let rec insert remaining current =
@@ -102,31 +128,54 @@ module internal DataConversions =
 
         insert segments node
 
-    let rec private convertConfigurationNode node =
-        match node with
-        | Value value -> value
-        | Branch children when children.IsEmpty -> Data.Object []
-        | Branch children ->
-            let indexed =
-                children
-                |> Map.toList
-                |> List.map (fun (key, child) -> tryNonNegativeInt key |> Option.map (fun index -> index, child))
+    let private ensureDepth (limits: DataConversionLimits) argumentName (segments: string list) =
+        if segments.Length > limits.MaxDepth then
+            rejectLimit argumentName ("Configuration path '" + String.concat "." segments + "' exceeds " + string limits.MaxDepth + " segments.")
 
-            if indexed |> List.forall Option.isSome then
-                let byIndex = indexed |> List.choose id |> Map.ofList
-                let maximum = byIndex |> Map.toSeq |> Seq.map fst |> Seq.max
-
-                [ for index in 0..maximum ->
-                      byIndex
-                      |> Map.tryFind index
-                      |> Option.map convertConfigurationNode
-                      |> Option.defaultValue Data.Null ]
-                |> Data.List
-            else
-                children
-                |> Map.toList
-                |> List.map (fun (name, child) -> name, convertConfigurationNode child)
-                |> Data.Object
+    let private convertConfigurationNode (limits: DataConversionLimits) argumentName forceObject node =
+        let mutable remaining = limits.MaxExpandedNodes
+        let location path = if List.isEmpty path then "<root>" else path |> List.rev |> String.concat "."
+        let ensureAvailable path count =
+            if count > int64 remaining then
+                rejectLimit argumentName ("Configuration at '" + location path + "' exceeds " + string limits.MaxExpandedNodes + " expanded nodes.")
+        let consume path =
+            ensureAvailable path 1L
+            remaining <- remaining - 1
+        let rec convert path forceObject current =
+            consume path
+            match current with
+            | Value value -> value
+            | Branch children when children.IsEmpty -> Data.Object []
+            | Branch children ->
+                let fields = Map.toList children
+                if not forceObject && (fields |> List.forall (fun (key, _) -> isIndexSegment key)) then
+                    let indexOf (text: string) =
+                        let mutable value = 0L
+                        for character in text do
+                            // Each previous value is below a positive Int32 bound, so this cannot overflow Int64.
+                            value <- value * 10L + int64 (int character - int '0')
+                            if value >= int64 limits.MaxCollectionLength then
+                                rejectLimit argumentName ("Collection at '" + location path + "' exceeds " + string limits.MaxCollectionLength + " items.")
+                        int value
+                    let byIndex = fields |> List.map (fun (key, child) -> indexOf key, child) |> Map.ofList
+                    let maximum = byIndex |> Map.toSeq |> Seq.map fst |> Seq.max
+                    let length = int64 maximum + 1L
+                    if length > int64 limits.MaxCollectionLength then
+                        rejectLimit argumentName ("Collection at '" + location path + "' exceeds " + string limits.MaxCollectionLength + " items.")
+                    // Preflight the sparse slots before allocating them; nested children share this budget.
+                    ensureAvailable path length
+                    [ for index in 0 .. maximum ->
+                        let childPath = string index :: path
+                        match Map.tryFind index byIndex with
+                        | Some child -> convert childPath false child
+                        | None -> consume childPath; Data.Null ]
+                    |> Data.List
+                else
+                    ensureAvailable path (int64 children.Count)
+                    children |> Map.toList
+                    |> List.map (fun (name, child) -> name, convert (name :: path) false child)
+                    |> Data.Object
+        convert [] forceObject node
 
     /// <summary>Builds object-shaped structured data from a list of named structured data fields.</summary>
     /// <remarks>Field order and repeated names are preserved.</remarks>
@@ -336,8 +385,9 @@ module internal DataConversions =
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Numeric path segments are interpreted as collection indexes, matching the common .NET configuration convention
-    /// for arrays such as <c>contacts:0:value</c>.
+    /// Sections whose child names are all canonical ASCII decimal indexes (<c>0</c> or <c>[1-9][0-9]*</c>) become
+    /// lists, such as <c>contacts:0:value</c>. Other names, including <c>00</c>, <c>+1</c> and <c>0x10</c>, remain
+    /// object fields. This recognition is identical on .NET and Fable.
     /// </para>
     /// <para>
     /// Later pairs override earlier ones at the same path, matching .NET configuration layering: a repeated key
@@ -348,8 +398,12 @@ module internal DataConversions =
     /// section's children.
     /// </para>
     /// </remarks>
-    let ofConfiguration (values: seq<string * string>) : Data =
+    /// <exception cref="T:System.ArgumentException">Thrown when a limit is nonpositive or conversion exceeds a
+    /// configured list length, total output node count, or input path depth. The diagnostic identifies the path.</exception>
+    let ofConfigurationWith (configure: DataConversionLimits -> DataConversionLimits) (values: seq<string * string>) : Data =
+        if isNull (box configure) then nullArg (nameof configure)
         let values = ensureValues (nameof values) values
+        let limits = configure defaultLimits |> validateLimits (nameof configure)
 
         values
         |> Seq.fold
@@ -360,9 +414,14 @@ module internal DataConversions =
                 if segments |> List.exists ((=) "") then
                     invalidArg (nameof values) $"Configuration key cannot contain an empty segment: {key}"
 
+                ensureDepth limits (nameof values) segments
                 insertConfigurationValue segments (textOrNull value) node)
             (Branch Map.empty)
-        |> convertConfigurationNode
+        |> convertConfigurationNode limits (nameof values) false
+
+    /// <summary>Converts flattened configuration with defaults of 10000 items per list, 100000 output nodes and 64 path segments.</summary>
+    /// <remarks>Use ofConfigurationWith to raise limits explicitly for larger trusted inputs.</remarks>
+    let ofConfiguration (values: seq<string * string>) : Data = ofConfigurationWith id values
 
     /// <summary>Builds structured data from configuration key/value pairs, such as .NET <c>IConfiguration.AsEnumerable()</c>.</summary>
     /// <remarks>
@@ -380,22 +439,25 @@ module internal DataConversions =
 
         values |> Seq.map (fun pair -> pair.Key, pair.Value) |> ofConfiguration
 
-    /// <summary>The options <c>ofEnvironment</c> uses: no prefix and the separator <c>__</c>.</summary>
-    let environmentDefaults: DataEnvironmentOptions = { Prefix = None; Separator = "__" }
+    /// <summary>The default prefix, separator and bounded conversion limits used by ofEnvironment.</summary>
+    let environmentDefaults: DataEnvironmentOptions = { Prefix = None; Separator = "__"; Limits = defaultLimits }
 
     /// <summary>Builds structured data from environment variable name and value pairs using configured options.</summary>
     /// <remarks>
     /// <para>
     /// The caller reads the environment and passes the pairs in, so the conversion itself performs no I/O. Each name
-    /// is split on <c>Separator</c> into a path and its value becomes a <c>Data.Text</c> leaf; the schema that parses
+    /// is split on <c>Separator</c> into a path and its value becomes a <c>Data.Text</c> leaf (or <c>Data.Null</c> for a null string); the schema that parses
     /// the result decides whether <c>"8080"</c> is a number. Names keep the case they were given. Field matching is the
     /// schema's concern: a schema field <c>port</c> does not match a variable <c>PORT</c> unless it declares
     /// <c>alias "PORT"</c>.
     /// </para>
     /// <para>
-    /// Numeric segments are list indexes, as in <c>ofConfiguration</c>, so <c>Servers__0__Host</c> builds a
+    /// Sections with only canonical decimal child names become lists, as in <c>ofConfiguration</c>, so <c>Servers__0__Host</c> builds a
     /// <c>Data.List</c>. This is the Microsoft.Extensions.Configuration convention for arrays. A gap in the indexes is
-    /// filled with <c>Data.Null</c>. The root is always a <c>Data.Object</c>, even when every name is numeric.
+    /// filled with <c>Data.Null</c>. Noncanonical names such as <c>00</c> remain distinct object fields, never aliases
+    /// for <c>0</c>. The root is always a <c>Data.Object</c>, even when every name is numeric. Limits default to
+    /// 10000 list items, 100000 output nodes (including root, containers and gaps), and 64 path segments.
+    /// Configure <c>Limits</c> to change them; all limits must be positive.
     /// </para>
     /// <para>
     /// The environment has no meaningful order, so names are applied in ordinal order rather than input order. A
@@ -416,7 +478,7 @@ module internal DataConversions =
     /// <exception cref="T:System.ArgumentNullException">Thrown when the configuring function, its result, the
     /// variables, or a variable name is null.</exception>
     /// <exception cref="T:System.ArgumentException">Thrown when the separator is null or empty, or the prefix is
-    /// <c>Some</c> null or empty text.</exception>
+    /// <c>Some</c> null or empty text, limits are nonpositive, or conversion exceeds a configured limit.</exception>
     let ofEnvironmentWith
         (configure: DataEnvironmentOptions -> DataEnvironmentOptions)
         (variables: seq<string * string>)
@@ -438,6 +500,7 @@ module internal DataConversions =
             invalidArg (nameof configure) "The environment prefix cannot be empty; use None to take every variable."
         | _ -> ()
 
+        let limits = validateLimits (nameof configure) options.Limits
         let separator = [| options.Separator |]
 
         let pathOf (name: string) =
@@ -454,7 +517,10 @@ module internal DataConversions =
             |> Option.bind (fun key ->
                 let segments = key.Split(separator, StringSplitOptions.None) |> Array.toList
 
-                if segments |> List.exists String.IsNullOrEmpty then None else Some(key, segments))
+                if segments |> List.exists String.IsNullOrEmpty then None
+                else
+                    ensureDepth limits (nameof variables) segments
+                    Some(key, segments))
 
         let root =
             variables
@@ -464,13 +530,7 @@ module internal DataConversions =
             |> List.sortWith (fun (left, _, _) (right, _, _) -> String.CompareOrdinal(left, right))
             |> List.fold (fun node (_, segments, value) -> insertConfigurationValue segments (textOrNull value) node) (Branch Map.empty)
 
-        match root with
-        | Branch children ->
-            children
-            |> Map.toList
-            |> List.map (fun (name, child) -> name, convertConfigurationNode child)
-            |> Data.Object
-        | Value value -> value
+        convertConfigurationNode limits (nameof variables) true root
 
     /// <summary>Builds structured data from environment variable name and value pairs.</summary>
     /// <remarks>

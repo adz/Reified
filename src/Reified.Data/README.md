@@ -4,8 +4,8 @@
 configuration, command-line input, form values, and events.
 
 ```fsharp
-open Reified.Data
-open Data.Syntax
+open Reified
+open Reified.DataDSL
 
 let customer =
     data [
@@ -96,6 +96,15 @@ load """{ "verbose": false, "database": { "host": "localhost", "port": 5432 } }"
 On .NET, pass `Environment.GetEnvironmentVariables()` as name/value pairs; under Fable, pass the entries of
 `process.env`. `Data.ofEnvironment` itself performs no I/O. Objects merge recursively; lists and scalars replace; a
 later `null` overrides the key to `Data.Null` rather than removing it.
+
+Environment and configuration sections become lists only when every child name is a canonical ASCII decimal index
+(`0` or `[1-9][0-9]*`). Names such as `00`, `+1`, `0x10` and `1_0` remain object fields, with no aliasing or lost
+subtrees. Recognition is identical on .NET and Fable.
+
+Conversions default to 10,000 items per list, 100,000 output nodes across the entire result (root, containers,
+leaves and null gaps), and 64 input path segments. Oversized expansion throws `ArgumentException` with a path and
+limit. Configure positive bounds explicitly with `Data.ofConfigurationWith` or `DataEnvironmentOptions.Limits`
+when larger trusted configurations are required. Hosts must still bound input bytes and pair counts.
 
 See the [Reified.Data documentation](https://adz.github.io/Reified/data/) for tutorials, partial matching, case
 matrices, JSON conversion, and the complete API reference.

@@ -13,19 +13,35 @@ file, the environment, and the command line before one schema parse.
   explicit readable text instead: contract and migration errors, schema issues, data patch and comparison failures,
   `ParseError`, and HTTP problem details. Code that relied on structural `string value` output should call the type's
   `ToString` or its renderer. `%A` formatting in your own code is unaffected.
-- `Violation.render` joins `All` groups with `"; "` and `Any` groups with `", or "`, and never includes message keys
-  or arguments. `Violation.ToString` keeps the key and arguments of a described violation for debugging.
+- `Violation.ToString` has explicit debug text retaining the key and arguments of a described violation.
+  `Violation.render` is unchanged: it joins `All` with `"; "` and `Any` with `", or "`, without message keys/arguments.
 - `SchemaErrors.ToString()` renders one line per issue, the same text as `SchemaErrors.toString`.
+- Configuration conversion (`ofConfiguration`, `ofConfigurationPairs`) now bounds sparse expansion: 10,000 items per
+  list, 100,000 output nodes across the result (including root, containers, leaves and null gaps), and 64 input path
+  segments. Exceeding a limit throws `ArgumentException` with the path and limit, before oversized list allocation.
+  For larger trusted inputs, migrate to `Data.ofConfigurationWith` and explicitly adjust positive limits.
+- Configuration list indexes must now be canonical ASCII decimal names: `0` or `[1-9][0-9]*`. Noncanonical names
+  such as `00`, `+1`, `0x10` and `1_0` remain object fields, consistently on .NET/Fable, instead of aliasing an index
+  and potentially losing a subtree. Rename intended indexes to canonical spelling and resolve conflicting paths
+  before conversion. Canonical numeric indexes beyond the configured bound, including beyond Int32, are rejected.
 
 ### Added
 
 - `Data.merge` and `Data.mergeAll`: right-biased deep merge. Objects merge by name at every depth, keeping first-seen
   field order and appending new names; lists, scalars, and `Data.Null` on the right replace the left. A later `null`
   overrides a key to `Data.Null` and never removes it. `mergeAll` folds left from `Data.Object []`.
-- `Data.ofEnvironment` and `Data.ofEnvironmentWith`, with `DataEnvironmentOptions` (`Prefix`, `Separator`): nested
+- `Data.ofEnvironment` and `Data.ofEnvironmentWith`, with `DataEnvironmentOptions` (`Prefix`, `Separator`, `Limits`): nested
   `Data` from environment variable pairs the caller supplies, split on `__` by default. Names keep their case,
-  numeric segments become list indexes as in `Data.ofConfiguration`, names apply in ordinal order so a section always
-  beats a value of the same name, and names with an empty segment are skipped.
+  canonical numeric sections become bounded lists as in `Data.ofConfiguration`, names apply in ordinal order so a
+  section always beats a value of the same name, and names with an empty segment are skipped. Values are text or
+  null. Set `Limits` explicitly for larger trusted inputs; defaults match configuration conversion.
+- `DataConversionLimits` (`MaxCollectionLength`, `MaxExpandedNodes`, `MaxDepth`) and `Data.ofConfigurationWith`:
+  configure positive conversion bounds. All nested lists share the complete output-node budget.
+
+### Fixed
+
+- Numeric index recognition no longer depends on runtime-specific `Int32.TryParse` behavior. Hexadecimal and
+  underscore spellings stay object names on both .NET and Fable, and `0`/`00` sections retain both subtrees.
 
 ### AOT and trimming
 
