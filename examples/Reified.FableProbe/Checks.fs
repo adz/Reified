@@ -212,7 +212,15 @@ module Checks =
                   environment
                   Data.ofCliArgs [ "--name"; "Ada" ] ]
 
-        [ environment =
+        let portableSegments =
+            ["0x10"; "1_0"]
+            |> List.forall (fun segment ->
+                let expected = Data.Object ["X", Data.Object [segment, Data.Text "v"]]
+                Data.ofEnvironment ["X__" + segment, "v"] = expected &&
+                Data.ofConfiguration ["X:" + segment, "v"] = expected)
+
+        [ portableSegments
+          environment =
             Data.Object
                 [ "age", Data.Text "41"
                   "name", Data.Text "env"

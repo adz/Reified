@@ -92,6 +92,15 @@ module DataEnvironmentTests =
         test <@ exactPrefix = Data.Object [] @>
 
     [<Fact>]
+    let ``numeric aliases remain separate object sections without dropping children`` () =
+        let expected =
+            Data.Object ["X", Data.Object ["0", Data.Object ["A", Data.Text "a"]; "00", Data.Object ["B", Data.Text "b"]]]
+        let environment = ["X__0__A", "a"; "X__00__B", "b"]
+        let configuration = ["X:0:A", "a"; "X:00:B", "b"]
+        for pairs in [environment; List.rev environment] do Assert.Equal(expected, Data.ofEnvironment pairs)
+        for pairs in [configuration; List.rev configuration] do Assert.Equal(expected, Data.ofConfiguration pairs)
+
+    [<Fact>]
     let ``invalid options and null input are rejected`` () =
         raises<ArgumentException> <@ Data.ofEnvironmentWith (fun options -> { options with Separator = "" }) [] @>
         raises<ArgumentException> <@ Data.ofEnvironmentWith (fun options -> { options with Prefix = Some "" }) [] @>
