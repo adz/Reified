@@ -38,7 +38,8 @@ let parsed = Schema.parse signupSchema input
 
 
 The same schema accepts input from `Data.ofJsonDocument` for a request body, `Data.ofNameValues` for a form post,
-`Data.ofCliArgs` for a command line, and `Data.ofConfiguration` for settings. The schema does not depend on the source.
+`Data.ofCliArgs` for a command line, `Data.ofConfiguration` or `Data.ofEnvironment` for settings, and
+`Data.mergeAll` for several of those layered together. The schema does not depend on the source.
 
 Adapters produce different trees. JSON carries typed
 Booleans and numbers, while form, CLI, and configuration leaves are all text that the schema still has

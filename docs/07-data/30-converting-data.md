@@ -92,6 +92,7 @@ fields and converts numbers to JavaScript numbers, so it cannot preserve the ori
 | command-line arguments | `Data.ofCliArgs` | Parsed option names and their supplied values. |
 | flattened configuration pairs | `Data.ofConfiguration` | Nested objects and lists from colon-separated keys. |
 | configuration key/value pairs | `Data.ofConfigurationPairs` | The .NET configuration form, including null values. |
+| environment variable pairs | `Data.ofEnvironment`, `Data.ofEnvironmentWith` | Nested objects and lists from `__`-separated names. |
 
 The adapters below handle repetition and nesting differently.
 
@@ -200,6 +201,103 @@ Data.ofNameValues [ "tag", "fsharp"; "tag", "validation"; "name", "Ada" ]
 //    ]
 ```
 
+
+## Environment variables
+
+`Data.ofEnvironment` takes `seq<string * string>` and splits each name on `__`, the
+Microsoft.Extensions.Configuration convention, because `:` is not valid in a shell variable name. It does not read the
+environment itself; pass the pairs in, so the conversion stays a pure function that tests can feed directly.
+
+```fsharp
+Data.ofEnvironment
+    [ "Logging__Level", "Debug"
+      "Servers__0__Host", "a.internal"
+      "Servers__1__Host", "b.internal"
+      "Port", "8080" ]
+// => Data.Object [
+//      "Logging", Data.Object [ "Level", Data.Text "Debug" ]
+//      "Port", Data.Text "8080"
+//      "Servers", Data.List [
+//          Data.Object [ "Host", Data.Text "a.internal" ]
+//          Data.Object [ "Host", Data.Text "b.internal" ]
+//      ]
+//    ]
+```
+
+
+`Data.ofEnvironmentWith` takes a function that adjusts the defaults. A `Prefix` selects only the variables that start
+with it, compared case-sensitively, and strips it; include the separator in the prefix. `Separator` replaces `__`.
+
+```fsharp
+[ "MYAPP__Database__Port", "5432"; "PATH", "/usr/bin" ]
+|> Data.ofEnvironmentWith (fun options -> { options with Prefix = Some "MYAPP__" })
+// => Data.Object [ "Database", Data.Object [ "Port", Data.Text "5432" ] ]
+```
+
+
+On .NET, read the variables with `Environment.GetEnvironmentVariables()`; under Fable on Node, read `process.env`:
+
+```fsharp no-check reason="Reads the host process environment, which differs on every machine."
+let environment =
+    System.Environment.GetEnvironmentVariables()
+    |> Seq.cast<System.Collections.DictionaryEntry>
+    |> Seq.map (fun entry -> string entry.Key, string entry.Value)
+    |> Data.ofEnvironmentWith (fun options -> { options with Prefix = Some "MYAPP__" })
+```
+
+
+The rules:
+
+- Every leaf is text, as with the CLI adapter; the schema decides whether `"5432"` is a number.
+- Names keep their case. `PORT` and `Port` are different fields, and a schema field `port` matches neither unless it
+  declares `alias "PORT"`. Matching is the schema's concern, not the adapter's.
+- Numeric segments are list indexes, as in `ofConfiguration`, and the root is always an object.
+- The environment has no meaningful order, so names apply in ordinal order rather than input order. A name that is
+  also a section loses to the section in either order: `A=1` with `A__B=2` gives `A.B = "2"`. A repeated name keeps
+  its last value.
+- A name that is empty after the prefix, or that contains an empty segment, cannot address a path and is skipped.
+  Shells and operating systems set such variables (macOS sets `__CF_USER_TEXT_ENCODING`), so rejecting them would make
+  an unprefixed read fail on ordinary machines.
+
+## Merge layered sources
+
+`Data.merge` combines two values and the right one wins. Objects merge field by field at every depth. Field names keep
+the order they first appear in, and names only the right side has are appended. A right-side list, scalar, or
+`Data.Null` replaces whatever the left had, and an object replaces a non-object.
+
+```fsharp
+Data.merge
+    (data [ "database" => [ "host" => "localhost"; "port" => 5432 ]; "hosts" => [ "a"; "b" ] ])
+    (data [ "database" => [ "host" => "db.internal" ]; "hosts" => [ "c" ] ])
+// => Data.Object [
+//      "database", Data.Object [ "host", Data.Text "db.internal"; "port", Data.Number "5432" ]
+//      "hosts", Data.List [ Data.Text "c" ]
+//    ]
+```
+
+
+`Data.mergeAll` folds a list from the left, starting from an empty object, so list the layers from lowest to highest
+precedence:
+
+```fsharp no-check reason="configFileText, the environment pairs, and argv belong to the host application."
+Data.mergeAll
+    [ Json.parseData configFileText
+      Data.ofEnvironmentWith (fun options -> { options with Prefix = Some "MYAPP__" }) environment
+      Data.ofCliArgs argv ]
+|> Schema.parse settingsSchema
+```
+
+
+Choices that matter for configuration:
+
+- A later `null` overrides. `{"proxy": null}` in a later layer leaves `proxy` present with the value `Data.Null`, which
+  an option field parses as `None`. No merge removes a key. JSON Merge Patch (RFC 7396) deletes on null instead; use
+  `Data.patch` with `remove` when a key must go.
+- Lists replace whole. An indexed environment variable such as `Servers__0__Host` builds a complete list that replaces
+  the file's list, so a layer that changes one element must supply every element.
+- A name repeated within one object merges into its first occurrence, so every object in the result has unique names.
+- Merging is associative while layers agree on which paths hold objects. When a middle layer puts a non-object between
+  two objects at one path, grouping changes the result; `mergeAll` always applies layers in order, so prefer it.
 
 ## Parse adapted data with a schema
 

@@ -152,6 +152,45 @@ come from numeric segments, never from repetition; repeated names as multi-value
 belongs to `ofNameValues`. Numeric segments need not be contiguous: a sparse set such as `contacts:0` and `contacts:2`
 becomes a three-item list with `Data.Null` at the missing index 1.
 
+## Environment Variables
+
+Environment variable names use `__` between sections, the Microsoft.Extensions.Configuration convention. The adapter
+takes the pairs rather than reading the environment, and an optional prefix selects and strips the application's
+variables:
+
+```fsharp isolated
+open Reified
+
+let raw =
+    [ "SHOP__name", "Ada Lovelace"; "SHOP__address__city", "London"; "HOME", "/home/ada" ]
+    |> Data.ofEnvironmentWith (fun options -> { options with Prefix = Some "SHOP__" })
+```
+
+
+Names keep their case, so a field matches `SHOP__name` but not `SHOP__NAME` unless it declares `alias "NAME"`.
+Numeric segments are list indexes, as with configuration keys. See
+[environment variables](/data/converting-data.html#environment-variables) for the ordering and conflict rules.
+
+## Layered Sources
+
+`Data.mergeAll` combines sources before one parse, with later layers winning field by field. The schema then reports
+every failure, whichever layer supplied the bad value:
+
+```fsharp isolated
+open Reified
+
+let layered =
+    Data.mergeAll
+        [ Json.parseData """{"name":"Ada Lovelace","address":{"city":"Paris"},"contacts":[]}"""
+          Data.ofEnvironment [ "address__city", "London" ]
+          Data.ofCliArgs [ "--name"; "Ada" ] ]
+// name "Ada" from the command line, address.city "London" from the environment, contacts [] from the file
+```
+
+
+A later `null` overrides rather than removes, and a later list replaces the earlier list whole. See
+[merge layered sources](/data/converting-data.html#merge-layered-sources).
+
 ## One Parse For All Of Them
 
 Continuing with the configuration input above:

@@ -10,3 +10,8 @@
   `Data.ofJsonDocument`. Under Fable, pass a native `JSON.parse` result to `Data.ofJsonValue` when duplicate fields and
   original number-token spelling do not matter.
 - `Reified.Json.parseData` provides portable, lossless JSON-to-`Data` parsing from the `Reified.Schema` package.
+- Adapt sources with `Data.ofCliArgs`, `Data.ofConfiguration` (`:` keys), and `Data.ofEnvironment` /
+  `Data.ofEnvironmentWith` (`__` names, optional prefix; the caller passes the variable pairs, no I/O). Leaves are text
+  for the schema to parse.
+- Layer configuration with `Data.mergeAll [ file; environment; cli ]`: right-biased deep merge of objects; lists,
+  scalars, and `Data.Null` on the right replace; a later null overrides and never removes a key.

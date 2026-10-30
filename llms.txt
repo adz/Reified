@@ -49,8 +49,9 @@ independent set of composition tools. Load only the context needed for the task:
 - Invariant-carrying types: `/refined/`
 - Primitive text decoding and Result composition, `result { }`, and accumulating builders: `/parsing/`,
   `/result-handling/llms.txt`
-- Structured fixtures, immutable edits, comparisons, and produced-data matching, also the required input shape
-  for `Schema.parse`, not only a testing convenience: `/data/llms.txt`
+- Structured fixtures, immutable edits, comparisons, produced-data matching, and layered configuration
+  (`Data.ofEnvironment`, `Data.mergeAll`), also the required input shape for `Schema.parse`, not only a testing
+  convenience: `/data/llms.txt`
 
 `Reified` is an umbrella package that installs every runtime package at once. It adds no API of its own: every
 type still comes from the package documented above.
