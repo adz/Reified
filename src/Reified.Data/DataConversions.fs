@@ -8,6 +8,24 @@ open System.Collections.Specialized
 open Fable.Core.JsInterop
 #endif
 
+/// <summary>How <c>Data.ofEnvironmentWith</c> selects environment variables and splits their names into sections.</summary>
+/// <remarks>
+/// Pass a configuring function to <c>Data.ofEnvironmentWith</c>; the value it receives is the default used by
+/// <c>Data.ofEnvironment</c>: no prefix and the separator <c>__</c>.
+/// </remarks>
+type DataEnvironmentOptions =
+    { /// <summary>
+      /// Takes only variables whose name starts with this text, compared ordinally (case-sensitive), and strips it.
+      /// Include any separator in the prefix: <c>Some "MYAPP__"</c> turns <c>MYAPP__Port</c> into <c>Port</c>.
+      /// <c>None</c> takes every variable.
+      /// </summary>
+      Prefix: string option
+      /// <summary>
+      /// The text that separates section names inside a variable name. The default <c>__</c> is the
+      /// Microsoft.Extensions.Configuration convention, chosen because <c>:</c> is not valid in POSIX shell names.
+      /// </summary>
+      Separator: string }
+
 /// <summary>Internal conversions from supported source representations into owned structured data.</summary>
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
@@ -84,34 +102,31 @@ module internal DataConversions =
 
         insert segments node
 
-    let private configurationNodeToData node =
-        let rec convert node =
-            match node with
-            | Value value -> value
-            | Branch children when children.IsEmpty -> Data.Object []
-            | Branch children ->
-                let indexed =
-                    children
-                    |> Map.toList
-                    |> List.map (fun (key, child) -> tryNonNegativeInt key |> Option.map (fun index -> index, child))
+    let rec private convertConfigurationNode node =
+        match node with
+        | Value value -> value
+        | Branch children when children.IsEmpty -> Data.Object []
+        | Branch children ->
+            let indexed =
+                children
+                |> Map.toList
+                |> List.map (fun (key, child) -> tryNonNegativeInt key |> Option.map (fun index -> index, child))
 
-                if indexed |> List.forall Option.isSome then
-                    let byIndex = indexed |> List.choose id |> Map.ofList
-                    let maximum = byIndex |> Map.toSeq |> Seq.map fst |> Seq.max
+            if indexed |> List.forall Option.isSome then
+                let byIndex = indexed |> List.choose id |> Map.ofList
+                let maximum = byIndex |> Map.toSeq |> Seq.map fst |> Seq.max
 
-                    [ for index in 0..maximum ->
-                          byIndex
-                          |> Map.tryFind index
-                          |> Option.map convert
-                          |> Option.defaultValue Data.Null ]
-                    |> Data.List
-                else
-                    children
-                    |> Map.toList
-                    |> List.map (fun (name, child) -> name, convert child)
-                    |> Data.Object
-
-        convert node
+                [ for index in 0..maximum ->
+                      byIndex
+                      |> Map.tryFind index
+                      |> Option.map convertConfigurationNode
+                      |> Option.defaultValue Data.Null ]
+                |> Data.List
+            else
+                children
+                |> Map.toList
+                |> List.map (fun (name, child) -> name, convertConfigurationNode child)
+                |> Data.Object
 
     /// <summary>Builds object-shaped structured data from a list of named structured data fields.</summary>
     /// <remarks>Field order and repeated names are preserved.</remarks>
@@ -347,7 +362,7 @@ module internal DataConversions =
 
                 insertConfigurationValue segments (textOrNull value) node)
             (Branch Map.empty)
-        |> configurationNodeToData
+        |> convertConfigurationNode
 
     /// <summary>Builds structured data from configuration key/value pairs, such as .NET <c>IConfiguration.AsEnumerable()</c>.</summary>
     /// <remarks>
@@ -365,3 +380,106 @@ module internal DataConversions =
 
         values |> Seq.map (fun pair -> pair.Key, pair.Value) |> ofConfiguration
 
+    /// <summary>The options <c>ofEnvironment</c> uses: no prefix and the separator <c>__</c>.</summary>
+    let environmentDefaults: DataEnvironmentOptions = { Prefix = None; Separator = "__" }
+
+    /// <summary>Builds structured data from environment variable name and value pairs using configured options.</summary>
+    /// <remarks>
+    /// <para>
+    /// The caller reads the environment and passes the pairs in, so the conversion itself performs no I/O. Each name
+    /// is split on <c>Separator</c> into a path and its value becomes a <c>Data.Text</c> leaf; the schema that parses
+    /// the result decides whether <c>"8080"</c> is a number. Names keep the case they were given. Field matching is the
+    /// schema's concern: a schema field <c>port</c> does not match a variable <c>PORT</c> unless it declares
+    /// <c>alias "PORT"</c>.
+    /// </para>
+    /// <para>
+    /// Numeric segments are list indexes, as in <c>ofConfiguration</c>, so <c>Servers__0__Host</c> builds a
+    /// <c>Data.List</c>. This is the Microsoft.Extensions.Configuration convention for arrays. A gap in the indexes is
+    /// filled with <c>Data.Null</c>. The root is always a <c>Data.Object</c>, even when every name is numeric.
+    /// </para>
+    /// <para>
+    /// The environment has no meaningful order, so names are applied in ordinal order rather than input order. A
+    /// name that is also a section therefore always loses to the section: <c>A=1</c> with <c>A__B=2</c> gives
+    /// <c>{ "A": { "B": "2" } }</c> whichever order the pairs arrive in. A name repeated in the input keeps its
+    /// last value. A name that is empty after removing the prefix, or that contains an empty segment
+    /// (<c>__CF_USER_TEXT_ENCODING</c>, <c>A____B</c>, <c>TRAILING__</c>), cannot address a path and is skipped
+    /// rather than rejected, because the process environment is not authored by the caller.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// [ "MYAPP__Database__Port", "5432"; "PATH", "/usr/bin" ]
+    /// |&gt; Data.ofEnvironmentWith (fun options -&gt; { options with Prefix = Some "MYAPP__" })
+    /// // Data.Object [ "Database", Data.Object [ "Port", Data.Text "5432" ] ]
+    /// </code>
+    /// </example>
+    /// <exception cref="T:System.ArgumentNullException">Thrown when the configuring function, its result, the
+    /// variables, or a variable name is null.</exception>
+    /// <exception cref="T:System.ArgumentException">Thrown when the separator is null or empty, or the prefix is
+    /// <c>Some</c> null or empty text.</exception>
+    let ofEnvironmentWith
+        (configure: DataEnvironmentOptions -> DataEnvironmentOptions)
+        (variables: seq<string * string>)
+        : Data =
+        if isNull (box configure) then
+            nullArg (nameof configure)
+
+        let variables = ensureValues (nameof variables) variables
+        let options = configure environmentDefaults
+
+        if isNull (box options) then
+            nullArg (nameof configure)
+
+        if String.IsNullOrEmpty options.Separator then
+            invalidArg (nameof configure) "The environment section separator cannot be empty."
+
+        match options.Prefix with
+        | Some prefix when String.IsNullOrEmpty prefix ->
+            invalidArg (nameof configure) "The environment prefix cannot be empty; use None to take every variable."
+        | _ -> ()
+
+        let separator = [| options.Separator |]
+
+        let pathOf (name: string) =
+            if isNull name then
+                nullArg (nameof variables)
+
+            let key =
+                match options.Prefix with
+                | None -> Some name
+                | Some prefix when name.StartsWith(prefix, StringComparison.Ordinal) -> Some(name.Substring prefix.Length)
+                | Some _ -> None
+
+            key
+            |> Option.bind (fun key ->
+                let segments = key.Split(separator, StringSplitOptions.None) |> Array.toList
+
+                if segments |> List.exists String.IsNullOrEmpty then None else Some(key, segments))
+
+        let root =
+            variables
+            |> Seq.choose (fun (name, value) -> pathOf name |> Option.map (fun (key, segments) -> key, segments, value))
+            |> Seq.toList
+            // Stable, so a repeated name keeps its last value; a value sorts before any section that extends it.
+            |> List.sortWith (fun (left, _, _) (right, _, _) -> String.CompareOrdinal(left, right))
+            |> List.fold (fun node (_, segments, value) -> insertConfigurationValue segments (textOrNull value) node) (Branch Map.empty)
+
+        match root with
+        | Branch children ->
+            children
+            |> Map.toList
+            |> List.map (fun (name, child) -> name, convertConfigurationNode child)
+            |> Data.Object
+        | Value value -> value
+
+    /// <summary>Builds structured data from environment variable name and value pairs.</summary>
+    /// <remarks>
+    /// Uses no prefix and the separator <c>__</c>; see <c>ofEnvironmentWith</c> for the full rules.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// Data.ofEnvironment [ "Logging__Level", "Debug"; "Port", "8080" ]
+    /// // Data.Object [ "Logging", Data.Object [ "Level", Data.Text "Debug" ]; "Port", Data.Text "8080" ]
+    /// </code>
+    /// </example>
+    let ofEnvironment (variables: seq<string * string>) : Data = ofEnvironmentWith id variables

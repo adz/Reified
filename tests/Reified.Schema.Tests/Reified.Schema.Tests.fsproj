@@ -30,6 +30,7 @@
     <Compile Include="SchemaInterpreterPrototypeTests.fs" />
     <Compile Include="SchemaGenerationTargetProofTests.fs" />
     <Compile Include="DataTests.fs" />
+    <Compile Include="LayeredConfigurationTests.fs" />
     <Compile Include="RetainedParseResultTests.fs" />
     <Compile Include="SchemaErrorTests.fs" />
     <Compile Include="InputParseTests.fs" />

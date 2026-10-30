@@ -88,6 +88,86 @@ module Data =
     /// <summary>Builds structured data from .NET configuration key and value pairs.</summary>
     let ofConfigurationPairs = DataConversions.ofConfigurationPairs
 
+    /// <summary>Builds nested structured data from environment variable name and value pairs.</summary>
+    /// <remarks>
+    /// Splits names on <c>__</c>, keeps their case, and turns numeric segments into list indexes. The caller reads
+    /// the environment; see <c>ofEnvironmentWith</c> for a prefix, another separator, and the conflict rules.
+    /// </remarks>
+    /// <example><code>Data.ofEnvironment [ "Database__Port", "5432" ]
+    /// // Data.Object [ "Database", Data.Object [ "Port", Data.Text "5432" ] ]</code></example>
+    let ofEnvironment (variables: seq<string * string>) : Data = DataConversions.ofEnvironment variables
+
+    /// <summary>Builds nested structured data from environment variables selected and split by configured options.</summary>
+    /// <remarks>
+    /// <para>
+    /// The configuring function receives the defaults (no prefix, separator <c>__</c>). A prefix is matched
+    /// ordinally and stripped, so include its separator. Leaves are <c>Data.Text</c>; names keep their case, and
+    /// matching <c>PORT</c> to a field <c>port</c> is the schema's job (<c>alias "PORT"</c>).
+    /// </para>
+    /// <para>
+    /// Numeric segments are list indexes, as in <c>ofConfiguration</c>. Names are applied in ordinal order, because
+    /// the environment has no meaningful order: a name that is also a section loses to the section
+    /// (<c>A=1</c> with <c>A__B=2</c> gives <c>A.B = "2"</c> in either input order), and a repeated name keeps its
+    /// last value. Names that are empty after the prefix or contain an empty segment are skipped. The root is always
+    /// an object.
+    /// </para>
+    /// <para>
+    /// On .NET, pass <c>Environment.GetEnvironmentVariables()</c> as pairs; under Fable, pass the entries of
+    /// <c>process.env</c>.
+    /// </para>
+    /// </remarks>
+    /// <example><code>System.Environment.GetEnvironmentVariables()
+    /// |&gt; Seq.cast&lt;System.Collections.DictionaryEntry&gt;
+    /// |&gt; Seq.map (fun entry -&gt; string entry.Key, string entry.Value)
+    /// |&gt; Data.ofEnvironmentWith (fun options -&gt; { options with Prefix = Some "MYAPP__" })</code></example>
+    /// <exception cref="T:System.ArgumentException">Thrown when the separator or a supplied prefix is empty.</exception>
+    let ofEnvironmentWith
+        (configure: DataEnvironmentOptions -> DataEnvironmentOptions)
+        (variables: seq<string * string>)
+        : Data =
+        DataConversions.ofEnvironmentWith configure variables
+
+    /// <summary>Merges two structured values, letting the right one win.</summary>
+    /// <remarks>
+    /// <para>
+    /// Two objects merge field by field, recursively: names keep their first-seen order and names only the right
+    /// side has are appended. Everything else on the right replaces the left: a list replaces a list whole (there is
+    /// no element-wise merge), a scalar replaces anything, and an object replaces a non-object.
+    /// </para>
+    /// <para>
+    /// A right-side <c>Data.Null</c> overrides: the key stays and its value becomes <c>Null</c>, which is how a
+    /// later configuration source that sets a key to null behaves. Nothing removes a key. (JSON Merge Patch,
+    /// RFC 7396, deletes on null instead; use <c>Data.patch</c> with <c>remove</c> for that.) A name repeated within
+    /// one object merges into its first occurrence, so every object in the result has unique names; lists are taken
+    /// as they are and not inspected.
+    /// </para>
+    /// <para>
+    /// The right argument wins, so <c>Data.merge defaults overrides</c> reads in layering order; piping
+    /// <c>defaults |&gt; Data.merge overrides</c> would let the defaults win. <c>Data.Object []</c> is an identity on both
+    /// sides for objects. Merge is associative except where one layer has a non-object between two layers that have
+    /// objects at the same path; prefer <c>mergeAll</c>, which always applies layers in order.
+    /// </para>
+    /// </remarks>
+    /// <example><code>Data.merge
+    ///     (Data.Object [ "db", Data.Object [ "host", Data.Text "localhost"; "port", Data.Number "5432" ] ])
+    ///     (Data.Object [ "db", Data.Object [ "host", Data.Text "db.internal" ] ])
+    /// // Data.Object [ "db", Data.Object [ "host", Data.Text "db.internal"; "port", Data.Number "5432" ] ]</code></example>
+    let merge (left: Data) (right: Data) : Data = DataMerging.merge left right
+
+    /// <summary>Merges structured values in order with <c>merge</c>, so each later layer wins.</summary>
+    /// <remarks>
+    /// Folds from the left starting at <c>Data.Object []</c>, so an empty list gives an empty object and a
+    /// one-item list gives that item. Order the list from lowest to highest precedence, typically file, then
+    /// environment, then command line.
+    /// </remarks>
+    /// <example><code>Data.mergeAll
+    ///     [ Data.Object [ "port", Data.Number "80"; "host", Data.Text "localhost" ]
+    ///       Data.ofEnvironment [ "port", "8080" ]
+    ///       Data.ofCliArgs [ "--host"; "example.org" ] ]
+    /// // Data.Object [ "port", Data.Text "8080"; "host", Data.Text "example.org" ]</code></example>
+    /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="layers" /> is null.</exception>
+    let mergeAll (layers: Data list) : Data = DataMerging.mergeAll layers
+
     /// <summary>Attempts to find a value at a parsed path.</summary>
     let tryFind = DataLookup.tryFind
 

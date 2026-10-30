@@ -49,6 +49,7 @@
     <Compile Include="DataErgonomicsTypes.fs" />
     <Compile Include="DataInternals.fs" />
     <Compile Include="DataPatching.fs" />
+    <Compile Include="DataMerging.fs" />
     <Compile Include="DataComparison.fs" />
     <Compile Include="DataMatching.fs" />
     <Compile Include="DataErgonomics.fs" />

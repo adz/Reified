@@ -198,3 +198,29 @@ module Checks =
           |> Seq.forall (fun c -> int c < 128)
           (Json.serializeWith (fun o -> { o with EscapeHtml = true }) codec value).Contains "\\u003c" ]
         |> List.forall id
+
+    /// Layered configuration: environment splitting (string split, ordinal sort and prefix match) and deep merge
+    /// must agree across targets, and the merged layers must parse through a schema.
+    let runConfigurationLayering () =
+        let environment =
+            [ "APP__age", "41"; "APP__name", "env"; "PATH", "/usr/bin"; "APP__x__1", "b"; "APP__x__0", "a"; "APP__x", "lost" ]
+            |> Data.ofEnvironmentWith (fun options -> { options with Prefix = Some "APP__" })
+
+        let merged =
+            Data.mergeAll
+                [ Json.parseData "{\"name\":\"file\",\"age\":30,\"x\":[\"old\"]}"
+                  environment
+                  Data.ofCliArgs [ "--name"; "Ada" ] ]
+
+        [ environment =
+            Data.Object
+                [ "age", Data.Text "41"
+                  "name", Data.Text "env"
+                  "x", Data.List [ Data.Text "a"; Data.Text "b" ] ]
+          merged =
+            Data.Object
+                [ "name", Data.Text "Ada"
+                  "age", Data.Text "41"
+                  "x", Data.List [ Data.Text "a"; Data.Text "b" ] ]
+          Schema.parse contactSchema merged = Ok { Name = "Ada"; Age = 41 } ]
+        |> List.forall id

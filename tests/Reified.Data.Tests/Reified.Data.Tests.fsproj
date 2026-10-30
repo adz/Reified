@@ -10,6 +10,8 @@
 
   <ItemGroup>
     <Compile Include="DataTests.fs" />
+    <Compile Include="DataMergeTests.fs" />
+    <Compile Include="DataEnvironmentTests.fs" />
   </ItemGroup>
 
   <ItemGroup>

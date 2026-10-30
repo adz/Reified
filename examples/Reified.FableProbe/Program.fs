@@ -62,6 +62,12 @@ let main _ =
 
     printfn "Localization: ok"
 
+    require
+        (Checks.runConfigurationLayering ())
+        "Environment conversion or Data merge differed across targets."
+
+    printfn "Configuration layering: ok"
+
 #if FABLE_COMPILER
     // Portable parsing must preserve number tokens and duplicate keys, and the native bridge must exist only
     // on this target.
