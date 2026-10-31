@@ -50,7 +50,7 @@ module SecretTests =
         | Error _ -> failwith "Expected sealed default"
         Assert.Equal("sensitive-sentinel", Schema.defaultValue secretSchema |> Option.get |> Secret.reveal)
         Assert.DoesNotContain("sensitive-sentinel", JsonSchema.generateValue secretSchema)
-        Assert.Throws<System.ArgumentException>(fun () -> Schema.inspectUnderlying<Secret<string>, string> secretSchema |> ignore) |> ignore
+        Assert.Throws<System.ArgumentException>(fun () -> let inspect: Secret<string> -> string = Schema.inspectUnderlying secretSchema in inspect |> ignore) |> ignore
 
     [<Fact>]
     let ``secret codec errors and retained inputs never keep payloads`` () =
