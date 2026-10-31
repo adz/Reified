@@ -20,7 +20,7 @@ module ConfigurationExtrasTests =
 
     [<Fact>]
     let ``case collisions deep merge in first seen order with last value winning`` () =
-        let input = Data.Object ["DB", Data.Object ["PORT", Data.Text "1"]; "db", Data.Object ["port", Data.Text "2"]]
+        let input = Data.Object ["db", Data.Object ["port", Data.Text "1"]; "DB", Data.Object ["PORT", Data.Text "2"]]
         Assert.Equal(Ok { Db = { Port = 2 } }, Schema.parseWith Schema.ignoreKeyCase (settingsSchema ()) input)
 
     [<Fact>]
@@ -32,4 +32,4 @@ module ConfigurationExtrasTests =
     [<Fact>]
     let ``case ambiguous schema field definitions are rejected`` () =
         let definitions = schema<int * int> { fieldAs "port" fst; fieldAs "PORT" snd; construct (fun a b -> a, b) }
-        Assert.True(Schema.parseWith Schema.ignoreKeyCase definitions (Data.Object ["port", Data.Text "1"]) |> Result.isError)
+        Assert.True(Schema.parseWith Schema.ignoreKeyCase definitions (Data.Object ["port", Data.Text "1"; "PORT", Data.Text "2"]) |> Result.isError)
