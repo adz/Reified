@@ -33,6 +33,7 @@ jobs:
         with:
           node-version: 22.x
       - run: dotnet run --project tools/Reified.Build -- --target Fable
+      - run: dotnet run --project tools/Reified.Build -- --target FableCompat
 
   native-aot:
     runs-on: ubuntu-latest

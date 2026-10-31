@@ -10,8 +10,9 @@ let root = Path.GetFullPath(Path.Combine(__SOURCE_DIRECTORY__, "../.."))
 Directory.SetCurrentDirectory root
 Context.setExecutionContextFromCommandLineArgs "tools/Reified.Build/Program.fs"
 
-let runCapture file args env =
+let runCaptureIn workingDirectory file args env =
     let info = ProcessStartInfo(file, RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false)
+    if not (String.IsNullOrEmpty workingDirectory) then info.WorkingDirectory <- workingDirectory
     args |> List.iter info.ArgumentList.Add
     env |> List.iter (fun (key, value) -> info.Environment[key] <- value)
     use child = Process.Start info
@@ -22,6 +23,8 @@ let runCapture file args env =
     if stdout.Length > 0 then Console.Write stdout
     if stderr.Length > 0 then Console.Error.Write stderr
     child.ExitCode, stdout + stderr
+
+let runCapture file args env = runCaptureIn "" file args env
 
 let run file args =
     let code, _ = runCapture file args []
@@ -146,6 +149,22 @@ let private hasTopLevelSideEffect (source: string) =
             [ "import "; "export "; "const "; "let "; "var "; "function "; "class "; "}"; ")"; "]"; "*" ]
             |> List.exists code.StartsWith))
 
+let fableProbeOutputs =
+    [ "Schema record plan: ok"
+      "Annotated getter surface: ok"
+      "Codec round-trip: ok"
+      "Codec writer options: ok"
+      "Constraints: ok"
+      "Operand agreement: ok"
+      "Localization: ok"
+      "Data JSON boundaries: ok"
+      "Reified Fable probe: ok" ]
+
+let checkFableProbeOutput (out: string) =
+    let _, output = runCapture "node" [ Path.Combine(out, "Program.js") ] []
+    for expected in fableProbeOutputs do
+        if not (output.Contains expected) then failwith $"Fable probe missing: {expected}"
+
 target "Fable" (fun () ->
     let out = "artifacts/fable-js-surface"
     if Directory.Exists out then Directory.Delete(out, true)
@@ -154,8 +173,7 @@ target "Fable" (fun () ->
     let code, _ = runCapture "dotnet" [ "fable"; "examples/Reified.FableProbe/Reified.FableProbe.fsproj"; "--lang"; "javascript"; "--outDir"; out ] [ "TreatWarningsAsErrors", "false" ]
     if code <> 0 then failwith "Fable compilation failed"
     if not (File.Exists(Path.Combine(out, "src/Reified.Schema/Json.js"))) then failwith "Reified.Schema's JSON codec was absent from Fable output"
-    let _, output = runCapture "node" [ Path.Combine(out, "Program.js") ] []
-    for expected in [ "Schema record plan: ok"; "Annotated getter surface: ok"; "Codec round-trip: ok"; "Codec writer options: ok"; "Constraints: ok"; "Operand agreement: ok"; "Localization: ok"; "Data JSON boundaries: ok"; "Reified Fable probe: ok" ] do if not (output.Contains expected) then failwith $"Fable probe missing: {expected}"
+    checkFableProbeOutput out
     if Directory.EnumerateFiles(out, "*", SearchOption.AllDirectories) |> Seq.exists (fun p -> File.ReadAllText(p).Contains "ResourceManager") then failwith "ResourceManager leaked into Fable output"
     let effectful =
         Directory.EnumerateFiles(Path.Combine(out, "src"), "*.js", SearchOption.AllDirectories)
@@ -164,6 +182,23 @@ target "Fable" (fun () ->
         |> List.ofSeq
     if not (List.isEmpty effectful) then
         failwith $"""Fable output carries top-level side effects, so "sideEffects": false is no longer honest: {String.Join(", ", effectful)}""")
+
+// Fable before 5.13 returned the two-element `isFieldGet` quotation layout; 5.13 adds an indexer-argument
+// slot. The repository pins 5.13, so this target compiles the same probe with 5.6.0 (the version Axial pins)
+// to keep both layouts covered. Its own manifest keeps the default toolchain at 5.13.
+target "FableCompat" (fun () ->
+    let out = Path.GetFullPath "artifacts/fable-js-compat-5.6"
+    let toolDirectory = Path.Combine(root, "tools/Reified.FableCompat")
+    let manifest = Path.Combine(toolDirectory, ".config/dotnet-tools.json")
+    dotnet [ "tool"; "restore"; "--tool-manifest"; manifest ]
+    if Directory.Exists out then Directory.Delete(out, true)
+    Directory.CreateDirectory out |> ignore
+    File.WriteAllText(Path.Combine(out, "package.json"), "{ \"type\": \"module\", \"sideEffects\": false }")
+    let project = Path.GetFullPath "examples/Reified.FableProbe/Reified.FableProbe.fsproj"
+    let code, _ = runCaptureIn toolDirectory "dotnet" [ "fable"; project; "--lang"; "javascript"; "--outDir"; out ] [ "TreatWarningsAsErrors", "false" ]
+    if code <> 0 then failwith "Fable 5.6 compatibility compilation failed"
+    if not (File.Exists(Path.Combine(out, "src/Reified.Schema/Json.js"))) then failwith "Reified.Schema's JSON codec was absent from Fable 5.6 output"
+    checkFableProbeOutput out)
 
 target "NativeAot" (fun () -> for product in [ "Result"; "Constraint"; "Refinements"; "Schema" ] do let dir = $"artifacts/publish/Reified.{product}.AotProbe/linux-x64" in dotnet [ "publish"; $"examples/Reified.{product}.AotProbe/Reified.{product}.AotProbe.fsproj"; "-c"; "Release"; "-r"; "linux-x64"; "-o"; dir ]; run (Path.Combine(dir, $"Reified.{product}.AotProbe")) [])
 
@@ -291,6 +326,7 @@ target "Default" ignore
 "SourceInventory" ==> "Verify" |> ignore
 "Build" ==> "SchemaCompilerErrors" ==> "Verify" |> ignore
 "Build" ==> "Fable" ==> "Verify" |> ignore
+"Build" ==> "FableCompat" ==> "Verify" |> ignore
 "Build" ==> "NativeAot" ==> "Verify" |> ignore
 [ "Test"; "SourceInventory"; "SchemaCompilerErrors" ]
 |> List.iter (fun dependency -> dependency ==> "Core" |> ignore)

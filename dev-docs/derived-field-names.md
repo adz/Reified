@@ -49,8 +49,9 @@ Two Fable traps worth knowing before editing that branch:
   5.13. Matching `[]` in the Fable branch therefore read a third element that did not exist on older Fable and passed
   `undefined` to `isEmpty`, producing `Cannot read properties of undefined (reading 'tail')` from `GetterName.split`.
   The Fable branch matches the slot with `_`: a direct getter has no indexer arguments on any target, so ignoring the
-  slot cannot admit an indexed property. The repository pins 5.13, which is why this needed a consumer's 5.6 build
-  (Axial) to surface; keep a compatibility run in mind when changing this branch.
+  slot cannot admit an indexed property. The repository pins 5.13, so the `FableCompat` target compiles and runs the
+  same probe with 5.6.0 from `tools/Reified.FableCompat/.config/dotnet-tools.json`; `Verify` runs it alongside the
+  5.13 `Fable` target, which is how the older layout stays covered.
 - **Do not reach for `LeafExpressionConverter.EvaluateQuotation`.** It works and it is the obvious thing to write,
   but it returns an *interpreter closure*: Fable's `evaluate` compiles `ExprLambda` to
   `(arg) => { const newEnv = new Map(capturedEnv); ...; return evaluate(expr.body, newEnv); }`, so every call
