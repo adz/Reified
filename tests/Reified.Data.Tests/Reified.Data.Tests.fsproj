@@ -13,6 +13,7 @@
     <Compile Include="DataMergeTests.fs" />
     <Compile Include="DataEnvironmentTests.fs" />
     <Compile Include="DataConfigurationLimitsTests.fs" />
+    <Compile Include="DataCliNestingTests.fs" />
   </ItemGroup>
 
   <ItemGroup>
