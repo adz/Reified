@@ -56,6 +56,9 @@ file, the environment, and the command line before one schema parse.
   inputs are redacted. JSON encoding writes `"<redacted>"`, never the payload; decoding still accepts the underlying
   wire shape, so secret codecs intentionally do not round trip. Inspection hides payload metadata; JSON Schema marks
   it write-only/opaque, and derived generation fails closed. Secret is redaction, not encryption or access control.
+- `Schema.parseRetainingInputWith` applies parse options while retaining input. Retained-input redaction matches
+  declared secret field names and aliases ordinal-ignore-case, so a differently-cased secret key is masked on
+  success or failure.
 
 ### Fixed
 

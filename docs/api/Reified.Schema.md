@@ -71,7 +71,7 @@ api:
     - id: execution
       title: Parse and check
       order: 60
-      members: [parse, parseWith, parseWithOptions, parseRetainingInput, check]
+      members: [parse, parseWith, ignoreKeyCase, parseWithOptions, parseRetainingInput, parseRetainingInputWith, check]
       facets:
         task: [execute]
         audience: [common]

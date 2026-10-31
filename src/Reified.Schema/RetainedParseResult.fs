@@ -18,7 +18,7 @@ module private DataPathConversion =
 /// <summary>A schema parse result retaining structured input, with declared secret subtrees redacted.</summary>
 type RetainedParseResult<'value> =
     {
-        /// <summary>The structured boundary data, redacted by Schema.parseRetainingInput at declared secret boundaries.</summary>
+        /// <summary>The structured boundary data, redacted by Schema.parseRetainingInput or parseRetainingInputWith at declared secret boundaries.</summary>
         Input: Data
         /// <summary>The parsed model or accumulated schema failures.</summary>
         Result: Result<'value, SchemaErrors>

@@ -50,8 +50,11 @@ also redacts violations. Exceptions from callbacks remain exceptions, but their 
 withheld. `Schema.inspectUnderlying` rejects secret schemas: unsealing requires `Secret.reveal`.
 
 `Schema.parseRetainingInput` replaces declared secret inputs with the placeholder before returning its `Input`, on
-success or failure. Collections and aliases are covered. A union that can contain secrets is retained as one
-redacted subtree; it is not a lossless redisplay source. The original input supplied by the caller is not mutated.
+success or failure. Field names and aliases are matched ordinal-ignore-case, so `PASSWORD` is redacted for a
+`Password` secret field even when the parse rejects it. Collections and aliases are covered. A union that can
+contain secrets is retained as one redacted subtree; it is not a lossless redisplay source. The original input
+supplied by the caller is not mutated. Use `Schema.parseRetainingInputWith` to apply parse options such as
+`Schema.ignoreKeyCase` while retaining input.
 
 ## JSON accepts payloads but never writes them
 

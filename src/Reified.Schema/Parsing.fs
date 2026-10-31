@@ -27,9 +27,21 @@ module internal SchemaParsing =
         let values = Dictionary<string, struct (Data * int)>(comparer)
         let fields =
             if ignoreCase then
-                match Data.mergeWith comparer (Data.Object []) (Data.Object fields) with
-                | Data.Object normalized -> normalized
-                | _ -> fields
+                // Normalize only this object's field names. Data.mergeWith is a deep merge; applying it to the
+                // whole object would also case-fold keys inside arbitrary map and union values.
+                let merged = ResizeArray<string * Data>()
+                let indexes = Dictionary<string, int>(comparer)
+
+                for name, value in fields do
+                    match indexes.TryGetValue name with
+                    | true, index ->
+                        let originalName, existing = merged[index]
+                        merged[index] <- originalName, Data.mergeWith comparer existing value
+                    | false, _ ->
+                        indexes[name] <- merged.Count
+                        merged.Add(name, value)
+
+                merged |> Seq.toList
             else fields
 
         do
@@ -659,8 +671,11 @@ module internal SchemaParsing =
     let parse (schema: Schema<'model>) (input: Data) : Result<'model, SchemaErrors> =
         parseWith id schema input
 
-    /// <summary>Parses structured boundary data while retaining that input for redisplay and error lookup.</summary>
-    let parseRetainingInput (schema: Schema<'model>) (input: Data) : RetainedParseResult<'model> =
+    let private redactableFieldSchemas (definitions: FieldDescriptor<'model> list) =
+        definitions
+        |> List.map (fun field -> field.ExternalName, field.Aliases, field.ValueSchema)
+
+    let private redactedRetainedInput (schema: Schema<'model>) (input: Data) : Data =
         let containsSecret definition =
             let seen = HashSet<ValueSchemaDefinition>(HashIdentity.Reference)
             let rec visit definition =
@@ -682,29 +697,57 @@ module internal SchemaParsing =
                 match definition.Shape, raw with
                 | RefinedValueDefinition(inner, _), _ -> redactValue inner raw
                 | LazyValueDefinition deferred, _ -> redactValue (deferred.Force()) raw
-                | NestedValueDefinition(model, _), Data.Object fields -> redactFields model.Fields fields
+                | NestedValueDefinition(model, _), Data.Object fields -> redactFields (redactableFieldSchemas model.Fields) fields
                 | ManyValueDefinition collection, Data.List items -> items |> List.map (redactValue collection.Item) |> Data.List
                 | MapValueDefinition collection, Data.Object fields -> fields |> List.map (fun (key, value) -> key, redactValue collection.Item value) |> Data.Object
                 | OptionValueDefinition optional, _ -> redactValue optional.Payload raw
                 | UnionValueDefinition _, _ when containsSecret definition -> Data.Text "<redacted>"
                 | _ when containsSecret definition -> Data.Text "<redacted>"
                 | _ -> raw
-        and redactFields (definitions: FieldDescriptor<obj> list) fields =
+        and redactFields (definitions: (ExternalFieldName * ExternalFieldName list * ValueSchemaDefinition) list) fields =
             fields |> List.map (fun (name, value) ->
-                match definitions |> List.tryFind (fun field -> field.ExternalName :: field.Aliases |> List.exists (fun accepted -> ExternalFieldName.value accepted = name)) with
-                | Some field -> name, redactValue field.ValueSchema value
-                | None -> name, value) |> Data.Object
-        let retained =
-            match schema.Definition, input with
-            | ValueDefinition value, _ -> redactValue value input
-            | ModelDefinition model, Data.Object fields ->
-                // Root descriptors have a typed getter; redaction only needs their value definitions and names.
-                fields |> List.map (fun (name, value) ->
-                    match model.Fields |> List.tryFind (fun field -> field.ExternalName :: field.Aliases |> List.exists (fun accepted -> ExternalFieldName.value accepted = name)) with
-                    | Some field -> name, redactValue field.ValueSchema value
-                    | None -> name, value) |> Data.Object
-            | _ -> input
-        parse schema input |> RetainedParseResult.create retained
+                let matching =
+                    definitions
+                    |> List.filter (fun (externalName, aliases, _) ->
+                        externalName :: aliases
+                        |> List.exists (fun accepted -> Data.ordinalIgnoreCase.Equals(ExternalFieldName.value accepted, name)))
+                match matching with
+                | [] -> name, value
+                | (_, _, firstSchema) :: rest ->
+                    // A case-insensitive match may select more than one declared field. Redact through each so a
+                    // secret field cannot be missed because an earlier non-secret alias matched the same key.
+                    let redacted =
+                        rest
+                        |> List.fold (fun current (_, _, schema) -> redactValue schema current) (redactValue firstSchema value)
+                    name, redacted) |> Data.Object
+        match schema.Definition, input with
+        | ValueDefinition value, _ -> redactValue value input
+        | ModelDefinition model, Data.Object fields -> redactFields (redactableFieldSchemas model.Fields) fields
+        | _ -> input
+
+    /// <summary>Parses structured boundary data with custom options while retaining redacted input for redisplay.</summary>
+    /// <remarks>Declared secret field names and aliases are matched ordinal-ignore-case when retaining input, even
+    /// when the parse rejects the supplied key spellings. Use this when parsing needs the same options, such as
+    /// <c>Schema.ignoreKeyCase</c>, that <c>Schema.parseWith</c> accepts.</remarks>
+    /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="configure" /> or <paramref name="schema" /> is null.</exception>
+    let parseRetainingInputWith
+        (configure: SchemaParseOptions -> SchemaParseOptions)
+        (schema: Schema<'model>)
+        (input: Data)
+        : RetainedParseResult<'model> =
+        if isNull (box configure) then
+            nullArg (nameof configure)
+
+        if isNull (box schema) then
+            nullArg (nameof schema)
+
+        let retained = redactedRetainedInput schema input
+        parseWithErrors configure schema input |> RetainedParseResult.create retained
+
+    /// <summary>Parses structured boundary data while retaining that input for redisplay and error lookup.</summary>
+    /// <remarks>Declared secret field names and aliases are matched ordinal-ignore-case when retaining input.</remarks>
+    let parseRetainingInput (schema: Schema<'model>) (input: Data) : RetainedParseResult<'model> =
+        parseRetainingInputWith id schema input
 
     /// <summary>
     /// Parses structured boundary data through a trusted model schema using custom input parser options, expressed as a

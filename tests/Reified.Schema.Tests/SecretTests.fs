@@ -75,3 +75,18 @@ module SecretTests =
             match retained.Result with
             | Error errors -> Assert.DoesNotContain(sentinel, string errors)
             | Ok _ -> ()
+
+    [<Fact>]
+    let ``retaining parser applies key case options and still redacts`` () =
+        let sentinel = "sensitive-sentinel"
+        let retained =
+            Schema.parseRetainingInputWith
+                Schema.ignoreKeyCase
+                (credentialsSchema ())
+                (Data.Object [ "PASSWORD", Data.Text sentinel ])
+
+        match retained.Result with
+        | Ok value -> Assert.Equal(sentinel, Secret.reveal value.Password)
+        | Error errors -> failwithf "Expected a case-insensitive parse: %s" (string errors)
+
+        Assert.DoesNotContain(sentinel, Data.Json.render retained.Input)

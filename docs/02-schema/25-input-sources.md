@@ -132,6 +132,8 @@ Use the same comparer **during layer merging**, not only at parse time. An exact
 `port` in place while leaving a later `PORT` beside it; the parser cannot recover the original source order.
 `Data.mergeAllWith Data.ordinalIgnoreCase` preserves later-source precedence, including across three such layers.
 The comparer is supported on both .NET and Fable; use it instead of the BCL `StringComparer` property in portable code.
+`Schema.parseRetainingInputWith` applies the same parse options while retaining input for redisplay; declared secret
+field names and aliases are matched ordinal-ignore-case during redaction.
 
 For credentials, use [Secret fields](/refined/secrets.html), not a key-name redaction heuristic.
 

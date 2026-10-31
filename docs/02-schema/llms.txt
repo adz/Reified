@@ -20,6 +20,8 @@
   Equivalent input names deep-merge (first spelling/position, later value); case-colliding schema names are errors.
   Merge mixed-case layers with `Data.mergeAllWith Data.ordinalIgnoreCase` first; parsing cannot recover precedence
   lost in an earlier exact-name merge. Default parsing and compiled JSON codec name matching remain case-sensitive.
+- `Schema.parseRetainingInputWith configure schema data` retains input while applying parse options. Retained secret
+  field names/aliases are matched ordinal-ignore-case, so mixed-case secret keys are redacted on success or failure.
 - `Secret<'v>` (Reified.Refinements) resolves canonically. `Schema.secret<'v>()` / `Schema.secretWith payloadSchema`
   redact errors to secret.invalid/<redacted> at the secret field path and encode JSON as a placeholder, never raw
   payload. Decoding accepts the underlying wire shape; these codecs intentionally do not round trip.

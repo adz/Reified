@@ -344,7 +344,7 @@ module ApiShapeTests =
 
         moduleTypeFromAssembly "Reified.Schema" "Reified.Schema"
         |> publicStaticMemberNames
-        |> assertContainsAll [ "parse"; "parseWith"; "constructorErrorAt"; "ignoreKeyCase"; "check"; "refine"; "secret"; "secretWith" ]
+        |> assertContainsAll [ "parse"; "parseWith"; "parseRetainingInputWith"; "constructorErrorAt"; "ignoreKeyCase"; "check"; "refine"; "secret"; "secretWith" ]
 
         assertTypeAbsentFromAssembly "Reified.Schema" "Reified.ValueSchema`1"
 

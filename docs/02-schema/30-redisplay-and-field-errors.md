@@ -10,12 +10,14 @@ targetFramework: net8.0
 
 When boundary input fails to parse, a form should show the user's original text next to each field's errors. Reified's
 `RetainedParseResult` keeps both: structured data and diagnostics addressed by path. Declared `Secret` boundaries
-are the exception to exact redisplay: `Schema.parseRetainingInput` masks them, including on successful parses.
-Unions that can contain secrets are retained as one redacted subtree. See [Secrets](/refined/secrets.html).
+are the exception to exact redisplay: `Schema.parseRetainingInput` masks them, including on successful parses, and
+matches declared secret field names and aliases ordinal-ignore-case. Unions that can contain secrets are retained as
+one redacted subtree. Use `Schema.parseRetainingInputWith` when the parse needs options such as
+`Schema.ignoreKeyCase`. See [Secrets](/refined/secrets.html).
 
 ## The Handoff Value
 
-Use `Schema.parseRetainingInput` when the boundary needs the submitted representation after parsing:
+Use `Schema.parseRetainingInput` (or `Schema.parseRetainingInputWith` with parse options) when the boundary needs the submitted representation after parsing:
 
 ```fsharp
 open Reified
@@ -37,7 +39,7 @@ let parsed = Schema.parseRetainingInput customerSchema raw
 
 parsed.IsValid        // true when a trusted model exists
 parsed.Result         // Ok model | Error diagnostics
-parsed.Input          // the original Data, always retained
+parsed.Input          // submitted Data; declared secret subtrees redacted
 parsed.Errors         // flattened path-aware errors ([] when valid)
 ```
 
