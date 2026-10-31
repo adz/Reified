@@ -21,6 +21,15 @@ module Checks =
 
     type SecretCredentials = { Password: Secret<string> }
 
+    type AxisDbSettings = { Host: string; Port: int }
+
+    type AxisSecretSettings = { Token: Secret<int> }
+
+    type AxisNestedSettings =
+        { Db: AxisDbSettings
+          Timeout: int
+          Proxy: string option }
+
 #if FABLE_COMPILER
     [<Fable.Core.Emit("JSON.stringify($0)")>]
     let private nativeStringify (_: obj) : string = failwith "JavaScript only"
@@ -69,6 +78,48 @@ module Checks =
 
     let buildSchemaPlanSummary () =
         Schema.compilePlan (SummaryFactory<SchemaContact>()) contactSchema
+
+    let private axisDbSchema () =
+        schema<AxisDbSettings> {
+            field (fun (settings: AxisDbSettings) -> settings.Host)
+            field (fun (settings: AxisDbSettings) -> settings.Port)
+            construct (fun host port -> { Host = host; Port = port })
+        }
+
+    let private axisSecretSchema () =
+        schema<AxisSecretSettings> {
+            field (fun (settings: AxisSecretSettings) -> settings.Token) {
+                withSchema (Schema.secretWith Schema.int)
+            }
+
+            construct (fun (token: Secret<int>) -> { Token = token })
+        }
+
+    let private axisNestedSchema () =
+        schema<AxisNestedSettings> {
+            field (fun (settings: AxisNestedSettings) -> settings.Db) { withSchema (axisDbSchema ()) }
+            field (fun (settings: AxisNestedSettings) -> settings.Timeout)
+            field (fun (settings: AxisNestedSettings) -> settings.Proxy)
+            construct (fun db timeout proxy ->
+                { Db = db
+                  Timeout = timeout
+                  Proxy = proxy })
+        }
+
+    /// The annotated-lambda getter form every Axial configuration schema uses. `field _.Name` is covered above;
+    /// this covers the shape callers actually write with explicit parameter types, plus nested records, options,
+    /// and `Secret<'value>` fields.
+    let runAnnotatedGetterSurface () =
+        let nestedPlan =
+            Schema.compilePlan (SummaryFactory<AxisNestedSettings>()) (axisNestedSchema ())
+        let nestedCodec = Json.compile (axisNestedSchema ())
+        let nested = { Db = { Host = "localhost"; Port = 5432 }; Timeout = 30; Proxy = Some "http://proxy" }
+        let secretCodec = Json.compile (axisSecretSchema ())
+
+        [ nestedPlan = [ "0:db"; "1:timeout"; "2:proxy" ]
+          Json.deserialize nestedCodec (Json.serialize nestedCodec nested) = nested
+          Secret.reveal (Json.deserialize secretCodec "{\"token\":7}").Token = 7 ]
+        |> List.forall id
 
     /// Keeps the resolved union-representation vocabulary on the cross-target compilation surface.
     let runUnionRepresentationSurface () =
@@ -217,7 +268,7 @@ module Checks =
         }
         let layers = [Data.ofConfiguration ["name", "file"; "age", "30"]; Data.ofEnvironment ["NAME", "env"]; Data.ofCliArgs ["--name=cli"]]
         let merged = Data.mergeAllWith Data.ordinalIgnoreCase layers
-        let credentials = schema<SecretCredentials> { field _.Password; construct (fun password -> { Password = password }) }
+        let credentials = schema<SecretCredentials> { field (fun (settings: SecretCredentials) -> settings.Password); construct (fun (password: Secret<string>) -> { Password = password }) }
         let codec = Json.compile credentials
         let secret = Json.deserialize codec "{\"password\":\"sensitive-sentinel\"}"
         let raw = Schema.text |> Schema.validate (fun value -> Error(SchemaError.Custom("echo", Some value)))

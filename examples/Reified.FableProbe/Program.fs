@@ -26,6 +26,10 @@ let main _ =
 
     printfn "Schema record plan: ok"
 
+    require (Checks.runAnnotatedGetterSurface ()) "Annotated-lambda, nested, optional, or secret field getters failed."
+
+    printfn "Annotated getter surface: ok"
+
     require
         (Checks.runUnionRepresentationSurface ())
         "Union representation metadata differed across targets."
