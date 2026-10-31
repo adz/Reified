@@ -1,6 +1,6 @@
 # Release Notes
 
-## 0.12.1 - TBD
+## 0.12.1 - 2026-10-31
 
 A bug-fix release. `Reified.Schema` now builds the derived `field _.Property` form on older Fable quotation
 layouts, including Fable 5.6.0.
