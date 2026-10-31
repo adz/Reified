@@ -41,6 +41,18 @@ module SecretTests =
         Schema.parse mapped (Data.Object ["sensitive-sentinel", Data.Text "sensitive-sentinel"]) |> assertSafe
 
     [<Fact>]
+    let ``secret defaults stay sealed and metadata cannot reveal raw defaults`` () =
+        let payload = Schema.text |> Schema.withDefault "sensitive-sentinel"
+        let secretSchema = Schema.secretWith payload
+        let settings = schema<Credentials> { field _.Password { withSchema secretSchema }; construct (fun password -> { Password = password }) }
+        match Schema.parse settings (Data.Object []) with
+        | Ok value -> Assert.Equal("sensitive-sentinel", Secret.reveal value.Password)
+        | Error _ -> failwith "Expected sealed default"
+        Assert.Equal("sensitive-sentinel", Schema.defaultValue secretSchema |> Option.get |> Secret.reveal)
+        Assert.DoesNotContain("sensitive-sentinel", JsonSchema.generateValue secretSchema)
+        Assert.Throws<System.ArgumentException>(fun () -> Schema.inspectUnderlying<Secret<string>, string> secretSchema |> ignore) |> ignore
+
+    [<Fact>]
     let ``secret codec errors and retained inputs never keep payloads`` () =
         let codec = Json.compile (Schema.secretWith Schema.int)
         let failure = Assert.Throws<JsonCodecException>(fun () -> Json.deserialize codec "\"sensitive-sentinel\"" |> ignore)
