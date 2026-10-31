@@ -1,5 +1,18 @@
 # Release Notes
 
+## 0.12.1 - TBD
+
+A bug-fix release. `Reified.Schema` now builds the derived `field _.Property` form on Fable versions before 5.13.
+
+### Fixed
+
+- Fable schema construction no longer throws `TypeError: Cannot read properties of undefined (reading 'tail')` while
+  deriving a wire name. Fable's quotation `isFieldGet` returned an instance and property name before 5.13, and gained
+  an indexer-arguments slot in 5.13; `GetterName.split` required that third slot, so every `field (fun x -> x.Name)`
+  or `field _.Name` failed on the older representation. It now ignores the slot on Fable, as it already did on .NET
+  for direct property getters. Nested records, option fields, and `Secret<'value>` fields use the same path and were
+  affected in the same way. .NET behaviour is unchanged.
+
 ## 0.12.0 - 2026-10-31
 
 Reified 0.12.0 builds every runtime library reflection-free, gives the public error types explicit readable text,

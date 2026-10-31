@@ -44,6 +44,13 @@ Two Fable traps worth knowing before editing that branch:
 
 - **The matched `property` is not a `PropertyInfo`.** Fable represents that slot as the property-name string,
   hence the `unbox<string>`. Calling `.Name` on it compiles and yields nonsense.
+- **The quotation slot layout is version-dependent.** Fable compiles the `PropertyGet` pattern through its own
+  `isFieldGet`, which returned `[instance, propertyName]` before Fable 5.13 and `[instance, propertyName, []]` from
+  5.13. Matching `[]` in the Fable branch therefore read a third element that did not exist on older Fable and passed
+  `undefined` to `isEmpty`, producing `Cannot read properties of undefined (reading 'tail')` from `GetterName.split`.
+  The Fable branch matches the slot with `_`: a direct getter has no indexer arguments on any target, so ignoring the
+  slot cannot admit an indexed property. The repository pins 5.13, which is why this needed a consumer's 5.6 build
+  (Axial) to surface; keep a compatibility run in mind when changing this branch.
 - **Do not reach for `LeafExpressionConverter.EvaluateQuotation`.** It works and it is the obvious thing to write,
   but it returns an *interpreter closure*: Fable's `evaluate` compiles `ExprLambda` to
   `(arg) => { const newEnv = new Map(capturedEnv); ...; return evaluate(expr.body, newEnv); }`, so every call
