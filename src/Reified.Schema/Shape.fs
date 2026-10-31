@@ -198,7 +198,12 @@ module internal GetterName =
     let split (getter: Expr<'model -> 'value>) : string * ('model -> 'value) =
 #if FABLE_COMPILER
         match getter :> Expr with
-        | Lambda(_, PropertyGet(Some(Var _), property, [])) ->
+        // Do not constrain the indexer-argument slot here. Fable compiles this pattern through its own
+        // `isFieldGet`, which returned only the instance and property name before Fable 5.13; matching `[]`
+        // made the generated JavaScript read a third element that did not exist and then call `isEmpty` on
+        // `undefined`. Quotations for a direct getter never carry indexer arguments, so ignoring the slot is
+        // equivalent on every target that produces this shape.
+        | Lambda(_, PropertyGet(Some(Var _), property, _)) ->
             // Fable surfaces the PropertyInfo slot as the property-name string.
             let propertyName = unbox<string> property
             let compiledGetter = fun (model: 'model) -> unbox<'value> (jsProperty (box model) propertyName)
