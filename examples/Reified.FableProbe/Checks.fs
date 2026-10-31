@@ -3,6 +3,7 @@ namespace Reified.FableProbe
 open System
 open Reified
 open Reified.SchemaDSL
+open Reified.Refinements
 open Reified
 
 /// The Reified surface that must behave identically on .NET and on Fable JavaScript. Each function returns a
@@ -17,6 +18,13 @@ module Checks =
             Age: int
         }
 
+
+    type SecretCredentials = { Password: Secret<string> }
+
+#if FABLE_COMPILER
+    [<Fable.Core.Emit("JSON.stringify($0)")>]
+    let private nativeStringify (_: obj) : string = failwith "JavaScript only"
+#endif
 
     type private SchemaFieldSummary =
         {
@@ -201,6 +209,45 @@ module Checks =
 
     /// Layered configuration: environment splitting (string split, ordinal sort and prefix match) and deep merge
     /// must agree across targets, and the merged layers must parse through a schema.
+    let runConfigurationExtras () =
+        let contact = schema<SchemaContact> {
+            fieldAs "name" _.Name
+            fieldAs "age" _.Age
+            construct (fun name age -> { Name = name; Age = age })
+        }
+        let layers = [Data.ofConfiguration ["name", "file"; "age", "30"]; Data.ofEnvironment ["NAME", "env"]; Data.ofCliArgs ["--name=cli"]]
+        let merged = Data.mergeAllWith Data.ordinalIgnoreCase layers
+        let credentials = schema<SecretCredentials> { field _.Password; construct (fun password -> { Password = password }) }
+        let codec = Json.compile credentials
+        let secret = Json.deserialize codec "{\"password\":\"sensitive-sentinel\"}"
+        let raw = Schema.text |> Schema.validate (fun value -> Error(SchemaError.Custom("echo", Some value)))
+        let sealedSchema = Schema.secretWith raw
+        let safeError = function
+            | Ok _ -> false
+            | Error errors -> not ((string errors).Contains "sensitive-sentinel") && (string errors).Contains "<redacted>"
+        let retained = Schema.parseRetainingInput credentials (Data.Object ["password", Data.Text "sensitive-sentinel"])
+        [ Data.ordinalIgnoreCase.Equals("σ", "ς")
+          Data.ordinalIgnoreCase.Equals("é", "É")
+          Data.ordinalIgnoreCase.Equals("\U00010428", "\U00010400")
+          not (Data.ordinalIgnoreCase.Equals("K", "K"))
+          not (Data.ordinalIgnoreCase.Equals("ſ", "S"))
+          not (Data.ordinalIgnoreCase.Equals("ı", "I"))
+          not (Data.ordinalIgnoreCase.Equals("ßs", "sß"))
+          Schema.parseWith Schema.ignoreKeyCase contact (Data.ofEnvironment ["NAME", "env"; "AGE", "30"]) = Ok { Name = "env"; Age = 30 }
+          Schema.parse contact (Data.ofEnvironment ["NAME", "env"; "AGE", "30"]) |> Result.isError
+          Schema.parseWith Schema.ignoreKeyCase contact merged = Ok { Name = "cli"; Age = 30 }
+          Data.ofCliArgs ["--Db:Servers__1:Port=5432"] = Data.Object ["Db", Data.Object ["Servers", Data.List [Data.Null; Data.Object ["Port", Data.Text "5432"]]]]
+          Secret.reveal secret.Password = "sensitive-sentinel"
+          string secret.Password = "<redacted>"
+          Json.serialize codec secret = "{\"password\":\"<redacted>\"}"
+          Schema.parse sealedSchema (Data.Text "sensitive-sentinel") |> safeError
+          Schema.check sealedSchema (Secret.create "sensitive-sentinel") |> safeError
+          not ((Data.Json.render retained.Input).Contains "sensitive-sentinel")
+#if FABLE_COMPILER
+          nativeStringify (box secret.Password) = "\"<redacted>\""
+#endif
+        ] |> List.forall id
+
     let runConfigurationLayering () =
         let environment =
             [ "APP__age", "41"; "APP__name", "env"; "PATH", "/usr/bin"; "APP__x__1", "b"; "APP__x__0", "a"; "APP__x", "lost" ]

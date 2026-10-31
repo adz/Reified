@@ -68,6 +68,9 @@ let main _ =
 
     printfn "Configuration layering: ok"
 
+    require (Checks.runConfigurationExtras ()) "Configuration extras or secret redaction differed across targets."
+    printfn "Configuration extras: ok"
+
 #if FABLE_COMPILER
     // Portable parsing must preserve number tokens and duplicate keys, and the native bridge must exist only
     // on this target.
