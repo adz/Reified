@@ -12,6 +12,7 @@
   <ItemGroup>
     <Compile Include="SchemaTestSupport.fs" />
     <Compile Include="ConfigurationExtrasTests.fs" />
+    <Compile Include="SecretTests.fs" />
     <Compile Include="SchemaConstraintInspectionTests.fs" />
     <Compile Include="SchemaConstructorGetterAlignmentTests.fs" />
     <Compile Include="ShapeSyntaxTests.fs" />
