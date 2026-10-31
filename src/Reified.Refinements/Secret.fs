@@ -23,7 +23,7 @@ module Secret =
     let create value = Secret(fun () -> value)
 
     /// <summary>Explicitly accesses the sealed value.</summary>
-    /// <example><code>let plain = Secret.reveal password</code></example>
+    /// <example><code>let plain = Secret.create "credential" |&gt; Secret.reveal</code></example>
     let reveal (secret: Secret<'value>) =
         if isNull (box secret) then nullArg (nameof secret)
         secret.Read()
