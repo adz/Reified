@@ -49,6 +49,7 @@ module SecretTests =
         | Ok value -> Assert.Equal("sensitive-sentinel", Secret.reveal value.Password)
         | Error _ -> failwith "Expected sealed default"
         Assert.Equal("sensitive-sentinel", Schema.defaultValue secretSchema |> Option.get |> Secret.reveal)
+        Assert.Equal("sensitive-sentinel", (Json.deserialize (Json.compile settings) "{}").Password |> Secret.reveal)
         Assert.DoesNotContain("sensitive-sentinel", JsonSchema.generateValue secretSchema)
         Assert.Throws<System.ArgumentException>(fun () -> let inspect: Secret<string> -> string = Schema.inspectUnderlying secretSchema in inspect |> ignore) |> ignore
 
