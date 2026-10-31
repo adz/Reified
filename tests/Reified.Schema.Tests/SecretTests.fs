@@ -60,3 +60,18 @@ module SecretTests =
         Assert.DoesNotContain("sensitive-sentinel", failure.ToString())
         let retained = Schema.parseRetainingInput (credentialsSchema ()) (Data.Object ["password", Data.Text "sensitive-sentinel"])
         Assert.DoesNotContain("sensitive-sentinel", Data.Json.render retained.Input)
+
+    [<Fact>]
+    let ``retained input redacts declared secret fields regardless of key case`` () =
+        for key in [ "PASSWORD"; "password" ] do
+            let sentinel = "sensitive-sentinel"
+            let retained =
+                Schema.parseRetainingInput (credentialsSchema ()) (Data.Object [ key, Data.Text sentinel ])
+
+            let rendered = Data.Json.render retained.Input
+            Assert.DoesNotContain(sentinel, rendered)
+            Assert.Contains("<redacted>", rendered)
+
+            match retained.Result with
+            | Error errors -> Assert.DoesNotContain(sentinel, string errors)
+            | Ok _ -> ()
