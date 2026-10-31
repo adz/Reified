@@ -1,6 +1,6 @@
 # Release Notes
 
-## 0.12.0 - <date TBD by coordinator>
+## 0.12.0 - 2026-10-31
 
 Reified 0.12.0 builds every runtime library reflection-free, gives the public error types explicit readable text,
 and adds layered configuration to `Reified.Data`: environment variables as `Data`, and a deep merge that combines a
