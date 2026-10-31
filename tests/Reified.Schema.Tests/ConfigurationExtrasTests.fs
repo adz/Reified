@@ -9,8 +9,8 @@ module ConfigurationExtrasTests =
     type Db = { Port: int }
     type Settings = { Db: Db }
     let private settingsSchema () =
-        let nested = Schema.define<Db> |> fieldAs "port" _.Port |> construct (fun port -> { Port = port })
-        Schema.define<Settings> |> fieldAs "db" _.Db |> withSchema nested |> construct (fun db -> { Db = db })
+        let nested = schema<Db> { fieldAs "port" _.Port; construct (fun port -> { Port = port }) }
+        schema<Settings> { fieldAs "db" _.Db { withSchema nested }; construct (fun db -> { Db = db }) }
 
     [<Fact>]
     let ``case matching is opt in at every model depth`` () =
@@ -31,5 +31,5 @@ module ConfigurationExtrasTests =
 
     [<Fact>]
     let ``case ambiguous schema field definitions are rejected`` () =
-        let definitions = Schema.define<int * int> |> fieldAs "port" fst |> fieldAs "PORT" snd |> construct (fun a b -> a, b)
+        let definitions = schema<int * int> { fieldAs "port" fst; fieldAs "PORT" snd; construct (fun a b -> a, b) }
         Assert.True(Schema.parseWith Schema.ignoreKeyCase definitions (Data.Object ["port", Data.Text "1"]) |> Result.isError)
