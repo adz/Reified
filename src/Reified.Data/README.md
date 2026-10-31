@@ -101,6 +101,15 @@ Environment and configuration sections become lists only when every child name i
 (`0` or `[1-9][0-9]*`). Names such as `00`, `+1`, `0x10` and `1_0` remain object fields, with no aliasing or lost
 subtrees. Recognition is identical on .NET and Fable.
 
+CLI option names now nest on `:` and `__` by default (`--Db:Port=5432` / `--Db__Port 5432`); dots remain literal.
+Repeated equivalent paths collect values in argument order and positionals stay under `_`. Sections beat scalar
+prefixes. CLI sparse, repeated-option and positional lists share the default conversion bounds.
+
+For mixed-case sources, fold layers with `Data.mergeAllWith Data.ordinalIgnoreCase`, then parse with
+`Schema.parseWith Schema.ignoreKeyCase`. First name spelling/position survive and later equivalent names merge
+recursively. Parsing alone cannot recover precedence lost by an earlier case-sensitive merge. Default merge and
+parse behavior stay case-sensitive; map keys, tag values, prefix filters and JSON codec names are unchanged.
+
 Conversions default to 10,000 items per list, 100,000 output nodes across the entire result (root, containers,
 leaves and null gaps), and 64 input path segments. Oversized expansion throws `ArgumentException` with a path and
 limit. Configure positive bounds explicitly with `Data.ofConfigurationWith` or `DataEnvironmentOptions.Limits`

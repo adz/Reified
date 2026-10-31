@@ -8,7 +8,7 @@ open System.Collections.Specialized
 open Fable.Core.JsInterop
 #endif
 
-/// <summary>Resource bounds for flattened configuration and environment conversion.</summary>
+/// <summary>Resource bounds for flattened configuration, environment and CLI conversion.</summary>
 /// <remarks>The node budget includes the root, containers, supplied leaves and null gaps. All limits must be positive.</remarks>
 type DataConversionLimits =
     { /// <summary>Maximum length of each expanded list, including gaps. Default: 10000.</summary>
@@ -144,6 +144,11 @@ module internal DataConversions =
         let rec convert path forceObject current =
             consume path
             match current with
+            | Value(Data.List items) ->
+                if items.Length > limits.MaxCollectionLength then
+                    rejectLimit argumentName ("Collection at '" + location path + "' exceeds " + string limits.MaxCollectionLength + " items.")
+                ensureAvailable path (int64 items.Length)
+                items |> List.mapi (fun index item -> convert (string index :: path) false (Value item)) |> Data.List
             | Value value -> value
             | Branch children when children.IsEmpty -> Data.Object []
             | Branch children ->
@@ -288,11 +293,27 @@ module internal DataConversions =
     /// <remarks>
     /// <para>
     /// Supports <c>--name value</c>, <c>--name=value</c>, <c>-n value</c>, boolean flags, <c>--no-name</c>, and repeated
-    /// options. Positional arguments are stored under the <c>_</c> field as a collection.
+    /// options. Colons and double underscores nest paths by default; canonical numeric sections become lists.
+    /// Repeated equivalent paths collect values in argument order; sections beat scalar prefixes. Dots are literal.
+    /// Positional arguments are stored under <c>_</c>. All lists (including repetitions/positionals) share defaults of
+    /// 10000 items per list, 100000 output nodes including gaps, and 64 path segments. Empty segments or exceeding
+    /// bounds throws ArgumentException. The root remains an object.
     /// </para>
     /// </remarks>
     let ofCliArgs (args: seq<string>) : Data =
         let args = ensureValues (nameof args) args |> Seq.toList
+        let addField name value fields =
+            let canonical = ensureName name |> fun text -> text.Replace("__", ":")
+            let segments = canonical.Split([| ':' |], StringSplitOptions.None) |> Array.toList
+            if segments |> List.exists ((=) "") then invalidArg (nameof args) "CLI option paths cannot contain empty segments."
+            ensureDepth defaultLimits (nameof args) segments
+            addField canonical value fields
+        let finish fields =
+            fields
+            |> Map.fold (fun node (name: string) value ->
+                let segments = name.Split([| ':' |], StringSplitOptions.None) |> Array.toList
+                insertConfigurationValue segments value node) (Branch Map.empty)
+            |> convertConfigurationNode defaultLimits (nameof args) true
 
         let rec loop remaining fields positionals =
             match remaining with
@@ -302,7 +323,7 @@ module internal DataConversions =
                     | [] -> fields
                     | positionals -> fields |> addField "_" (positionals |> List.map Data.Text |> Data.List)
 
-                fields |> Map.toList |> Data.Object
+                finish fields
             | "--" :: rest ->
                 loop [] fields (List.rev rest @ positionals)
             | arg :: rest when isNull arg ->

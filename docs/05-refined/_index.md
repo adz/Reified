@@ -15,6 +15,9 @@ invariant makes possible. Guarded construction is how a value is admitted, but i
 the reason to reach for a refined type, a wrapper that only checks on the way in leaves
 callers unwrapping it at first use, and the invariant buys nothing after the boundary.
 
+`Secret<'value>` carries a display invariant instead: values remain redacted until explicitly accessed with
+`Secret.reveal`. Its Schema integration redacts failures and JSON output. See [Secrets](/refined/secrets.html).
+
 These types remove checks from later code:
 
 ```fsharp no-check reason="Signatures only; lines, a and b are the caller's refined values."

@@ -649,7 +649,27 @@ let probe () =
     probeWideRecordJson ()
     probeWideRecordParse ()
 
+type SecretSettings = { Password: Reified.Refinements.Secret<string> }
+
+let probeConfigurationExtras () =
+    let contact = schema<SchemaContact> {
+        fieldAs "name" _.Name
+        fieldAs "age" _.Age
+        construct (fun name age -> { Name = name; Age = age })
+    }
+    let layers = [Data.ofConfiguration ["name", "file"; "age", "30"]; Data.ofEnvironment ["NAME", "env"]; Data.ofCliArgs ["--name=cli"]]
+    let merged = Data.mergeAllWith Data.ordinalIgnoreCase layers
+    Assert.equal (Ok { Name = "cli"; Age = 30 }) (Schema.parseWith Schema.ignoreKeyCase contact merged)
+    Assert.equal (Data.Object ["Db", Data.Object ["Port", Data.Text "5432"]]) (Data.ofCliArgs ["--Db:Port=5432"])
+    let credentials = schema<SecretSettings> { fieldAs "password" _.Password; construct (fun password -> { Password = password }) }
+    let codec = Json.compile credentials
+    let value = Json.deserialize codec "{\"password\":\"sensitive-sentinel\"}"
+    Assert.equal "sensitive-sentinel" (Reified.Refinements.Secret.reveal value.Password)
+    Assert.equal "{\"password\":\"<redacted>\"}" (Json.serialize codec value)
+    Assert.equal "<redacted>" (string value.Password)
+
 [<EntryPoint>]
 let main _ =
+    probeConfigurationExtras ()
     probe ()
     0

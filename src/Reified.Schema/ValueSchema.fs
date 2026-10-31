@@ -200,6 +200,23 @@ module internal ValueSchema =
               Default = None }
         )
 
+    let rec isSecret (definition: ValueSchemaDefinition) =
+        match definition.Shape with
+        | RefinedValueDefinition(raw, ops) -> ops.IsSecret || isSecret raw
+        | LazyValueDefinition deferred -> isSecret (deferred.Force())
+        | _ -> false
+
+    let secretWith (raw: Schema<'value>) : Schema<Reified.Refinements.Secret<'value>> =
+        if isNull (box raw) then nullArg (nameof raw)
+        let ops = RefinedValueOps(
+            (fun value -> value |> unbox<'value> |> Reified.Refinements.Secret.create |> box |> Ok),
+            (fun value -> value |> unbox<Reified.Refinements.Secret<'value>> |> Reified.Refinements.Secret.reveal |> box),
+            [], isSecret = true)
+        let sealedDefault =
+            raw.ValueDefinition.Default
+            |> Option.map (fun value -> value |> unbox<'value> |> Reified.Refinements.Secret.create |> box)
+        Schema(ValueDefinition { Shape = RefinedValueDefinition(raw.ValueDefinition, ops); Format = None; Rules = []; Description = None; Default = sealedDefault })
+
     let refine
         (refinement: Refinement<'raw, 'value>)
         (raw: Schema<'raw>)
@@ -623,6 +640,9 @@ module internal ValueSchema =
         if isNull (box schema) then
             nullArg (nameof schema)
 
+        if isSecret schema.ValueDefinition then
+            invalidArg (nameof schema) "Secret payloads require explicit Secret.reveal."
+
         // Both targets validate that the schema is primitive-backed; the eager projection-type check is .NET-only
         // because Fable erases generics at runtime. The projection itself stays reflection-free on both targets.
         let kind = underlyingPrimitiveKind schema
@@ -797,6 +817,8 @@ module internal ValueSchema =
             | Some _ as declared -> declared
             | None ->
                 match definition.Shape with
+                | RefinedValueDefinition(raw, ops) when isSecret definition ->
+                    defaultOf raw |> Option.bind (fun value -> ops.Construct value |> Result.toOption)
                 | RefinedValueDefinition(raw, _) -> defaultOf raw
                 | PrimitiveValueDefinition _ -> None
                 | NestedValueDefinition _ -> None

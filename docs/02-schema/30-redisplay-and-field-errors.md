@@ -9,7 +9,9 @@ targetFramework: net8.0
 # Redisplay And Field Errors
 
 When boundary input fails to parse, a form should show the user's original text next to each field's errors. Reified's
-`RetainedParseResult` keeps both: the structured data exactly as submitted, and diagnostics addressed by path.
+`RetainedParseResult` keeps both: structured data and diagnostics addressed by path. Declared `Secret` boundaries
+are the exception to exact redisplay: `Schema.parseRetainingInput` masks them, including on successful parses.
+Unions that can contain secrets are retained as one redacted subtree. See [Secrets](/refined/secrets.html).
 
 ## The Handoff Value
 

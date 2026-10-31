@@ -228,6 +228,8 @@ module Checks =
         let retained = Schema.parseRetainingInput credentials (Data.Object ["password", Data.Text "sensitive-sentinel"])
         [ Data.ordinalIgnoreCase.Equals("σ", "ς")
           Data.ordinalIgnoreCase.Equals("é", "É")
+          Data.ordinalIgnoreCase.Equals("ᾳ", "ᾼ")
+          Data.ordinalIgnoreCase.GetHashCode("σ") = Data.ordinalIgnoreCase.GetHashCode("ς")
           Data.ordinalIgnoreCase.Equals("\U00010428", "\U00010400")
           not (Data.ordinalIgnoreCase.Equals("K", "K"))
           not (Data.ordinalIgnoreCase.Equals("ſ", "S"))

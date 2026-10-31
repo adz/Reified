@@ -40,6 +40,17 @@ the overview, the comments are the ground truth.
 
 `Data` lives in its own dependency-free package (`src/Reified.Data`).
 
+Configuration additions in 0.12: `SchemaParsing` carries opt-in `IgnoreKeyCase`; `ObjectFieldIndex` uses the portable
+`Data.ordinalIgnoreCase` comparer and merge normalization in that mode. Matching cannot recover historical layer
+precedence, so callers must use `Data.mergeAllWith` while folding mixed-case layers. Schema-name ambiguity is checked
+under the selected comparison at every model boundary.
+
+`Secret` uses a marked `RefinedValueOps` boundary. Parse/check/codec interpreters redact failures there, encoding
+never calls its payload projection, and retained input walks mask declared secrets (whole union subtrees when
+necessary). `ValueSchema.isSecret` sees through outer conversion/validation wrappers. Public inspection emits
+`SchemaShape.Secret`, not hidden payload descriptions; JSON Schema marks it opaque/write-only and generation fails
+closed. Defaults must be constructed as sealed values, never returned as unboxed raw defaults.
+
 The JSON Schema interpreter lives in `src/Reified.Schema/JsonSchema.fs`, and the compiled
 JSON codecs in `src/Reified.Schema/{Buffers,JsonRuntime,Json}.fs`.
 

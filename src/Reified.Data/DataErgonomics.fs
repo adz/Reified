@@ -60,7 +60,10 @@ module Data =
     let ofNameValueCollection = DataConversions.ofNameValueCollection
 #endif
 
-    /// <summary>Builds structured data from command-line arguments.</summary>
+    /// <summary>Builds bounded nested data from CLI arguments; colons and double underscores delimit paths.</summary>
+    /// <remarks>Repeated paths collect values in argument order. Canonical decimal sections become sparse lists,
+    /// using the same default limits as configuration conversion; positionals remain under _.</remarks>
+    /// <example><code>Data.ofCliArgs [ "--Db:Port"; "5432"; "--Servers__0__Host=localhost" ]</code></example>
     let ofCliArgs = DataConversions.ofCliArgs
 
 #if NET8_0_OR_GREATER && !FABLE_COMPILER
@@ -183,6 +186,22 @@ module Data =
     /// // Data.Object [ "port", Data.Text "8080"; "host", Data.Text "example.org" ]</code></example>
     /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="layers" /> is null.</exception>
     let mergeAll (layers: Data list) : Data = DataMerging.mergeAll layers
+
+    /// <summary>The ordinal-ignore-case object-name comparer supported on .NET and Fable.</summary>
+    /// <example><code>layers |&gt; Data.mergeAllWith Data.ordinalIgnoreCase</code></example>
+    let ordinalIgnoreCase = DataMerging.ordinalIgnoreCase
+
+    /// <summary>Deep-merges object names using the supplied equality comparer.</summary>
+    /// <remarks>First spelling and position survive; later equivalent names merge recursively. Lists replace whole.
+    /// Apply the comparer while merging each layer; parsing cannot recover precedence lost in an earlier exact-name merge.</remarks>
+    /// <example><code>Data.mergeWith Data.ordinalIgnoreCase
+    ///     (Data.Object [ "port", Data.Text "1" ]) (Data.Object [ "PORT", Data.Text "2" ])</code></example>
+    let mergeWith comparer left right = DataMerging.mergeWith comparer left right
+
+    /// <summary>Folds layers in precedence order with explicit object-name equality.</summary>
+    /// <example><code>[ Data.ofConfiguration [ "db:port", "1" ]; Data.ofEnvironment [ "DB__PORT", "2" ] ]
+    /// |&gt; Data.mergeAllWith Data.ordinalIgnoreCase</code></example>
+    let mergeAllWith comparer layers = DataMerging.mergeAllWith comparer layers
 
     /// <summary>Attempts to find a value at a parsed path.</summary>
     let tryFind = DataLookup.tryFind

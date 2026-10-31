@@ -19,6 +19,10 @@ The [Schema quickstart](/schema/quickstart.html) introduces fields,
 record construction, and path-aware diagnostics. Then read [Refined Values in Schema](/schema/refined-values.html) for canonical field schemas, raw-value constraints, explicit refinement, and
 schema-local restrictions.
 
+For sensitive fields, `Secret<'value>` resolves a canonical secret schema. `Schema.secretWith` adds payload
+validation without exposing rejected values in errors; JSON encoding writes a placeholder instead of the payload.
+This differs from ordinary transparent refinements. See [Secrets](/refined/secrets.html).
+
 ## Refine a primitive schema
 
 ```fsharp

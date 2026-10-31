@@ -92,6 +92,12 @@ module SchemaCheck =
         | Error first, Error second -> Error(Violation.All(first, [ second ]))
 
     let rec private runDefinition (definition: ValueSchemaDefinition) value =
+        if ValueSchema.isSecret definition then
+            try runDefinitionCore definition value
+            with _ -> raise (System.InvalidOperationException("<redacted>"))
+        else runDefinitionCore definition value
+
+    and private runDefinitionCore (definition: ValueSchemaDefinition) value =
         let own = ErasedCheck.run definition.Rules value
 
         let underlying =
@@ -106,7 +112,10 @@ module SchemaCheck =
             | LazyValueDefinition deferred -> runDefinition (deferred.Force()) value
             | _ -> Ok ()
 
-        combine underlying own
+        let result = combine underlying own
+        if ValueSchema.isSecret definition then
+            result |> Result.mapError (fun _ -> Violation.Atomic(AtomicViolation.Described("<redacted>", None)))
+        else result
 
     /// <summary>Runs each complete constraint against the value at the refinement layer where it was attached.</summary>
     /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="schema" /> is null.</exception>
@@ -207,6 +216,12 @@ module internal ModelFieldCheck =
         | Error violation -> Error [ SchemaError.Violation violation ]
 
     let rec private validateValue valueSchema fieldRules path (value: obj) =
+        if ValueSchema.isSecret valueSchema then
+            try validateValueCore valueSchema fieldRules path value
+            with _ -> raise (System.InvalidOperationException("<redacted>"))
+        else validateValueCore valueSchema fieldRules path value
+
+    and private validateValueCore valueSchema fieldRules path (value: obj) =
         let rules = allRules valueSchema @ fieldRules
 
         match valueSchema.Shape with
@@ -229,10 +244,16 @@ module internal ModelFieldCheck =
                 | Error errors ->
                     errors |> List.map (diagnosticsAt path) |> mergeErrors |> SchemaResult.error
 
-            SchemaResult.map2
-                (fun _ _ -> value)
-                (SchemaResult.map2 (fun _ _ -> value) rawValidation refinementValidation)
-                constraintValidation
+            let result =
+                SchemaResult.map2
+                    (fun _ _ -> value)
+                    (SchemaResult.map2 (fun _ _ -> value) rawValidation refinementValidation)
+                    constraintValidation
+            if ValueSchema.isSecret valueSchema then
+                match SchemaResult.toResult result with
+                | Ok accepted -> SchemaResult.ok accepted
+                | Error _ -> SchemaResult.error (diagnosticsAt path (SchemaError.Custom("secret.invalid", Some "<redacted>")))
+            else result
         | PrimitiveValueDefinition _ ->
             let primitive = inspectUnderlying valueSchema value
 

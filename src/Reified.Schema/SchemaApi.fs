@@ -12,6 +12,16 @@ open Reified.Refinements
 module Schema =
     /// <summary>Describes text input.</summary>
     let text = SchemaCore.text
+
+    /// <summary>Seals a payload schema behind a redacted parse/check/codec boundary.</summary>
+    /// <remarks>Errors collapse to a value-free issue at the secret field path. Codecs accept the payload wire shape
+    /// but encode the string &lt;redacted&gt;, not the payload; encoding is deliberately not a round trip.
+    /// Only Secret.reveal returns the payload. This is log redaction, not memory encryption.</remarks>
+    /// <example><code>let passwordSchema = Schema.secretWith Schema.text</code></example>
+    let secretWith raw = SchemaCore.secretWith raw
+    /// <summary>Resolves a canonical payload schema and seals it as a secret.</summary>
+    /// <example><code>let passwordSchema = Schema.secret&lt;string&gt; ()</code></example>
+    let inline secret () : Schema<Reified.Refinements.Secret< ^value>> = secretWith (SchemaDefaults.Resolve())
     /// <summary>Describes a 32-bit integer.</summary>
     let ``int`` = SchemaCore.``int``
     /// <summary>Describes a 64-bit integer.</summary>
@@ -133,6 +143,14 @@ module Schema =
     let defaults = SchemaParsing.defaults
     /// <summary>Places a record-constructor failure at a field path.</summary>
     let constructorErrorAt path options = SchemaParsing.constructorErrorAt path options
+
+    /// <summary>Matches input object keys ordinal-ignore-case at every model depth.</summary>
+    /// <remarks>Default parsing is case-sensitive. Equivalent input names deep-merge in source order, preserving
+    /// first spelling/position and taking later values, like Data.merge. Schema names/aliases that collide under
+    /// this comparison produce field.case.ambiguous. For layered settings, also merge layers with the same comparer.</remarks>
+    /// <example><code>Data.ofEnvironment [ "PORT", "5432" ]
+    /// |&gt; Schema.parseWith Schema.ignoreKeyCase settingsSchema</code></example>
+    let ignoreKeyCase options = SchemaParsing.ignoreKeyCase options
     /// <summary>Parses structured data after configuring parser options.</summary>
     let parseWith configure schema input = SchemaParsing.parseWith configure schema input
     /// <summary>Parses source-neutral structured data, runs constraints and refinements, and invokes record constructors.</summary>

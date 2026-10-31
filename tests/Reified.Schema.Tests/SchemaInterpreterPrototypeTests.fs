@@ -39,6 +39,7 @@ module SchemaInterpreterPrototypes =
     module Docs =
         let rec private valueSummary (description: SchemaDescription) =
             match underlyingShape description with
+            | SchemaShape.Secret -> "secret"
             | SchemaShape.Primitive kind -> (sprintf "%A" kind).ToLowerInvariant()
             | SchemaShape.Nested _ -> "object"
             | SchemaShape.Many _ -> "list"
@@ -145,6 +146,7 @@ module SchemaInterpreterPrototypes =
             | SchemaShape.Primitive PrimitiveValueKind.Guid -> IdentifierBox
             | SchemaShape.Nested model -> Group(fieldsFor model)
             | SchemaShape.Many item -> Repeater(controlFor item)
+            | SchemaShape.Secret
             | SchemaShape.Union _
             | SchemaShape.Enum _ -> Group []
             | SchemaShape.Optional payload -> controlFor payload

@@ -476,6 +476,7 @@ module JsonSchema =
 
         let shapeKeywords =
             match underlyingShape description with
+            | SchemaShape.Secret -> [ "\"writeOnly\":true"; "\"x-reified-secret\":true" ]
             | SchemaShape.Primitive kind ->
                 primitiveKeywords kind @ formatKeyword @ constraintKeywords (SchemaShape.Primitive kind) constraints |> List.distinct
             | SchemaShape.Nested model -> modelKeywords model
@@ -547,6 +548,7 @@ module JsonSchema =
         | SchemaShape.Optional _ -> true
         | SchemaShape.Refined underlying -> isOptionalDescription underlying
         | SchemaShape.Deferred(_, value) -> isOptionalDescription value
+        | SchemaShape.Secret
         | SchemaShape.Primitive _
         | SchemaShape.Nested _
         | SchemaShape.Many _
@@ -661,6 +663,7 @@ module JsonSchema =
                     | UnionCaseShape.Empty -> ()
                     | UnionCaseShape.Value payload -> visitValue payload
                     | UnionCaseShape.Fields fields -> visitModel fields)
+            | SchemaShape.Secret
             | SchemaShape.Primitive _
             | SchemaShape.Enum _
             | SchemaShape.Recursive _ -> ()

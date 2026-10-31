@@ -324,6 +324,7 @@ module SchemaGen =
                 | SchemaShape.Primitive PrimitiveValueKind.Date -> Ok(Gen.choose(0, 3650) |> Gen.map (fun days -> DateOnly(2020, 1, 1).AddDays days |> string |> Data.Text))
                 | SchemaShape.Primitive PrimitiveValueKind.DateTime -> Ok(Gen.choose(0, 100000) |> Gen.map (fun minutes -> DateTimeOffset(2020, 1, 1, 0, 0, 0, TimeSpan.Zero).AddMinutes minutes |> string |> Data.Text))
                 | SchemaShape.Primitive PrimitiveValueKind.Guid -> Ok(ArbMap.defaults.ArbFor<Guid>().Generator |> Gen.map (string >> Data.Text))
+                | SchemaShape.Secret -> unsupported path "Secret payload metadata is redacted; supply an explicit generator."
                 | SchemaShape.Refined raw -> value path size constraints raw
                 | SchemaShape.Nested model -> modelValue path size model
                 | SchemaShape.Many item ->

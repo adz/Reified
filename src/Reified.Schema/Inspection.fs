@@ -19,6 +19,8 @@ open Reified
 type SchemaShape =
     /// <summary>A primitive value of the supplied kind.</summary>
     | Primitive of kind: PrimitiveValueKind
+    /// <summary>An opaque secret boundary. Payload constraints, defaults and descriptions are withheld.</summary>
+    | Secret
     /// <summary>A refined/domain value whose boundary representation is the supplied underlying description.</summary>
     | Refined of underlying: SchemaDescription
     /// <summary>A nested model value described by its own field descriptions.</summary>
@@ -145,6 +147,8 @@ module Inspect =
                   Default = definition.Default }
 
             match definition.Shape with
+            | _ when ValueSchema.isSecret definition ->
+                { Shape = SchemaShape.Secret; Format = None; Constraints = []; Supply = None; Description = Some "<redacted>"; Default = None }
             | LazyValueDefinition deferred ->
                 let reference =
                     match identities.TryGetValue deferred with

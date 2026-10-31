@@ -10,6 +10,8 @@
   `Data.ofJsonDocument`. Under Fable, pass a native `JSON.parse` result to `Data.ofJsonValue` when duplicate fields and
   original number-token spelling do not matter.
 - `Reified.Json.parseData` provides portable, lossless JSON-to-`Data` parsing from the `Reified.Schema` package.
+- CLI option names nest on `:` and `__` by default, with canonical indexes and default conversion bounds.
+  Equivalent separator spellings share repeated-option order; positionals stay under `_`; dots remain literal.
 - Adapt sources with `Data.ofCliArgs`, `Data.ofConfiguration` (`:` keys), and `Data.ofEnvironment` /
   `Data.ofEnvironmentWith` (`__` names, optional prefix; caller-supplied pairs, no I/O). Sections use canonical
   ASCII decimal indexes only; `00` never aliases `0`. Text/null leaves and null gaps count toward bounded output.
@@ -18,3 +20,6 @@
   for the schema to parse.
 - Layer configuration with `Data.mergeAll [ file; environment; cli ]`: right-biased deep merge of objects; lists,
   scalars, and `Data.Null` on the right replace; a later null overrides and never removes a key.
+- For ordinal-ignore-case layers, use `Data.mergeAllWith Data.ordinalIgnoreCase` (or mergeWith for two values)
+  before `Schema.parseWith Schema.ignoreKeyCase`. First spelling/position stay; later equivalent names deep-merge.
+  Default merge functions remain case-sensitive; parsing cannot recover precedence lost in an exact-name merge.

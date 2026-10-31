@@ -28,6 +28,10 @@ open Reified.Refinements
 | `FiniteFloat`, `FiniteFloat32` | `negate`, `abs` | aggregates that cannot be silently poisoned |
 | `DistinctList<'T>` | `add`, `remove`, `union`, `intersect`, `sort`, `filter`, `map` | `toSet` |
 
+`Secret<'value>` preserves a display invariant rather than arithmetic/collection closure: `Secret.create` seals a
+value, display is always `<redacted>`, and `Secret.reveal` is explicit. Its Schema boundary also redacts failures,
+retained inputs and JSON encoding. It has reference equality, not structural equality. See [Secrets](/refined/secrets.html).
+
 ## Collections
 
 `NonEmptyList` carries its non-emptiness in the representation, so the case is public and

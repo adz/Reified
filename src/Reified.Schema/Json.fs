@@ -457,13 +457,20 @@ module rec Json =
         | RefinedValueDefinition(raw, ops) ->
             let rawDecoder = compileValueDecoderObj raw
 
-            fun src ->
+            let decode src =
                 let struct (rawValue, next) = rawDecoder src
                 match ops.Construct rawValue with
                 | Ok value -> struct (value, next)
                 | Error errors ->
                     let detail = errors |> List.map string |> String.concat "; "
                     raise (JsonCodecException("", detail))
+            if ValueSchema.isSecret definition then
+                fun src ->
+                    try decode src
+                    with
+                    | :? JsonCodecException -> raise (JsonCodecException("", "<redacted>"))
+                    | _ -> raise (System.InvalidOperationException("<redacted>"))
+            else decode
         | NestedValueDefinition(model, _) -> compileErasedModelDecoder model
         | ManyValueDefinition collection ->
             let itemDecoder = compileValueDecoderObj collection.Item
@@ -697,8 +704,11 @@ module rec Json =
         match definition.Shape with
         | PrimitiveValueDefinition kind -> primitiveObjEncoder kind
         | RefinedValueDefinition(raw, ops) ->
-            let rawEncoder = compileValueEncoderObj raw
-            fun writer value -> rawEncoder writer (ops.Inspect value)
+            if ValueSchema.isSecret definition then
+                fun writer _ -> writeQuoted writer "<redacted>"
+            else
+                let rawEncoder = compileValueEncoderObj raw
+                fun writer value -> rawEncoder writer (ops.Inspect value)
         | NestedValueDefinition(model, _) -> compileErasedModelEncoder model
         | ManyValueDefinition collection ->
             let itemEncoder = compileValueEncoderObj collection.Item
@@ -1140,6 +1150,10 @@ module rec Json =
 
                         match propertySource with
                         | ValueNone -> struct (ValueNone, afterPrevious)
+                        | ValueSome propertySource when propertySource.Offset >= propertySource.Data.Length
+                                                       || propertySource.Data[propertySource.Offset] <> byte '"' ->
+                            // An empty/defaulted object is not canonical field order; let the general decoder supply defaults.
+                            struct (ValueNone, propertySource)
                         | ValueSome propertySource ->
                             let struct (start, length, escaped, afterName) = stringRaw propertySource
 

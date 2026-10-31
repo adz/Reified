@@ -157,7 +157,8 @@ module SchemaFormat =
 type internal RefinedValueOps(
     construct: obj -> Result<obj, SchemaError list>,
     inspect: obj -> obj,
-    rules: SchemaRule list
+    rules: SchemaRule list,
+    ?isSecret: bool
 ) =
     do
         if isNull (box construct) then
@@ -176,6 +177,7 @@ type internal RefinedValueOps(
     /// The rules owned and executed by the refinement. Metadata interpreters expose these,
     /// but schema validation must not execute them a second time.
     member _.Rules = rules
+    member _.IsSecret = defaultArg isSecret false
 
 type internal ValueSchemaDefinition =
     { Shape: ValueSchemaShape

@@ -41,6 +41,10 @@ shape. Decoding an attributed record with the trusted path looks validated but i
 
 ## Package routing
 
+Secret values live in Reified.Refinements (`Secret.create`/`reveal`); canonical Schema.secret/secretWith boundaries
+redact parse/check/codec diagnostics and JSON output. See `/refined/secrets.html`. Case-insensitive settings use
+`Data.mergeAllWith Data.ordinalIgnoreCase` followed by `Schema.parseWith Schema.ignoreKeyCase`; both are opt-in.
+
 Schema uses Constraint, Parse, Data, and Refinements; each package can also be installed without Schema. Result is an
 independent set of composition tools. Load only the context needed for the task:
 
@@ -50,7 +54,7 @@ independent set of composition tools. Load only the context needed for the task:
 - Primitive text decoding and Result composition, `result { }`, and accumulating builders: `/parsing/`,
   `/result-handling/llms.txt`
 - Structured fixtures, immutable edits, comparisons, produced-data matching, and layered configuration
-  (`Data.ofEnvironment`, `Data.mergeAll`), with canonical decimal indexes and bounded expansion (10000 items/list,
+  (`Data.ofEnvironment`, nested `Data.ofCliArgs`, `Data.mergeAll`; case-aware mergeAllWith Data.ordinalIgnoreCase), with canonical decimal indexes and bounded expansion (10000 items/list,
   100000 output nodes, 64 path segments; configure via `ofConfigurationWith` / environment `Limits`), also the
   required input shape for `Schema.parse`, not only a testing
   convenience: `/data/llms.txt`

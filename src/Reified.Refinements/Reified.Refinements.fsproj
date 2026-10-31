@@ -29,6 +29,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Refinement.fs" />
+    <Compile Include="Secret.fs" />
     <Compile Include="NonEmpty.fs" />
     <Compile Include="Interval.fs" />
     <Compile Include="Bounded.fs" />

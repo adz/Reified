@@ -124,12 +124,15 @@ The rules:
 - The following token is taken as the value only when it does not start with `-`. Otherwise the option is a flag and
   gets the text `"true"`.
 - `--no-name` sets the field `name` to the text `"false"`.
-- A repeated option collects its values into a `Data.List`, in the order they appeared.
+- `:` and `__` split option names into nested paths by default: `--Db:Port 5432` and `--Db__Port=5432` both
+  produce `Db.Port`. Dots remain literal name characters. Empty path segments are rejected.
+- A repeated option path collects values into a `Data.List` in argument order, including when spellings mix the two
+  separators. Sections beat scalar prefixes regardless of argument order, as with environment conversion.
 - Anything that is not an option is positional, and positionals are collected under the field `_`.
 - `--` ends option parsing: every remaining token is positional, even if it starts with a dash.
 - Fields come out ordered by name, not in command-line order. Positional order is preserved within `_`.
 
-Every CLI leaf is text. `Data.ofCliArgs` identifies structure but leaves `"42"` and `"true"` as text; the schema
+Supplied CLI values are text; sparse index gaps are `Data.Null`. `Data.ofCliArgs` leaves `"42"` and `"true"` as text; the schema
 parsing the tree decides whether they represent a number or Boolean.
 
 Because a value token must not start with `-`, a negative number as a separate token reads as a positional, and a
@@ -264,7 +267,7 @@ The rules:
 
 ## Conversion limits
 
-Environment and flattened configuration conversion default to **10,000 items per list**, **100,000 output nodes**
+CLI, environment and flattened configuration conversion default to **10,000 items per list**, **100,000 output nodes**
 across the complete result, and **64 input path segments**. The node budget includes the root, every object/list,
 supplied leaves and every null gap in a sparse list. For example, `X__9999` requires 10,000 list slots; `X__10000`
 exceeds the default length. Canonical numeric indexes too large for Int32 are rejected, not reinterpreted as object
@@ -289,7 +292,8 @@ let environment =
 
 Limits bound conversion's expansion, not source text bytes or the number of supplied pairs. A host handling
 untrusted uploads should bound those inputs too. `merge` does not apply these adapter-specific limits to arbitrary
-already-built Data values.
+already-built Data values. CLI uses these defaults without a separate options API; repeated-option and positional
+lists also consume the length/node budgets. Nesting is the default pre-1.0 API, not a compatibility alias.
 
 ## Merge layered sources
 
@@ -332,6 +336,12 @@ Choices that matter for configuration:
   the empty-object identity law applies to already-normalized object trees, not arbitrary duplicate-key inputs.
 - Merging is associative while layers agree on which paths hold objects. When a middle layer puts a non-object between
   two objects at one path, grouping changes the result; `mergeAll` always applies layers in order, so prefer it.
+
+For case-insensitive settings, merge **each layer** with `Data.mergeAllWith Data.ordinalIgnoreCase`, then parse
+with `Schema.parseWith Schema.ignoreKeyCase`. The comparer preserves the first name spelling and position while
+merging later equivalent names. Applying case-insensitive parsing after an ordinary exact-name merge cannot
+recover precedence already lost across three mixed-case layers. Ordinary `merge`/`mergeAll` remain case-sensitive.
+`Data.mergeWith comparer left right` handles two layers. See [key case](/schema/input-sources.html#key-case).
 
 A singleton object layer need not be identical to its input:
 

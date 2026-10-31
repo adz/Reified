@@ -163,6 +163,7 @@ module internal SchemaCore =
     /// <summary>Converts a schema through total construction and inspection functions.</summary>
     let convert forward backward schema = ValueSchema.refined forward backward schema
     let refine refinement schema = ValueSchema.refine refinement schema
+    let secretWith schema = ValueSchema.secretWith schema
     let validate validation schema = ValueSchema.validate validation schema
     /// <summary>Describes a tagged union.</summary>
     let union cases = ValueSchema.union cases

@@ -16,6 +16,15 @@
 - A field does not need `refine` when its schema already returns the getter type, such as `Schema.int` for `int`.
 - `construct` is total. `constructResult` runs only after all fields succeed.
 - `Schema.parse schema data` and `Schema.check schema value` return `Result<_,SchemaErrors>`.
+- `Schema.parseWith Schema.ignoreKeyCase` opts into ordinal-ignore-case field/alias matching at every model depth.
+  Equivalent input names deep-merge (first spelling/position, later value); case-colliding schema names are errors.
+  Merge mixed-case layers with `Data.mergeAllWith Data.ordinalIgnoreCase` first; parsing cannot recover precedence
+  lost in an earlier exact-name merge. Default parsing and compiled JSON codec name matching remain case-sensitive.
+- `Secret<'v>` (Reified.Refinements) resolves canonically. `Schema.secret<'v>()` / `Schema.secretWith payloadSchema`
+  redact errors to secret.invalid/<redacted> at the secret field path and encode JSON as a placeholder, never raw
+  payload. Decoding accepts the underlying wire shape; these codecs intentionally do not round trip.
+  Retained inputs mask declared secrets (whole union subtrees when needed); Inspect reports opaque SchemaShape.Secret.
+  Secret.reveal is explicit; no structural equality. Schema-derived generation fails closed for hidden payloads.
 - Use `SchemaErrors.toList` for `SchemaIssue` values and `SchemaPath.format` for their complete locations.
 - `SchemaErrors.messages renderer errors` returns `(SchemaPath * string)` predicates; `fullMessages` composes the attribute noun; `toStringWith` is the localized `toString`.
 - Schema folds its typed `SchemaPath` in as the renderer attribute; supply only `Renderer.context`. Indexes stay out of resource keys and stay in returned paths.

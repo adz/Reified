@@ -16,13 +16,21 @@ type SchemaParseOptions =
     internal
         {
             ConstructorErrorPath: SchemaPathComponent list option
+            IgnoreKeyCase: bool
         }
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]
 module internal SchemaParsing =
-    type private ObjectFieldIndex(fields: (string * Data) list) =
-        let values = Dictionary<string, struct (Data * int)>()
+    type private ObjectFieldIndex(ignoreCase: bool, fields: (string * Data) list) =
+        let comparer = if ignoreCase then Data.ordinalIgnoreCase else EqualityComparer<string>.Default
+        let values = Dictionary<string, struct (Data * int)>(comparer)
+        let fields =
+            if ignoreCase then
+                match Data.mergeWith comparer (Data.Object []) (Data.Object fields) with
+                | Data.Object normalized -> normalized
+                | _ -> fields
+            else fields
 
         do
             for name, value in fields do
@@ -44,7 +52,17 @@ module internal SchemaParsing =
 
     /// <summary>The default input parser options.</summary>
     let defaults =
-        { ConstructorErrorPath = None }
+        { ConstructorErrorPath = None; IgnoreKeyCase = false }
+
+    let ignoreKeyCase (options: SchemaParseOptions) =
+        if isNull (box options) then nullArg (nameof options)
+        { options with IgnoreKeyCase = true }
+
+    let private ambiguousNames options names =
+        if not options.IgnoreKeyCase then false
+        else
+            let seen = HashSet<string>(Data.ordinalIgnoreCase)
+            names |> List.exists (fun name -> not (seen.Add name))
 
     /// <summary>
     /// Attaches model constructor errors to the supplied structured data path instead of the current object path.
@@ -98,6 +116,8 @@ module internal SchemaParsing =
     let rec private tryDefaultValue (definition: ValueSchemaDefinition) =
         match definition.Default, definition.Shape with
         | Some value, _ -> Some value
+        | None, RefinedValueDefinition(raw, ops) when ValueSchema.isSecret definition ->
+            tryDefaultValue raw |> Option.bind (fun value -> ops.Construct value |> Result.toOption)
         | None, RefinedValueDefinition(raw, _) -> tryDefaultValue raw
         | None, LazyValueDefinition deferred -> tryDefaultValue (deferred.Force())
         | None, _ -> None
@@ -192,15 +212,19 @@ module internal SchemaParsing =
                 |> Result.map optional.WrapSome
         | RefinedValueDefinition(rawSchema, ops) ->
             let rules = valueSchema.Rules @ fieldRules
-
-            parseValue options rawSchema [] path raw
-            |> Result.bind (fun rawValue ->
-                ops.Construct rawValue
-                |> Result.mapError (fun errors -> errors |> List.map (diagnosticsAt path) |> mergeErrors))
-            |> Result.bind (fun value ->
-                match runRules rules value with
-                | Ok checkedValue -> Ok checkedValue
-                | Error errors -> errors |> List.map (diagnosticsAt path) |> mergeErrors |> Error)
+            let parse () =
+                parseValue options rawSchema [] path raw
+                |> Result.bind (fun rawValue ->
+                    ops.Construct rawValue
+                    |> Result.mapError (fun errors -> errors |> List.map (diagnosticsAt path) |> mergeErrors))
+                |> Result.bind (fun value ->
+                    match runRules rules value with
+                    | Ok checkedValue -> Ok checkedValue
+                    | Error errors -> errors |> List.map (diagnosticsAt path) |> mergeErrors |> Error)
+            if ValueSchema.isSecret valueSchema then
+                try parse () |> Result.mapError (fun _ -> diagnosticsAt path (SchemaError.Custom("secret.invalid", Some "<redacted>")))
+                with _ -> raise (InvalidOperationException("<redacted>"))
+            else parse ()
         | PrimitiveValueDefinition _
         | NestedValueDefinition _
         | ManyValueDefinition _
@@ -485,8 +509,11 @@ module internal SchemaParsing =
         parseFieldInput options basePath fields field
 
     and private parseObject options path (model: ModelSchemaDefinition<obj>) (rawFields: (string * Data) list) =
-        let fields = ObjectFieldIndex rawFields
-        let parsedFields = model.Fields |> List.map (parseNestedField options path fields)
+        let fields = ObjectFieldIndex(options.IgnoreKeyCase, rawFields)
+        let names = model.Fields |> List.collect (fun field -> field.ExternalName :: field.Aliases |> List.map ExternalFieldName.value)
+        let parsedFields =
+            if ambiguousNames options names then [errorAt path (SchemaError.Custom("field.case.ambiguous", Some "Schema field names or aliases differ only by case."))]
+            else model.Fields |> List.map (parseNestedField options path fields)
         let errors = parsedFields |> List.choose (function Error diagnostics -> Some diagnostics | Ok _ -> None)
 
         match errors with
@@ -600,8 +627,11 @@ module internal SchemaParsing =
             | ModelDefinition _, Data.Bool _ -> Error(diagnosticsAt [] SchemaError.ExpectedObject)
             | ModelDefinition _, Data.List _ -> Error(diagnosticsAt [] SchemaError.ExpectedObject)
             | ModelDefinition model, Data.Object rawFields ->
-                let fields = ObjectFieldIndex rawFields
-                let parsedFields = model.Fields |> List.map (parseRootField options [] fields)
+                let fields = ObjectFieldIndex(options.IgnoreKeyCase, rawFields)
+                let names = model.Fields |> List.collect (fun field -> field.ExternalName :: field.Aliases |> List.map ExternalFieldName.value)
+                let parsedFields =
+                    if ambiguousNames options names then [errorAt [] (SchemaError.Custom("field.case.ambiguous", Some "Schema field names or aliases differ only by case."))]
+                    else model.Fields |> List.map (parseRootField options [] fields)
                 let errors = parsedFields |> List.choose (function Error diagnostics -> Some diagnostics | Ok _ -> None)
 
                 match errors with
@@ -631,7 +661,50 @@ module internal SchemaParsing =
 
     /// <summary>Parses structured boundary data while retaining that input for redisplay and error lookup.</summary>
     let parseRetainingInput (schema: Schema<'model>) (input: Data) : RetainedParseResult<'model> =
-        parse schema input |> RetainedParseResult.create input
+        let containsSecret definition =
+            let seen = HashSet<ValueSchemaDefinition>(HashIdentity.Reference)
+            let rec visit definition =
+                if not (seen.Add definition) then false
+                else
+                    match definition.Shape with
+                    | RefinedValueDefinition(raw, ops) -> ops.IsSecret || visit raw
+                    | NestedValueDefinition(model, _) -> model.Fields |> List.exists (fun field -> visit field.ValueSchema)
+                    | ManyValueDefinition collection -> visit collection.Item
+                    | MapValueDefinition collection -> visit collection.Item
+                    | OptionValueDefinition optional -> visit optional.Payload
+                    | LazyValueDefinition deferred -> visit (deferred.Force())
+                    | UnionValueDefinition union -> union.Cases |> List.exists (fun case -> match case.Payload with EmptyUnionCase -> false | ValueUnionCase payload | FieldsUnionCase payload -> visit payload)
+                    | _ -> false
+            visit definition
+        let rec redactValue definition raw =
+            if ValueSchema.isSecret definition then Data.Text "<redacted>"
+            else
+                match definition.Shape, raw with
+                | RefinedValueDefinition(inner, _), _ -> redactValue inner raw
+                | LazyValueDefinition deferred, _ -> redactValue (deferred.Force()) raw
+                | NestedValueDefinition(model, _), Data.Object fields -> redactFields model.Fields fields
+                | ManyValueDefinition collection, Data.List items -> items |> List.map (redactValue collection.Item) |> Data.List
+                | MapValueDefinition collection, Data.Object fields -> fields |> List.map (fun (key, value) -> key, redactValue collection.Item value) |> Data.Object
+                | OptionValueDefinition optional, _ -> redactValue optional.Payload raw
+                | UnionValueDefinition _, _ when containsSecret definition -> Data.Text "<redacted>"
+                | _ when containsSecret definition -> Data.Text "<redacted>"
+                | _ -> raw
+        and redactFields (definitions: FieldDescriptor<obj> list) fields =
+            fields |> List.map (fun (name, value) ->
+                match definitions |> List.tryFind (fun field -> field.ExternalName :: field.Aliases |> List.exists (fun accepted -> ExternalFieldName.value accepted = name)) with
+                | Some field -> name, redactValue field.ValueSchema value
+                | None -> name, value) |> Data.Object
+        let retained =
+            match schema.Definition, input with
+            | ValueDefinition value, _ -> redactValue value input
+            | ModelDefinition model, Data.Object fields ->
+                // Root descriptors have a typed getter; redaction only needs their value definitions and names.
+                fields |> List.map (fun (name, value) ->
+                    match model.Fields |> List.tryFind (fun field -> field.ExternalName :: field.Aliases |> List.exists (fun accepted -> ExternalFieldName.value accepted = name)) with
+                    | Some field -> name, redactValue field.ValueSchema value
+                    | None -> name, value) |> Data.Object
+            | _ -> input
+        parse schema input |> RetainedParseResult.create retained
 
     /// <summary>
     /// Parses structured boundary data through a trusted model schema using custom input parser options, expressed as a

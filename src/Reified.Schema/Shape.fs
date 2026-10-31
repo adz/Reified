@@ -54,6 +54,15 @@ type SchemaDefaults =
     static member Schema(_: System.DateOnly) : Schema<System.DateOnly> = SchemaCore.date
 #endif
 
+    /// <summary>Builds a secret schema from an explicitly resolved payload schema.</summary>
+    /// <example><code>SchemaDefaults.SecretWith Schema.text</code></example>
+    static member SecretWith(item: Schema<'item>) : Schema<Reified.Refinements.Secret<'item>> = SchemaCore.secretWith item
+
+    static member inline Schema(_: Reified.Refinements.Secret< ^item>) : Schema<Reified.Refinements.Secret< ^item>> =
+        let inline resolve (witness: ^w, marker: ^value) : Schema< ^value> =
+            ((^w or ^value): (static member Schema: ^value -> Schema< ^value>) marker)
+        SchemaDefaults.SecretWith(resolve (Unchecked.defaultof<SchemaDefaults>, Unchecked.defaultof< ^item>))
+
     static member inline Schema(_: ^item list) : Schema< ^item list> =
         let inline resolve (witness: ^w, marker: ^value) : Schema< ^value> =
             ((^w or ^value): (static member Schema: ^value -> Schema< ^value>) marker)

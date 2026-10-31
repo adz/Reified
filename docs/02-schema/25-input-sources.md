@@ -98,7 +98,42 @@ let raw = Data.ofCliArgs [ "--name"; "Ada Lovelace"; "--verbose"; "--no-color" ]
 
 
 `--name value`, `--name=value`, `-n value`, boolean flags, `--no-name`, and repeated options are supported; positional
-arguments collect under the `_` field.
+arguments collect under the `_` field. `--Db:Port 5432` and `--Db__Port=5432` create the same nested `Db.Port`
+path by default. Sections use the canonical decimal index grammar and bounded expansion described below. Repeated
+paths collect values in argument order; `:`/`__` spellings of the same path share that repetition.
+
+## Key case
+
+Parsing is case-sensitive unless configured with `Schema.ignoreKeyCase`. This option matches record field names
+and aliases ordinal-ignore-case at every model depth; it does not rename fields or change arbitrary map keys,
+tag values, prefix filtering, or compiled JSON codec name matching.
+
+```fsharp isolated
+open Reified
+open Reified.SchemaDSL
+
+type PortSettings = { Port: int }
+let settingsSchema = schema<PortSettings> { field _.Port; construct (fun port -> { Port = port }) }
+let input =
+    [ Data.ofConfiguration [ "port", "1" ]
+      Data.ofEnvironment [ "PORT", "2" ]
+      Data.ofCliArgs [ "--port=5432" ] ]
+    |> Data.mergeAllWith Data.ordinalIgnoreCase
+let parsed = input |> Schema.parseWith Schema.ignoreKeyCase settingsSchema
+assert (parsed = Ok { Port = 5432 })
+```
+
+Within an input object, equivalent names follow the merge rule: first spelling/position survive, later values win,
+and object-valued sections merge recursively. Lists/scalars/null replace whole. A schema whose declared names or
+aliases collide under this comparison is rejected with `field.case.ambiguous`, rather than assigning one input to
+two fields. Default case-sensitive alias ambiguity checks remain unchanged.
+
+Use the same comparer **during layer merging**, not only at parse time. An exact-name merge can overwrite an early
+`port` in place while leaving a later `PORT` beside it; the parser cannot recover the original source order.
+`Data.mergeAllWith Data.ordinalIgnoreCase` preserves later-source precedence, including across three such layers.
+The comparer is supported on both .NET and Fable; use it instead of the BCL `StringComparer` property in portable code.
+
+For credentials, use [Secret fields](/refined/secrets.html), not a key-name redaction heuristic.
 
 ## JSON Bodies With System.Text.Json
 

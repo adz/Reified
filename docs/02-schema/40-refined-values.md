@@ -8,6 +8,10 @@ targetFramework: net8.0
 
 # Refined Schemas
 
+`Secret<'value>` is an opaque refinement boundary rather than a transparent wire projection. Its canonical schema
+redacts failures, retained input and JSON output; use `Schema.secretWith` for payload validation. See
+[Secrets](/refined/secrets.html) before using it in a codec that would otherwise round trip.
+
 A type with a canonical schema needs only a bare field declaration. This minimal `Email`/`Contact` example shows
 the result; the sections below build it step by step:
 

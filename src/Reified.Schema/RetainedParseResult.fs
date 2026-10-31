@@ -15,10 +15,10 @@ module private DataPathConversion =
 
             SchemaPath.append current next) SchemaPath.root
 
-/// <summary>A schema parse result that retains its original structured input.</summary>
+/// <summary>A schema parse result retaining structured input, with declared secret subtrees redacted.</summary>
 type RetainedParseResult<'value> =
     {
-        /// <summary>The structured boundary data that was parsed.</summary>
+        /// <summary>The structured boundary data, redacted by Schema.parseRetainingInput at declared secret boundaries.</summary>
         Input: Data
         /// <summary>The parsed model or accumulated schema failures.</summary>
         Result: Result<'value, SchemaErrors>

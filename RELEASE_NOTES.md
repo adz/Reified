@@ -16,6 +16,12 @@ file, the environment, and the command line before one schema parse.
 - `Violation.ToString` has explicit debug text retaining the key and arguments of a described violation.
   `Violation.render` is unchanged: it joins `All` with `"; "` and `Any` with `", or "`, without message keys/arguments.
 - `SchemaErrors.ToString()` renders one line per issue, the same text as `SchemaErrors.toString`.
+- CLI option names now nest on `:` and `__` by default: `--Db:Port 5432` / `--Db__Port=5432` address `Db.Port`.
+  Rename literal keys containing those separators or pass prebuilt Data instead. Dots remain literal. Canonical
+  indexes, empty-segment rejection and default conversion bounds also apply to CLI; repeated/positional lists count
+  toward the budgets. Repeated equivalent paths retain argument order; sections beat scalar prefixes.
+- `SchemaShape.Secret` is a new opaque inspection case. Custom metadata interpreters must withhold the payload,
+  not treat it as a transparent refinement; generation must fail closed when its hidden schema is required.
 - Configuration conversion (`ofConfiguration`, `ofConfigurationPairs`) now bounds sparse expansion: 10,000 items per
   list, 100,000 output nodes across the result (including root, containers, leaves and null gaps), and 64 input path
   segments. Exceeding a limit throws `ArgumentException` with the path and limit, before oversized list allocation.
@@ -37,6 +43,19 @@ file, the environment, and the command line before one schema parse.
   null. Set `Limits` explicitly for larger trusted inputs; defaults match configuration conversion.
 - `DataConversionLimits` (`MaxCollectionLength`, `MaxExpandedNodes`, `MaxDepth`) and `Data.ofConfigurationWith`:
   configure positive conversion bounds. All nested lists share the complete output-node budget.
+
+- `Schema.ignoreKeyCase` configures ordinal-ignore-case record field/alias matching at every model depth, opt-in
+  through `Schema.parseWith`; the default stays case-sensitive. Equivalent input names merge recursively in order,
+  retaining first spelling/position and later values. Case-colliding schema names/aliases report `field.case.ambiguous`.
+- `Data.mergeWith`, `mergeAllWith` and portable `Data.ordinalIgnoreCase`: apply key comparison while folding layers.
+  Use the comparer during each merge and the matching Schema parse option; parsing cannot reconstruct precedence
+  already lost by exact-name merging across mixed-case sources. Default merges are unchanged.
+- `Secret<'value>` in `Reified.Refinements`: sealed reference-equality values, redacted display, explicit
+  `Secret.create` / `Secret.reveal`. Canonical field inference and `Schema.secret` / `secretWith` wrap payload schemas.
+  Parse/check failures become value-free `secret.invalid` issues at the secret field path; codec errors and retained
+  inputs are redacted. JSON encoding writes `"<redacted>"`, never the payload; decoding still accepts the underlying
+  wire shape, so secret codecs intentionally do not round trip. Inspection hides payload metadata; JSON Schema marks
+  it write-only/opaque, and derived generation fails closed. Secret is redaction, not encryption or access control.
 
 ### Fixed
 
