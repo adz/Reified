@@ -18,6 +18,9 @@ the address or hidden fields that send it again.
 - `BoundaryInput.toPairs` writes object-shaped `Data` as the name/value pairs `ofQuery` and `ofForm` read back to the
   same data. List items get indexed names, so a one-item list round-trips.
 - `BoundaryInput.queryString` renders pairs as an escaped query string.
+- `BoundaryInput.ofQuery` and `ofForm` read bracketed names as ASP.NET MVC, Rails, PHP and the `qs` package write
+  them: `address[city]` is `address.city`, `tags[0]` is `tags.0`, and each `tags[]` takes the next index, so a one-item
+  list still reads as a list.
 
 ## 0.12.1 - 2026-10-31
 

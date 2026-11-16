@@ -12,7 +12,9 @@ open Reified
 /// </para>
 /// <para>
 /// Query strings and forms share one naming convention. Dotted names nest (<c>address.city</c>), numeric segments
-/// index lists (<c>tags.0</c>, <c>tags.1</c>), and a repeated name collects its values into a list. A name that appears
+/// index lists (<c>tags.0</c>, <c>tags.1</c>), and a repeated name collects its values into a list. Bracketed names read
+/// the same, so input from ASP.NET MVC, Rails, PHP or the <c>qs</c> package parses as written: <c>address[city]</c> is
+/// <c>address.city</c>, <c>tags[0]</c> is <c>tags.0</c>, and each <c>tags[]</c> takes the next index. A name that appears
 /// once stays a scalar: only the schema knows which fields are lists, so a list that may hold one item should be
 /// written with indexed names, as <c>toPairs</c> does. An empty value is left out, because a browser sends an empty
 /// field as <c>name=</c>: an optional field left blank parses as absent, and a required one reports that it must be
@@ -61,18 +63,60 @@ module BoundaryInput =
             else
                 fields |> Map.toList |> List.map (fun (name, child) -> name, dataOf child) |> Data.Object
 
+    /// The path a name stands for: <c>address.city</c> and <c>address[city]</c> are the same path, and a trailing
+    /// <c>[]</c> is kept as an empty last segment. A name with an unclosed bracket splits on dots only.
+    let private segmentsOf (name: string) : string list =
+        let first = name.IndexOf '['
+
+        if first < 0 then
+            name.Split '.' |> List.ofArray
+        else
+            let rec rest (text: string) =
+                if text = "" then
+                    Some []
+                elif text.StartsWith "[" then
+                    match text.IndexOf ']' with
+                    | -1 -> None
+                    | close -> rest (text.Substring(close + 1)) |> Option.map (fun tail -> text.Substring(1, close - 1) :: tail)
+                elif text.StartsWith "." then
+                    let text = text.Substring 1
+
+                    let stop =
+                        match text.IndexOfAny [| '.'; '[' |] with
+                        | -1 -> text.Length
+                        | at -> at
+
+                    rest (text.Substring stop) |> Option.map (fun tail -> text.Substring(0, stop) :: tail)
+                else
+                    None
+
+            match rest (name.Substring first) with
+            | Some tail -> List.ofArray (name.Substring(0, first).Split '.') @ tail
+            | None -> name.Split '.' |> List.ofArray
+
     let private ofPairs (pairs: seq<string * string>) : Data =
         if isNull (box pairs) then
             nullArg (nameof pairs)
 
+        // A trailing [] appends: each one takes the next index under its path, so tags[]=a reads as a one-item list.
+        let appended (counts: Map<string list, int>) (segments: string list) =
+            match List.rev segments with
+            | "" :: parent when not parent.IsEmpty ->
+                let parent = List.rev parent
+                let index = counts.TryFind parent |> Option.defaultValue 0
+                counts.Add(parent, index + 1), parent @ [ string index ]
+            | _ -> counts, segments
+
         pairs
         |> Seq.fold
-            (fun node (name, value) ->
+            (fun (node, counts) (name, value) ->
                 if String.IsNullOrEmpty name || String.IsNullOrEmpty value then
-                    node
+                    node, counts
                 else
-                    insert node (name.Split '.' |> List.ofArray) value)
-            (Node.Fields Map.empty)
+                    let counts, segments = appended counts (segmentsOf name)
+                    insert node segments value, counts)
+            (Node.Fields Map.empty, Map.empty)
+        |> fst
         |> dataOf
 
     /// <summary>Reads query-string pairs as structured data.</summary>

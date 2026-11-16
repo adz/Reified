@@ -222,3 +222,36 @@ let ``pairs need object-shaped data`` () =
 [<Fact>]
 let ``query strings escape names and values`` () =
     test <@ BoundaryInput.queryString [ "q", "red car&more"; "page", "2" ] = "q=red%20car%26more&page=2" @>
+
+[<Fact>]
+let ``bracketed names read the same as dotted names`` () =
+    let dotted =
+        BoundaryInput.ofForm
+            [ "name", "Ada Lovelace"; "age", "36"
+              "address.street", "12 Analytical Way"; "address.city", "London"
+              "tags.0", "vip"; "tags.1", "founder" ]
+
+    let bracketed =
+        BoundaryInput.ofForm
+            [ "name", "Ada Lovelace"; "age", "36"
+              "address[street]", "12 Analytical Way"; "address[city]", "London"
+              "tags[0]", "vip"; "tags[1]", "founder" ]
+
+    test <@ bracketed = dotted @>
+
+[<Fact>]
+let ``each empty bracket takes the next index, so one item still reads as a list`` () =
+    let parsed = Schema.parseRetainingInput (searchSchema ()) (BoundaryInput.ofQuery [ "page", "1"; "terms[]", "only" ])
+    test <@ parsed.Result = Ok { Page = 1; Terms = [ "only" ]; Owner = None } @>
+
+    let many = BoundaryInput.ofQuery [ "terms[]", "a"; "terms[]", "b" ]
+    test <@ many = Data.Object [ "terms", Data.List [ Data.Text "a"; Data.Text "b" ] ] @>
+
+[<Fact>]
+let ``brackets and dots mix within one name`` () =
+    let data = BoundaryInput.ofForm [ "items[0].name", "bolt"; "items.0[size]", "M6" ]
+    test <@ data = Data.Object [ "items", Data.List [ Data.Object [ "name", Data.Text "bolt"; "size", Data.Text "M6" ] ] ] @>
+
+[<Fact>]
+let ``a name with an unclosed bracket stays literal`` () =
+    test <@ BoundaryInput.ofForm [ "odd[name", "x" ] = Data.Object [ "odd[name", Data.Text "x" ] @>
