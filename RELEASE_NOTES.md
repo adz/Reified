@@ -1,6 +1,6 @@
 # Release Notes
 
-## Unreleased
+## 0.13.0 - 2026-11-17
 
 `Reified.Schema.Http` now writes models back to query strings and forms, so one schema both reads a request and builds
 the address or hidden fields that send it again.
