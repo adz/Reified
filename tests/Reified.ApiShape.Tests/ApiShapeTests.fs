@@ -1437,7 +1437,7 @@ module ApiShapeTests =
 
         moduleTypeFromAssembly "Reified.Schema.Http" "Reified.Schema.Http.BoundaryInput"
         |> publicStaticMemberNames
-        |> assertContainsAll [ "ofQuery"; "ofForm" ]
+        |> assertContainsAll [ "ofQuery"; "ofForm"; "toPairs"; "queryString" ]
 
         // The record type ProblemDetails shadows the module of the same name, so name the module explicitly:
         // resolving the bare name would silently assert against the record and find none of these members.

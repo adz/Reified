@@ -166,3 +166,59 @@ let ``openapi documents embed generated schemas per endpoint`` () =
 
     let problem = responses.GetProperty("400").GetProperty("content")
     Assert.True(problem.TryGetProperty(ProblemDetails.ContentType) |> fst)
+
+type private Search = { Page: int; Terms: string list; Owner: string option }
+
+let private searchSchema () =
+    schema<Search> {
+        field _.Page
+        field _.Terms { withSchema (Schema.listWith Schema.text) }
+        field _.Owner
+        construct (fun page terms owner -> { Page = page; Terms = terms; Owner = owner })
+    }
+
+[<Fact>]
+let ``a blank field parses as absent`` () =
+    let parsed =
+        Schema.parseRetainingInput (searchSchema ()) (BoundaryInput.ofForm [ "page", "2"; "terms.0", "a"; "owner", "" ])
+
+    test <@ parsed.Result = Ok { Page = 2; Terms = [ "a" ]; Owner = None } @>
+
+[<Fact>]
+let ``a blank required field reports that it must be present`` () =
+    let parsed = Schema.parseRetainingInput (signupSchema ()) (BoundaryInput.ofForm [ "name", ""; "age", "36" ])
+    test <@ not (List.isEmpty (parsed.ErrorsFor "name")) @>
+
+[<Fact>]
+let ``a model written as pairs reads back from a form`` () =
+    let schema = signupSchema ()
+
+    let signup =
+        { Name = "Ada Lovelace"
+          Age = 36
+          Address = { Street = "12 Analytical Way"; City = "London" }
+          Tags = [ "vip" ] }
+
+    let pairs = Json.toData (Json.compile schema) signup |> BoundaryInput.toPairs
+
+    test <@ pairs |> List.contains ("address.city", "London") @>
+    test <@ pairs |> List.contains ("tags.0", "vip") @>
+    test <@ (Schema.parseRetainingInput schema (BoundaryInput.ofForm pairs)).Result = Ok signup @>
+
+[<Fact>]
+let ``a model written as pairs reads back from a query string`` () =
+    let schema = searchSchema ()
+    let search = { Page = 1; Terms = [ "only" ]; Owner = Some "ada" }
+
+    let pairs = Json.toData (Json.compile schema) search |> BoundaryInput.toPairs
+
+    test <@ pairs = [ "page", "1"; "terms.0", "only"; "owner", "ada" ] @>
+    test <@ (Schema.parseRetainingInput schema (BoundaryInput.ofQuery pairs)).Result = Ok search @>
+
+[<Fact>]
+let ``pairs need object-shaped data`` () =
+    raises<System.ArgumentException> <@ BoundaryInput.toPairs (Data.Text "loose") @>
+
+[<Fact>]
+let ``query strings escape names and values`` () =
+    test <@ BoundaryInput.queryString [ "q", "red car&more"; "page", "2" ] = "q=red%20car%26more&page=2" @>

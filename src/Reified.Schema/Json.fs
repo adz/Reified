@@ -1531,6 +1531,13 @@ module rec Json =
         with :? JsonCodecException as ex ->
             Error ex.Message
 
+    /// <summary>Writes a trusted model as Data through a compiled codec, with the same field names and values its JSON has.</summary>
+    /// <remarks>Use it to turn a model back into boundary input, such as the query string a parsed search came from.</remarks>
+    /// <example><code>Json.toData (Json.compile Search.schema) { Page = 2 }
+    /// // Data.Object [ "page", Data.Number "2" ]</code></example>
+    /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="codec" /> is null.</exception>
+    let toData (codec: JsonCodec<'model>) (value: 'model) : Data = serialize codec value |> parseData
+
     /// <summary>Deserializes UTF-8 JSON bytes to a trusted model through a compiled codec.</summary>
     /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="codec" /> or <paramref name="bytes" /> is null.</exception>
     /// <exception cref="T:Reified.JsonCodecException">Thrown when the JSON does not match the schema's wire shape.</exception>

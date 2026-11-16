@@ -1,5 +1,24 @@
 # Release Notes
 
+## Unreleased
+
+`Reified.Schema.Http` now writes models back to query strings and forms, so one schema both reads a request and builds
+the address or hidden fields that send it again.
+
+### Breaking changes
+
+- `BoundaryInput.ofQuery` uses the form convention: dotted names nest and numeric segments index lists. A query name
+  containing a dot no longer stays one flat field.
+- `BoundaryInput.ofQuery` and `ofForm` leave out empty values. A browser posts an empty field as `name=`, so an optional
+  field left blank now parses as absent instead of failing to parse, and a required one reports that it must be present.
+
+### Added
+
+- `Json.toData codec value` writes a trusted model as `Data`.
+- `BoundaryInput.toPairs` writes object-shaped `Data` as the name/value pairs `ofQuery` and `ofForm` read back to the
+  same data. List items get indexed names, so a one-item list round-trips.
+- `BoundaryInput.queryString` renders pairs as an escaped query string.
+
 ## 0.12.1 - 2026-10-31
 
 A bug-fix release. `Reified.Schema` now builds the derived `field _.Property` form on older Fable quotation
