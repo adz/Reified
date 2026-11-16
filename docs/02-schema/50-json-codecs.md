@@ -57,6 +57,8 @@ let json = Json.serialize codec { Name = "Ada"; Age = 36; Address = { Street = "
 // {"name":"Ada","age":36,"address":{"street":"12 Analytical Way","city":"London"}}
 
 let customer = Json.deserialize codec json
+
+let data = Json.toData codec customer   // the same fields and values as Data
 ```
 
 

@@ -85,8 +85,14 @@ let raw =
 
 
 `Data.ofMap` handles single-valued maps, and `Data.ofNameValueCollection` adapts
-`System.Collections.Specialized.NameValueCollection` directly from ASP.NET-style APIs. Name/value sources are flat; use
-the configuration or JSON adapters below when the input carries nested models or indexed collections.
+`System.Collections.Specialized.NameValueCollection` directly from ASP.NET-style APIs. These name/value sources are
+flat; use the configuration or JSON adapters below when the input carries nested models or indexed collections.
+
+For real form posts and query strings, the `Reified.Schema.Http` package reads nesting too. `BoundaryInput.ofForm` and
+`BoundaryInput.ofQuery` nest dotted names (`address.city`), index lists with numeric segments (`tags.0`), read bracketed
+names the same way (`address[city]`, `tags[0]`, `tags[]`), and leave out empty values, so a blank optional field parses
+as absent. `BoundaryInput.toPairs` writes a model back as the pairs that parse to it, for the links and hidden fields
+that send it again.
 
 ## CLI Arguments
 
