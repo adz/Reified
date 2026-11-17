@@ -148,10 +148,10 @@ module BoundaryInput =
             | Data.Null -> ()
             | Data.List items ->
                 for index, item in List.indexed items do
-                    yield! walk $"{name}.{index}" item
+                    yield! walk (name + "." + string index) item
             | Data.Object fields ->
                 for field, value in fields do
-                    yield! walk $"{name}.{field}" value
+                    yield! walk (name + "." + field) value
         ]
 
         match data with
