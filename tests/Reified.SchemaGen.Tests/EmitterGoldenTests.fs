@@ -77,6 +77,30 @@ contract Kw.v1 {
         test <@ emitted.Contains "Method: int" @>
 
     [<Fact>]
+    let ``Secret fields lower to Schema.secretWith`` () =
+        let parsed =
+            match
+                Records.parse SchemaNaming.CamelCase "secret.fs"
+                    """
+namespace My.Wire
+
+open Reified.DerivedSchema
+open Reified.Refinements
+
+[<DeriveSchema>]
+type Settings =
+    { Token: Secret<string>; Port: int }
+"""
+            with
+            | Ok file -> file
+            | Error diagnostics -> failwithf "Expected a clean parse, got %A" diagnostics
+
+        let emitted = Emitter.emit "Ns" [ parsed ] parsed
+
+        test <@ emitted.Contains "Schema.secretWith Schema.text" @>
+        test <@ emitted.Contains "fieldAs \"token\" _.Token" @>
+
+    [<Fact>]
     let ``a schema constructor closes the generated shape`` () =
         let parsed =
             match

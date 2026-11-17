@@ -19,6 +19,17 @@ module ShipmentPriority =
             EnumCase.create "same-day" Model.SameDay
         ]
 
+    let all = [
+        Model.Standard
+        Model.Express
+        Model.SameDay
+    ]
+    let tag value = Schema.tagOf schema value
+    let tryOfTag (text: string) =
+        match Schema.parse schema (Data.Text text) with
+        | Ok value -> Some value
+        | Error _ -> None
+
 /// Schema for PickupPoint.
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
 [<RequireQualifiedAccess>]

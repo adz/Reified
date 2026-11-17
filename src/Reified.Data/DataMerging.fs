@@ -72,3 +72,22 @@ module internal DataMerging =
         layers |> List.fold (mergeWith comparer) (Data.Object [])
 
     let mergeAll layers = mergeAllWith EqualityComparer<string>.Default layers
+
+    /// <summary>Merges layers in order and records the source layer that supplied each surviving scalar or list path.</summary>
+    let mergeAllWithSources (layers: (string * Data) list) : Data * Map<DataPath, string> =
+        if isNull (box layers) then nullArg (nameof layers)
+
+        let rec collect (source: string) (path: DataPath) (value: Data) provenance =
+            match value with
+            | Data.Object fields ->
+                fields
+                |> List.fold (fun acc (name, item) -> collect source (path @ [ DataPathSegment.Name name ]) item acc) provenance
+            | Data.List _
+            | Data.Null
+            | Data.Text _
+            | Data.Number _
+            | Data.Bool _ -> Map.add path source provenance
+
+        let merged = layers |> List.map snd |> mergeAll
+        let provenance = layers |> List.fold (fun acc (source, layer) -> collect source [] layer acc) Map.empty
+        merged, provenance

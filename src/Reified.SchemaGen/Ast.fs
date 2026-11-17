@@ -69,6 +69,7 @@ and FieldType =
     | ListOf of FieldType
     | MapOf of FieldType
     | MapOfTransparentKey of typeName: string * caseName: string * FieldType
+    | Secret of FieldType
     | LiteralUnion of string list
     | UnionBlock of discriminator: string * cases: UnionCaseDecl list
     | ExternalEnum of typeName: string * cases: ExternalEnumCase list

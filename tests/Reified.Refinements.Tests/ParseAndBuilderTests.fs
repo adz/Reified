@@ -20,6 +20,15 @@ module RefinementTests =
         @>
 
     [<Fact>]
+    let ``createText returns rendered English text failures`` () =
+        test <@ Refinement.createText customerId 2 |> Result.map _.Value = Ok 2 @>
+        test <@ Refinement.createText customerId 0 |> Result.isError @>
+
+        match Refinement.createText customerId 0 with
+        | Error message -> test <@ message.Length > 0 @>
+        | Ok _ -> failwith "Expected a rendered failure."
+
+    [<Fact>]
     let ``successful refinement projects to its original underlying value`` () =
         let refined = Refinement.create customerId 3 |> Result.defaultWith (failwithf "%A")
         test <@ Refinement.underlying customerId refined = 3 @>

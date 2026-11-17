@@ -653,6 +653,7 @@ module Records =
                 | "option", [ _ ] ->
                     report line "nested options are not supported; '?' absence is one axis (mark the field itself optional)"
                     None
+                | "Secret", [ payload ] -> lowerType line payload |> Option.map Secret
                 | "Map", [ SynType.LongIdent key; value ] ->
                     match lowerType line (SynType.LongIdent key) with
                     | Some(Primitive PText) -> lowerType line value |> Option.map MapOf

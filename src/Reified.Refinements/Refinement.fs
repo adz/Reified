@@ -57,6 +57,28 @@ module Refinement =
         Constraint.check refinement.Constraint underlying
         |> Result.map (fun () -> refinement.Construct underlying)
 
+    /// <summary>Constructs a refined value, reporting admission failures through a supplied renderer.</summary>
+    /// <example><code>type RetryCount = RetryCount of int
+    /// let retryCount = Refinement.define (Constraint.between 0 10) RetryCount (fun (RetryCount value) -> value)
+    /// 3 |> Refinement.createWith Violation.render retryCount // Ok (RetryCount 3)</code></example>
+    let createWith
+        (render: Violation -> string)
+        (refinement: Refinement<'underlying, 'refined>)
+        (underlying: 'underlying)
+        : Result<'refined, string> =
+        if isNull (box render) then nullArg (nameof render)
+        create refinement underlying |> Result.mapError render
+
+    /// <summary>Constructs a refined value, reporting admission failures as rendered English text.</summary>
+    /// <example><code>type RetryCount = RetryCount of int
+    /// let retryCount = Refinement.define (Constraint.between 0 10) RetryCount (fun (RetryCount value) -> value)
+    /// 3 |> Refinement.createText retryCount // Ok (RetryCount 3)</code></example>
+    let createText
+        (refinement: Refinement<'underlying, 'refined>)
+        (underlying: 'underlying)
+        : Result<'refined, string> =
+        createWith Violation.render refinement underlying
+
     /// <summary>Returns the canonical underlying representation of a refined value.</summary>
     /// <example><code>type RetryCount = RetryCount of int
     /// let retryCount = Refinement.define (Constraint.between 0 10) RetryCount (fun (RetryCount value) -> value)

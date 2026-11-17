@@ -121,6 +121,17 @@ and EnumDescription =
         Cases: EnumCaseDescription list
     }
 
+/// <summary>Helpers for walking inspectable schema descriptions.</summary>
+[<RequireQualifiedAccess>]
+module SchemaDescription =
+    /// <summary>Returns the payload description when the supplied description is an optional value.</summary>
+    let unwrapOptional (description: SchemaDescription) : SchemaDescription option =
+        if isNull (box description) then nullArg (nameof description)
+
+        match description.Shape with
+        | SchemaShape.Optional payload -> Some payload
+        | _ -> None
+
 /// <summary>The inspection API over built schemas and value schemas.</summary>
 /// <remarks>
 /// <para>
@@ -265,3 +276,41 @@ module Inspect =
           Schema = describeValueDefinition field.Definition.ValueSchema
           Constraints = SchemaRule.descriptions field.Definition.Rules
           Supply = SchemaRule.trySupply field.Definition.Rules }
+
+    /// <summary>Resolves a path to one field description in a model schema.</summary>
+    /// <remarks>Key components address object fields; index components walk through list items. Optional wrappers are transparent.</remarks>
+    /// <example><code>Inspect.fieldAt (SchemaPath.key "address" |> SchemaPath.append (SchemaPath.key "city")) customerSchema</code></example>
+    let fieldAt (path: SchemaPath) (schema: Schema<'model>) : FieldDescription option =
+        if isNull path then nullArg (nameof path)
+        if isNull (box schema) then nullArg (nameof schema)
+
+        let rec inSchema components (description: SchemaDescription) =
+            match components with
+            | [] -> None
+            | KeyComponent name :: rest ->
+                match description.Shape with
+                | SchemaShape.Nested nested ->
+                    match nested.Fields |> List.tryFind (fun field -> field.Name = name || List.contains name field.Aliases) with
+                    | Some field when List.isEmpty rest -> Some field
+                    | Some field ->
+                        inSchema rest (SchemaDescription.unwrapOptional field.Schema |> Option.defaultValue field.Schema)
+                    | None -> None
+                | _ -> None
+            | IndexComponent _ :: rest ->
+                match description.Shape with
+                | SchemaShape.Many item -> inSchema rest item
+                | _ -> None
+
+        match schema.Definition with
+        | ModelDefinition _ ->
+            let root =
+                { Shape = SchemaShape.Nested(model schema)
+                  Format = None
+                  Constraints = []
+                  Supply = None
+                  Description = None
+                  Default = None }
+
+            inSchema path.Components root
+        | ValueDefinition _
+        | PendingDefinition -> None

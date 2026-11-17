@@ -188,6 +188,7 @@ module Emitter =
         | ListOf element -> $"{fsType refTypeName contractTypeName fieldName element} list"
         | MapOf element -> $"Map<string, {fsType refTypeName contractTypeName fieldName element}>"
         | MapOfTransparentKey(typeName, _, element) -> $"Map<{typeName}, {fsType refTypeName contractTypeName fieldName element}>"
+        | Secret element -> $"Reified.Refinements.Secret<{fsType refTypeName contractTypeName fieldName element}>"
         | LiteralUnion _
         | UnionBlock _ -> caseTypeName contractTypeName fieldName
         | ExternalEnum(typeName, _)
@@ -217,6 +218,7 @@ module Emitter =
             "Schema.defer (fun () -> schema)"
         | Reference reference -> $"{refSchemaName reference}.schema"
         | ListOf element -> $"Schema.listWith {parenthesize (baseValueExpr refSchemaName unionSchemaName namedSchemaName keyMapName (contractName, contractVersion) fieldName element)}"
+        | Secret element -> $"Schema.secretWith {parenthesize (baseValueExpr refSchemaName unionSchemaName namedSchemaName keyMapName (contractName, contractVersion) fieldName element)}"
         | MapOf element -> $"Schema.mapWith {parenthesize (baseValueExpr refSchemaName unionSchemaName namedSchemaName keyMapName (contractName, contractVersion) fieldName element)}"
         | MapOfTransparentKey(typeName, caseName, element) ->
             let item = parenthesize (baseValueExpr refSchemaName unionSchemaName namedSchemaName keyMapName (contractName, contractVersion) fieldName element)
@@ -340,7 +342,8 @@ module Emitter =
         | Primitive _ -> true
         | ListOf element
         | MapOf element -> hasCanonicalSchema element
-        | MapOfTransparentKey _ -> false
+        | MapOfTransparentKey _
+        | Secret _ -> false
         | Reference _
         | LiteralUnion _
         | UnionBlock _
@@ -449,7 +452,8 @@ module Emitter =
             | ListOf element
             | MapOf element
             | MapOfTransparentKey(_, _, element)
-            | ExternalTransparent(_, _, element) -> externalUnionsIn element
+            | ExternalTransparent(_, _, element)
+            | Secret element -> externalUnionsIn element
             | Primitive _
             | Reference _
             | LiteralUnion _
@@ -462,7 +466,8 @@ module Emitter =
             | ListOf element
             | MapOf element
             | MapOfTransparentKey(_, _, element)
-            | ExternalTransparent(_, _, element) -> referencesIn element
+            | ExternalTransparent(_, _, element)
+            | Secret element -> referencesIn element
             | UnionBlock(_, cases) -> cases |> List.map _.CaseRef
             | ExternalUnion(_, _, cases, _) ->
                 cases
@@ -481,7 +486,8 @@ module Emitter =
             | ListOf element
             | MapOf element
             | MapOfTransparentKey(_, _, element)
-            | ExternalTransparent(_, _, element) -> externalEnumsIn element
+            | ExternalTransparent(_, _, element)
+            | Secret element -> externalEnumsIn element
             | ExternalUnion(_, _, cases, _) ->
                 cases
                 |> List.collect (fun case ->
@@ -501,7 +507,8 @@ module Emitter =
             | MapOfTransparentKey(typeName, caseName, element) ->
                 (typeName, caseName, Primitive PText, false, true) :: transparentTypesIn element
             | ListOf element
-            | MapOf element -> transparentTypesIn element
+            | MapOf element
+            | Secret element -> transparentTypesIn element
             | ExternalUnion(_, _, cases, _) ->
                 cases
                 |> List.collect (fun case ->
@@ -720,7 +727,8 @@ module Emitter =
             match fieldType with
             | Reference reference -> reference.RefName = contract.QualifiedName && reference.RefVersion = contract.Version
             | ListOf element
-            | MapOf element -> hasSelfReference contract element
+            | MapOf element
+            | Secret element -> hasSelfReference contract element
             | MapOfTransparentKey(_, _, element) -> hasSelfReference contract element
             | UnionBlock(_, cases) ->
                 cases |> List.exists (fun case -> case.CaseRef.RefName = contract.QualifiedName && case.CaseRef.RefVersion = contract.Version)
@@ -787,6 +795,16 @@ module Emitter =
             for case in cases do
                 line $"            EnumCase.create \"{escapeString case.EnumTag}\" {alias}.{case.EnumFsCase}"
             line "        ]"
+            line ""
+            line "    let all = ["
+            for case in cases do
+                line $"        {alias}.{case.EnumFsCase}"
+            line "    ]"
+            line "    let tag value = Schema.tagOf schema value"
+            line "    let tryOfTag (text: string) ="
+            line "        match Schema.parse schema (Data.Text text) with"
+            line "        | Ok value -> Some value"
+            line "        | Error _ -> None"
 
         for typeName, caseName, payload, usedAsKey in ownedTransparents do
             let moduleName = localName typeName

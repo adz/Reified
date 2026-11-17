@@ -169,3 +169,14 @@ module DataMergeTests =
     [<Fact>]
     let ``merge rejects a null list`` () =
         raises<ArgumentNullException> <@ Data.mergeAll (Unchecked.defaultof<Data list>) @>
+
+    [<Fact>]
+    let ``mergeAllWithSources records the winning source per scalar path`` () =
+        let fileData = Data.objectOfList [ "db", Data.Object [ "port", Data.Text "1"; "host", Data.Text "localhost" ] ]
+        let envData = Data.objectOfList [ "db", Data.Object [ "port", Data.Text "2" ] ]
+
+        let merged, sources = Data.mergeAllWithSources [ "file", fileData; "env", envData ]
+
+        test <@ Data.tryFindPath "db.port" merged = Some(Data.Text "2") @>
+        test <@ sources |> Map.tryFind (DataPath.parse "db.port") = Some "env" @>
+        test <@ sources |> Map.tryFind (DataPath.parse "db.host") = Some "file" @>

@@ -17,6 +17,7 @@ type SchemaParseOptions =
         {
             ConstructorErrorPath: SchemaPathComponent list option
             IgnoreKeyCase: bool
+            StrictScalars: bool
         }
 
 [<CompilationRepresentation(CompilationRepresentationFlags.ModuleSuffix)>]
@@ -64,11 +65,16 @@ module internal SchemaParsing =
 
     /// <summary>The default input parser options.</summary>
     let defaults =
-        { ConstructorErrorPath = None; IgnoreKeyCase = false }
+        { ConstructorErrorPath = None; IgnoreKeyCase = false; StrictScalars = false }
 
     let ignoreKeyCase (options: SchemaParseOptions) =
         if isNull (box options) then nullArg (nameof options)
         { options with IgnoreKeyCase = true }
+
+    /// <summary>Requires JSON-style scalar fidelity: text fields accept only text, numeric fields only numbers, and Boolean fields only Booleans.</summary>
+    let strictScalars (options: SchemaParseOptions) =
+        if isNull (box options) then nullArg (nameof options)
+        { options with StrictScalars = true }
 
     let private ambiguousNames options names =
         if not options.IgnoreKeyCase then false
@@ -200,6 +206,61 @@ module internal SchemaParsing =
         | PrimitiveValueKind.DateTime -> Parse.dateTimeOffset text |> Result.map box |> Result.mapError SchemaError.ofParseError
         | PrimitiveValueKind.Guid -> Parse.guid text |> Result.map box |> Result.mapError SchemaError.ofParseError
 
+    let private isNumericPrimitive kind =
+        match kind with
+        | PrimitiveValueKind.Int
+        | PrimitiveValueKind.Int64
+        | PrimitiveValueKind.Decimal
+        | PrimitiveValueKind.Float -> true
+        | _ -> false
+
+    let private isTextPrimitive kind =
+        match kind with
+        | PrimitiveValueKind.Text
+        | PrimitiveValueKind.Date
+        | PrimitiveValueKind.DateTime
+        | PrimitiveValueKind.Guid -> true
+        | _ -> false
+
+    /// <summary>Returns the primitive kind beneath refinements, or <c>None</c> for non-scalar schemas.</summary>
+    let private tryUnderlyingPrimitiveKind (valueSchema: ValueSchemaDefinition) =
+        let rec kindOf (definition: ValueSchemaDefinition) =
+            match definition.Shape with
+            | PrimitiveValueDefinition kind -> Some kind
+            | RefinedValueDefinition(raw, _) -> kindOf raw
+            | LazyValueDefinition deferred -> kindOf (deferred.Force())
+            | _ -> None
+
+        kindOf valueSchema
+
+    let private strictScalarError (valueSchema: ValueSchemaDefinition) raw =
+        let actual =
+            match raw with
+            | Data.Text _ -> "text"
+            | Data.Number _ -> "a number"
+            | Data.Bool _ -> "a Boolean"
+            | _ -> "a value"
+
+        let expected =
+            match tryUnderlyingPrimitiveKind valueSchema with
+            | Some PrimitiveValueKind.Text -> "text"
+            | Some PrimitiveValueKind.Int
+            | Some PrimitiveValueKind.Int64
+            | Some PrimitiveValueKind.Decimal
+            | Some PrimitiveValueKind.Float -> "a number"
+            | Some PrimitiveValueKind.Bool -> "a Boolean"
+            | Some PrimitiveValueKind.Date -> "a date"
+            | Some PrimitiveValueKind.DateTime -> "a timestamp"
+            | Some PrimitiveValueKind.Guid -> "a GUID"
+            | None -> "a value"
+
+        SchemaError.Custom("scalar.kind", Some("Expected " + expected + " but found " + actual + "."))
+
+    let private strictTextAllows (valueSchema: ValueSchemaDefinition) =
+        match tryUnderlyingPrimitiveKind valueSchema with
+        | Some kind -> isTextPrimitive kind
+        | None -> true
+
     let rec private parseValue options valueSchema fieldRules path raw =
         match valueSchema.Shape with
         | LazyValueDefinition deferred ->
@@ -307,11 +368,24 @@ module internal SchemaParsing =
             | OptionValueDefinition _ -> invalidOp "Optional value schemas are parsed before structured data dispatch."
             | PrimitiveValueDefinition _
             | EnumValueDefinition _ -> errorAt path SchemaError.ExpectedScalar
-        | Data.Number token -> parsePresentValue options valueSchema fieldRules path (Data.Text token)
+        | Data.Number token ->
+            if options.StrictScalars then
+                match tryUnderlyingPrimitiveKind valueSchema with
+                | Some kind when isNumericPrimitive kind -> parsePresentValue { options with StrictScalars = false } valueSchema fieldRules path (Data.Text token)
+                | _ -> errorAt path (strictScalarError valueSchema raw)
+            else
+                parsePresentValue options valueSchema fieldRules path (Data.Text token)
         | Data.Bool value ->
-            parsePresentValue options valueSchema fieldRules path (Data.Text(if value then "true" else "false"))
+            if options.StrictScalars then
+                match tryUnderlyingPrimitiveKind valueSchema with
+                | Some PrimitiveValueKind.Bool -> parsePresentValue { options with StrictScalars = false } valueSchema fieldRules path (Data.Text(if value then "true" else "false"))
+                | _ -> errorAt path (strictScalarError valueSchema raw)
+            else
+                parsePresentValue options valueSchema fieldRules path (Data.Text(if value then "true" else "false"))
         | Data.Text text ->
             match valueSchema.Shape with
+            | _ when options.StrictScalars && not (strictTextAllows valueSchema) ->
+                errorAt path (strictScalarError valueSchema raw)
             | NestedValueDefinition _
             | MapValueDefinition _ -> errorAt path SchemaError.ExpectedObject
             | UnionValueDefinition union -> parseUnion options path union (Data.Text text)
@@ -670,6 +744,20 @@ module internal SchemaParsing =
     /// <summary>Parses structured boundary data through a trusted model schema.</summary>
     let parse (schema: Schema<'model>) (input: Data) : Result<'model, SchemaErrors> =
         parseWith id schema input
+
+    /// <summary>Parses JSON text through a schema with strict scalar fidelity.</summary>
+    let parseJsonWith
+        (configure: SchemaParseOptions -> SchemaParseOptions)
+        (schema: Schema<'model>)
+        (json: string)
+        : Result<'model, SchemaErrors> =
+        if isNull (box configure) then nullArg (nameof configure)
+        if isNull (box schema) then nullArg (nameof schema)
+        if isNull json then nullArg (nameof json)
+
+        match Json.tryParseData json with
+        | Error message -> Error(SchemaErrors.singleton SchemaPath.root (SchemaError.Custom("json.syntax", Some message)))
+        | Ok data -> parseWith (configure >> strictScalars) schema data
 
     let private redactableFieldSchemas (definitions: FieldDescriptor<'model> list) =
         definitions

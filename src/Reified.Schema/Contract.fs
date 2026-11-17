@@ -175,6 +175,23 @@ module Contract =
                 | true, version when version > 0 -> parseSelected contract version raw
                 | _ -> Error ContractError.VersionMissing
 
+    /// <summary>Serializes the current model to structured data with its version field stamped.</summary>
+    /// <remarks>The version field name comes from the contract's field version source.</remarks>
+    /// <exception cref="T:System.ArgumentException">Thrown when the contract source does not stamp a field for its version.</exception>
+    let writeData (contract: Contract<'model>) (model: 'model) : Data =
+        if isNull (box contract) then nullArg (nameof contract)
+
+        match contract.Source with
+        | VersionSource.Field wireName ->
+            let codec = Json.compile contract.CurrentSchema
+            let data = Json.toData codec model
+            Data.set wireName (Data.From contract.CurrentVersion) data
+        | _ -> invalidArg (nameof contract) "Contract write requires a field version source."
+
+    /// <summary>Serializes the current model to compact JSON with its version field stamped.</summary>
+    let writeJson (contract: Contract<'model>) (model: 'model) : string =
+        writeData contract model |> Data.Json.render
+
     /// Returns the contract's stable name.
     let name (contract: Contract<'model>) = contract.Name
 

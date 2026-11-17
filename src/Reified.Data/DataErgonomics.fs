@@ -209,6 +209,12 @@ module Data =
     /// |&gt; Data.mergeAllWith Data.ordinalIgnoreCase</code></example>
     let mergeAllWith comparer layers = DataMerging.mergeAllWith comparer layers
 
+    /// <summary>Merges named layers in precedence order and records the source layer that supplied each surviving scalar or list path.</summary>
+    /// <example><code>Data.mergeAllWithSources [ "file", fileData; "env", envData ]
+    /// // (mergedData, Map [ DataPath.parse "db.port", "env" ])</code></example>
+    let mergeAllWithSources (layers: (string * Data) list) : Data * Map<DataPath, string> =
+        DataMerging.mergeAllWithSources layers
+
     /// <summary>Attempts to find a value at a parsed path.</summary>
     let tryFind = DataLookup.tryFind
 

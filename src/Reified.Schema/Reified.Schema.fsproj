@@ -60,6 +60,9 @@
     <Compile Include="SchemaType.fs" />
     <Compile Include="ValueSchema.fs" />
     <Compile Include="SchemaCore.fs" />
+    <Compile Include="Buffers.fs" />
+    <Compile Include="JsonRuntime.fs" />
+    <Compile Include="Json.fs" />
     <Compile Include="Shape.fs" />
     <Compile Include="SchemaBuilder.fs" />
     <Compile Include="SchemaErrors.fs" />
@@ -71,9 +74,6 @@
     <Compile Include="RefinedSchemas.fs" />
     <Compile Include="Inspection.fs" />
     <Compile Include="JsonSchema.fs" />
-    <Compile Include="Buffers.fs" />
-    <Compile Include="JsonRuntime.fs" />
-    <Compile Include="Json.fs" />
   </ItemGroup>
 
 </Project>

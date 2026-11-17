@@ -340,11 +340,11 @@ module ApiShapeTests =
     let ``schema inspection and input interpreter modules expose the expected surface`` () =
         moduleTypeFromAssembly "Reified.Schema" "Reified.Inspect"
         |> publicStaticMemberNames
-        |> assertContainsAll [ "model"; "schema"; "field" ]
+        |> assertContainsAll [ "model"; "schema"; "field"; "fieldAt" ]
 
         moduleTypeFromAssembly "Reified.Schema" "Reified.Schema"
         |> publicStaticMemberNames
-        |> assertContainsAll [ "parse"; "parseWith"; "parseRetainingInputWith"; "constructorErrorAt"; "ignoreKeyCase"; "check"; "refine"; "secret"; "secretWith" ]
+        |> assertContainsAll [ "parse"; "parseWith"; "parseJson"; "parseJsonWith"; "parseRetainingInputWith"; "constructorErrorAt"; "ignoreKeyCase"; "check"; "refine"; "secret"; "secretWith"; "tagOf" ]
 
         assertTypeAbsentFromAssembly "Reified.Schema" "Reified.ValueSchema`1"
 
@@ -368,6 +368,7 @@ module ApiShapeTests =
               "mergeAll"
               "mergeWith"
               "mergeAllWith"
+              "mergeAllWithSources"
               "ordinalIgnoreCase"
               "assoc"
               "optionalAssoc"
@@ -1436,7 +1437,7 @@ module ApiShapeTests =
         |> publicStaticMemberNames
         // One constraint, one constructor: several rules compose with `Constraint.all` before the refinement is
         // defined, and an arbitrary predicate is `Constraint.custom`.
-        |> assertContainsAll [ "define"; "create"; "underlying"; "constraint'" ]
+        |> assertContainsAll [ "define"; "create"; "createWith"; "createText"; "underlying"; "constraint'" ]
 
     [<Fact>]
     let ``the host-neutral HTTP boundary keeps its shape and stays host-free`` () =

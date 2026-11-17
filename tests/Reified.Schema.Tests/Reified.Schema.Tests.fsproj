@@ -37,6 +37,7 @@
     <Compile Include="RetainedParseResultTests.fs" />
     <Compile Include="SchemaErrorTests.fs" />
     <Compile Include="InputParseTests.fs" />
+    <Compile Include="StrictScalarParseTests.fs" />
     <Compile Include="NestedSchemaParseTests.fs" />
     <Compile Include="ManySchemaParseTests.fs" />
     <Compile Include="MapSchemaParseTests.fs" />

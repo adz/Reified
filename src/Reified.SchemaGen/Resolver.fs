@@ -48,6 +48,7 @@ module Resolver =
         | ListOf _ -> KSized "list"
         | MapOf _ -> KSized "map"
         | MapOfTransparentKey _ -> KSized "map"
+        | Secret _ -> KOther "secret"
         | LiteralUnion _
         | ExternalEnum _ -> KEnum
         | ExternalTransparent(_, _, payload) -> kindOf payload
@@ -262,7 +263,8 @@ module Resolver =
                             resolveReference file.FilePath field.FieldLine reference
                             checkOrder field.FieldLine reference
                         | ListOf element
-                        | MapOf element -> checkType element
+                        | MapOf element
+                        | Secret element -> checkType element
                         | MapOfTransparentKey(_, _, element) -> checkType element
                         | LiteralUnion cases ->
                             if List.isEmpty cases then

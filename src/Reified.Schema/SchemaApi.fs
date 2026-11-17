@@ -89,6 +89,12 @@ module Schema =
     /// <summary>Describes a scalar enum.</summary>
     let enum cases = SchemaCore.enum cases
 
+    /// <summary>Returns the wire tag of the case that produced a trusted union or enum value.</summary>
+    /// <remarks>The tag is the codec's wire name, so history text and filters cannot drift from the codec.</remarks>
+    /// <example><code>let schema = Schema.union [ UnionCase.empty "idle" Idle (function Idle -> true | _ -> false) ]
+    /// Schema.tagOf schema Idle // "idle"</code></example>
+    let tagOf (schema: Schema<'union>) (value: 'union) : string = SchemaCore.tagOf schema value
+
     /// <summary>Requires a schema's values to satisfy a constraint.</summary>
     /// <remarks>
     /// The same <c>Constraint</c> value serves direct checking, refinement, and Schema. For a value schema the
@@ -161,6 +167,12 @@ module Schema =
     let parseRetainingInput schema input = SchemaParsing.parseRetainingInput schema input
     /// <summary>Parses structured data with a C#-friendly options delegate.</summary>
     let parseWithOptions options schema input = SchemaParsing.parseWithOptions options schema input
+    /// <summary>Parses JSON text through a schema, requiring JSON scalar fidelity: text fields accept only text, numeric fields only numbers, and Boolean fields only Booleans.</summary>
+    /// <remarks>Use this for JSON bodies and files. Query and form input stay lenient through <c>Schema.parse</c>.</remarks>
+    /// <example><code>Schema.parseJson settingsSchema "{ ""port"": 5432 }"</code></example>
+    let parseJsonWith configure schema json = SchemaParsing.parseJsonWith configure schema json
+    /// <summary>Parses JSON text through a schema with strict scalar fidelity.</summary>
+    let parseJson schema json = SchemaParsing.parseJsonWith id schema json
     /// <summary>Checks an existing typed value, such as a freely constructed draft, through the schema's constraints, refinements, and record constructor.</summary>
     let check schema value = SchemaParsing.check schema value
 

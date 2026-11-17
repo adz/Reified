@@ -476,9 +476,9 @@ module SchemaGen =
     let roundTrip (schema: Schema<'model>) : Result<unit, SchemaGenerationError> when 'model: equality =
         roundTripWith 100 0UL schema
 
-    /// Derives models by generating structured data and parsing it through the schema.
-    let model (schema: Schema<'model>) : Result<Gen<'model>, SchemaGenerationError> =
-        raw schema
+    /// Derives models by generating structured data and parsing it through the schema, with field-path generator overrides.
+    let modelWith (custom: Map<string, Gen<Data>>) (schema: Schema<'model>) : Result<Gen<'model>, SchemaGenerationError> =
+        rawWith custom schema
         |> Result.map (fun rawGen ->
             rawGen
             |> Gen.map (fun input -> (Schema.parse schema input))
@@ -489,3 +489,7 @@ module SchemaGen =
                     | Ok accepted -> accepted
                     | Error _ -> invalidOp "A successfully parsed model failed an immediate schema check."
                 | Error _ -> invalidOp "Filtered parse failure."))
+
+    /// Derives models by generating structured data and parsing it through the schema.
+    let model (schema: Schema<'model>) : Result<Gen<'model>, SchemaGenerationError> =
+        modelWith Map.empty schema

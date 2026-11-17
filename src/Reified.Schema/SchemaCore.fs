@@ -172,6 +172,29 @@ module internal SchemaCore =
 
     /// <summary>Describes a payload-less tagged enum.</summary>
     let enum cases = ValueSchema.enumOf cases
+
+    /// <summary>Returns the wire tag of the case that produced a trusted union or enum value.</summary>
+    let tagOf (schema: Schema<'union>) (value: 'union) : string =
+        if isNull (box schema) then
+            nullArg (nameof schema)
+
+        let found =
+            match schema.ValueDefinition.Shape with
+            | UnionValueDefinition union ->
+                union.Cases
+                |> List.tryPick (fun case ->
+                    match case.TryInspect (box value) with
+                    | Some _ -> Some case.Tag
+                    | None -> None)
+            | EnumValueDefinition enum ->
+                enum.Cases
+                |> List.tryPick (fun case -> if case.Value = box value then Some case.Tag else None)
+            | _ -> invalidArg (nameof schema) "Expected a union or enum schema."
+
+        match found with
+        | Some tag -> tag
+        | None -> invalidArg (nameof value) "The value is not a case of the supplied union or enum schema."
+
     /// <summary>Appends one portable constraint.</summary>
     let constrain (constraint': Constraint<'value>) (schema: Schema<'value>) =
         if isNull constraint' then nullArg (nameof constraint')
