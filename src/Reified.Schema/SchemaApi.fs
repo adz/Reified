@@ -169,9 +169,9 @@ module Schema =
     let parseWithOptions options schema input = SchemaParsing.parseWithOptions options schema input
     /// <summary>Parses JSON text through a schema, requiring JSON scalar fidelity: text fields accept only text, numeric fields only numbers, and Boolean fields only Booleans.</summary>
     /// <remarks>Use this for JSON bodies and files. Query and form input stay lenient through <c>Schema.parse</c>.</remarks>
-    /// <example><code>Schema.parseJson settingsSchema "{ ""port"": 5432 }"</code></example>
     let parseJsonWith configure schema json = SchemaParsing.parseJsonWith configure schema json
     /// <summary>Parses JSON text through a schema with strict scalar fidelity.</summary>
+    /// <example><code>Schema.parseJson Schema.int "5" // Ok 5</code></example>
     let parseJson schema json = SchemaParsing.parseJsonWith id schema json
     /// <summary>Checks an existing typed value, such as a freely constructed draft, through the schema's constraints, refinements, and record constructor.</summary>
     let check schema value = SchemaParsing.check schema value

@@ -210,8 +210,7 @@ module Data =
     let mergeAllWith comparer layers = DataMerging.mergeAllWith comparer layers
 
     /// <summary>Merges named layers in precedence order and records the source layer that supplied each surviving scalar or list path.</summary>
-    /// <example><code>Data.mergeAllWithSources [ "file", fileData; "env", envData ]
-    /// // (mergedData, Map [ DataPath.parse "db.port", "env" ])</code></example>
+    /// <example><code>Data.mergeAllWithSources [ "defaults", Data.Object [] ] // (Data.Object [], Map [])</code></example>
     let mergeAllWithSources (layers: (string * Data) list) : Data * Map<DataPath, string> =
         DataMerging.mergeAllWithSources layers
 

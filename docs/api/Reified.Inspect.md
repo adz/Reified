@@ -6,7 +6,7 @@ api:
     - id: models
       title: Model inspection
       order: 10
-      members: [model, field]
+      members: [model, field, fieldAt]
       facets:
         task: [inspect]
         audience: [common]

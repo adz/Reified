@@ -28,7 +28,7 @@ api:
       title: Schema descriptions
       order: 40
       summary: Consume the finite metadata exposed by schema inspection.
-      entities: [Reified.ModelDescription, Reified.FieldDescription, Reified.SchemaDescription, Reified.SchemaShape, Reified.PrimitiveValueKind, Reified.EnumCaseDescription, Reified.EnumDescription, Reified.UnionCaseDescription, Reified.UnionCaseShape, Reified.UnionDescription]
+      entities: [Reified.ModelDescription, Reified.FieldDescription, Reified.SchemaDescription, Reified.SchemaDescriptionModule, Reified.SchemaShape, Reified.PrimitiveValueKind, Reified.EnumCaseDescription, Reified.EnumDescription, Reified.UnionCaseDescription, Reified.UnionCaseShape, Reified.UnionDescription]
     - package: Reified.Schema
       id: derivation
       title: Generated schema declarations
@@ -59,7 +59,7 @@ api:
     - id: unions
       title: Unions and recursion
       order: 40
-      members: [union, unionWith, enum, defer]
+      members: [union, unionWith, enum, defer, tagOf]
       facets:
         task: [compose]
     - id: boundary
@@ -71,7 +71,7 @@ api:
     - id: execution
       title: Parse and check
       order: 60
-      members: [parse, parseWith, ignoreKeyCase, parseWithOptions, parseRetainingInput, parseRetainingInputWith, check]
+      members: [parse, parseWith, parseJson, parseJsonWith, ignoreKeyCase, parseWithOptions, parseRetainingInput, parseRetainingInputWith, check]
       facets:
         task: [execute]
         audience: [common]
