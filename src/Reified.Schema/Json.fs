@@ -1533,8 +1533,8 @@ module rec Json =
 
     /// <summary>Writes a trusted model as Data through a compiled codec, with the same field names and values its JSON has.</summary>
     /// <remarks>Use it to turn a model back into boundary input, such as the query string a parsed search came from.</remarks>
-    /// <example><code>Json.toData (Json.compile Search.schema) { Page = 2 }
-    /// // Data.Object [ "page", Data.Number "2" ]</code></example>
+    /// <example><code>Json.toData (Json.compile (Schema.listWith Schema.int)) [ 1; 2 ]
+    /// // Data.List [ Data.Number "1"; Data.Number "2" ]</code></example>
     /// <exception cref="T:System.ArgumentNullException">Thrown when <paramref name="codec" /> is null.</exception>
     let toData (codec: JsonCodec<'model>) (value: 'model) : Data = serialize codec value |> parseData
 
