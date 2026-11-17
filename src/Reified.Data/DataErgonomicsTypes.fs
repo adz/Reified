@@ -77,6 +77,34 @@ module DataEdit =
 
         invoke Unchecked.defaultof<Data> value
 
+    // Construction from an already-parsed path and an already-converted value. The public string-path
+    // constructors parse and can raise on invalid path text; these are used by the Data-level try* verbs,
+    // which parse the path once and fold a parse failure into the same structured failure channel as a
+    // shape failure.
+    let internal setParsed (path: DataPath) (renderedPath: string) (value: Data) =
+        DataEdit(Set(path, value), renderedPath)
+
+    let internal replaceParsed (path: DataPath) (renderedPath: string) (value: Data) =
+        DataEdit(Replace(path, value), renderedPath)
+
+    let internal appendParsed (path: DataPath) (renderedPath: string) (value: Data) =
+        DataEdit(Append(path, value), renderedPath)
+
+    let internal prependParsed (path: DataPath) (renderedPath: string) (value: Data) =
+        DataEdit(Prepend(path, value), renderedPath)
+
+    let internal insertParsed (path: DataPath) (renderedPath: string) (index: int) (value: Data) =
+        DataEdit(Insert(path, index, value), renderedPath)
+
+    let internal removeParsed (path: DataPath) (renderedPath: string) =
+        DataEdit(Remove(path), renderedPath)
+
+    let internal renameParsed (path: DataPath) (renderedPath: string) (name: string) =
+        DataEdit(Rename(path, name), renderedPath)
+
+    let internal updateParsed (path: DataPath) (renderedPath: string) (change: Data -> Data) =
+        DataEdit(Update(path, change), renderedPath)
+
     /// <summary>Describes replacing a value, or adding a missing final object field.</summary>
     /// <example><code>DataEdit.set "plan" "pro" // one DataEdit</code></example>
     let inline set path value = DataEdit.CreateSet(path, convert value)

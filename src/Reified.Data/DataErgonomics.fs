@@ -40,6 +40,12 @@ module Data =
             invalidArg (nameof token) "The token is not a valid JSON number."
         Data.Number token
 
+    /// <summary>Attempts to construct a number from one JSON number token.</summary>
+    /// <example><code>Data.tryNumber "1.2300e+4" // Some (Data.Number "1.2300e+4")</code></example>
+    let tryNumber (token: string) : Data option =
+        ensureText (nameof token) token |> ignore
+        if isJsonNumberToken token then Some(Data.Number token) else None
+
     /// <summary>Builds an object from an F# map, ordered by key.</summary>
     let objectOfMap = DataConversions.objectOfMap
 
@@ -239,6 +245,17 @@ module Data =
     let tryPatch (edits: DataEdit list) (input: Data) : Result<Data, DataPatchFailure list> =
         DataPatching.tryPatch edits input
 
+    let private tryParsePath (path: string) : Result<DataPath, DataPatchFailure list> =
+        match DataPath.tryParse path with
+        | Some parsed -> Ok parsed
+        | None -> Error [ { EditIndex = 0; Path = path; Message = $"Invalid input path: {path}" } ]
+
+    let inline private toData value : Data =
+        let inline invoke (witness: ^witness) (supplied: ^value) : Data =
+            ((^witness or ^value): (static member From: ^value -> Data) supplied)
+
+        invoke Unchecked.defaultof<Data> value
+
     /// <summary>Applies edits atomically or raises <c>DataPatchException</c>.</summary>
     /// <example><code>Data.data [ Data.assoc "name" "Ada" ]
     /// |&gt; Data.patch [ DataEdit.replace "name" "Grace" ]
@@ -248,65 +265,152 @@ module Data =
         | Ok value -> value
         | Error failures -> raise (DataPatchException failures)
 
+    /// <summary>Attempts to apply one prepared edit.</summary>
+    /// <example><code>data [ "name" =&gt; "Ada" ] |&gt; Data.tryApplyEdit (replace "name" "Grace")
+    /// // Ok (data [ "name" =&gt; "Grace" ])</code></example>
+    let tryApplyEdit (edit: DataEdit) (input: Data) : Result<Data, DataPatchFailure list> =
+        tryPatch [ edit ] input
+
     /// <summary>Applies one prepared edit or raises <c>DataPatchException</c>.</summary>
     /// <example><code>data [ "name" =&gt; "Ada" ] |&gt; Data.applyEdit (replace "name" "Grace")
     /// // data [ "name" =&gt; "Grace" ]</code></example>
     let applyEdit edit input =
-        match tryPatch [ edit ] input with
+        match tryApplyEdit edit input with
         | Ok value -> value
         | Error failures -> raise (DataPatchException failures)
+
+    /// <summary>Attempts to replace one value, or add a missing final object field, and returns the changed tree.</summary>
+    /// <example><code>data [ "name" =&gt; "Ada" ] |&gt; Data.trySet "active" (Data.Bool true)
+    /// // Ok (data [ "name" =&gt; "Ada"; "active" =&gt; true ])</code></example>
+    let trySet (path: string) (value: Data) (input: Data) : Result<Data, DataPatchFailure list> =
+        match tryParsePath path with
+        | Error failures -> Error failures
+        | Ok parsed -> tryPatch [ DataEdit.setParsed parsed path value ] input
 
     /// <summary>Replaces one value, or adds a missing final object field, and returns the changed tree.</summary>
     /// <example><code>data [ "name" =&gt; "Ada" ] |&gt; Data.set "active" true
     /// // data [ "name" =&gt; "Ada"; "active" =&gt; true ]</code></example>
     let inline set path value input =
-        DataEdit.set path value
-        |> fun edit -> applyEdit edit input
+        match trySet path (toData value) input with
+        | Ok changed -> changed
+        | Error failures -> raise (DataPatchException failures)
+
+    /// <summary>Attempts to replace one existing value and returns the changed tree.</summary>
+    /// <example><code>data [ "name" =&gt; "Ada" ] |&gt; Data.tryReplace "name" (Data.Text "Grace")
+    /// // Ok (data [ "name" =&gt; "Grace" ])</code></example>
+    let tryReplace (path: string) (value: Data) (input: Data) : Result<Data, DataPatchFailure list> =
+        match tryParsePath path with
+        | Error failures -> Error failures
+        | Ok parsed -> tryPatch [ DataEdit.replaceParsed parsed path value ] input
 
     /// <summary>Replaces one existing value and returns the changed tree.</summary>
     /// <example><code>data [ "name" =&gt; "Ada" ] |&gt; Data.replace "name" "Grace"
     /// // data [ "name" =&gt; "Grace" ]</code></example>
     let inline replace path value input =
-        DataEdit.replace path value
-        |> fun edit -> applyEdit edit input
+        match tryReplace path (toData value) input with
+        | Ok changed -> changed
+        | Error failures -> raise (DataPatchException failures)
+
+    /// <summary>Attempts to remove one existing field or list item and returns the changed tree.</summary>
+    /// <example><code>data [ "name" =&gt; "Ada"; "active" =&gt; true ] |&gt; Data.tryRemove "active"
+    /// // Ok (data [ "name" =&gt; "Ada" ])</code></example>
+    let tryRemove path input : Result<Data, DataPatchFailure list> =
+        match tryParsePath path with
+        | Error failures -> Error failures
+        | Ok parsed -> tryPatch [ DataEdit.removeParsed parsed path ] input
 
     /// <summary>Removes one existing field or list item and returns the changed tree.</summary>
     /// <example><code>data [ "name" =&gt; "Ada"; "active" =&gt; true ] |&gt; Data.remove "active"
     /// // data [ "name" =&gt; "Ada" ]</code></example>
-    let remove path input = applyEdit (DataEdit.remove path) input
+    let remove path input =
+        match tryRemove path input with
+        | Ok changed -> changed
+        | Error failures -> raise (DataPatchException failures)
+
+    /// <summary>Attempts to append one item to an existing list and returns the changed tree.</summary>
+    /// <example><code>data [ "roles" =&gt; [ "author" ] ] |&gt; Data.tryAppend "roles" (Data.Text "admin")
+    /// // Ok (data [ "roles" =&gt; [ "author"; "admin" ] ])</code></example>
+    let tryAppend (path: string) (value: Data) (input: Data) : Result<Data, DataPatchFailure list> =
+        match tryParsePath path with
+        | Error failures -> Error failures
+        | Ok parsed -> tryPatch [ DataEdit.appendParsed parsed path value ] input
 
     /// <summary>Appends one item to an existing list and returns the changed tree.</summary>
     /// <example><code>data [ "roles" =&gt; [ "author" ] ] |&gt; Data.append "roles" "admin"
     /// // data [ "roles" =&gt; [ "author"; "admin" ] ]</code></example>
     let inline append path value input =
-        DataEdit.append path value
-        |> fun edit -> applyEdit edit input
+        match tryAppend path (toData value) input with
+        | Ok changed -> changed
+        | Error failures -> raise (DataPatchException failures)
+
+    /// <summary>Attempts to prepend one item to an existing list and returns the changed tree.</summary>
+    /// <example><code>data [ "roles" =&gt; [ "admin" ] ] |&gt; Data.tryPrepend "roles" (Data.Text "author")
+    /// // Ok (data [ "roles" =&gt; [ "author"; "admin" ] ])</code></example>
+    let tryPrepend (path: string) (value: Data) (input: Data) : Result<Data, DataPatchFailure list> =
+        match tryParsePath path with
+        | Error failures -> Error failures
+        | Ok parsed -> tryPatch [ DataEdit.prependParsed parsed path value ] input
 
     /// <summary>Prepends one item to an existing list and returns the changed tree.</summary>
     /// <example><code>data [ "roles" =&gt; [ "admin" ] ] |&gt; Data.prepend "roles" "author"
     /// // data [ "roles" =&gt; [ "author"; "admin" ] ]</code></example>
     let inline prepend path value input =
-        DataEdit.prepend path value
-        |> fun edit -> applyEdit edit input
+        match tryPrepend path (toData value) input with
+        | Ok changed -> changed
+        | Error failures -> raise (DataPatchException failures)
+
+    /// <summary>Attempts to insert one item at a valid list index and returns the changed tree.</summary>
+    /// <example><code>data [ "roles" =&gt; [ "author" ] ] |&gt; Data.tryInsert "roles" 1 (Data.Text "admin")
+    /// // Ok (data [ "roles" =&gt; [ "author"; "admin" ] ])</code></example>
+    let tryInsert (path: string) (index: int) (value: Data) (input: Data) : Result<Data, DataPatchFailure list> =
+        if index < 0 then invalidArg (nameof index) "The insertion index cannot be negative."
+        match tryParsePath path with
+        | Error failures -> Error failures
+        | Ok parsed -> tryPatch [ DataEdit.insertParsed parsed path index value ] input
 
     /// <summary>Inserts one item at a valid list index and returns the changed tree.</summary>
     /// <example><code>data [ "roles" =&gt; [ "author" ] ] |&gt; Data.insert "roles" 1 "admin"
     /// // data [ "roles" =&gt; [ "author"; "admin" ] ]</code></example>
     let inline insert path index value input =
-        DataEdit.insert path index value
-        |> fun edit -> applyEdit edit input
+        match tryInsert path index (toData value) input with
+        | Ok changed -> changed
+        | Error failures -> raise (DataPatchException failures)
+
+    /// <summary>Attempts to rename one existing object field without moving it and returns the changed tree.</summary>
+    /// <example><code>data [ "name" =&gt; "Ada" ] |&gt; Data.tryRename "name" "displayName"
+    /// // Ok (data [ "displayName" =&gt; "Ada" ])</code></example>
+    let tryRename path name input : Result<Data, DataPatchFailure list> =
+        if isNull path then nullArg (nameof path)
+        if System.String.IsNullOrEmpty name then invalidArg (nameof name) "The value cannot be empty."
+        match tryParsePath path with
+        | Error failures -> Error failures
+        | Ok parsed -> tryPatch [ DataEdit.renameParsed parsed path name ] input
 
     /// <summary>Renames one existing object field without moving it and returns the changed tree.</summary>
     /// <example><code>data [ "name" =&gt; "Ada" ] |&gt; Data.rename "name" "displayName"
     /// // data [ "displayName" =&gt; "Ada" ]</code></example>
     let rename path name input =
-        applyEdit (DataEdit.rename path name) input
+        match tryRename path name input with
+        | Ok changed -> changed
+        | Error failures -> raise (DataPatchException failures)
+
+    /// <summary>Attempts to apply one function to an existing value and returns the changed tree.</summary>
+    /// <example><code>data [ "active" =&gt; true ] |&gt; Data.tryUpdate "active" (fun _ -&gt; Data.Bool false)
+    /// // Ok (data [ "active" =&gt; false ])</code></example>
+    let tryUpdate path change input : Result<Data, DataPatchFailure list> =
+        if isNull path then nullArg (nameof path)
+        if isNull (box change) then nullArg (nameof change)
+        match tryParsePath path with
+        | Error failures -> Error failures
+        | Ok parsed -> tryPatch [ DataEdit.updateParsed parsed path change ] input
 
     /// <summary>Applies one function to an existing value and returns the changed tree.</summary>
     /// <example><code>data [ "active" =&gt; true ] |&gt; Data.update "active" (fun _ -&gt; Data.Bool false)
     /// // data [ "active" =&gt; false ]</code></example>
     let update path change input =
-        applyEdit (DataEdit.update path change) input
+        match tryUpdate path change input with
+        | Ok changed -> changed
+        | Error failures -> raise (DataPatchException failures)
 
     /// <summary>Returns all exact structural differences between two values.</summary>
     /// <example><code>Data.diff (data [ "name" =&gt; "Ada" ]) (data [ "name" =&gt; "Grace" ])

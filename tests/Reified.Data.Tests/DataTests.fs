@@ -258,6 +258,55 @@ module DataTests =
         |> ignore
 
     [<Fact>]
+    let ``try edit verbs return results instead of raising`` () =
+        let baseline = data [ "name" => "Ada"; "roles" => [ "author" ]; "obsolete" => true ]
+
+        let setResult = baseline |> Data.trySet "plan" (Data.Text "pro")
+        let replaceResult = baseline |> Data.tryReplace "name" (Data.Text "Margaret")
+        let removeResult = baseline |> Data.tryRemove "obsolete"
+        let appendResult = baseline |> Data.tryAppend "roles" (Data.Text "admin")
+        let prependResult = baseline |> Data.tryPrepend "roles" (Data.Text "admin")
+        let insertResult = baseline |> Data.tryInsert "roles" 1 (Data.Text "admin")
+        let renameResult = baseline |> Data.tryRename "name" "displayName"
+        let updateResult = baseline |> Data.tryUpdate "name" (fun _ -> Data.Text "Grace")
+        let applyResult = baseline |> Data.tryApplyEdit (replace "name" "Grace")
+
+        let expectedSet = data [ "name" => "Ada"; "roles" => [ "author" ]; "obsolete" => true; "plan" => "pro" ]
+        let expectedReplace = data [ "name" => "Margaret"; "roles" => [ "author" ]; "obsolete" => true ]
+        let expectedRemove = data [ "name" => "Ada"; "roles" => [ "author" ] ]
+        let expectedAppend = data [ "name" => "Ada"; "roles" => [ "author"; "admin" ]; "obsolete" => true ]
+        let expectedPrepend = data [ "name" => "Ada"; "roles" => [ "admin"; "author" ]; "obsolete" => true ]
+        let expectedInsert = data [ "name" => "Ada"; "roles" => [ "author"; "admin" ]; "obsolete" => true ]
+        let expectedRename = data [ "displayName" => "Ada"; "roles" => [ "author" ]; "obsolete" => true ]
+        let expectedUpdate = data [ "name" => "Grace"; "roles" => [ "author" ]; "obsolete" => true ]
+        let expectedApply = data [ "name" => "Grace"; "roles" => [ "author" ]; "obsolete" => true ]
+
+        test <@ setResult = Ok expectedSet @>
+        test <@ replaceResult = Ok expectedReplace @>
+        test <@ removeResult = Ok expectedRemove @>
+        test <@ appendResult = Ok expectedAppend @>
+        test <@ prependResult = Ok expectedPrepend @>
+        test <@ insertResult = Ok expectedInsert @>
+        test <@ renameResult = Ok expectedRename @>
+        test <@ updateResult = Ok expectedUpdate @>
+        test <@ applyResult = Ok expectedApply @>
+
+        match baseline |> Data.trySet "bad[path" (Data.Text "x") with
+        | Error [ failure ] ->
+            test <@ failure.Path = "bad[path" @>
+            test <@ failure.Message.Contains "Invalid input path" @>
+        | other -> failwith $"Expected invalid path failure, got %A{other}"
+
+        match baseline |> Data.tryAppend "name" (Data.Text "Grace") with
+        | Error [ failure ] ->
+            test <@ failure.Path = "name" @>
+            test <@ failure.Message.Contains "Expected a list" @>
+        | other -> failwith $"Expected shape failure, got %A{other}"
+
+        test <@ Data.tryNumber "1.2300e+4" = Some(Data.Number "1.2300e+4") @>
+        test <@ Data.tryNumber "01" = None @>
+
+    [<Fact>]
     let ``explicit construction and edit APIs work without concise syntax`` () =
         let nickname : string option = None
         let baseline =

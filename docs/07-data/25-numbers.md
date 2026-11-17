@@ -71,6 +71,13 @@ Data.render numValue
 The same JSON-number grammar is checked on .NET and Fable. Invalid tokens such as `"01"`, `"NaN"`, `"Infinity"`,
 leading `+` signs, surrounding whitespace, and incomplete fractions or exponents raise `ArgumentException`.
 
+Use `Data.tryNumber` to validate a dynamic token without raising:
+
+```fsharp
+Data.tryNumber "1.2300e+4" // Some (Data.Number "1.2300e+4")
+Data.tryNumber "01"       // None
+```
+
 ## Exact comparison
 
 Exact comparison compares number tokens, not their mathematical values.

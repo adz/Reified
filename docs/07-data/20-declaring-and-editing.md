@@ -166,6 +166,18 @@ customer
 `Data.set` may add its final object field, but its parent must exist. Shape and path failures raise
 `DataPatchException`.
 
+Each direct operation also has a `try` counterpart that returns `Result<Data, DataPatchFailure list>` instead of
+raising. The `try` forms take an already-converted `Data` value, and a malformed path becomes an `Error`:
+
+```fsharp
+match customer |> Data.tryAppend "roles" (Data.Text "admin") with
+| Ok updated -> ()
+| Error [ failure ] -> () // failure.Path and failure.Message describe the path or shape problem
+```
+
+A malformed path such as `"roles["` is reported as a `DataPatchFailure` with the original path text and the
+message `Invalid input path: roles[`.
+
 ## Apply several edits atomically
 
 `Data.patch` applies a list of edits in order. It returns a new value only when every edit succeeds.
