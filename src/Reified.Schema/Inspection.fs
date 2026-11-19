@@ -314,3 +314,9 @@ module Inspect =
             inSchema path.Components root
         | ValueDefinition _
         | PendingDefinition -> None
+
+    /// <summary>Resolves a path to one field's combined constraint descriptions.</summary>
+    /// <remarks>The field-level constraints are followed by the field's schema-level constraints. Optional wrappers are transparent.</remarks>
+    let constraintsAt (path: SchemaPath) (schema: Schema<'model>) : ConstraintDescription list option =
+        fieldAt path schema
+        |> Option.map (fun field -> field.Constraints @ field.Schema.Constraints)
